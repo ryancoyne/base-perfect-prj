@@ -1,0 +1,82 @@
+[INFO] [87c008dc-f96c-430b-8893-35f138dab865] [2018-02-03 22:05:14 GMT-05:00] Running setup: config
+[ERROR] [074b0bc5-2ed0-4b1d-ba65-23963ee95749] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [f72a9771-0ace-4135-bfe8-eab1988ea7d4] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[INFO] [add961e1-b910-4dfd-9c4b-149c21a37736] [2018-02-03 22:05:14 GMT-05:00] Running setup: config
+[ERROR] [b8c1ab23-1265-4b53-b0f9-f767539877c7] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [376a8735-34d8-496f-b0f9-e6c155c78962] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [68c2073f-d7d1-4be8-a76a-86cfb8a4be21] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [ff3ddbfb-ec16-48e2-bc83-88f20c53489f] [2018-02-03 22:05:14 GMT-05:00] Error: error("error(\"Connection Error\")")
+[ERROR] [722061a9-59c9-4c7a-b271-35fc8c36c05c] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [a5d3df60-1a77-4f1d-8e1e-b910f0ebc510] [2018-02-03 22:05:14 GMT-05:00] Error: error("error(\"Connection Error\")")
+[ERROR] [8ce4471c-72c3-41f1-9439-dac14b0f722c] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [6830f7a7-6ad4-4502-8fef-902398a6d0fb] [2018-02-03 22:05:14 GMT-05:00] Error: error("error(\"Connection Error\")")
+[ERROR] [07aa33aa-a3ad-44f4-ae04-3dd3e4084cf8] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [39de0e49-b9d9-4763-8312-6ffffed79f84] [2018-02-03 22:05:14 GMT-05:00] Error: error("error(\"Connection Error\")")
+[ERROR] [1746f6ac-5453-498a-b433-62072ffe4fcf] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [4bb1e063-b3f2-4a82-970a-596fafea583d] [2018-02-03 22:05:14 GMT-05:00] Error: error("error(\"Connection Error\")")
+[INFO] [3d9649bc-f2f3-447f-9a39-dbfdb741bf34] [2018-02-03 22:05:14 GMT-05:00] Running setup: config
+[ERROR] [cd93ab23-3f33-42bf-afdd-60922ea88b52] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [6cd11831-268f-4fcc-b3a5-87e536ca5746] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [8da4d063-6120-4383-9604-26c9a3dd47c0] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [9233b403-af76-4503-a275-ffb6a2244410] [2018-02-03 22:05:14 GMT-05:00] Error: error("error(\"Connection Error\")")
+[ERROR] [5120ad5e-16cf-4146-9a67-33a4130702e8] [2018-02-03 22:05:14 GMT-05:00] Error msg: error("Connection Error")
+[INFO] [e5454ea9-30e5-4662-b42f-575968a50dc6] [2018-02-03 22:09:06 GMT-05:00] Running setup: config
+[ERROR] [04286a68-6b6a-4c0e-a3d4-9f56fec5608f] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [73eb6385-0650-4cae-a4ab-54f4ece70007] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[INFO] [2e004efd-b084-410e-9107-29c8afaf87ae] [2018-02-03 22:09:06 GMT-05:00] Running setup: config
+[ERROR] [202d5021-93c6-4557-bff9-894c83181bea] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [40718644-ab7a-445e-a0a6-336f2a23ac35] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [092bf59d-1f39-467b-84de-8f318bfe8ff4] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [4b21d1a7-be9a-493a-bbee-7287143aa30e] [2018-02-03 22:09:06 GMT-05:00] Error: error("error(\"Connection Error\")")
+[ERROR] [c95b90ea-e072-4c02-b551-0514df0d6d2c] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [fd36ef85-671c-4219-bd52-3dec9d3ad68e] [2018-02-03 22:09:06 GMT-05:00] Error: error("error(\"Connection Error\")")
+[ERROR] [240e9e09-83f7-478c-b61e-f44e100f5ea4] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [d5a73df6-2110-43f3-a8fc-99d9a39eb33d] [2018-02-03 22:09:06 GMT-05:00] Error: error("error(\"Connection Error\")")
+[ERROR] [22c60b00-48d8-4c6b-ac13-c1b446237bba] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [ccf0dd65-d44d-4d4f-acab-dbd6d748608e] [2018-02-03 22:09:06 GMT-05:00] Error: error("error(\"Connection Error\")")
+[ERROR] [aee62c6e-f436-425a-92fd-568abce1cf60] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [840e9789-2545-4b82-9d01-96d3fadda761] [2018-02-03 22:09:06 GMT-05:00] Error: error("error(\"Connection Error\")")
+[INFO] [846979c7-d450-4eff-8671-f89279a5c62f] [2018-02-03 22:09:06 GMT-05:00] Running setup: config
+[ERROR] [4105cb21-c66f-45fa-bf10-6f9f0bad9d30] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [ce8ad543-8746-4064-a8d6-8d27ec1bcbcc] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [8b220aa1-0b46-4e17-b896-69a82b6f5dd4] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[ERROR] [250c15b0-a9d7-45a4-96d7-0560e885999d] [2018-02-03 22:09:06 GMT-05:00] Error: error("error(\"Connection Error\")")
+[ERROR] [acad8785-7b96-40fb-8e9b-5370ed621518] [2018-02-03 22:09:06 GMT-05:00] Error msg: error("Connection Error")
+[INFO] [68a74aac-03c9-4e47-859c-5ae6d8733a3c] [2018-02-04 09:20:08 GMT-05:00] Running setup: config
+[INFO] [96d63133-dc75-4c5e-a965-67230e58e8a6] [2018-02-04 09:20:08 GMT-05:00] Running setup: config
+[INFO] [e87fa03b-a64b-4741-9489-ec564f333775] [2018-02-04 09:20:08 GMT-05:00] Running setup: config
+[INFO] [caf243ae-98d1-4356-8d5b-ef0bc056798b] [2018-02-04 09:20:08 GMT-05:00] Running setup: account
+[ERROR] [bee94f35-cfc8-4eb2-b072-cff0d48228db] [2018-02-04 09:20:10 GMT-05:00] Error msg: error("ERROR:  syntax error at or near \"(\"\nLINE 1: ...time integer CONSTRAINT breadcrumb_pkey PRIMARY KEY (id) ); \n                                                               ^")
+[INFO] [0a45cd59-e578-491a-887f-1bd74bb481e6] [2018-02-04 09:28:06 GMT-05:00] Running setup: config
+[INFO] [5188d738-6908-495c-8903-520cfa280808] [2018-02-04 09:28:06 GMT-05:00] Running setup: config
+[INFO] [9e483f83-fcb9-4578-b7d6-f05511bda24d] [2018-02-04 09:28:06 GMT-05:00] Running setup: config
+[INFO] [f087fb56-6ff5-4d0c-89b1-191bb4f84ee7] [2018-02-04 09:28:06 GMT-05:00] Running setup: account
+[INFO] [3d712ed3-2735-4d89-8cef-0b62c6606053] [2018-02-04 09:28:08 GMT-05:00] Running setup: config
+[INFO] [60fc45ef-3550-4380-b4fc-da4444d11dc7] [2018-02-04 09:43:18 GMT-05:00] Running setup: config
+[INFO] [1488c006-25c4-415b-b85a-6754099e491f] [2018-02-04 09:43:18 GMT-05:00] Running setup: config
+[INFO] [d28921d2-51b6-42e2-ae92-e86dc2edcfa3] [2018-02-04 09:43:18 GMT-05:00] Running setup: config
+[INFO] [9ca0dbda-4c29-4911-9e65-15c9fd664341] [2018-02-04 09:43:18 GMT-05:00] Running setup: account
+[ERROR] [00a9b14c-2d13-499d-97d2-d1c68925d5c3] [2018-02-04 09:43:18 GMT-05:00] Error msg: error("ERROR:  duplicate key value violates unique constraint \"account_key\"\nDETAIL:  Key (id)=(DFD117EA-8878-4335-8F26-05B2F0BE843F) already exists.")
+[INFO] [8d00e71e-493b-4b65-a956-e545159df4b3] [2018-02-04 09:43:18 GMT-05:00] Running setup: config
+[INFO] [1bca9872-3b9a-4f99-8bfa-cee1a5267d35] [2018-02-04 09:47:32 GMT-05:00] Running setup: config
+[INFO] [e699a173-4d18-4e15-ad57-fe129d5ff89a] [2018-02-04 09:47:32 GMT-05:00] Running setup: config
+[INFO] [7b613b16-6ae6-4321-b4ba-a46686385c01] [2018-02-04 09:47:32 GMT-05:00] Running setup: config
+[INFO] [91239128-09ba-4ef4-b8fe-dbe2dc981397] [2018-02-04 09:50:37 GMT-05:00] Running setup: config
+[INFO] [18d60144-ad67-49b5-b5ff-b087c87553b0] [2018-02-04 09:50:37 GMT-05:00] Running setup: config
+[INFO] [efe084cc-72a8-4473-9221-ce7ce96242fc] [2018-02-04 09:50:37 GMT-05:00] Running setup: config
+[INFO] [8c37c8e9-2436-42f6-afe4-ea3b7fe970a9] [2018-02-04 09:50:38 GMT-05:00] Running setup: account
+[ERROR] [93460a6e-c88a-4f83-afc0-2649378a6e48] [2018-02-04 09:50:38 GMT-05:00] Error msg: error("ERROR:  duplicate key value violates unique constraint \"account_key\"\nDETAIL:  Key (id)=(DFD117EA-8878-4335-8F26-05B2F0BE843F) already exists.")
+[INFO] [e4d8611d-7146-49c8-a42f-4497c36bb20b] [2018-02-04 09:50:38 GMT-05:00] Running setup: config
+[INFO] [ddc6345d-3c5e-4019-89ef-586777f90771] [2018-02-04 09:52:00 GMT-05:00] Running setup: config
+[INFO] [365c5d4c-4a38-46a2-a769-75a2667a1b6f] [2018-02-04 09:52:00 GMT-05:00] Running setup: config
+[INFO] [5eac116c-a1b4-42e0-8a1d-74e5d6192819] [2018-02-04 09:52:00 GMT-05:00] Running setup: config
+[INFO] [f8ed8a87-d091-4f44-9906-9a9a5b12fd84] [2018-02-04 09:52:01 GMT-05:00] Running setup: account
+[INFO] [698cd452-ada2-40a9-a790-f0027d0df789] [2018-02-04 09:52:03 GMT-05:00] Running setup: config
+[INFO] [2a9beeea-6fe8-423d-98ee-f59bebecb3b5] [2018-02-04 09:52:19 GMT-05:00] Running setup: config
+[INFO] [1a03904b-50e1-4f98-b75e-96c17563f266] [2018-02-04 09:52:19 GMT-05:00] Running setup: config
+[INFO] [7aa063cd-bf34-497e-b851-f318cca80a73] [2018-02-04 09:52:19 GMT-05:00] Running setup: config
+[INFO] [51ac4eb2-0db3-4f8d-adfe-ab64f6860fe6] [2018-02-04 09:52:20 GMT-05:00] Running setup: config
+[INFO] [770b0b6d-7082-4a45-93c1-cce0dddabcb5] [2018-02-05 06:18:09 GMT-05:00] Running setup: config
+[INFO] [207b2155-a684-462c-a13f-8c05b883e34d] [2018-02-05 06:18:09 GMT-05:00] Running setup: config
+[INFO] [1094622d-ac52-4350-9c4b-47ebdf9c8d48] [2018-02-05 06:18:09 GMT-05:00] Running setup: config
+[INFO] [f17fd0af-0d53-4bf2-bb59-3f1375bee7c1] [2018-02-05 06:18:10 GMT-05:00] Running setup: config

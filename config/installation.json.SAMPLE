@@ -1,0 +1,15 @@
+{
+    "note": "This configuration file will overwrite environment variables.  Omit tags in this file that are not needed.  Copy this sample and remove tags or sections that are not needed.  You must have properly formatted JSON for this document.  There are no specific warnings that the JSON values were not used.",
+    "ios": {
+        "note":"These variables describe the Apple notification keys and such for notifications to be sent to individual iOS users devices."
+        "IOS_APNS_KEY_IDENTIFIER"      : "key-identifier",
+        "IOS_APNS_PRIVATE_KEY_FILEPATH": "key-path",
+        "IOS_APNS_TEAM_IDENTIFIER"     : "the team identifier",
+        "IOS_APPID"                    : "the app id"
+    },
+    "android": {
+        "note":"These variables describe the Google notification keys and such for notifications to be sent to individual Android users devices."
+        "IMPLEMENTATION":"Android Notifications are not implemented at this time."
+        "host": "127.0.0.1"
+    }
+}

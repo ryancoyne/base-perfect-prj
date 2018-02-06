@@ -1,0 +1,15 @@
+<!-- <div id="wrapper" class="toggled"> -->
+	{{#authenticated}}
+		<!-- Sidebar -->
+		<!-- <div id="sidebar-wrapper"> -->
+				<ul class="sidebar-nav">
+						<li class="sidebar-brand">User Management</li>
+						<li><a href="/profile"><span class="icon-user"></span> My Profile</a></li>
+						{{#admin}}
+							<li><a href="/users"><span class="icon-users"></span> Users</a></li>
+						{{/admin}}
+						<li><a href="/logout"><span class="icon-warning"></span> Logout</a></li>
+				</ul>
+		<!-- </div> -->
+	{{/authenticated}}
+<!-- </div> -->

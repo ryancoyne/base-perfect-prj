@@ -1,0 +1,20 @@
+{{>header}}
+<div class="row" style="margin-top: 100px;">
+<div class="col sixteen last">
+
+{{^authenticated}}
+{{>login}}
+{{/authenticated}}
+
+{{#authenticated}}
+
+{{#error_true?}}{{>components/ccx.error}}{{/error_true?}}
+{{#accounts_true?}}{{>components/ccx.accounts}}{{/accounts_true?}}
+{{#breadcrumbs_true?}}{{>components/ccx.breadcrumbs}}{{/breadcrumbs_true?}}
+
+{{/authenticated}}
+
+
+</div>
+</div>
+{{>footer}}

@@ -1,0 +1,28 @@
+<h2>Breadcrumbs ({{#breadcrumbs}}{{total}}{{/breadcrumbs}} Users)</h2>
+
+{{msg}}
+
+<table class="amp">
+	<thead>
+		<tr>
+            <th>&nbsp;</th>
+			<th>User ID</th>
+			<th>Breadcrumb Count</th>
+			<th>&nbsp;</th>
+		</tr>
+	<thead>
+
+	<tbody>
+	{{#breadcrumbs}}
+        {{@users}}
+		<tr>
+            <td>&nbsp;</td>
+			<td>{{KEY}}</td>
+			<td>{{VALUE}}</td>
+            <td>&nbsp;</td>
+		</tr>
+        {{/users}}
+	{{/breadcrumbs}}
+	<tbody>
+
+</table>

@@ -1,0 +1,96 @@
+<h2>User Accounts</h2>
+
+{{msg}}
+
+<table class="amp">
+	<thead>
+		<tr>
+            <th>&nbsp;</th>
+            <th>&nbsp;</th>
+			<th>Total</th>
+            <th>Username/Email</th>
+            <th>Google</th>
+            <th>Facebook</th>
+            <th>Email Verified</th>
+            <th>Phone Verified</th>
+            <th>&nbsp;</th>
+		</tr>
+	<thead>
+
+	<tbody>
+    {{#accounts}}
+		<tr>
+            {{#all}}
+                <td>&nbsp;</td>
+                <td><b>All</b></td>
+                <td>{{total}}</td>
+                <td>{{local}}</td>
+                <td>{{google}}</td>
+                <td>{{facebook}}</td>
+                <td>{{email_verified}}</td>
+                <td>{{phone_verified}}</td>
+                <td>&nbsp;</td>
+            {{/all}}
+		</tr>
+
+        {{#new}}
+            <tr>
+                {{#today}}
+                    <td>&nbsp;</td>
+                    <td><b>New Today</b></td>
+                    <td>{{total}}</td>
+                    <td>{{local}}</td>
+                    <td>{{google}}</td>
+                    <td>{{facebook}}</td>
+                    <td>{{email_verified}}</td>
+                    <td>{{phone_verified}}</td>
+                    <td>&nbsp;</td>
+                {{/today}}
+            </tr>
+
+            <tr>
+                {{#yesterday}}
+                    <td>&nbsp;</td>
+                    <td><b>New Yesterday</b></td>
+                    <td>{{total}}</td>
+                    <td>{{local}}</td>
+                    <td>{{google}}</td>
+                    <td>{{facebook}}</td>
+                    <td>{{email_verified}}</td>
+                    <td>{{phone_verified}}</td>
+                    <td>&nbsp;</td>
+                {{/yesterday}}
+            </tr>
+
+            <tr>
+                {{#two_days_ago}}
+                    <td>&nbsp;</td>
+                    <td><b>New Two Days Ago</b></td>
+                    <td>{{total}}</td>
+                    <td>{{local}}</td>
+                    <td>{{google}}</td>
+                    <td>{{facebook}}</td>
+                    <td>{{email_verified}}</td>
+                    <td>{{phone_verified}}</td>
+                    <td>&nbsp;</td>
+                {{/two_days_ago}}
+            </tr>
+
+            <tr>
+                {{#last_week}}
+                    <td>&nbsp;</td>
+                    <td><b>New Last Week</b></td>
+                    <td>{{total}}</td>
+                    <td>{{local}}</td>
+                    <td>{{google}}</td>
+                    <td>{{facebook}}</td>
+                    <td>{{email_verified}}</td>
+                    <td>{{phone_verified}}</td>
+                    <td>&nbsp;</td>
+                {{/last_week}}
+            </tr>
+        {{/new}}
+    {{/accounts}}
+	<tbody>
+
+</table>
