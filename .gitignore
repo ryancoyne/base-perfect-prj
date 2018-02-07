@@ -1,5 +1,8 @@
 # Created by https://www.gitignore.io/api/osx,swift,xcode,swiftpm,swiftpackagemanager
 
+# this is swift server - no need to save the project files
+*.xcodeproj
+
 ### OSX ###
 *.DS_Store
 .AppleDouble
