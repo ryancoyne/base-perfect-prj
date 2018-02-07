@@ -2,7 +2,7 @@
 // Date: 2017-11-16 19:06:23 +0000
 import PackageDescription
 let package = Package(
-	name: "mobile-template",
+	name: "offroaddc",
 	targets: [],
 	dependencies: [
 		.Package(url: "https://github.com/PerfectlySoft/Perfect-HTTPServer.git", majorVersion: 3),
