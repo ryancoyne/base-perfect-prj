@@ -2,9 +2,9 @@
     "database": {
         "note": "The database fields provide connection information to the postgres database.  When developing on OSX and using Docker as the linux test, you may use the special DNS resolution for OSX localhost.  Thus DNS entry is: docker.for.mac.localhost",
         "DB_HOSTNAME": "127.0.0.1",
-        "DB_USERNAME": "mobile-template",
-        "DB_PASSWORD": "mobile-template",
-        "DB_DATABASE": "mobile-template",
+        "DB_USERNAME": "offroaddc",
+        "DB_PASSWORD": "1ffr11ddc",
+        "DB_DATABASE": "offroaddc",
         "DB_PORT"    : 5432
     },
     "url": {

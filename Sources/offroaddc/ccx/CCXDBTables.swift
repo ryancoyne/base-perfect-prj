@@ -13,17 +13,6 @@ import PerfectLogger
 import PerfectLocalAuthentication
 
 struct CCXTableLevels {
-//    static let installations   = 1.00
-//    static let notifications   = 1.00
-//    static let breadcrumb      = 1.00
-//    static let friend          = 1.00
-//    static let friendView1     = 1.00
-//    static let friendFunction1 = 1.00
-//    static let friendFunction2 = 1.00
-//    static let friendFunction3 = 1.00
-//    static let friendFunction4 = 1.00
-//    static let friendFunction5 = 1.00
-//    static let friendFunction6 = 1.00
     static let userlocation    = 1.00
 }
 

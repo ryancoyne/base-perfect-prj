@@ -59,7 +59,7 @@ struct PRJTableLevels {
 }
 
 struct PRJDBTableDefaults {
-    static let title       = ""
+    static let title       = "OffRoad DC"
     static let subTitle    = ""
     static let logo        = "/assets/images/no-logo.png"
     static let logoSet     = "/assets/images/no-logo.png 1x, /assets/images/no-logo.svg 2x"
