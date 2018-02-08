@@ -1,5 +1,8 @@
 # Created by https://www.gitignore.io/api/osx,swift,xcode,swiftpm,swiftpackagemanager
 
+# do not save the config files - they are unique to location and installation
+config/*.json
+
 # this is swift server - no need to save the project files
 *.xcodeproj
 
