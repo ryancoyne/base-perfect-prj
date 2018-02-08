@@ -114,8 +114,8 @@
         "repositoryURL": "https://github.com/PerfectlySoft/Perfect-Logger.git",
         "state": {
           "branch": null,
-          "revision": "61b9f0f246e510731f1ed47d2492ac2a92a72c0b",
-          "version": "3.0.4"
+          "revision": "2f1baef51d316d8bc1d919e6d89f55be6b3f914c",
+          "version": "3.0.5"
         }
       },
       {
@@ -242,15 +242,6 @@
           "branch": null,
           "revision": "fd63796450c3562cc3a851ab694056d37bd2a2f8",
           "version": "1.1.1"
-        }
-      },
-      {
-        "package": "SwiftMoment",
-        "repositoryURL": "https://github.com/iamjono/SwiftMoment.git",
-        "state": {
-          "branch": null,
-          "revision": "2db870fe30d6ab327458df038a56727f23a3da18",
-          "version": "1.0.0"
         }
       },
       {

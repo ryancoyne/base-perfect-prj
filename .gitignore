@@ -1,5 +1,13 @@
 # Created by https://www.gitignore.io/api/osx,swift,xcode,swiftpm,swiftpackagemanager
 
+# perfect server stuff
+.build_lin
+.package_lin.pins
+.package_lin.resolved
+Package.pins
+Package.swift.orig
+Package.resolved
+
 # do not save the config files - they are unique to location and installation
 config/*.json
 
