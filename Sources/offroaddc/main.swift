@@ -78,6 +78,10 @@ for (key, value) in env_variables {
 //  CREATEROLE
 //  NOREPLICATION;
 
+// ALTER ROLE dbuser WITH PASSWORD 'dbpassword';
+
+// CREATE DATABASE dbname OWNER dbuser
+
 if notesettings.IOS_APPID != nil {
     NotificationPusher.addConfigurationAPNS(
         name: notesettings.IOS_APPID!,

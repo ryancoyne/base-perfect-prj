@@ -1,0 +1,38 @@
+{
+    "database": {
+        "note": "The database fields provide connection information to the postgres database.  When developing on OSX and using Docker as the linux test, you may use the special DNS resolution for OSX localhost.  Thus DNS entry is: docker.for.mac.localhost",
+        "DB_HOSTNAME": "localhost",
+        "DB_USERNAME": "offroaddc",
+        "DB_PASSWORD": "1ffr11ddc",
+        "DB_DATABASE": "offroaddc",
+        "DB_PORT"    : 5432
+    },
+    "url": {
+        "note": "These variables are used to build the URL string for the web based path.  It may be the same as the API, but we split them out for more flexibility.",
+        "URL_PROTOCOL": "https",
+        "URL_DOMAIN"  : "offroadc.ccxbe.com",
+        "URL_PORT"    : 443
+    },
+    "api": {
+        "note": "These variables are used to build the URL string for the API path.  It may be the same as the web, but we split them out for more flexibility.",
+        "API_DOMAIN"      : "offroadc.ccxbe.com",
+        "API_URL_PROTOCOL": "http",
+        "API_URL_PORT"    : 9000
+    },
+    "aws": {
+        "AWS_FILE_URL": "https://s3.amazonaws.com/offroaddc/"
+    },
+    "localfiles": {
+        "note": "These variables describe the path on the local filesystem for the files.  The local filesystem may connect to AWS S3 using fuse.  The files are expected to end up on AWS S3 for use on the mobile devices.",
+        "LOCAL_FILE_PATH": "./files",
+        "LOCAL_FILE_PATH_LOGS": "./logs"
+    },
+    "misc": {
+        "note": "These are miscellaneous variables.  The StORM varible determines if StORM transactions are written to a log file.  The server environment may be either PROD for production or DEV for development.  New environments may be added in the future.  The session name is used for cookie authentication.  The HTTP document root is the place where templates and other web based content is stored. This directory is standard and is generally not changed.",
+        "STORM_DEBUG"       : true,
+        "SERVER_ENVIRONMENT": "DEV",
+        "SESSION_NAME"      : "offroaddc",
+        "HTTP_DOCUMENT_ROOT": "./webroot"
+    }
+}
+
