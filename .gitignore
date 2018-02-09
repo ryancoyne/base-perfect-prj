@@ -7,13 +7,6 @@
 Package.pins
 Package.swift.orig
 Package.resolved
-Sources
-PADockerfile_build
-Packages 
-StORMlog.txt
-files
-log
-logs
 
 # do not save the config files - they are unique to location and installation
 config/*.json
