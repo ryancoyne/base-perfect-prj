@@ -610,7 +610,7 @@ struct UserAPI {
             c.detail["\(imagetype)_picture"] = picturesource
             c.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
             
-            if newfilenameadjustedimage.characters.count > 0 {
+            if newfilenameadjustedimage.count > 0 {
                 // we have the small image!
                 c.detail["small_picture"] = "\(EnvironmentVariables.sharedInstance.AWSfileURLProfilePics!)\(newfilenameadjustedimage)"
             }

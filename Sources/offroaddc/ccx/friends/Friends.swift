@@ -198,8 +198,8 @@ class Friends: PostgresStORM {
         }
 
         // remove the last comma
-        if idsin.characters.count > 0 {
-            idsin.characters.removeLast()
+        if idsin.count > 0 {
+            idsin.removeLast()
         }
         
         // lets get our list of accounts now
@@ -254,8 +254,8 @@ class Friends: PostgresStORM {
         }
         
         // remove the last comma
-        if idsin.characters.count > 0 {
-            idsin.characters.removeLast()
+        if idsin.count > 0 {
+            idsin.removeLast()
         }
         
         // lets get our list of accounts now
@@ -301,8 +301,8 @@ class Friends: PostgresStORM {
         var retaccts: [[String:Any]] = []
         
         // get rid of the last comma
-        if emaillist.characters.count > 0 {
-            emaillist.characters.removeLast()
+        if emaillist.count > 0 {
+            emaillist.removeLast()
         }
         
         // check to see if they are already friends
