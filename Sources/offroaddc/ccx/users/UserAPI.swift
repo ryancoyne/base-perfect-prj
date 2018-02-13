@@ -12,7 +12,8 @@ import PerfectLib
 import PerfectLocalAuthentication
 import PerfectSessionPostgreSQL
 import PerfectSession
-import SwiftRandom
+//import SwiftRandom
+import PerfectCrypto
 import SwiftGD
 
 //MARK: - User API
@@ -649,12 +650,18 @@ struct UserAPI {
                     
                     if let email = dic["email"].stringValue {
                         
-                        let r = URandom()
+                        // generate the random (with safety net incase there is an issue)
+                        let random = [UInt8](randomCount: 16)
+                        var secureToken = "basetoken\(random)"
+                        if let base64 = random.encode(.base64),
+                            let sectok = String(validatingUTF8: base64) {
+                            secureToken = sectok
+                        }
                         
                         let account = Account()
                         let theTry:()? = try? account.find(["email":email.lowercased()])
                         if theTry.isNotNil && !account.id.isEmpty {
-                            account.passvalidation = r.secureToken
+                            account.passvalidation = secureToken
                         }
                         
                         if (!account.id.isEmpty || account.email != email.lowercased()) && (try? account.save()).isNotNil {

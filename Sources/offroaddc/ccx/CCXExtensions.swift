@@ -1410,6 +1410,50 @@ extension String {
     var sanitized : String {
         return self.replacingOccurrences(of: "'", with: "''")
     }
+    
+    func chompLeft(_ prefix: String) -> String {
+        if let prefixRange = range(of: prefix) {
+            if prefixRange.upperBound >= endIndex {
+                return self[startIndex..<prefixRange.lowerBound]
+            } else {
+                return self[prefixRange.upperBound..<endIndex]
+            }
+        }
+        return self
+    }
+    
+    func chompRight(_ suffix: String) -> String {
+        if let suffixRange = range(of: suffix, options: .backwards) {
+            if suffixRange.upperBound >= endIndex {
+                return self[startIndex..<suffixRange.lowerBound]
+            } else {
+                return self[suffixRange.upperBound..<endIndex]
+            }
+        }
+        return self
+    }
+    
+    func toBool() -> Bool? {
+        let trimmed = self.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if Int(trimmed) != 0 {
+            return true
+        }
+        switch trimmed {
+        case "true", "yes", "1":
+            return true
+        case "false", "no", "0":
+            return false
+        default:
+            return false
+        }
+    }
+
+    
+    
+    
+    
+    
+    
 }
 //MARK: Integer Extensions:
 extension Int {

@@ -6,7 +6,7 @@
 
 import Foundation
 import PerfectLib
-import SwiftString
+// import SwiftString
 import SwiftMoment
 
 final class CCXServiceClass {
@@ -185,7 +185,7 @@ final class CCXServiceClass {
 
     public func getNow() -> Int {
         return Int(utc().epoch())
-        //        return Int(Date().timeIntervalSince1970)
+        // return Int(Date().timeIntervalSince1970)
     }
     
     public func getMidnight() -> Int {
