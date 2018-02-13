@@ -1012,8 +1012,9 @@ extension Utility2 {
         // parse the body data into a json convertible
         do {
 //            if (content?.count)! > 0 {
-            if (content?.length)! > 0 {
-                if (content?.startsWith("["))! {
+            if (content?.count)! > 0 {
+                if (content?.starts(with: "["))! {
+//                if (content?.startsWith("["))! {
                     let arr = try content?.jsonDecode() as! [Any]
                     data["response"] = arr
                 } else {

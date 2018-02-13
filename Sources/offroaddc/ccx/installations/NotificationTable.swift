@@ -49,7 +49,7 @@ final class NotificationTable {
     private func update(currentlevel: Double) {
     
         // PERFORM THE UPDATE ACCORDING TO REQUIREMENTS
-        print("UPDATE \(tbl.table().capitalize()).  Current Level \(currentlevel), Required Level: \(tablelevel)")
+        print("UPDATE \(tbl.table().capitalized).  Current Level \(currentlevel), Required Level: \(tablelevel)")
     
     }
 

@@ -163,7 +163,7 @@ final class FriendsTableViews {
         let tbl = Friends()
         
         // PERFORM THE UPDATE ACCORDING TO REQUIREMENTS
-        print("UPDATE VIEW \(tbl.table().capitalize()) 1.  Current Level \(currentlevel), Required Level: \(friendView1)")
+        print("UPDATE VIEW \(tbl.table().capitalized) 1.  Current Level \(currentlevel), Required Level: \(friendView1)")
         
     }
     
@@ -172,7 +172,7 @@ final class FriendsTableViews {
         let tbl = Friends()
         
         // PERFORM THE UPDATE ACCORDING TO REQUIREMENTS
-        print("UPDATE FUNCTION \(tbl.table().capitalize()) 1.  Current Level \(currentlevel), Required Level: \(friendFunction1)")
+        print("UPDATE FUNCTION \(tbl.table().capitalized) 1.  Current Level \(currentlevel), Required Level: \(friendFunction1)")
         
     }
     
@@ -181,7 +181,7 @@ final class FriendsTableViews {
         let tbl = Friends()
         
         // PERFORM THE UPDATE ACCORDING TO REQUIREMENTS
-        print("UPDATE FUNCTION \(tbl.table().capitalize()) 2.  Current Level \(currentlevel), Required Level: \(friendFunction2)")
+        print("UPDATE FUNCTION \(tbl.table().capitalized) 2.  Current Level \(currentlevel), Required Level: \(friendFunction2)")
         
     }
     
@@ -190,7 +190,7 @@ final class FriendsTableViews {
         let tbl = Friends()
         
         // PERFORM THE UPDATE ACCORDING TO REQUIREMENTS
-        print("UPDATE FUNCTION \(tbl.table().capitalize()) 3.  Current Level \(currentlevel), Required Level: \(friendFunction3)")
+        print("UPDATE FUNCTION \(tbl.table().capitalized) 3.  Current Level \(currentlevel), Required Level: \(friendFunction3)")
         
     }
     
@@ -199,7 +199,7 @@ final class FriendsTableViews {
         let tbl = Friends()
         
         // PERFORM THE UPDATE ACCORDING TO REQUIREMENTS
-        print("UPDATE FUNCTION \(tbl.table().capitalize()) 4.  Current Level \(currentlevel), Required Level: \(friendFunction4)")
+        print("UPDATE FUNCTION \(tbl.table().capitalized) 4.  Current Level \(currentlevel), Required Level: \(friendFunction4)")
         
     }
     
@@ -208,7 +208,7 @@ final class FriendsTableViews {
         let tbl = Friends()
         
         // PERFORM THE UPDATE ACCORDING TO REQUIREMENTS
-        print("UPDATE FUNCTION \(tbl.table().capitalize()) 5.  Current Level \(currentlevel), Required Level: \(friendFunction5)")
+        print("UPDATE FUNCTION \(tbl.table().capitalized) 5.  Current Level \(currentlevel), Required Level: \(friendFunction5)")
         
     }
     
@@ -217,7 +217,7 @@ final class FriendsTableViews {
         let tbl = Friends()
         
         // PERFORM THE UPDATE ACCORDING TO REQUIREMENTS
-        print("UPDATE FUNCTION \(tbl.table().capitalize()) 6.  Current Level \(currentlevel), Required Level: \(friendFunction6)")
+        print("UPDATE FUNCTION \(tbl.table().capitalized) 6.  Current Level \(currentlevel), Required Level: \(friendFunction6)")
         
     }
     
