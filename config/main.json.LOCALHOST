@@ -9,13 +9,13 @@
     },
     "url": {
         "note": "These variables are used to build the URL string for the web based path.  It may be the same as the API, but we split them out for more flexibility.",
-        "URL_PROTOCOL": "https",
-        "URL_DOMAIN"  : "offroadc.ccxbe.com",
-        "URL_PORT"    : 443
+        "URL_PROTOCOL": "http",
+        "URL_DOMAIN"  : "localhost",
+        "URL_PORT"    : 9000
     },
     "api": {
         "note": "These variables are used to build the URL string for the API path.  It may be the same as the web, but we split them out for more flexibility.",
-        "API_DOMAIN"      : "offroadc.ccxbe.com",
+        "API_DOMAIN"      : "localhost",
         "API_URL_PROTOCOL": "http",
         "API_URL_PORT"    : 9000
     },
@@ -30,7 +30,7 @@
     "misc": {
         "note": "These are miscellaneous variables.  The StORM varible determines if StORM transactions are written to a log file.  The server environment may be either PROD for production or DEV for development.  New environments may be added in the future.  The session name is used for cookie authentication.  The HTTP document root is the place where templates and other web based content is stored. This directory is standard and is generally not changed.",
         "STORM_DEBUG"       : true,
-        "SERVER_ENVIRONMENT": "PROD",
+        "SERVER_ENVIRONMENT": "DEV",
         "SESSION_NAME"      : "offroaddc",
         "HTTP_DOCUMENT_ROOT": "./webroot"
     }
