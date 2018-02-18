@@ -47,51 +47,27 @@ struct ServiceDictionary {
             }
         }
     }
-    var server_url : String? {
+    var service_id : Int? {
         get {
-            return self.dic["url"] as? String
+            return self.dic["service_id"] as? Int
         }
         set {
             if newValue != nil {
-                self.dic["url"] = newValue!
+                self.dic["service_id"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "url")
+                self.dic.removeValue(forKey: "service_id")
             }
         }
     }
-    var username : String? {
+    var servers : [ServiceServer]? {
         get {
-            return self.dic["username"].stringValue
+            return self.dic["servers"] as? [ServiceServer]
         }
         set {
             if newValue != nil {
-                self.dic["username"] = newValue.stringValue
+                self.dic["servers"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "username")
-            }
-        }
-    }
-    var password : String? {
-        get {
-            return self.dic["password"] as? String
-        }
-        set {
-            if newValue != nil {
-                self.dic["password"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "password")
-            }
-        }
-    }
-    var location_service_id : Int? {
-        get {
-            return self.dic["location_service_id"] as? Int
-        }
-        set {
-            if newValue != nil {
-                self.dic["location_service_id"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "location_service_id")
+                self.dic.removeValue(forKey: "servers")
             }
         }
     }
