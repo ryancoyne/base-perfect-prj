@@ -214,7 +214,8 @@ final class CCXDBTables {
         if cntgis == 0 {
             do {
                 // turn on postgis
-                let _ = try? conf.sqlRows("CREATE EXTENSION postgis CASCADE;", params: [])
+//                let _ = try? conf.sqlRows("CREATE EXTENSION postgis CASCADE;", params: [])
+                let _ = try? conf.sqlRows("CREATE EXTENSION postgis;", params: [])
                 gis = true
             }
         } else if therows != nil {
@@ -228,7 +229,8 @@ final class CCXDBTables {
         if cntgis == 0 {
             do {
                 // turn on postgis topo
-                let _ = try? conf.sqlRows("CREATE EXTENSION postgis_topology CASCADE;", params: [])
+//                let _ = try? conf.sqlRows("CREATE EXTENSION postgis_topology CASCADE;", params: [])
+                let _ = try? conf.sqlRows("CREATE EXTENSION postgis_topology;", params: [])
                 topo = true
             }
         } else if therows != nil {
