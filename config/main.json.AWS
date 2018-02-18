@@ -11,7 +11,7 @@
         "note": "These variables are used to build the URL string for the web based path.  It may be the same as the API, but we split them out for more flexibility.",
         "URL_PROTOCOL": "https",
         "URL_DOMAIN"  : "offroadc.ccxbe.com",
-        "URL_PORT"    : 443
+        "URL_PORT"    : 9000
     },
     "api": {
         "note": "These variables are used to build the URL string for the API path.  It may be the same as the web, but we split them out for more flexibility.",
