@@ -1,9 +1,10 @@
 
 import Foundation
+import PerfectLib
 import JSONConfigEnhanced
 
 final class EnvironmentVariables {
-
+    
     private init() {
 
         // try the environment variables first
@@ -75,6 +76,55 @@ final class EnvironmentVariables {
         // here is where we look to see if there is a JSON file with settings
         JSONConfigEnhanced.shared.source = "./config/main.json"
         if JSONConfigEnhanced.shared.doesSourceFileExist() {
+            
+            // the first thing we are going to do is to parse out the servers and services for API connections
+            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "services") {
+
+                // Load the entire document and pull out the services section to process
+                let file = File(JSONConfigEnhanced.shared.source!)
+
+                do {
+                    try file.open()
+                    defer {
+                        file.close()
+                    }
+                
+                    var thedata:String?
+                    try thedata = file.readString()
+
+                    // this section will parse out the servers and add them to the service
+                    var json:[String:Any]?
+                    if thedata.isNotNil {
+                        json = try? JSONSerialization.jsonObject(with: thedata!.data(using: String.Encoding.utf16)!, options: .allowFragments) as! [String:Any]
+                        var servers:[String:Any]?
+                        if let s = json?["services"] {
+                            let ss = s as! [String:Any]
+                            servers = ss
+                        }
+                        
+                        if servers.isNotNil {
+                            // process the servers individually
+                            var tmpConnectionServices:[Service] = []
+                            for (_,value) in servers! {
+                                if let _value = value as? [String:Any] {
+                                    if let tmpsrv = Service(json: _value) {
+                                        // this is where we are adding the connection services to the mix
+                                        tmpConnectionServices.append(tmpsrv)
+                                    }
+                                }
+                            }
+                            // if we parsed services, then save them
+                            if tmpConnectionServices.count > 0 {
+                                self.ConnectionServices = tmpConnectionServices
+                            } else {
+                                self.ConnectionServices = nil
+                            }
+                        }
+                    }
+                } catch {
+                    print("There was a problem with the conversion of the servers.")
+                }
+            }
             
             if let value = JSONConfigEnhanced.shared.value(forKeyPath: "aws.AWS_FILE_URL") as? String {
                 self.AWSfileURL = value
@@ -694,6 +744,21 @@ final class EnvironmentVariables {
             }
         }
     }
+    
+    private var _ConnectionServices: [Service]?
+    public var ConnectionServices: [Service]? {
+        get {
+            return _ConnectionServices
+        }
+        set {
+            if newValue != nil {
+                _ConnectionServices = newValue!
+            } else {
+                _ConnectionServices = nil
+            }
+        }
+    }
+
 
     
 }

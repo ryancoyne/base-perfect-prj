@@ -83,9 +83,21 @@ struct ServiceServerDictionary {
             }
         }
     }
-    var location_service_id : Int? {
+    var server_id : Int? {
         get {
-            return self.dic["location_service_id"] as? Int
+            return self.dic["server_id"] as? Int
+        }
+        set {
+            if newValue != nil {
+                self.dic["server_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "server_id")
+            }
+        }
+    }
+    var location_service_id : String? {
+        get {
+            return self.dic["location_service_id"] as? String
         }
         set {
             if newValue != nil {

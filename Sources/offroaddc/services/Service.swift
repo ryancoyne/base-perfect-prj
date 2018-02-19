@@ -7,6 +7,32 @@ class Service {
     var service_id : Int?
     var servers    : [ServiceServer]?
     
+    init?(json: [String: Any]) {
+        guard let _name = json["name"].stringValue,
+            let _note = json["note"].stringValue,
+            let _service_id = json["service_id"].intValue,
+        let _theservers = json["servers"] as? [String:Any]
+            else {
+                return nil
+        }
+        
+        self.note = _note
+        self.name = _name
+        self.service_id = _service_id
+        
+        for (_, value) in _theservers {
+            if let _value = value as? [String:Any] {
+                if let tmpsrv = ServiceServer(json: _value) {
+                    if self.servers.isNil {
+                        self.servers = []
+                    }
+                    self.servers?.append(tmpsrv)
+                }
+            }
+
+        }
+    }
+    
     func asDictionary() -> [String: Any] {
         
         var dictionary:[String:Any] = [:]
