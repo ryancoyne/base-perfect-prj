@@ -9,19 +9,19 @@
                     "server_id": 1,
                     "name":"U Street Stages",
                     "note":"This is the U Street location and is marked by the id of 1. It is important to have each server named differently (ie: server1)",
-                    "url":"",
-                    "username":"",
-                    "password":"",
-                    "location_service_id":""
+                    "url":"https://stagesflight.com/locapi/v1",
+                    "username":"OffroadDC",
+                    "password":"MDljYTRlOGYtYzQ3OC00NzhmLWE3MjAtZTg4Y2IzYjAzMGJj",
+                    "location_service_id":"1186"
                 },
                 "server2": {
                     "server_id": 2,
                     "name":"Cap Hill Stages",
                     "note":"This is the CapHill location and is marked by the id of 2. It is important to have each server named differently (ie: server2)",
-                    "url":"",
-                    "username":"",
-                    "password":"",
-                    "location_service_id":""
+                    "url":"https://stagesflight.com/locapi/v1",
+                    "username":"OffroadDC",
+                    "password":"MDljYTRlOGYtYzQ3OC00NzhmLWE3MjAtZTg4Y2IzYjAzMGJj",
+                    "location_service_id":"1201"
                 }
             }
         },
