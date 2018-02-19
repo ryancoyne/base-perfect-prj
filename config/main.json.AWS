@@ -1,4 +1,57 @@
 {
+    "services" : {
+        "service1": {
+            "name": "Stages Flight",
+            "service_id": 1,
+            "note": "Technical details from rides and such. It is important to have each service named differently (ie: service1)",
+            "servers": {
+                "server1": {
+                    "server_id": 1,
+                    "name":"U Street Stages",
+                    "note":"This is the U Street location and is marked by the id of 1. It is important to have each server named differently (ie: server1)",
+                    "url":"",
+                    "username":"",
+                    "password":"",
+                    "location_service_id":""
+                },
+                "server2": {
+                    "server_id": 2,
+                    "name":"Cap Hill Stages",
+                    "note":"This is the CapHill location and is marked by the id of 2. It is important to have each server named differently (ie: server2)",
+                    "url":"",
+                    "username":"",
+                    "password":"",
+                    "location_service_id":""
+                }
+            }
+        },
+        "service2" : {
+            "name": "MindBody",
+            "service_id": 2,
+            "note": "Scheduling and payment service noted by the id of 2. It is important to have each service named differently (ie: service2)",
+            "servers": {
+                "server1": {
+                    "server_id": 1,
+                    "name":"U Street MindBody",
+                    "note":"This is the U Street location and is marked by the id of 1. It is important to have each server named differently (ie: server1)",
+                    "url":"https://api.mindbodyonline.com/0_5_1",
+                    "username":"OffRoadDC",
+                    "password":"2S66CJcgpmp2M0s",
+                    "location_service_id":"-99"
+                },
+                "server2": {
+                    "server_id": 2,
+                    "name":"Cap Hill MindBody",
+                    "note":"This is the CapHill location and is marked by the id of 2. It is important to have each server named differently (ie: server2)",
+                    "url":"https://api.mindbodyonline.com/0_5_1",
+                    "username":"OffRoadDC",
+                    "password":"2S66CJcgpmp2M0s",
+                    "location_service_id":"-99"
+                }
+            }
+        }
+    },
+    
     "database": {
         "note": "The database fields provide connection information to the postgres database.  When developing on OSX and using Docker as the linux test, you may use the special DNS resolution for OSX localhost.  Thus DNS entry is: docker.for.mac.localhost",
         "DB_HOSTNAME": "localhost",

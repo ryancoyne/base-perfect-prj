@@ -42,6 +42,58 @@
         "SERVER_ENVIRONMENT": "DEV",
         "SESSION_NAME"      : "session",
         "HTTP_DOCUMENT_ROOT": "./webroot"
+    },
+    "services" : {
+        "service1": {
+            "name": "Stages Flight",
+            "service_id": 1,
+            "note": "Technical details from rides and such. It is important to have each service named differently (ie: service1)",
+            "servers": {
+                "server1": {
+                    "server_id": 1,
+                    "name":"U Street Stages",
+                    "note":"This is the U Street location and is marked by the id of 1. It is important to have each server named differently (ie: server1)",
+                    "url":"",
+                    "username":"",
+                    "password":"",
+                    "location_service_id":""
+                },
+                "server2": {
+                    "server_id": 2,
+                    "name":"Cap Hill Stages",
+                    "note":"This is the CapHill location and is marked by the id of 2. It is important to have each server named differently (ie: server2)",
+                    "url":"",
+                    "username":"",
+                    "password":"",
+                    "location_service_id":""
+                }
+            }
+        },
+        "service2" : {
+            "name": "MindBody",
+            "service_id": 2,
+            "note": "Scheduling and payment service noted by the id of 2. It is important to have each service named differently (ie: service2)",
+            "servers": {
+                "server1": {
+                    "server_id": 1,
+                    "name":"U Street MindBody",
+                    "note":"This is the U Street location and is marked by the id of 1. It is important to have each server named differently (ie: server1)",
+                    "url":"",
+                    "username":"",
+                    "password":"",
+                    "location_service_id":""
+                },
+                "server2": {
+                    "server_id": 2,
+                    "name":"Cap Hill MindBody",
+                    "note":"This is the CapHill location and is marked by the id of 2. It is important to have each server named differently (ie: server2)",
+                    "url":"",
+                    "username":"",
+                    "password":"",
+                    "location_service_id":""
+                }
+            }
+        }
     }
 }
 
