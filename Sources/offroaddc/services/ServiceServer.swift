@@ -21,20 +21,22 @@ class ServiceServer {
             let _note = json["note"].stringValue,
             let _server_id = json["server_id"].intValue,
             let _location_service_id = json["location_service_id"].stringValue,
-            let _server_url = json["url"].stringValue,
-            let _username = json["username"].stringValue,
-            let _password = json["password"].stringValue
+            let _server_url = json["url"].stringValue
             else {
                 return nil
         }
         
         self.note                = _note
         self.name                = _name
-        self.username            = _username
-        self.password            = _password
         self.server_id           = _server_id
         self.server_url          = _server_url
         self.location_service_id = _location_service_id
+        
+        if  let _username = json["username"].stringValue, let _password = json["password"].stringValue {
+            self.username            = _username
+            self.password            = _password
+        }
+
     }
 
     func asDictionary() -> [String: Any] {

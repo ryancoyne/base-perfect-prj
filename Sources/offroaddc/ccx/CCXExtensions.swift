@@ -1244,8 +1244,8 @@ extension PostgresStORM {
         }
         
         // Remove out the last comma after looping:
-        if set.characters.count > 0 {
-            set.characters.removeLast()
+        if set.count > 0 {
+            set.removeLast()
         }
         
         // build the sql

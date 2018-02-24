@@ -5,6 +5,8 @@ class Service {
     var note       : String?
     var name       : String?
     var service_id : Int?
+    var username   : String?
+    var password   : String?
     var servers    : [ServiceServer]?
     
     init?(json: [String: Any]) {
@@ -19,7 +21,14 @@ class Service {
         self.note = _note
         self.name = _name
         self.service_id = _service_id
+
+        // setup the username and password if they exist
+        if let _username = json["username"].stringValue, let _password = json["password"].stringValue {
+            self.username = _username
+            self.password = _password
+        }
         
+        // process the servers
         for (_, value) in _theservers {
             if let _value = value as? [String:Any] {
                 if let tmpsrv = ServiceServer(json: _value) {
@@ -42,6 +51,12 @@ class Service {
         }
         if self.name.isNotNil {
             dictionary.service.name = self.name
+        }
+        if self.username.isNotNil {
+            dictionary.service.username = self.username
+        }
+        if self.password.isNotNil {
+            dictionary.service.password = self.password
         }
         if self.service_id.isNotNil {
             dictionary.service.service_id = self.service_id

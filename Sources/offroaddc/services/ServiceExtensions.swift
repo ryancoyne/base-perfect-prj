@@ -47,6 +47,30 @@ struct ServiceDictionary {
             }
         }
     }
+    var username : String? {
+        get {
+            return self.dic["username"] as? String
+        }
+        set {
+            if newValue != nil {
+                self.dic["username"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "username")
+            }
+        }
+    }
+    var password : String? {
+        get {
+            return self.dic["password"] as? String
+        }
+        set {
+            if newValue != nil {
+                self.dic["password"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "password")
+            }
+        }
+    }
     var service_id : Int? {
         get {
             return self.dic["service_id"] as? Int

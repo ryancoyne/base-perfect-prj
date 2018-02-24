@@ -233,6 +233,22 @@ func filters() -> [[String: Any]] {
     return filters
 }
 
+//MARK: -
+//MARK: External API Call configuration - this is where you set the service_id to process the correct service.
+for service in EnvironmentVariables.sharedInstance.ConnectionServices! {
+    
+    if let srv_id = service.service_id {
+        switch srv_id {
+        case 1:
+            StagesConnecter.sharedInstance.services = service
+            StagesConnecter.sharedInstance.login()
+        default:
+            // not really doing anything here as this should not occur
+            print("This should not occur, but it did.  service_id: \(srv_id)")
+        }
+    }
+}
+
 //MARK:-
 //MARK: Server configuration
 var confData: [String:[[String:Any]]] = [
