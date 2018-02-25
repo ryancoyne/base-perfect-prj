@@ -242,6 +242,10 @@ for service in EnvironmentVariables.sharedInstance.ConnectionServices! {
         case 1:
             StagesConnecter.sharedInstance.services = service
             StagesConnecter.sharedInstance.login()
+            
+            // GET USERS
+            StagesConnecter.sharedInstance.retrieveUsers()
+            
         default:
             // not really doing anything here as this should not occur
             print("This should not occur, but it did.  service_id: \(srv_id)")

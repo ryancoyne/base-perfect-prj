@@ -7,11 +7,13 @@
 
 import Foundation
 import PerfectCURL
+import JSONConfigEnhanced
 
 class StagesConnecter {
 
     struct endpoints {
         static let auth = "/auth/{id}"
+        static let users = "/users"
     }
     
     // Singleton configuration
@@ -29,8 +31,9 @@ class StagesConnecter {
         // if you send in a token, the token is set.  If ysou send in nil, the token is returned
         if token == nil, let returntoken = self._authToken[location] {
             // setup the token for the proper return in format for the header
-            var thereturn = "Bearer: "
-            thereturn.append((returntoken as! String))
+            var rt = returntoken as! String
+            rt = rt.replacingOccurrences(of: "\"", with: "")
+            let thereturn = "Bearer \(rt)"
 
             return thereturn
             
@@ -111,7 +114,9 @@ class StagesConnecter {
                 let jsonRequest = try requestJSON.jsonEncodedString()
 
                 // do the sync request for the authentication process
-                let response = try CURLRequest(urltouse, .failOnError,
+                let response = try CURLRequest(urltouse,
+//                                               .failOnError,
+                                               .httpMethod(.post),
                                                .addHeader(.contentType, "application/json"),
                                                .postString(jsonRequest)
                     ).perform()
@@ -130,12 +135,86 @@ class StagesConnecter {
         
     }
 
-    static func retrieveClasses(location: String) {
+    func retrieveClasses(location: String) {
         
     }
 
-    static func retrieveUsers(location: String) {
+    func retrieveUsers(location: String? = nil) {
         
+        // if we do not have the servers definition - get outta here
+        if self.services!.servers == nil {
+            return
+        }
+        
+        // the API is the same for all - the token is what makes it work for the location
+        
+        // lets process all users from all locations
+        for serv in self.services!.servers! {
+            
+            if location != nil && serv.location_service_id?.hashValue != location?.hashValue {
+                continue
+            }
+            
+            // grab the users from the location
+            var urltouse = serv.server_url!
+            urltouse.append(endpoints.users)
+            
+            // grab the token string
+            if let tokenString = self.bearerToken(location: serv.location_service_id!) {
+                do {
+                    
+                    // run thru the list of users
+                    var start = 0
+                    var total = 0
+                    let increment = 50
+                    var wearedone = false
+                    
+                    while !wearedone {
+
+                        var thequery = urltouse
+                        thequery.append("/?take=")
+                        thequery.append(String(increment))
+
+                        if total > 0 {
+                            thequery.append("&skip=")
+                            thequery.append(String(total))
+                        }
+
+                        print("The users query: \(thequery)")
+                        
+                        do {
+                            let curlrequest = CURLRequest(thequery,
+                                                          .httpMethod(.get),
+                                                          .addHeaders([(CURLRequest.Header.Name.custom(name: "Content-Type"), "application/json"),
+                                                                   (CURLRequest.Header.Name.custom(name: "Authorization"), tokenString)])
+                            )
+
+                            // do the sync request for the authentication process
+                            let response = try curlrequest.perform().bodyString
+                        
+                            let resp = try response.jsonDecode()
+                            print("Users Response: \(resp)")
+                            
+                            
+                            
+                            let json:[[String:Any]] = try! JSONSerialization.jsonObject(with: response.data(using: String.Encoding.utf16)!, options: .allowFragments) as! [[String:Any]]
+                            
+                            total = total + json.count
+                            
+                            if json.count < increment || json.count == 0 {
+                                print("Total records: \(total)")
+                                wearedone = true
+                            }
+
+                        } catch {
+                            print("Error during the curl process: \(error.localizedDescription)")
+                            wearedone = true
+                        }
+                    }
+
+                    }
+            }
+        }
     }
 
     static func retrieveBikeAssignments(location: String) {
