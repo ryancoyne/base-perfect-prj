@@ -5,8 +5,10 @@
 //  Created by Mike Silvers on 2/21/18.
 //
 
+import StORM
 import Foundation
 import PerfectCURL
+import PostgresStORM
 import JSONConfigEnhanced
 
 class StagesConnecter {
@@ -146,6 +148,16 @@ class StagesConnecter {
             return
         }
         
+        
+//        "Phone": 12022463657,
+//        "NickName": ShutUpLegs,
+//        "FirstName": Tammar,
+//        "Weight": 60.78137758,
+//        "Gender": Female,
+//        "LastName": Berger,
+//        "Email": tammar.berger@gmail.com,
+//        "Id": 8640
+        
         // the API is the same for all - the token is what makes it work for the location
         
         // lets process all users from all locations
@@ -192,16 +204,62 @@ class StagesConnecter {
                             // do the sync request for the authentication process
                             let response = try curlrequest.perform().bodyString
                         
-                            let resp = try response.jsonDecode()
-                            print("Users Response: \(resp)")
+//                            let resp = try response.jsonDecode()
+//                            print("Users Response: \(resp)")
                             
+                            let userarray:[[String:Any]] = try! JSONSerialization.jsonObject(with: response.data(using: String.Encoding.utf16)!, options: .allowFragments) as! [[String:Any]]
+
+                            var updateduserarray:[[String:Any]] = []
+
+                            // update the dictionary to use our common key values
+                            for d in userarray {
+
+                                var tmpd:[String:Any] = [:]
+                                
+                                print("Phone: \(d["Phone"])")
+                                
+                                
+                                
+                                if let value = d["Phone"] as? String {
+                                    tmpd["phone"] = value
+                                }
+
+                                if let value = d["Weight"] as? Float {
+                                    tmpd["weight"] = value
+                                }
+
+                                if let value = d["NickName"] as? String {
+                                    tmpd["nickname"] = value
+                                }
+
+                                if let value = d["FirstName"] as? String {
+                                    tmpd["name_first"] = value
+                                }
+                                
+                                if let value = d["LastName"] as? String {
+                                    tmpd["name_last"] = value
+                                }
+                                
+                                if let value = d["Email"] as? String {
+                                    tmpd["email"] = value
+                                }
+                                
+                                if let value = d["NickName"] as? String {
+                                    tmpd["nickname"] = value
+                                }
+                                
+                                tmpd["source"] = "stages"
+                                
+                                updateduserarray.append(tmpd)
+
+                            }
                             
+                            // process the user array
+                            self.processUserArray(userarray: updateduserarray)
+
+                            total = total + userarray.count
                             
-                            let json:[[String:Any]] = try! JSONSerialization.jsonObject(with: response.data(using: String.Encoding.utf16)!, options: .allowFragments) as! [[String:Any]]
-                            
-                            total = total + json.count
-                            
-                            if json.count < increment || json.count == 0 {
+                            if userarray.count < increment || userarray.count == 0 {
                                 print("Total records: \(total)")
                                 wearedone = true
                             }
@@ -215,6 +273,67 @@ class StagesConnecter {
                     }
             }
         }
+    }
+    
+    func processUserArray(userarray:[[String:Any]]) {
+        
+        // spin theu the array and process each user.
+        for user in userarray {
+            
+            print("User: \(user)")
+            
+            let thisuser = UsersRaw()
+            thisuser.fromDictionary(sourceDictionary: user)
+            
+            var sql:String?
+            
+            // first check to see if there is a user in the raw table
+            if let useremail = user["email"].stringValue {
+                sql = "SELECT id FROM users_raw WHERE email = '"
+                sql!.append(useremail)
+                sql!.append("'")
+            } else if  let userphone = user["phone"].intValue {
+                sql = "SELECT id FROM users_raw WHERE phone = "
+                sql!.append(String(userphone))
+            }
+
+            if sql.isNotNil {
+                
+                let raw = UsersRaw()
+                
+                do {
+                    
+                    let raw_results = try raw.sqlRows(sql!, params: [])
+
+                    if raw_results.count == 0 {
+                        try? thisuser.save()
+                    }
+                    
+// ************ // IN THE FUTURE: MAKE CHANGES ID THEY DIFFER
+                    
+//                    for rr in raw_results {
+//                        // lets check to see if there are any differences in the objects
+//                        let userraw_data = UsersRaw()
+//                        userraw_data.to(rr)
+//
+//                        // now lets compare:
+//                        if !userraw_data.compare(targetItem: thisuser) {
+//                            // SAVE THE CHANGED DATA
+//                        }
+//
+//                    }
+                    
+                } catch {
+                    print("SQL update user raw error: \(error.localizedDescription)")
+                }
+            }
+            
+            
+            
+            
+        }
+        
+        
     }
 
     static func retrieveBikeAssignments(location: String) {
