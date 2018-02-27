@@ -177,5 +177,18 @@ struct UsersRawDictionary {
         }
     }
 
+    var status    : String?    {
+        get {
+            return self.dic["status"] as? String
+        }
+        set {
+            if newValue != nil {
+                self.dic["status"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "status")
+            }
+        }
+    }
+
 }
 

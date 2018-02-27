@@ -29,6 +29,7 @@ public class UsersRaw: PostgresStORM {
     var nickname   : String? = nil
     var email      : String? = nil
     var gender     : String? = nil
+    var status     : String? = nil
 
     var weight     : Float?    = nil
     var phone      : String?    = nil
@@ -102,7 +103,11 @@ public class UsersRaw: PostgresStORM {
         if let data = this.data.users_raw.weight {
             weight = data
         }
-        
+
+        if let data = this.data.users_raw.status {
+            status = data
+        }
+
     }
     
     func rows() -> [UsersRaw] {
@@ -174,6 +179,11 @@ public class UsersRaw: PostgresStORM {
             case "weight":
                 if (value as! Float) != 0.0 {
                     self.weight = (value as! Float)
+                }
+
+            case "status":
+                if !(value as! String).isEmpty {
+                    self.status = (value as! String)
                 }
 
             default:
@@ -253,7 +263,11 @@ public class UsersRaw: PostgresStORM {
         if self.weight.isNotNil {
             dictionary.users_raw.weight = self.weight
         }
-                
+
+        if self.status.isNotNil {
+            dictionary.users_raw.status = self.status
+        }
+
         return dictionary
     }
     
@@ -262,50 +276,54 @@ public class UsersRaw: PostgresStORM {
         
         var diff = true
         
-        if self.account_id != targetItem.account_id {
+        if diff == true, self.account_id != targetItem.account_id {
             diff = false
         }
         
-        if self.email != targetItem.email {
+        if diff == true, self.email != targetItem.email {
             diff = false
         }
         
-        if self.gender != targetItem.gender {
+        if diff == true, self.gender != targetItem.gender {
             diff = false
         }
         
-        if self.name_first != targetItem.name_first {
+        if diff == true, self.name_first != targetItem.name_first {
             diff = false
         }
         
-        if self.name_full != targetItem.name_full {
+        if diff == true, self.name_full != targetItem.name_full {
             diff = false
         }
         
-        if self.name_last != targetItem.name_last {
+        if diff == true, self.name_last != targetItem.name_last {
             diff = false
         }
         
-        if self.nickname != targetItem.nickname {
+        if diff == true, self.nickname != targetItem.nickname {
             diff = false
         }
         
-        if self.phone != targetItem.phone {
+        if diff == true, self.phone != targetItem.phone {
             diff = false
         }
         
-        if self.source != targetItem.source {
+        if diff == true, self.source != targetItem.source {
             diff = false
         }
         
-        if self.source_id != targetItem.source_id {
+        if diff == true, self.source_id != targetItem.source_id {
             diff = false
         }
         
-        if self.weight != targetItem.weight {
+        if diff == true, self.weight != targetItem.weight {
             diff = false
         }
-        
+
+        if diff == true, self.status != targetItem.status {
+            diff = false
+        }
+
         return diff
         
     }

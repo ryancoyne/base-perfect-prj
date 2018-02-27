@@ -148,6 +148,24 @@ class StagesConnecter {
             return
         }
         
+        // first thing we do is set every user to deleted, then update them
+        let delete_sql = "SELECT id FROM users_raw WHERE source = 'stages'"
+        let useme = UsersRaw()
+        
+        let delete_results = try? useme.sqlRows(delete_sql, params: [])
+        if delete_results.isNotNil {
+            for del_row in delete_results! {
+                
+                // ok - now set all of these as deleted
+                let theid = del_row.data["id"].intValue
+                if (try? useme.find(["id":"\(theid!)"])).isNotNil {
+                    useme.status = "deleted"
+                    try? useme.saveWithGIS()
+                }
+                
+            }
+        }
+        
         
 //        "Phone": 12022463657,
 //        "NickName": ShutUpLegs,
@@ -176,7 +194,6 @@ class StagesConnecter {
                 do {
                     
                     // run thru the list of users
-                    var start = 0
                     var total = 0
                     let increment = 50
                     var wearedone = false
@@ -216,9 +233,13 @@ class StagesConnecter {
 
                                 var tmpd:[String:Any] = [:]
                                 
-                                print("Phone: \(d["Phone"])")
+                                if let value = d["Gender"] as? String {
+                                    tmpd["gender"] = value.lowercased()
+                                }
                                 
-                                
+                                if let value = d["Id"] as? Int {
+                                    tmpd["source_id"] = "\(value)"
+                                }
                                 
                                 if let value = d["Phone"] as? String {
                                     tmpd["phone"] = value
@@ -242,10 +263,6 @@ class StagesConnecter {
                                 
                                 if let value = d["Email"] as? String {
                                     tmpd["email"] = value
-                                }
-                                
-                                if let value = d["NickName"] as? String {
-                                    tmpd["nickname"] = value
                                 }
                                 
                                 tmpd["source"] = "stages"
@@ -275,7 +292,7 @@ class StagesConnecter {
         }
     }
     
-    func processUserArray(userarray:[[String:Any]]) {
+    fileprivate func processUserArray(userarray:[[String:Any]]) {
         
         // spin theu the array and process each user.
         for user in userarray {
@@ -292,7 +309,7 @@ class StagesConnecter {
                 sql = "SELECT id FROM users_raw WHERE email = '"
                 sql!.append(useremail)
                 sql!.append("'")
-            } else if  let userphone = user["phone"].intValue {
+            } else if  let userphone = user["phone"].stringValue {
                 sql = "SELECT id FROM users_raw WHERE phone = "
                 sql!.append(String(userphone))
             }
@@ -306,7 +323,17 @@ class StagesConnecter {
                     let raw_results = try raw.sqlRows(sql!, params: [])
 
                     if raw_results.count == 0 {
-                        try? thisuser.save()
+                        try? thisuser.saveWithGIS()
+                    } else {
+                        for rr in raw_results {
+                            
+                            let us = UsersRaw()
+                            let theid = rr.data["id"].intValue
+                            try? us.find(["id":"\(theid!)"])
+                            us.status = "active"
+                            try? us.saveWithGIS()
+                            
+                        }
                     }
                     
 // ************ // IN THE FUTURE: MAKE CHANGES ID THEY DIFFER
