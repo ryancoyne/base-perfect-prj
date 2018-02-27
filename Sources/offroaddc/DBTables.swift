@@ -185,6 +185,7 @@ final class PRJDBTables {
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
         if thereturn.postgis && thereturn.postgis_topo {
             // create the postgis tables here
+            UsersRawTable.sharedInstance.create()
             
             // finally - lets add sample data - controlled by the condif table entry for sampledata (0 = no, 1 = yes)
 
