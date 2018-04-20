@@ -148,18 +148,19 @@ class StagesConnecter {
             return
         }
         
-        // first thing we do is set every user to deleted, then update them
-        let delete_sql = "SELECT id FROM users_raw WHERE source = 'stages'"
+        // first thing we do is set every user to updating, then update them
+        let updating_sql = "SELECT id FROM users_raw WHERE source = 'stages'"
         let useme = UsersRaw()
         
-        let delete_results = try? useme.sqlRows(delete_sql, params: [])
-        if delete_results.isNotNil {
-            for del_row in delete_results! {
+        let updating_results = try? useme.sqlRows(updating_sql, params: [])
+        if updating_results.isNotNil {
+            for upd_row in updating_results! {
                 
                 // ok - now set all of these as deleted
-                let theid = del_row.data["id"].intValue
+                let theid = upd_row.data["id"].intValue
                 if (try? useme.find(["id":"\(theid!)"])).isNotNil {
-                    useme.status = "deleted"
+                    useme.status = "updating"
+                    useme.modifiedby = "SYSTEM"
                     try? useme.saveWithGIS()
                 }
                 
@@ -290,6 +291,24 @@ class StagesConnecter {
                     }
             }
         }
+        
+        // now set the records that are updating to deleted
+        // first thing we do is set every user to updating, then update them
+        let delete_sql = "SELECT id FROM users_raw WHERE source = 'stages' AND status = 'updating'"
+        let del_useme = UsersRaw()
+        
+        let delete_results = try? useme.sqlRows(delete_sql, params: [])
+        if delete_results.isNotNil {
+            for del_row in delete_results! {
+                // ok - now set all of these as deleted
+                let theid = del_row.data["id"].intValue
+                if (try? del_useme.find(["id":"\(theid!)"])).isNotNil {
+                    del_useme.status = "deleted"
+                    try? del_useme.saveWithGIS()
+                }
+            }
+        }
+
     }
     
     fileprivate func processUserArray(userarray:[[String:Any]]) {

@@ -64,9 +64,11 @@ LogFile.location = EnvironmentVariables.sharedInstance.mainLog!
 
 // print out the system environment variables
 let env_variables = ProcessInfo.processInfo.environment
+print("\n== Environment Variable List START ==")
 for (key, value) in env_variables {
-    print("Process Info: key: \(key), value: \(value)")
+    print("    Process Info: key: \(key), value: \(value)")
 }
+print("== Environment Variable List END ==\n")
 
 
 // the DB user should be a superuser

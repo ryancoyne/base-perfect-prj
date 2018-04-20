@@ -36,6 +36,7 @@ final class EnvironmentVariables {
         self.filesDirectory = env_variables["LOCAL_FILE_PATH"].stringValue
         if self.filesDirectory != nil {
             self.filesDirectoryProfilePics = "\(self.filesDirectory!)/profilepics"
+            self.configDirectory = "\(self.filesDirectory!)/config"
         }
 
         self.filesDirectoryLogs = env_variables["LOCAL_FILE_PATH_LOGS"].stringValue
@@ -71,10 +72,17 @@ final class EnvironmentVariables {
     //MARK: JSON configuration file processing
     private func readJSONConfiguration() {
         
+        // lets see the PWD
+        print("PWD: \(Dir.workingDir)")
+
         //MARK: --
         //MARK: config file: main.json
         // here is where we look to see if there is a JSON file with settings
-        JSONConfigEnhanced.shared.source = "./config/main.json"
+        if self.configDirectory.isNotNil {
+            JSONConfigEnhanced.shared.source = "\(self.configDirectory!)/main.json"
+        } else {
+            JSONConfigEnhanced.shared.source = "main.json"
+        }
         if JSONConfigEnhanced.shared.doesSourceFileExist() {
             
             // the first thing we are going to do is to parse out the servers and services for API connections
@@ -617,6 +625,20 @@ final class EnvironmentVariables {
 
     //MARK: --
     //MARK: Local file access variable definitions
+    private var _configDirectory: String?
+    public var configDirectory: String? {
+        get {
+            return _configDirectory
+        }
+        set {
+            if newValue != nil {
+                _configDirectory = newValue!
+            } else {
+                _configDirectory = nil
+            }
+        }
+    }
+
     private var _filesDirectory: String?
     public var filesDirectory: String? {
         get {
