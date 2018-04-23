@@ -63,12 +63,12 @@ RequestLogFile.location = EnvironmentVariables.sharedInstance.httpRequestLog!
 LogFile.location = EnvironmentVariables.sharedInstance.mainLog!
 
 // print out the system environment variables
-let env_variables = ProcessInfo.processInfo.environment
-print("\n== Environment Variable List START ==")
-for (key, value) in env_variables {
-    print("    Process Info: key: \(key), value: \(value)")
-}
-print("== Environment Variable List END ==\n")
+//let env_variables = ProcessInfo.processInfo.environment
+//print("\n== Environment Variable List START ==")
+//for (key, value) in env_variables {
+//    print("    Process Info: key: \(key), value: \(value)")
+//}
+//print("== Environment Variable List END ==\n")
 
 
 // the DB user should be a superuser
@@ -237,20 +237,22 @@ func filters() -> [[String: Any]] {
 
 //MARK: -
 //MARK: External API Call configuration - this is where you set the service_id to process the correct service.
-for service in EnvironmentVariables.sharedInstance.ConnectionServices! {
-    
-    if let srv_id = service.service_id {
-        switch srv_id {
-        case 1:
-            StagesConnecter.sharedInstance.services = service
-            StagesConnecter.sharedInstance.login()
-            
-            // GET USERS
-            StagesConnecter.sharedInstance.retrieveUsers()
-            
-        default:
-            // not really doing anything here as this should not occur
-            print("This should not occur, but it did.  service_id: \(srv_id)")
+if let servicelist = EnvironmentVariables.sharedInstance.ConnectionServices {
+    for service in servicelist {
+        
+        if let srv_id = service.service_id {
+            switch srv_id {
+            case 1:
+                StagesConnecter.sharedInstance.services = service
+                StagesConnecter.sharedInstance.login()
+                
+                // GET USERS
+                StagesConnecter.sharedInstance.retrieveUsers()
+                
+            default:
+                // not really doing anything here as this should not occur
+                print("This should not occur, but it did.  service_id: \(srv_id)")
+            }
         }
     }
 }

@@ -73,7 +73,7 @@ final class EnvironmentVariables {
     private func readJSONConfiguration() {
         
         // lets see the PWD
-        print("PWD: \(Dir.workingDir)")
+        print("PWD: \(Dir.workingDir.path)")
 
         //MARK: --
         //MARK: config file: main.json
@@ -81,7 +81,7 @@ final class EnvironmentVariables {
         if self.configDirectory.isNotNil {
             JSONConfigEnhanced.shared.source = "\(self.configDirectory!)/main.json"
         } else {
-            JSONConfigEnhanced.shared.source = "main.json"
+            JSONConfigEnhanced.shared.source = "\(Dir.workingDir.path)config/main.json"
         }
         if JSONConfigEnhanced.shared.doesSourceFileExist() {
             
@@ -134,7 +134,8 @@ final class EnvironmentVariables {
                 }
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "aws.AWS_FILE_URL") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "aws.AWS_FILE_URL") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "aws")!["AWS_FILE_URL"] as? String {
                 self.AWSfileURL = value
             }
 
@@ -146,23 +147,28 @@ final class EnvironmentVariables {
                 self.filesDirectoryLogs = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_HOSTNAME") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_HOSTNAME") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "database")!["DB_HOSTNAME"] as? String {
                 self.DB_HOSTNAME = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_USERNAME") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_USERNAME") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "database")!["DB_USERNAME"] as? String {
                 self.DB_USERNAME = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_PASSWORD") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_PASSWORD") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "database")!["DB_PASSWORD"] as? String {
                 self.DB_PASSWORD = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_DATABASE") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_DATABASE") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "database")!["DB_DATABASE"] as? String {
                 self.DB_DATABASE = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_PORT") as? Int {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_PORT") as? Int {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "database")!["DB_PORT"] as? Int {
                 self.DB_PORT = value
             }
             

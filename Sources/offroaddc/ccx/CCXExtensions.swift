@@ -1414,9 +1414,9 @@ extension String {
     func chompLeft(_ prefix: String) -> String {
         if let prefixRange = range(of: prefix) {
             if prefixRange.upperBound >= endIndex {
-                return self[startIndex..<prefixRange.lowerBound]
+                return String(self[startIndex..<prefixRange.lowerBound])
             } else {
-                return self[prefixRange.upperBound..<endIndex]
+                return String(self[prefixRange.upperBound..<endIndex])
             }
         }
         return self
@@ -1425,9 +1425,9 @@ extension String {
     func chompRight(_ suffix: String) -> String {
         if let suffixRange = range(of: suffix, options: .backwards) {
             if suffixRange.upperBound >= endIndex {
-                return self[startIndex..<suffixRange.lowerBound]
+                return String(self[startIndex..<suffixRange.lowerBound])
             } else {
-                return self[suffixRange.upperBound..<endIndex]
+                return String(self[suffixRange.upperBound..<endIndex])
             }
         }
         return self
