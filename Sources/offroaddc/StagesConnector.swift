@@ -92,10 +92,11 @@ class StagesConnecter {
         }
         
         // make sure there are valid username and passwords
-        if StagesConnecter.sharedInstance.services?.username == nil ||
-            StagesConnecter.sharedInstance.services?.password == nil {
-            return false
-        }
+        // Removed because the username and password are set at the server level, not the services level.
+//        if StagesConnecter.sharedInstance.services?.username == nil ||
+//            StagesConnecter.sharedInstance.services?.password == nil {
+//            return false
+//        }
         
         // this will indicate if we had a successful login for any location
         var returnsuccess = false
@@ -109,8 +110,9 @@ class StagesConnecter {
             urltouse = urltouse.stringByReplacing(string: "{id}", withString: serv.location_service_id!)
 
             // lets get the token
-            let requestJSON:[String:Any] = ["ClientId":self.services!.username!,"ClientSecret":self.services!.password!]
-            
+//            let requestJSON:[String:Any] = ["ClientId":self.services!.username!,"ClientSecret":self.services!.password!]
+            let requestJSON:[String:Any] = ["ClientId":serv.username!,"ClientSecret":serv.password!]
+
             do {
                 
                 let jsonRequest = try requestJSON.jsonEncodedString()
@@ -304,7 +306,7 @@ class StagesConnecter {
                 let theid = del_row.data["id"].intValue
                 if (try? del_useme.find(["id":"\(theid!)"])).isNotNil {
                     del_useme.status = "deleted"
-                    try? del_useme.saveWithGIS()
+                    let _ = try? del_useme.saveWithGIS()
                 }
             }
         }
@@ -321,28 +323,29 @@ class StagesConnecter {
             let thisuser = UsersRaw()
             thisuser.fromDictionary(sourceDictionary: user)
             
-            var sql:String?
+            var sql:String = ""
             
             // first check to see if there is a user in the raw table
             if let useremail = user["email"].stringValue {
                 sql = "SELECT id FROM users_raw WHERE email = '"
-                sql!.append(useremail)
-                sql!.append("'")
+                sql.append(useremail)
+                sql.append("'")
+                print("\(sql)")
             } else if  let userphone = user["phone"].stringValue {
                 sql = "SELECT id FROM users_raw WHERE phone = "
-                sql!.append(String(userphone))
+                sql.append(String(userphone))
             }
 
-            if sql.isNotNil {
+            if !sql.isEmpty {
                 
                 let raw = UsersRaw()
                 
                 do {
                     
-                    let raw_results = try raw.sqlRows(sql!, params: [])
+                    let raw_results = try raw.sqlRows(sql, params: [])
 
                     if raw_results.count == 0 {
-                        try? thisuser.saveWithGIS()
+                        let _ = try? thisuser.saveWithGIS()
                     } else {
                         for rr in raw_results {
                             
@@ -350,7 +353,7 @@ class StagesConnecter {
                             let theid = rr.data["id"].intValue
                             try? us.find(["id":"\(theid!)"])
                             us.status = "active"
-                            try? us.saveWithGIS()
+                            let _ = try? us.saveWithGIS()
                             
                         }
                     }

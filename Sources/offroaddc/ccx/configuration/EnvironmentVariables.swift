@@ -86,7 +86,8 @@ final class EnvironmentVariables {
         if JSONConfigEnhanced.shared.doesSourceFileExist() {
             
             // the first thing we are going to do is to parse out the servers and services for API connections
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "services") {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "services") {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "services") {
 
                 // Load the entire document and pull out the services section to process
                 let file = File(JSONConfigEnhanced.shared.source!)
@@ -135,100 +136,117 @@ final class EnvironmentVariables {
             }
             
 //            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "aws.AWS_FILE_URL") as? String {
-            if let value = JSONConfigEnhanced.shared.json(forKey: "aws")!["AWS_FILE_URL"] as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "aws")?["AWS_FILE_URL"] as? String {
                 self.AWSfileURL = value
             }
 
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "localfiles.LOCAL_FILE_PATH") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "localfiles.LOCAL_FILE_PATH") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "localfiles")?["LOCAL_FILE_PATH"] as? String {
                 self.filesDirectory = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "localfiles.LOCAL_FILE_PATH_LOGS") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "localfiles.LOCAL_FILE_PATH_LOGS") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "localfiles")?["LOCAL_FILE_PATH_LOGS"] as? String {
                 self.filesDirectoryLogs = value
             }
             
 //            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_HOSTNAME") as? String {
-            if let value = JSONConfigEnhanced.shared.json(forKey: "database")!["DB_HOSTNAME"] as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "database")?["DB_HOSTNAME"] as? String {
                 self.DB_HOSTNAME = value
             }
             
 //            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_USERNAME") as? String {
-            if let value = JSONConfigEnhanced.shared.json(forKey: "database")!["DB_USERNAME"] as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "database")?["DB_USERNAME"] as? String {
                 self.DB_USERNAME = value
             }
             
 //            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_PASSWORD") as? String {
-            if let value = JSONConfigEnhanced.shared.json(forKey: "database")!["DB_PASSWORD"] as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "database")?["DB_PASSWORD"] as? String {
                 self.DB_PASSWORD = value
             }
             
 //            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_DATABASE") as? String {
-            if let value = JSONConfigEnhanced.shared.json(forKey: "database")!["DB_DATABASE"] as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "database")?["DB_DATABASE"] as? String {
                 self.DB_DATABASE = value
             }
             
 //            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "database.DB_PORT") as? Int {
-            if let value = JSONConfigEnhanced.shared.json(forKey: "database")!["DB_PORT"] as? Int {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "database")?["DB_PORT"] as? Int {
                 self.DB_PORT = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "url.URL_PROTOCOL") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "url.URL_PROTOCOL") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "url")?["URL_PROTOCOL"] as? String {
                 self.URL_PROTOCOL = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "url.URL_DOMAIN") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "url.URL_DOMAIN") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "url")?["URL_DOMAIN"] as? String {
                 self.URL_DOMAIN = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "url.URL_PORT") as? Int {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "url.URL_PORT") as? Int {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "url")?["URL_PORT"] as? Int {
                 self.URL_PORT = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "api.API_DOMAIN") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "api.API_DOMAIN") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "api")?["API_DOMAIN"] as? String {
                 self.API_DOMAIN = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "api.API_URL_PROTOCOL") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "api.API_URL_PROTOCOL") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "api")?["API_URL_PROTOCOL"] as? String {
                 self.API_URL_PROTOCOL = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "api.API_URL_PORT") as? Int {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "api.API_URL_PORT") as? Int {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "api")?["API_URL_PORT"] as? Int {
                 self.API_URL_PORT = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "email.EMAIL_SERVER") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "email.EMAIL_SERVER") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "email")?["EMAIL_SERVER"] as? String {
                 self.EMAIL_SERVER = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "email.EMAIL_USERNAME") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "email.EMAIL_USERNAME") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "email")?["EMAIL_USERNAME"] as? String {
                 self.EMAIL_USERNAME = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "email.EMAIL_PASSWORD") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "email.EMAIL_PASSWORD") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "email")?["EMAIL_PASSWORD"] as? String {
                 self.EMAIL_PASSWORD = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "email.EMAIL_FROM_ADDRESS") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "email.EMAIL_FROM_ADDRESS") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "email")?["EMAIL_FROM_ADDRESS"] as? String {
                 self.EMAIL_FROM_ADDRESS = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "email.EMAIL_FROM_DISPLAY_NAME") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "email.EMAIL_FROM_DISPLAY_NAME") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "email")?["EMAIL_FROM_DISPLAY_NAME"] as? String {
                 self.EMAIL_FROM_DISPLAY_NAME = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "misc.STORM_DEBUG") as? Bool {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "misc.STORM_DEBUG") as? Bool {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["STORM_DEBUG"] as? Bool {
                 self.StORMdebug = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "misc.SERVER_ENVIRONMENT") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "misc.SERVER_ENVIRONMENT") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["SERVER_ENVIRONMENT"] as? String {
                 self.ServerEnvironment = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "misc.SESSION_NAME") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "misc.SESSION_NAME") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["SESSION_NAME"] as? String {
                 self.SessionName = value
             }
             
-            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "misc.HTTP_DOCUMENT_ROOT") as? String {
+//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "misc.HTTP_DOCUMENT_ROOT") as? String {
+            if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["HTTP_DOCUMENT_ROOT"] as? String {
                 self.HTTP_DOCUMENT_ROOT = value
             }
         }
