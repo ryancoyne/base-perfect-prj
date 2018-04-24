@@ -243,15 +243,28 @@ if let servicelist = EnvironmentVariables.sharedInstance.ConnectionServices {
         if let srv_id = service.service_id {
             switch srv_id {
             case 1:
+                
+                // we want to connect even if we are not using it right away
                 StagesConnecter.sharedInstance.services = service
                 StagesConnecter.sharedInstance.login()
+
+                // check to see if you should run the entire process on startup
+                if let chk = EnvironmentVariables.sharedInstance.CheckOnStart_Server1, chk {
                 
-                // GET USERS
-                StagesConnecter.sharedInstance.retrieveUsers()
+                    // GET USERS
+                    StagesConnecter.sharedInstance.retrieveUsers()
                 
-                // Associate them if they have not been associated before
-                StagesConnecter.sharedInstance.associateUsers()
+                    // Associate them if they have not been associated before
+                    StagesConnecter.sharedInstance.associateUsers()
+                }
                 
+            case 2:
+                if let chk = EnvironmentVariables.sharedInstance.CheckOnStart_Server2, chk {
+
+                    // MINDBODY CONNECTOR
+                    
+                }
+
             default:
                 // not really doing anything here as this should not occur
                 print("This should not occur, but it did.  service_id: \(srv_id)")

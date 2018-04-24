@@ -210,6 +210,10 @@ extension Handlers {
                     user.detail["created"] = CCXServiceClass.sharedInstance.getNow()
                     
                     try? user.create()
+                    
+                    // lets see if we can link stages
+                    StagesConnecter.sharedInstance.associateUsers(user)
+                    
                 } else {
                     user.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
                     try? user.save()

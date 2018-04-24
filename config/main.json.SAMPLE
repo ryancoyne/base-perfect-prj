@@ -41,7 +41,9 @@
         "STORM_DEBUG"       : false,
         "SERVER_ENVIRONMENT": "DEV",
         "SESSION_NAME"      : "session",
-        "HTTP_DOCUMENT_ROOT": "./webroot"
+        "HTTP_DOCUMENT_ROOT": "./webroot",
+        "SERVER_1_ON_START" :false,
+        "SERVER_2_ON_START" :false
     },
     "services" : {
         "service1": {

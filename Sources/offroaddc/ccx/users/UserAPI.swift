@@ -294,6 +294,10 @@ struct UserAPI {
                     // no need for the GIS save function - the location info is saved in the detail (and another table)
                     try user.create()
                     
+                    // lets see if we can link stages
+                    // do this before we change the user.detail with the isNew element.
+                    StagesConnecter.sharedInstance.associateUsers(user)
+                    
                     user.detail["isNew"] = true
                     
                 } else {

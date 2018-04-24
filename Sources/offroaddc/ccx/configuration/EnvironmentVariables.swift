@@ -66,6 +66,9 @@ final class EnvironmentVariables {
         self.SessionName          = env_variables["SESSION_NAME"].stringValue
         self.HTTP_DOCUMENT_ROOT   = env_variables["HTTP_DOCUMENT_ROOT"].stringValue
 
+        self.CheckOnStart_Server1 = env_variables["SERVER_1_ON_START"].boolValue
+        self.CheckOnStart_Server2 = env_variables["SERVER_2_ON_START"].boolValue
+
     }
     
     //MARK: --
@@ -249,6 +252,15 @@ final class EnvironmentVariables {
             if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["HTTP_DOCUMENT_ROOT"] as? String {
                 self.HTTP_DOCUMENT_ROOT = value
             }
+            
+            if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["SERVER_1_ON_START"] as? Bool {
+                self.CheckOnStart_Server1 = value
+            }
+
+            if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["SERVER_2_ON_START"] as? Bool {
+                self.CheckOnStart_Server2 = value
+            }
+
         }
     }
 
@@ -369,6 +381,14 @@ final class EnvironmentVariables {
 
         if self.mainLog == nil {
             self.mainLog = "\(self.filesDirectoryLogs!)/main.log"
+        }
+        
+        if self.CheckOnStart_Server1 == nil {
+            self.CheckOnStart_Server1 = false
+        }
+
+        if self.CheckOnStart_Server2 == nil {
+            self.CheckOnStart_Server2 = false
         }
 
     }
@@ -707,6 +727,34 @@ final class EnvironmentVariables {
 
     //MARK: --
     //MARK: misc variable definitions
+    private var _CheckOnStart_Server1: Bool?
+    public var CheckOnStart_Server1: Bool? {
+        get {
+            return _CheckOnStart_Server1
+        }
+        set {
+            if newValue != nil {
+                _CheckOnStart_Server1 = newValue!
+            } else {
+                _CheckOnStart_Server1 = nil
+            }
+        }
+    }
+
+    private var _CheckOnStart_Server2: Bool?
+    public var CheckOnStart_Server2: Bool? {
+        get {
+            return _CheckOnStart_Server2
+        }
+        set {
+            if newValue != nil {
+                _CheckOnStart_Server2 = newValue!
+            } else {
+                _CheckOnStart_Server2 = nil
+            }
+        }
+    }
+
     private var _StORMdebug: Bool?
     public var StORMdebug: Bool? {
         get {
