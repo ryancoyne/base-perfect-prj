@@ -23,6 +23,7 @@ public class UsersRaw: PostgresStORM {
     var source     : String? = nil
     var account_id : String? = nil
     var source_id  : String? = nil
+    var source_location_id : String? = nil
     var name_first : String? = nil
     var name_last  : String? = nil
     var name_full  : String? = nil
@@ -65,11 +66,11 @@ public class UsersRaw: PostgresStORM {
         }
         
         if let data = this.data.users_raw.email {
-            email = data
+            email = data.lowercased()
         }
         
         if let data = this.data.users_raw.gender {
-            gender = data
+            gender = data.lowercased()
         }
         
         if let data = this.data.users_raw.name_first {
@@ -93,7 +94,7 @@ public class UsersRaw: PostgresStORM {
         }
         
         if let data = this.data.users_raw.source {
-            source = data
+            source = data.lowercased()
         }
         
         if let data = this.data.users_raw.source_id {
@@ -105,7 +106,11 @@ public class UsersRaw: PostgresStORM {
         }
 
         if let data = this.data.users_raw.status {
-            status = data
+            status = data.lowercased()
+        }
+        
+        if let data = this.data.users_raw.source_location_id {
+            source_location_id = data
         }
 
     }
@@ -130,15 +135,20 @@ public class UsersRaw: PostgresStORM {
                 if !(value as! String).isEmpty {
                     self.account_id = (value as! String)
                 }
-                
+
+            case "source_location_id":
+                if !(value as! String).isEmpty {
+                    self.source_location_id = (value as! String)
+                }
+
             case "email":
                 if !(value as! String).isEmpty {
-                    self.email = (value as! String)
+                    self.email = (value as! String).lowercased()
                 }
 
             case "gender":
                 if !(value as! String).isEmpty {
-                    self.gender = (value as! String)
+                    self.gender = (value as! String).lowercased()
                 }
 
             case "name_first":
@@ -168,7 +178,7 @@ public class UsersRaw: PostgresStORM {
 
             case "source":
                 if !(value as! String).isEmpty {
-                    self.source = (value as! String)
+                    self.source = (value as! String).lowercased()
                 }
 
             case "source_id":
@@ -183,7 +193,7 @@ public class UsersRaw: PostgresStORM {
 
             case "status":
                 if !(value as! String).isEmpty {
-                    self.status = (value as! String)
+                    self.status = (value as! String).lowercased()
                 }
 
             default:
@@ -259,7 +269,11 @@ public class UsersRaw: PostgresStORM {
         if self.source_id.isNotNil {
             dictionary.users_raw.source_id = self.source_id
         }
-        
+
+        if self.source_location_id.isNotNil {
+            dictionary.users_raw.source_location_id = self.source_location_id
+        }
+
         if self.weight.isNotNil {
             dictionary.users_raw.weight = self.weight
         }

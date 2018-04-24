@@ -150,26 +150,6 @@ class StagesConnecter {
             return
         }
         
-        // first thing we do is set every user to updating, then update them
-        let updating_sql = "SELECT id FROM users_raw WHERE source = 'stages'"
-        let useme = UsersRaw()
-        
-        let updating_results = try? useme.sqlRows(updating_sql, params: [])
-        if updating_results.isNotNil {
-            for upd_row in updating_results! {
-                
-                // ok - now set all of these as deleted
-                let theid = upd_row.data["id"].intValue
-                if (try? useme.find(["id":"\(theid!)"])).isNotNil {
-                    useme.status = "updating"
-                    useme.modifiedby = "SYSTEM"
-                    try? useme.saveWithGIS()
-                }
-                
-            }
-        }
-        
-        
 //        "Phone": 12022463657,
 //        "NickName": ShutUpLegs,
 //        "FirstName": Tammar,
@@ -187,6 +167,26 @@ class StagesConnecter {
             if location != nil && serv.location_service_id?.hashValue != location?.hashValue {
                 continue
             }
+            
+            // first thing we do is set every user to updating, then update them
+            let updating_sql = "SELECT id FROM users_raw WHERE source = 'stages' AND source_location_id = '\(serv.location_service_id!)'"
+            let useme = UsersRaw()
+            
+            let updating_results = try? useme.sqlRows(updating_sql, params: [])
+            if updating_results.isNotNil {
+                for upd_row in updating_results! {
+                    
+                    // ok - now set all of these as deleted
+                    let theid = upd_row.data["id"].intValue
+                    if (try? useme.find(["id":"\(theid!)"])).isNotNil {
+                        useme.status = "updating"
+                        useme.modifiedby = "SYSTEM"
+                        let _ = try? useme.saveWithGIS()
+                    }
+                    
+                }
+            }
+
             
             // grab the users from the location
             var urltouse = serv.server_url!
@@ -265,8 +265,10 @@ class StagesConnecter {
                                 }
                                 
                                 if let value = d["Email"] as? String {
-                                    tmpd["email"] = value
+                                    tmpd["email"] = value.lowercased()
                                 }
+                                
+                                tmpd["source_location_id"] = serv.location_service_id!
                                 
                                 tmpd["source"] = "stages"
                                 
@@ -292,25 +294,24 @@ class StagesConnecter {
 
                     }
             }
-        }
-        
-        // now set the records that are updating to deleted
-        // first thing we do is set every user to updating, then update them
-        let delete_sql = "SELECT id FROM users_raw WHERE source = 'stages' AND status = 'updating'"
-        let del_useme = UsersRaw()
-        
-        let delete_results = try? useme.sqlRows(delete_sql, params: [])
-        if delete_results.isNotNil {
-            for del_row in delete_results! {
-                // ok - now set all of these as deleted
-                let theid = del_row.data["id"].intValue
-                if (try? del_useme.find(["id":"\(theid!)"])).isNotNil {
-                    del_useme.status = "deleted"
-                    let _ = try? del_useme.saveWithGIS()
+            
+            // now set the records that are updating to deleted
+            // first thing we do is set every user to updating, then update them
+            let delete_sql = "SELECT id FROM users_raw WHERE source = 'stages' AND status = 'updating' AND source_location_id = '\(serv.location_service_id!)'"
+            let del_useme = UsersRaw()
+            
+            let delete_results = try? del_useme.sqlRows(delete_sql, params: [])
+            if delete_results.isNotNil {
+                for del_row in delete_results! {
+                    // ok - now set all of these as deleted
+                    let theid = del_row.data["id"].intValue
+                    if (try? del_useme.find(["id":"\(theid!)"])).isNotNil {
+                        del_useme.status = "deleted"
+                        let _ = try? del_useme.saveWithGIS()
+                    }
                 }
             }
         }
-
     }
     
     fileprivate func processUserArray(userarray:[[String:Any]]) {
@@ -324,16 +325,25 @@ class StagesConnecter {
             thisuser.fromDictionary(sourceDictionary: user)
             
             var sql:String = ""
+            var locid = ""
+            
+            if let loc = user["source"].stringValue {
+                locid = "\(loc.lowercased())"
+            }
             
             // first check to see if there is a user in the raw table
             if let useremail = user["email"].stringValue {
                 sql = "SELECT id FROM users_raw WHERE email = '"
-                sql.append(useremail)
-                sql.append("'")
+                sql.append(useremail.lowercased())
+                sql.append("' AND ")
+                sql.append("source = '\(locid)'")
                 print("\(sql)")
             } else if  let userphone = user["phone"].stringValue {
                 sql = "SELECT id FROM users_raw WHERE phone = "
                 sql.append(String(userphone))
+                sql.append(" AND ")
+                sql.append("source = '\(locid)'")
+                print("\(sql)")
             }
 
             if !sql.isEmpty {
@@ -345,6 +355,8 @@ class StagesConnecter {
                     let raw_results = try raw.sqlRows(sql, params: [])
 
                     if raw_results.count == 0 {
+                        thisuser.status = "active"
+                        thisuser.createdby = "SYSTEM"
                         let _ = try? thisuser.saveWithGIS()
                     } else {
                         for rr in raw_results {
@@ -376,13 +388,7 @@ class StagesConnecter {
                     print("SQL update user raw error: \(error.localizedDescription)")
                 }
             }
-            
-            
-            
-            
         }
-        
-        
     }
 
     static func retrieveBikeAssignments(location: String) {

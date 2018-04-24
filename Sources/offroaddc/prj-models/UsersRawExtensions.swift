@@ -40,7 +40,7 @@ struct UsersRawDictionary {
         }
         set {
             if newValue != nil {
-                self.dic["source"] = newValue!
+                self.dic["source"] = newValue!.lowercased()
             } else {
                 self.dic.removeValue(forKey: "source")
             }
@@ -69,6 +69,19 @@ struct UsersRawDictionary {
                 self.dic["source_id"] = newValue!
             } else {
                 self.dic.removeValue(forKey: "source_id")
+            }
+        }
+    }
+    
+    var source_location_id : String? {
+        get {
+            return self.dic["source_location_id"] as? String
+        }
+        set {
+            if newValue != nil {
+                self.dic["source_location_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "source_location_id")
             }
         }
     }
@@ -131,7 +144,7 @@ struct UsersRawDictionary {
         }
         set {
             if newValue != nil {
-                self.dic["email"] = newValue!
+                self.dic["email"] = newValue!.lowercased()
             } else {
                 self.dic.removeValue(forKey: "email")
             }
@@ -157,7 +170,7 @@ struct UsersRawDictionary {
         }
         set {
             if newValue != nil {
-                self.dic["gender"] = newValue!
+                self.dic["gender"] = newValue!.lowercased()
             } else {
                 self.dic.removeValue(forKey: "gender")
             }
@@ -183,7 +196,7 @@ struct UsersRawDictionary {
         }
         set {
             if newValue != nil {
-                self.dic["status"] = newValue!
+                self.dic["status"] = newValue!.lowercased()
             } else {
                 self.dic.removeValue(forKey: "status")
             }

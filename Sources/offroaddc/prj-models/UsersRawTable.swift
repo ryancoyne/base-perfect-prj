@@ -68,6 +68,7 @@ final class UsersRawTable {
         createsql.append("source text COLLATE pg_catalog.default, ")
         createsql.append("account_id text COLLATE pg_catalog.default, ")
         createsql.append("source_id text COLLATE pg_catalog.default, ")
+        createsql.append("source_location_id text COLLATE pg_catalog.default, ")
         createsql.append("name_first text COLLATE pg_catalog.default, ")
         createsql.append("name_last text COLLATE pg_catalog.default, ")
         createsql.append("name_full text COLLATE pg_catalog.default, ")
