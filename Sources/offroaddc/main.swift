@@ -249,6 +249,9 @@ if let servicelist = EnvironmentVariables.sharedInstance.ConnectionServices {
                 // GET USERS
                 StagesConnecter.sharedInstance.retrieveUsers()
                 
+                // Associate them if they have not been associated before
+                StagesConnecter.sharedInstance.associateUsers()
+                
             default:
                 // not really doing anything here as this should not occur
                 print("This should not occur, but it did.  service_id: \(srv_id)")

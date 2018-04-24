@@ -36,7 +36,7 @@ final class UsersRawTable {
             let sequencesql = CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table())
             
             // create the sequence
-            let _ = try! tbl.sqlRows(sequencesql, params: [])
+            let _ = try? tbl.sqlRows(sequencesql, params: [])
             
             let _ = try! tbl.sqlRows(self.table(), params: [])
             

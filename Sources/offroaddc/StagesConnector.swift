@@ -10,6 +10,7 @@ import Foundation
 import PerfectCURL
 import PostgresStORM
 import JSONConfigEnhanced
+import PerfectLocalAuthentication
 
 class StagesConnecter {
 
@@ -139,28 +140,184 @@ class StagesConnecter {
         
     }
 
-    func retrieveClasses(location: String) {
-        
-    }
+    /**
+    *   The sourceID is required and is
+    *
+    **/
+    @discardableResult
+    func associateUsers(_ targetUser:Account? = nil) -> [String:Any] {
 
-    
-    func associateUsers(_ sourceId:String = "") {
+        var returnDict:[String:Any] = [:]
         
         // we are associating local users with the source records in the raw data
+        // only the users without stages
         
-        let sql = "SELECT email, phone, source_id FROM users_raw WHERE source = '\(sourceId)'"
+        var sql = "SELECT id, email, detail->>'phone' AS phone, detail FROM account WHERE detail->>'stages' IS NULL"
+        if targetUser.isNotNil, let tgtId = targetUser?.id {
+             sql.append(" AND id = \(tgtId)")
+        }
         
-        let user_raw = UsersRaw()
+        let user_list = Account()
         
         do {
 
-            if let user_raw_list = try? user_raw.sqlRows(sql, params: []) {
-                for ur in user_raw_list {
-                    let getusers_sql = "SELECT id FROM Account"
+            // we are going to go thru the entire list of users_raw to make sure they are
+            if let user_target = try? user_list.sqlRows(sql, params: []) {
+                for ur in user_target {
+                    
+                    var foundit = false
+                    var getusers_sql = ""
+
+                    let therawuser = UsersRaw()
+                    
+                    let thetarget = Account()
+                    try? thetarget.get(ur.data["id"].stringValue!)
+
+                    // check for the email first (if it has been found, don't look further)
+                    if let theemail = ur.data.users_raw.email {
+                        getusers_sql = "SELECT id FROM users_raw WHERE source = 'stages' AND email = '\(theemail)'"
+
+                        let rawuserlist = try? therawuser.sqlRows(getusers_sql, params: [])
+                        
+                        // lets see if there is only one - or... more than one
+                        if rawuserlist.isNotNil, rawuserlist.arrayDicValue.count > 1 {
+                            // this is where we have multiple accounts - what to do???
+                            
+                        } else if rawuserlist.isNotNil, rawuserlist.arrayDicValue.count == 1 {
+                            // we have one account matching - so... this works
+                            foundit = true
+                            
+                            // grab the raw user entry
+                            let rawuserid = rawuserlist![0].data["id"].intValue ?? 0
+                            try? therawuser.get(rawuserid)
+
+                            // now update both the rawuser and the account
+                            therawuser.account_id = thetarget.id
+                            if (try? therawuser.saveWithGIS()) != nil {
+                                // successsssssssssss
+                            }
+                            
+                            // grab the stages id:
+                            let stages_id = therawuser.source_id ?? "ERROR"
+                            
+                            // if there is a phone number, lets add it
+                            var yourphone = ""
+                            if let raw_phone = therawuser.phone {
+                                
+                                // make sure the raw_phone is not the same characters
+                                var notrepeating = true
+                                var repeatcount = 0
+                                var testchar:Character?
+                                
+                                if raw_phone.length > 9 {
+                                    // take the second character (I am not sure what they are doing with the country code)
+                                    testchar = raw_phone[1]
+                                
+                                    for c in raw_phone {
+                                    
+                                        if c == testchar {
+                                            repeatcount += 1
+                                        }
+                                    
+                                    }
+                                
+                                    // here is the decision point to see if numbers are repeating in the phone number
+                                    if repeatcount >= 9 {
+                                        notrepeating = false
+                                    }
+                                }
+                                
+                                // look at the length...
+                                if notrepeating, raw_phone.length == 11 {
+                                    yourphone = raw_phone
+                                } else if notrepeating, raw_phone.length == 10 {
+                                    yourphone.append("1")
+                                    yourphone.append(raw_phone)
+                                }
+                            }
+                            
+                            // update the account now
+                            var detail = thetarget.detail
+                            
+                            if let _ = detail["phone"].stringValue {
+                                // it exists - DO NOTHING
+                            } else if yourphone.length > 10 {
+                                // does not exist....
+                                detail["phone"] = yourphone
+                            }
+                            detail["stages"] = stages_id
+                            detail["stages_match"] = "email"
+                            thetarget.detail = detail
+                            
+                            // update the user account
+                            let _ = try? thetarget.saveWithGIS()
+                            
+                            // save the return...
+                            returnDict["stages"] = stages_id
+                            returnDict["stages_match"] = "email"
+
+                        } else {
+                            // there were no records matching the email address
+                        }
+                    }
+
+                    // the stages phone numbers are in various formats.  Over 1/2 are 14105551212.  Another major chunk are 4105551212
+                    // So we will try these formats for now and deal with internationalization later
+                    // check for the phone number if the email was not found
+                    if  !foundit, let thephone12 = thetarget.detail["phone"].stringValue {
+                        
+                        // lets format the phone number (11 numbers ie: 14105551212)
+                        var thephone11 = thephone12
+                        thephone11.removeFirst()
+                            
+                        getusers_sql = "SELECT id FROM account WHERE (detail @> '{\"phone\": \"\(thephone12)\"}') OR (detail @> '{\"phone\": \"\(thephone11)\"}')"
+
+                        
+                        let rawuserlist = try? therawuser.sqlRows(getusers_sql, params: [])
+                        
+                        // lets see if there is only one - or... more than one
+                        if rawuserlist.isNotNil, rawuserlist.arrayDicValue.count > 1 {
+                            // this is where we have multiple accounts - what to do???
+                            
+                        } else if rawuserlist.isNotNil, rawuserlist.arrayDicValue.count == 1 {
+                            // we have one account matching - so... this works
+                            foundit = true
+                            
+                            // grab the raw user entry
+                            let rawuserid = rawuserlist![0].data["id"].intValue ?? 0
+                            try? therawuser.get(rawuserid)
+                            
+                            // now update both the rawuser and the account
+                            therawuser.account_id = thetarget.id
+                            if (try? therawuser.saveWithGIS()) != nil {
+                                // successsssssssssss
+                            }
+                            
+                            // grab the stages id:
+                            let stages_id = therawuser.source_id ?? "ERROR"
+                            
+                            // update the account now
+                            var detail = thetarget.detail
+                            detail["stages"] = stages_id
+                            detail["stages_match"] = "phone"
+                            thetarget.detail = detail
+                            
+                            // update the user account
+                            let _ = try? thetarget.saveWithGIS()
+
+                            // save the return...
+                            returnDict["stages"] = stages_id
+                            returnDict["stages_match"] = "phone"
+
+                        } else {
+                            // there were no records matching the email address
+                        }
+                    }
                 }
             }
-
         }
+    
+        return returnDict
     }
     
     @discardableResult
