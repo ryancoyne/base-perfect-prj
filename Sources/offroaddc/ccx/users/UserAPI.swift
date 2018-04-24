@@ -783,6 +783,10 @@ struct UserAPI {
                             
                             do {
                                 try acc.save()
+                                
+                                // check with stages 
+                                StagesConnecter.sharedInstance.associateUsers(acc)
+                                
                                 request.session?.userid = acc.id
                                 context["msg_title"] = "Account Validated and Completed."
                                 context["msg_body"] = "<p><a class=\"button\" href=\"/\">Click to continue</a></p>"

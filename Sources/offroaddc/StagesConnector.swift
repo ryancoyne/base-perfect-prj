@@ -154,7 +154,7 @@ class StagesConnecter {
         
         var sql = "SELECT id, email, detail->>'phone' AS phone, detail FROM account WHERE detail->>'stages' IS NULL"
         if targetUser.isNotNil, let tgtId = targetUser?.id {
-             sql.append(" AND id = \(tgtId)")
+             sql.append(" AND id = '\(tgtId)'")
         }
         
         let user_list = Account()
