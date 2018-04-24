@@ -143,11 +143,32 @@ class StagesConnecter {
         
     }
 
-    func retrieveUsers(location: String? = nil) {
+    
+    func associateUsers(_ sourceId:String = "") {
+        
+        // we are associating local users with the source records in the raw data
+        
+        let sql = "SELECT email, phone, source_id FROM users_raw WHERE source = '\(sourceId)'"
+        
+        let user_raw = UsersRaw()
+        
+        do {
+
+            if let user_raw_list = try? user_raw.sqlRows(sql, params: []) {
+                for ur in user_raw_list {
+                    let getusers_sql = "SELECT id FROM Account"
+                }
+            }
+
+        }
+    }
+    
+    @discardableResult
+    func retrieveUsers(location: String? = nil) -> [String:Any]? {
         
         // if we do not have the servers definition - get outta here
         if self.services!.servers == nil {
-            return
+            return [:]
         }
         
 //        "Phone": 12022463657,
@@ -158,6 +179,8 @@ class StagesConnecter {
 //        "LastName": Berger,
 //        "Email": tammar.berger@gmail.com,
 //        "Id": 8640
+        
+        var retarray:[String:Any] = [:]
         
         // the API is the same for all - the token is what makes it work for the location
         
@@ -282,11 +305,14 @@ class StagesConnecter {
                             total = total + userarray.count
                             
                             if userarray.count < increment || userarray.count == 0 {
+                                retarray["total"] = total
+                                retarray["result"] = "success"
                                 print("Total records: \(total)")
                                 wearedone = true
                             }
 
                         } catch {
+                            retarray["result"] = "failure"
                             print("Error during the curl process: \(error.localizedDescription)")
                             wearedone = true
                         }
@@ -312,6 +338,9 @@ class StagesConnecter {
                 }
             }
         }
+        
+        return retarray
+        
     }
     
     fileprivate func processUserArray(userarray:[[String:Any]]) {
