@@ -48,6 +48,10 @@ switch EnvironmentVariables.sharedInstance.ServerEnvironment!.uppercased() {
         isProduction = false
 }
 
+// setup the logging
+RequestLogFile.location = EnvironmentVariables.sharedInstance.filesDirectoryLogs! + "/requests.log"
+LogFile.location        = EnvironmentVariables.sharedInstance.filesDirectoryLogs! + "/default.log"
+
 // if the notifications directory exists, lets set it up
 let notesettings = NotificationSettings()
 if CCXServiceClass.doesDirectoryExist(Dir("ccx/installations"), create: false) {
