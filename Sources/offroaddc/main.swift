@@ -50,9 +50,9 @@ switch EnvironmentVariables.sharedInstance.ServerEnvironment!.uppercased() {
 
 // make sure the log directory exists
 var logfilelocation = "/"
-let logFileName = "default.log"
-let requestFileName = "requests.log"
-let stormFileName = "storm.log"
+let logFileName = "default.txt"
+let requestFileName = "requests.txt"
+let stormFileName = "storm.txt"
 
 if let logfile = EnvironmentVariables.sharedInstance.filesDirectoryLogs {
     logfilelocation = logfile
@@ -73,7 +73,7 @@ if let logfile = EnvironmentVariables.sharedInstance.filesDirectoryLogs {
     
     let formatter = DateFormatter()
 //    formatter.dateFormat = "yyyy/MM/dd HH:mm"
-    formatter.dateFormat = "%Y-%m-%d %H:%M:%S %z"
+    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss z"
     let currentdatetime = formatter.string(from: Date())
     
     
@@ -83,17 +83,17 @@ if let logfile = EnvironmentVariables.sharedInstance.filesDirectoryLogs {
         let requestlogFile = File(logDir.path + requestFileName)
         let stormlogFile = File(logDir.path + stormFileName)
         
-        if let _ = try? defaultlogFile.open(File.OpenMode.readWrite, permissions: File.PermissionMode.writeGroup) {
+        if let _ = try? defaultlogFile.open(.readWrite, permissions: .rwUserGroup) {
             let _ = try? defaultlogFile.write(string: "LOGGING START: \(currentdatetime)")
             defaultlogFile.close()
         }
         
-        if let _ = try? requestlogFile.open(File.OpenMode.readWrite, permissions: File.PermissionMode.writeGroup) {
+        if let _ = try? requestlogFile.open(.readWrite, permissions: .rwUserGroup) {
             let _ = try? requestlogFile.write(string: "LOGGING START: \(currentdatetime)")
             requestlogFile.close()
         }
         
-        if let _ = try? stormlogFile.open(File.OpenMode.readWrite, permissions: File.PermissionMode.writeGroup) {
+        if let _ = try? stormlogFile.open(.readWrite, permissions: .rwUserGroup) {
             let _ = try? stormlogFile.write(string: "LOGGING START: \(currentdatetime)")
             stormlogFile.close()
         }
@@ -102,8 +102,8 @@ if let logfile = EnvironmentVariables.sharedInstance.filesDirectoryLogs {
 }
 
 // setup the logging
-RequestLogFile.location = logfilelocation + requestFileName
-LogFile.location        = logfilelocation + logFileName
+RequestLogFile.location = logfilelocation + "/" + requestFileName
+LogFile.location        = logfilelocation + "/" + logFileName
 
 Log.logger = SysLogger()
 
