@@ -133,14 +133,25 @@ struct UserAPI {
                                 
                                 let newuser_id = tnu?.first?.data["id"].stringValue
                                 
+                                var userret:[String:Any] = [:]
+                                
                                 if newuser_id.isNotNil {
                                     try? thenewuser.get(newuser_id!)
                                     // call the just created section
-                                    UserAPI.UserSuccessfullyCreated(thenewuser)
+                                    userret = UserAPI.UserSuccessfullyCreated(thenewuser)
                                     
                                 }
                                 
-                                _ = try response.setBody(json: ["result":"success", "message":"Check your email for an email from us. It contains instructions to complete your signup!"])
+                                var retDict:[String:Any] = [:]
+                                retDict["result"] = "success"
+                                retDict["message"] = "Check your email for an email from us. It contains instructions to complete your signup!"
+                                
+                                // add in the return values for the user connections
+                                for (key,value) in userret {
+                                    retDict[key] = value
+                                }
+
+                                _ = try response.setBody(json: retDict)
                                 response.completed(status: .ok)
                                 return
                             }

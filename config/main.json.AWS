@@ -72,6 +72,14 @@
         "API_URL_PROTOCOL": "http",
         "API_URL_PORT"    : 9000
     },
+    "email": {
+        "note": "This section allows you to connect ot your email server.",
+        "EMAIL_SERVER"           : "smtps://smtp.gmail.com",
+        "EMAIL_USERNAME"         : "pride@findapride.com",
+        "EMAIL_PASSWORD"         : "F1nd1Pr1d1!",
+        "EMAIL_FROM_ADDRESS"     : "pride@findapride.com",
+        "EMAIL_FROM_DISPLAY_NAME": "Mobile Gym"
+    },
     "aws": {
         "AWS_FILE_URL": "https://s3.amazonaws.com/offroaddc/"
     },
@@ -85,7 +93,9 @@
         "STORM_DEBUG"       : true,
         "SERVER_ENVIRONMENT": "PROD",
         "SESSION_NAME"      : "offroaddc",
-        "HTTP_DOCUMENT_ROOT": "./webroot"
+        "HTTP_DOCUMENT_ROOT": "./webroot",
+        "SERVER_1_ON_START" :false,
+        "SERVER_2_ON_START" :false
     }
 }
 
