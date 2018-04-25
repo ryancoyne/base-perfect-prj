@@ -212,7 +212,7 @@ extension Handlers {
                     try? user.create()
                     
                     // lets see if we can link stages
-                    StagesConnecter.sharedInstance.associateUsers(user)
+                    UserAPI.UserSuccessfullyCreated(user)
                     
                 } else {
                     user.detail["modified"] = CCXServiceClass.sharedInstance.getNow()

@@ -125,7 +125,33 @@ struct UserAPI {
                                 LocalAuthHandlers.error(request, response, error: "Registration Error: \(err)", code: .badRequest)
                                 return
                             } else {
-                                _ = try response.setBody(json: ["result":"success", "message":"Check your email for an email from us. It contains instructions to complete your signup!"])
+                                
+                                // success!
+                                // pull the user
+                                let thenewuser = Account()
+                                let tnu = try? thenewuser.sqlRows("SELECT id FROM account WHERE email = '\(e)'", params: [])
+                                
+                                let newuser_id = tnu?.first?.data["id"].stringValue
+                                
+                                var userret:[String:Any] = [:]
+                                
+                                if newuser_id.isNotNil {
+                                    try? thenewuser.get(newuser_id!)
+                                    // call the just created section
+                                    userret = UserAPI.UserSuccessfullyCreated(thenewuser)
+                                    
+                                }
+                                
+                                var retDict:[String:Any] = [:]
+                                retDict["result"] = "success"
+                                retDict["message"] = "Check your email for an email from us. It contains instructions to complete your signup!"
+                                
+                                // add in the return values for the user connections
+                                for (key,value) in userret {
+                                    retDict[key] = value
+                                }
+
+                                _ = try response.setBody(json: retDict)
                                 response.completed(status: .ok)
                                 return
                             }
@@ -296,7 +322,7 @@ struct UserAPI {
                     
                     // lets see if we can link stages
                     // do this before we change the user.detail with the isNew element.
-                    StagesConnecter.sharedInstance.associateUsers(user)
+                    UserAPI.UserSuccessfullyCreated(user)
                     
                     user.detail["isNew"] = true
                     
@@ -785,7 +811,7 @@ struct UserAPI {
                                 try acc.save()
                                 
                                 // check with stages 
-                                StagesConnecter.sharedInstance.associateUsers(acc)
+                                UserAPI.UserSuccessfullyCreated(acc)
                                 
                                 request.session?.userid = acc.id
                                 context["msg_title"] = "Account Validated and Completed."
@@ -952,6 +978,20 @@ struct UserAPI {
         
         return user
         
+    }
+    
+    @discardableResult
+    static func UserSuccessfullyCreated(_ user:Account)->[String:Any] {
+        
+        var returnDict:[String:Any] = [:]
+        
+        // call stages and return the user associations
+        let results = StagesConnecter.sharedInstance.associateUsers(user)
+        for (key,value) in results {
+            returnDict[key] = value
+        }
+        
+        return returnDict
     }
 }
 

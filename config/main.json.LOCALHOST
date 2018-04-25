@@ -19,6 +19,14 @@
         "API_URL_PROTOCOL": "http",
         "API_URL_PORT"    : 9000
     },
+    "email": {
+        "note": "This section allows you to connect ot your email server.",
+        "EMAIL_SERVER"           : "smtps://smtp.gmail.com",
+        "EMAIL_USERNAME"         : "pride@findapride.com",
+        "EMAIL_PASSWORD"         : "F1nd1Pr1d1!",
+        "EMAIL_FROM_ADDRESS"     : "pride@findapride.com",
+        "EMAIL_FROM_DISPLAY_NAME": "Mobile Gym"
+    },
     "aws": {
         "AWS_FILE_URL": "https://s3.amazonaws.com/offroaddc/"
     },
@@ -32,7 +40,63 @@
         "STORM_DEBUG"       : true,
         "SERVER_ENVIRONMENT": "DEV",
         "SESSION_NAME"      : "offroaddc",
-        "HTTP_DOCUMENT_ROOT": "./webroot"
+        "HTTP_DOCUMENT_ROOT": "./webroot",
+        "SERVER_1_ON_START" :false,
+        "SERVER_2_ON_START" :false
+    },
+    "services" : {
+        "service1": {
+            "name": "Stages Flight",
+            "service_id": 1,
+            "note": "Technical details from rides and such. It is important to have each service named differently (ie: service1)",
+            "servers": {
+                "server1": {
+                    "server_id": 1,
+                    "name":"U Street Stages",
+                    "note":"This is the U Street location and is marked by the id of 1. It is important to have each server named differently (ie: server1)",
+                    "url":"https://stagesflight.com/locapi/v1",
+                    "username":"OffroadDC",
+                    "password":"MDljYTRlOGYtYzQ3OC00NzhmLWE3MjAtZTg4Y2IzYjAzMGJj",
+                    "location_service_id":"1186"
+                },
+                "server2": {
+                    "server_id": 2,
+                    "name":"Cap Hill Stages",
+                    "note":"This is the CapHill location and is marked by the id of 2. It is important to have each server named differently (ie: server2)",
+                    "url":"https://stagesflight.com/locapi/v1",
+                    "username":"OffroadDC",
+                    "password":"MDljYTRlOGYtYzQ3OC00NzhmLWE3MjAtZTg4Y2IzYjAzMGJj",
+                    "location_service_id":"1201"
+                }
+            }
+        },
+        "service2" : {
+            "name": "MindBody",
+            "service_id": 2,
+            "note": "Scheduling and payment service noted by the id of 2. It is important to have each service named differently (ie: service2)",
+            "servers": {
+                "server1": {
+                    "server_id": 1,
+                    "name":"U Street MindBody",
+                    "note":"This is the U Street location and is marked by the id of 1. It is important to have each server named differently (ie: server1)",
+                    "url":"https://api.mindbodyonline.com/0_5_1",
+                    "username":"OffRoadDC",
+                    "password":"2S66CJcgpmp2M0s",
+                    "location_service_id":"-99"
+                },
+                "server2": {
+                    "server_id": 2,
+                    "name":"Cap Hill MindBody",
+                    "note":"This is the CapHill location and is marked by the id of 2. It is important to have each server named differently (ie: server2)",
+                    "url":"https://api.mindbodyonline.com/0_5_1",
+                    "username":"OffRoadDC",
+                    "password":"2S66CJcgpmp2M0s",
+                    "location_service_id":"-99"
+                }
+            }
+        }
     }
 }
+
+
 
