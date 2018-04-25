@@ -48,9 +48,64 @@ switch EnvironmentVariables.sharedInstance.ServerEnvironment!.uppercased() {
         isProduction = false
 }
 
+// make sure the log directory exists
+var logfilelocation = "/"
+let logFileName = "default.log"
+let requestFileName = "requests.log"
+let stormFileName = "storm.log"
+
+if let logfile = EnvironmentVariables.sharedInstance.filesDirectoryLogs {
+    logfilelocation = logfile
+    
+    var itexists = false
+    
+    // make sure it exists...
+    let logDir = Dir(logfilelocation)
+    if logDir.exists {
+        itexists = true
+    } else {
+        // create the directory
+        if let _ = try? logDir.create() {
+            itexists = true
+        }
+    }
+    
+    
+    let formatter = DateFormatter()
+//    formatter.dateFormat = "yyyy/MM/dd HH:mm"
+    formatter.dateFormat = "%Y-%m-%d %H:%M:%S %z"
+    let currentdatetime = formatter.string(from: Date())
+    
+    
+    if itexists {
+        // check for the files
+        let defaultlogFile = File(logDir.path + logFileName)
+        let requestlogFile = File(logDir.path + requestFileName)
+        let stormlogFile = File(logDir.path + stormFileName)
+        
+        if let _ = try? defaultlogFile.open(File.OpenMode.readWrite, permissions: File.PermissionMode.writeGroup) {
+            let _ = try? defaultlogFile.write(string: "LOGGING START: \(currentdatetime)")
+            defaultlogFile.close()
+        }
+        
+        if let _ = try? requestlogFile.open(File.OpenMode.readWrite, permissions: File.PermissionMode.writeGroup) {
+            let _ = try? requestlogFile.write(string: "LOGGING START: \(currentdatetime)")
+            requestlogFile.close()
+        }
+        
+        if let _ = try? stormlogFile.open(File.OpenMode.readWrite, permissions: File.PermissionMode.writeGroup) {
+            let _ = try? stormlogFile.write(string: "LOGGING START: \(currentdatetime)")
+            stormlogFile.close()
+        }
+
+    }
+}
+
 // setup the logging
-RequestLogFile.location = EnvironmentVariables.sharedInstance.filesDirectoryLogs! + "/requests.log"
-LogFile.location        = EnvironmentVariables.sharedInstance.filesDirectoryLogs! + "/default.log"
+RequestLogFile.location = logfilelocation + requestFileName
+LogFile.location        = logfilelocation + logFileName
+
+Log.logger = SysLogger()
 
 // if the notifications directory exists, lets set it up
 let notesettings = NotificationSettings()
@@ -60,11 +115,6 @@ if CCXServiceClass.doesDirectoryExist(Dir("ccx/installations"), create: false) {
     notesettings.IOS_APNS_TEAM_IDENTIFIER      = InstallationVariables.sharedInstance.IOS_APNS_TEAM_IDENTIFIER!
     notesettings.IOS_APPID                     = InstallationVariables.sharedInstance.IOS_APPID!
 }
-
-// var notonlocal = true
-
-RequestLogFile.location = EnvironmentVariables.sharedInstance.httpRequestLog!
-LogFile.location = EnvironmentVariables.sharedInstance.mainLog!
 
 // print out the system environment variables
 //let env_variables = ProcessInfo.processInfo.environment

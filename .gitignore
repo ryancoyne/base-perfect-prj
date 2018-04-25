@@ -1,5 +1,10 @@
 # Created by https://www.gitignore.io/api/osx,swift,xcode,swiftpm,swiftpackagemanager
 
+# this project 
+logs
+files
+StORMlog.txt
+
 # perfect server stuff
 .build_lin
 .package_lin.pins
