@@ -306,18 +306,16 @@ if let servicelist = EnvironmentVariables.sharedInstance.ConnectionServices {
                 // check to see if you should run the entire process on startup
                 if let chk = EnvironmentVariables.sharedInstance.CheckOnStart_Server1, chk {
                 
-                    // GET USERS
-                    StagesConnecter.sharedInstance.retrieveUsers()
-                
-                    // Associate them if they have not been associated before
-                    StagesConnecter.sharedInstance.associateUsers()
+                    // GET USERS and associate
+                    ExternalServicesConnecter.sharedInstance.server1SyncUsers()
                 }
                 
             case 2:
                 if let chk = EnvironmentVariables.sharedInstance.CheckOnStart_Server2, chk {
 
                     // MINDBODY CONNECTOR
-                    
+                    ExternalServicesConnecter.sharedInstance.server2SyncUsers()
+
                 }
 
             default:

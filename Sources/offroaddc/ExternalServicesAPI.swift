@@ -17,7 +17,7 @@ struct ExternalServicesAPI {
     /// This json structure supports all the JSON endpoints that you can use in the application.
     struct json {
         static var routes : [[String:Any]] {
-            return [["method":"post",   "uri":"/api/v1/externalservices", "handler":postServices],
+            return [["method":"post",   "uri":"/api/v1/remoteusers/sync", "handler":postServices],
             ]
         }
         //MARK:-
