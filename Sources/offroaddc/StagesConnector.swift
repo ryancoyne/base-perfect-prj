@@ -149,6 +149,12 @@ class StagesConnecter {
 
         var returnDict:[String:Any] = [:]
         
+        var emailRet:[String:Any] = [:]
+        var phoneRet:[String:Any] = [:]
+        var associatedUsersDict:[String:Any] = [:]
+        var grandtotalemail = 0
+        var grandtotalphone = 0
+
         // we are associating local users with the source records in the raw data
         // only the users without stages
         
@@ -172,7 +178,7 @@ class StagesConnecter {
                     
                     let thetarget = Account()
                     try? thetarget.get(ur.data["id"].stringValue!)
-
+                    
                     // check for the email first (if it has been found, don't look further)
                     if let theemail = ur.data.users_raw.email {
                         getusers_sql = "SELECT id FROM users_raw WHERE source = 'stages' AND email = '\(theemail)'"
@@ -253,14 +259,21 @@ class StagesConnecter {
                             let _ = try? thetarget.saveWithGIS()
                             
                             // save the return...
-                            returnDict["stages"] = stages_id
-                            returnDict["stages_match"] = "email"
+                            grandtotalemail += 1
+                            // if there is more than one, we are not sending back the type of match
+                            if grandtotalemail > 1 {
+                                emailRet.removeValue(forKey: "stages")
+                                emailRet.removeValue(forKey: "stages_match")
+                            } else {
+                                emailRet["stages"] = stages_id
+                                emailRet["stages_match"] = "email"
+                            }
 
                         } else {
                             // there were no records matching the email address
                         }
                     }
-
+                    
                     // the stages phone numbers are in various formats.  Over 1/2 are 14105551212.  Another major chunk are 4105551212
                     // So we will try these formats for now and deal with internationalization later
                     // check for the phone number if the email was not found
@@ -306,8 +319,14 @@ class StagesConnecter {
                             let _ = try? thetarget.saveWithGIS()
 
                             // save the return...
-                            returnDict["stages"] = stages_id
-                            returnDict["stages_match"] = "phone"
+                            grandtotalphone += 1
+                            if grandtotalphone > 1 {
+                                phoneRet.removeValue(forKey: "stages")
+                                phoneRet.removeValue(forKey: "stages_match")
+                            } else {
+                                phoneRet["stages"] = stages_id
+                                phoneRet["stages_match"] = "phone"
+                            }
 
                         } else {
                             // there were no records matching the email address
@@ -317,6 +336,14 @@ class StagesConnecter {
             }
         }
     
+        emailRet["total"] = grandtotalemail
+        associatedUsersDict["email"] = emailRet
+        
+        phoneRet["total"] = grandtotalphone
+        associatedUsersDict["phone"] = phoneRet
+
+        returnDict["associateusers"] = associatedUsersDict
+        
         return returnDict
     }
 
@@ -338,6 +365,8 @@ class StagesConnecter {
 //        "Id": 8640
         
         var retarray:[String:Any] = [:]
+        var syncUsersReturn:[String:Any] = [:]
+        var grandtotal = 0
         
         // the API is the same for all - the token is what makes it work for the location
         
@@ -380,7 +409,7 @@ class StagesConnecter {
                     var total = 0
                     let increment = 50
                     var wearedone = false
-                    
+
                     while !wearedone {
 
                         var thequery = urltouse
@@ -462,20 +491,31 @@ class StagesConnecter {
                             total = total + userarray.count
                             
                             if userarray.count < increment || userarray.count == 0 {
-                                retarray["total"] = total
-                                retarray["result"] = "success"
+                                
+                                grandtotal = grandtotal + total
+                                
+                                var ra:[String:Any] = [:]
+                                ra["total"] = total
+                                ra["result"] = "success"
+                                
+                                syncUsersReturn[serv.location_service_id!] = ra
+                                
                                 print("Total records: \(total)")
                                 wearedone = true
                             }
 
                         } catch {
-                            retarray["result"] = "failure"
+                            
+                            var ra:[String:Any] = [:]
+                            ra["result"] = "failure"
+                            
+                            syncUsersReturn[serv.location_service_id!] = ra
+
                             print("Error during the curl process: \(error.localizedDescription)")
                             wearedone = true
                         }
                     }
-
-                    }
+                }
             }
             
             // now set the records that are updating to deleted
@@ -495,7 +535,10 @@ class StagesConnecter {
                 }
             }
         }
-        
+
+        syncUsersReturn["total"] = grandtotal
+        retarray["syncusers"] = syncUsersReturn
+
         return retarray
         
     }

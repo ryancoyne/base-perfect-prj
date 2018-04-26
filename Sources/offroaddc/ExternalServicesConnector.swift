@@ -7,10 +7,10 @@
 
 import StORM
 import Foundation
-import PerfectCURL
-import PostgresStORM
-import JSONConfigEnhanced
-import PerfectLocalAuthentication
+//import PerfectCURL
+//import PostgresStORM
+//import JSONConfigEnhanced
+//import PerfectLocalAuthentication
 
 class ExternalServicesConnecter {
     
@@ -35,7 +35,15 @@ class ExternalServicesConnecter {
         
         let serverRet2 = StagesConnecter.sharedInstance.associateUsers()
 
+        var tmpk:[String:Any] = [:]
+        
         for (key,value) in serverRet2 {
+            tmpk[key] = value
+            if !returnDict[key].stringValue.isEmptyOrNil {
+                
+            } else {
+                
+            }
             returnDict[key] = value
         }
 

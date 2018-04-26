@@ -254,6 +254,7 @@ routes = routes + UserAPI.web.routes
 routes = routes + InstallationsV1Controller.json.routes
 routes = routes + CCXStatisticsV1Controller.json.routes
 routes = routes + FriendAPI.json.routes
+routes = routes + ExternalServicesAPI.json.routes
 
 //MARK:-
 //MARK: Initilization functions - only when we move to a new server that has not been initilized
