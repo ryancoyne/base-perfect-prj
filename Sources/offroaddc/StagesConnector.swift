@@ -319,9 +319,9 @@ class StagesConnecter {
     
         return returnDict
     }
-    
+
     @discardableResult
-    func retrieveUsers(location: String? = nil) -> [String:Any]? {
+    func retrieveUsers(location: String? = nil) -> [String:Any] {
         
         // if we do not have the servers definition - get outta here
         if self.services!.servers == nil {
