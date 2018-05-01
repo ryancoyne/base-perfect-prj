@@ -13,7 +13,7 @@ final class ClassCompetitionTable {
     }
 
     static let sharedInstance = ClassCompetitionTable()
-    let tbl = UsersRaw()
+    let tbl = ClassCompetition()
 
     let tablelevel = 1.00
 

@@ -11,32 +11,24 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class UsersRaw: PostgresStORM {
+public class ClassCompetition: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
-    var id         : Int?    = nil
-    var created    : Int?    = nil
-    var createdby  : String? = nil
-    var modified   : Int?    = nil
-    var modifiedby : String? = nil
+    var id                  : Int?    = nil
+    var created             : Int?    = nil
+    var createdby           : String? = nil
+    var modified            : Int?    = nil
+    var modifiedby          : String? = nil
     
-    var source     : String? = nil
-    var account_id : String? = nil
-    var source_id  : String? = nil
-    var source_location_id : String? = nil
-    var name_first : String? = nil
-    var name_last  : String? = nil
-    var name_full  : String? = nil
-    var nickname   : String? = nil
-    var email      : String? = nil
-    var gender     : String? = nil
-    var status     : String? = nil
-
-    var weight     : Float?    = nil
-    var phone      : String?    = nil
+    var name                : String? = nil
+    var start_time          : Int?    = nil
+    var end_time            : Int?    = nil
+    var private_competition : Bool    = true
+    var leader_user_id      : String? = nil
+    var competition_type_id : Int?    = nil
 
     //MARK: Table name
-    override public func table() -> String { return "users_raw" }
+    override public func table() -> String { return "class_competition" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
