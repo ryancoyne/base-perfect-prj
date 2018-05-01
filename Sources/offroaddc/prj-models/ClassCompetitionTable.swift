@@ -5,14 +5,14 @@
 import Foundation
 import PostgresStORM
 
-final class UsersRawTable {
+final class ClassCompetitionTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
 
-    static let sharedInstance = UsersRawTable()
+    static let sharedInstance = ClassCompetitionTable()
     let tbl = UsersRaw()
 
     let tablelevel = 1.00
