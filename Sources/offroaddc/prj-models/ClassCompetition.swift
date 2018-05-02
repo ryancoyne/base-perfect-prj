@@ -107,10 +107,10 @@ public class ClassCompetition: PostgresStORM {
 
     }
     
-    func rows() -> [UsersRaw] {
-        var rows = [UsersRaw]()
+    func rows() -> [ClassCompetition] {
+        var rows = [ClassCompetition]()
         for i in 0..<self.results.rows.count {
-            let row = UsersRaw()
+            let row = ClassCompetition()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -123,69 +123,34 @@ public class ClassCompetition: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "account_id":
+            case "name":
                 if !(value as! String).isEmpty {
-                    self.account_id = (value as! String)
+                    self.name = (value as! String)
                 }
 
-            case "source_location_id":
+            case "start_time":
+                if !(value as! Int).isEmpty {
+                    self.start_time = (value as! Int)
+                }
+
+            case "end_time":
+                if !(value as! Int).isEmpty {
+                    self.end_time = (value as! Int)
+                }
+
+            case "private_competition":
+                if !(value as! Bool).isEmpty {
+                    self.private_competition = (value as! Bool)
+                }
+
+            case "leader_user_id":
                 if !(value as! String).isEmpty {
-                    self.source_location_id = (value as! String)
+                    self.leader_user_id = (value as! String)
                 }
 
-            case "email":
-                if !(value as! String).isEmpty {
-                    self.email = (value as! String).lowercased()
-                }
-
-            case "gender":
-                if !(value as! String).isEmpty {
-                    self.gender = (value as! String).lowercased()
-                }
-
-            case "name_first":
-                if !(value as! String).isEmpty {
-                    self.name_first = (value as! String)
-                }
-
-            case "name_last":
-                if !(value as! String).isEmpty {
-                    self.name_last = (value as! String)
-                }
-
-            case "name_full":
-                if !(value as! String).isEmpty {
-                    self.name_full = (value as! String)
-                }
-
-            case "nickname":
-                if !(value as! String).isEmpty {
-                    self.nickname = (value as! String)
-                }
-
-            case "phone":
-                if let val = value as? String {
-                    self.phone = val
-                }
-
-            case "source":
-                if !(value as! String).isEmpty {
-                    self.source = (value as! String).lowercased()
-                }
-
-            case "source_id":
-                if !(value as! String).isEmpty {
-                    self.source_id = (value as! String)
-                }
-
-            case "weight":
-                if (value as! Float) != 0.0 {
-                    self.weight = (value as! Float)
-                }
-
-            case "status":
-                if !(value as! String).isEmpty {
-                    self.status = (value as! String).lowercased()
+            case "competition_type_id":
+                if !(value as! Int).isEmpty {
+                    self.competition_type_id = (value as! Int)
                 }
 
             default:
@@ -222,8 +187,10 @@ public class ClassCompetition: PostgresStORM {
             dictionary.modifiedBy = self.modifiedby
         }
         
-        if self.account_id.isNotNil {
-            dictionary.users_raw.account_id = self.account_id
+        
+        
+        if self.name.isNotNil {
+            dictionary. = self.name
         }
         
         if self.email.isNotNil {
