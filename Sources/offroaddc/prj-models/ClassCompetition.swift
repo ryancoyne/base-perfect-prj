@@ -1,8 +1,8 @@
 //
-//  Installation.swift
-//  findapride
+//  ClassCompetition.swift
+//  Atlete Program
 //
-//  Created by Mike Silvers on 7/2/17.
+//  Created by Mike Silvers on 5/2/18.
 //
 //
 
@@ -53,58 +53,29 @@ public class ClassCompetition: PostgresStORM {
             modifiedby = data
         }
         
-        if let data = this.data.users_raw.account_id {
-            account_id = data
+        if let data = this.data.class_competition.name {
+            name = data
         }
         
-        if let data = this.data.users_raw.email {
-            email = data.lowercased()
+        if let data = this.data.class_competition.start_time {
+            start_time = data
         }
         
-        if let data = this.data.users_raw.gender {
-            gender = data.lowercased()
+        if let data = this.data.class_competition.end_time {
+            end_time = data
         }
         
-        if let data = this.data.users_raw.name_first {
-            name_first = data
+        if let data = this.data.class_competition.private_competition {
+            private_competition = data
         }
         
-        if let data = this.data.users_raw.name_last {
-            name_last = data
+        if let data = this.data.class_competition.leader_user_id {
+            leader_user_id = data
         }
         
-        if let data = this.data.users_raw.name_full {
-            name_full = data
+        if let data = this.data.class_competition.competition_type_id {
+            competition_type_id = data
         }
-        
-        if let data = this.data.users_raw.nickname {
-            nickname = data
-        }
-        
-        if let data = this.data.users_raw.phone {
-            phone = data
-        }
-        
-        if let data = this.data.users_raw.source {
-            source = data.lowercased()
-        }
-        
-        if let data = this.data.users_raw.source_id {
-            source_id = data
-        }
-        
-        if let data = this.data.users_raw.weight {
-            weight = data
-        }
-
-        if let data = this.data.users_raw.status {
-            status = data.lowercased()
-        }
-        
-        if let data = this.data.users_raw.source_location_id {
-            source_location_id = data
-        }
-
     }
     
     func rows() -> [ClassCompetition] {
@@ -190,113 +161,61 @@ public class ClassCompetition: PostgresStORM {
         
         
         if self.name.isNotNil {
-            dictionary. = self.name
+            dictionary.class_competition.name = self.name
         }
         
-        if self.email.isNotNil {
-            dictionary.users_raw.email = self.email
+        if self.start_time.isNotNil {
+            dictionary.class_competition.start_time = self.start_time
         }
 
-        if self.gender.isNotNil {
-            dictionary.users_raw.gender = self.gender
+        if self.end_time.isNotNil {
+            dictionary.class_competition.end_time = self.end_time
         }
 
-        if self.name_first.isNotNil {
-            dictionary.users_raw.name_first = self.name_first
+        if self.private_competition.isNotNil {
+            dictionary.class_competition.private_competition = self.private_competition
         }
 
-        if self.name_full.isNotNil {
-            dictionary.users_raw.name_full = self.name_full
+        if self.leader_user_id.isNotNil {
+            dictionary.class_competition.leader_user_id = self.leader_user_id
         }
 
-        if self.name_last.isNotNil {
-            dictionary.users_raw.name_last = self.name_last
+        if self.competition_type_id.isNotNil {
+            dictionary.class_competition.competition_type_id = self.competition_type_id
         }
         
-        if self.nickname.isNotNil {
-            dictionary.users_raw.nickname = self.nickname
-        }
-        
-        if self.phone.isNotNil {
-            dictionary.users_raw.phone = self.phone
-        }
-        
-        if self.source.isNotNil {
-            dictionary.users_raw.source = self.source
-        }
-        
-        if self.source_id.isNotNil {
-            dictionary.users_raw.source_id = self.source_id
-        }
-
-        if self.source_location_id.isNotNil {
-            dictionary.users_raw.source_location_id = self.source_location_id
-        }
-
-        if self.weight.isNotNil {
-            dictionary.users_raw.weight = self.weight
-        }
-
-        if self.status.isNotNil {
-            dictionary.users_raw.status = self.status
-        }
-
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: UsersRaw)-> Bool {
+    func compare(targetItem: ClassCompetition)-> Bool {
         
         var diff = true
         
-        if diff == true, self.account_id != targetItem.account_id {
+        if diff == true, self.name != targetItem.name {
             diff = false
         }
         
-        if diff == true, self.email != targetItem.email {
+        if diff == true, self.start_time != targetItem.start_time {
             diff = false
         }
         
-        if diff == true, self.gender != targetItem.gender {
+        if diff == true, self.end_time != targetItem.end_time {
             diff = false
         }
         
-        if diff == true, self.name_first != targetItem.name_first {
+        if diff == true, self.private_competition != targetItem.private_competition {
             diff = false
         }
         
-        if diff == true, self.name_full != targetItem.name_full {
+        if diff == true, self.competition_type_id != targetItem.competition_type_id {
             diff = false
         }
         
-        if diff == true, self.name_last != targetItem.name_last {
+        if diff == true, self.leader_user_id != targetItem.leader_user_id {
             diff = false
         }
         
-        if diff == true, self.nickname != targetItem.nickname {
-            diff = false
-        }
-        
-        if diff == true, self.phone != targetItem.phone {
-            diff = false
-        }
-        
-        if diff == true, self.source != targetItem.source {
-            diff = false
-        }
-        
-        if diff == true, self.source_id != targetItem.source_id {
-            diff = false
-        }
-        
-        if diff == true, self.weight != targetItem.weight {
-            diff = false
-        }
-
-        if diff == true, self.status != targetItem.status {
-            diff = false
-        }
-
         return diff
         
     }
