@@ -188,6 +188,7 @@ final class PRJDBTables {
             UsersRawTable.sharedInstance.create()
             ClassCompetitionTable.sharedInstance.create()
             ClassDateTable.sharedInstance.create()
+            ClassDateTable.sharedInstance.create()
             
             // finally - lets add sample data - controlled by the condif table entry for sampledata (0 = no, 1 = yes)
 

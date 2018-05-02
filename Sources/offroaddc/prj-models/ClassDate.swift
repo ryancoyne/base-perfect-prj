@@ -27,7 +27,7 @@ public class ClassDate: PostgresStORM {
     var description     : String? = nil
 
     //MARK: Table name
-    override public func table() -> String { return "users_raw" }
+    override public func table() -> String { return "class_date" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -177,7 +177,7 @@ public class ClassDate: PostgresStORM {
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: UsersRaw)-> Bool {
+    func compare(targetItem: ClassDate)-> Bool {
         
         var diff = true
         
