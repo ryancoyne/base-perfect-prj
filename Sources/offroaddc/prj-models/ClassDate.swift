@@ -11,7 +11,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class UsersRaw: PostgresStORM {
+public class ClassDate: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -20,20 +20,11 @@ public class UsersRaw: PostgresStORM {
     var modified   : Int?    = nil
     var modifiedby : String? = nil
     
-    var source     : String? = nil
-    var account_id : String? = nil
-    var source_id  : String? = nil
-    var source_location_id : String? = nil
-    var name_first : String? = nil
-    var name_last  : String? = nil
-    var name_full  : String? = nil
-    var nickname   : String? = nil
-    var email      : String? = nil
-    var gender     : String? = nil
-    var status     : String? = nil
-
-    var weight     : Float?    = nil
-    var phone      : String?    = nil
+    var start_time      : Int? = nil
+    var end_time        : Int? = nil
+    var class_id        : Int? = nil
+    var class_status_id : Int? = nil
+    var description     : String? = nil
 
     //MARK: Table name
     override public func table() -> String { return "users_raw" }
@@ -61,62 +52,32 @@ public class UsersRaw: PostgresStORM {
             modifiedby = data
         }
         
-        if let data = this.data.users_raw.account_id {
-            account_id = data
+        
+        
+        if let data = this.data.class_date.start_time {
+            start_time = data
         }
         
-        if let data = this.data.users_raw.email {
-            email = data.lowercased()
+        if let data = this.data.class_date.end_time {
+            end_time = data
         }
         
-        if let data = this.data.users_raw.gender {
-            gender = data.lowercased()
+        if let data = this.data.class_date.class_id {
+            class_id = data
         }
         
-        if let data = this.data.users_raw.name_first {
-            name_first = data
+        if let data = this.data.class_date.class_status_id {
+            class_status_id = data
         }
         
-        if let data = this.data.users_raw.name_last {
-            name_last = data
-        }
-        
-        if let data = this.data.users_raw.name_full {
-            name_full = data
-        }
-        
-        if let data = this.data.users_raw.nickname {
-            nickname = data
-        }
-        
-        if let data = this.data.users_raw.phone {
-            phone = data
-        }
-        
-        if let data = this.data.users_raw.source {
-            source = data.lowercased()
-        }
-        
-        if let data = this.data.users_raw.source_id {
-            source_id = data
-        }
-        
-        if let data = this.data.users_raw.weight {
-            weight = data
-        }
-
-        if let data = this.data.users_raw.status {
-            status = data.lowercased()
-        }
-        
-        if let data = this.data.users_raw.source_location_id {
-            source_location_id = data
+        if let data = this.data.class_date.description {
+            description = data
         }
 
     }
     
-    func rows() -> [UsersRaw] {
-        var rows = [UsersRaw]()
+    func rows() -> [ClassDate] {
+        var rows = [ClassDate]()
         for i in 0..<self.results.rows.count {
             let row = UsersRaw()
             row.to(self.results.rows[i])
@@ -131,69 +92,29 @@ public class UsersRaw: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "account_id":
-                if !(value as! String).isEmpty {
-                    self.account_id = (value as! String)
+            case "start_time":
+                if let v = (value as! Int) {
+                    self.start_time = v
                 }
 
-            case "source_location_id":
-                if !(value as! String).isEmpty {
-                    self.source_location_id = (value as! String)
+            case "end_time":
+                if let v = (value as! Int) {
+                    self.end_time = v
                 }
 
-            case "email":
-                if !(value as! String).isEmpty {
-                    self.email = (value as! String).lowercased()
+            case "class_id":
+                if let v = (value as! Int) {
+                    self.class_id = v
                 }
 
-            case "gender":
-                if !(value as! String).isEmpty {
-                    self.gender = (value as! String).lowercased()
+            case "class_status_id":
+                if let v = (value as! String) {
+                    self.class_status_id = v
                 }
 
-            case "name_first":
-                if !(value as! String).isEmpty {
-                    self.name_first = (value as! String)
-                }
-
-            case "name_last":
-                if !(value as! String).isEmpty {
-                    self.name_last = (value as! String)
-                }
-
-            case "name_full":
-                if !(value as! String).isEmpty {
-                    self.name_full = (value as! String)
-                }
-
-            case "nickname":
-                if !(value as! String).isEmpty {
-                    self.nickname = (value as! String)
-                }
-
-            case "phone":
-                if let val = value as? String {
-                    self.phone = val
-                }
-
-            case "source":
-                if !(value as! String).isEmpty {
-                    self.source = (value as! String).lowercased()
-                }
-
-            case "source_id":
-                if !(value as! String).isEmpty {
-                    self.source_id = (value as! String)
-                }
-
-            case "weight":
-                if (value as! Float) != 0.0 {
-                    self.weight = (value as! Float)
-                }
-
-            case "status":
-                if !(value as! String).isEmpty {
-                    self.status = (value as! String).lowercased()
+            case "description":
+                if let v = (value as! String) {
+                    self.description = v
                 }
 
             default:
@@ -230,56 +151,26 @@ public class UsersRaw: PostgresStORM {
             dictionary.modifiedBy = self.modifiedby
         }
         
-        if self.account_id.isNotNil {
-            dictionary.users_raw.account_id = self.account_id
+        
+        
+        if self.start_time.isNotNil {
+            dictionary.class_date.start_time = self.start_time
         }
         
-        if self.email.isNotNil {
-            dictionary.users_raw.email = self.email
+        if self.end_time.isNotNil {
+            dictionary.class_date.end_time = self.end_time
         }
 
-        if self.gender.isNotNil {
-            dictionary.users_raw.gender = self.gender
+        if self.class_id.isNotNil {
+            dictionary.class_date.class_id = self.class_id
         }
 
-        if self.name_first.isNotNil {
-            dictionary.users_raw.name_first = self.name_first
+        if self.class_status_id.isNotNil {
+            dictionary.class_date.class_status_id = self.class_status_id
         }
 
-        if self.name_full.isNotNil {
-            dictionary.users_raw.name_full = self.name_full
-        }
-
-        if self.name_last.isNotNil {
-            dictionary.users_raw.name_last = self.name_last
-        }
-        
-        if self.nickname.isNotNil {
-            dictionary.users_raw.nickname = self.nickname
-        }
-        
-        if self.phone.isNotNil {
-            dictionary.users_raw.phone = self.phone
-        }
-        
-        if self.source.isNotNil {
-            dictionary.users_raw.source = self.source
-        }
-        
-        if self.source_id.isNotNil {
-            dictionary.users_raw.source_id = self.source_id
-        }
-
-        if self.source_location_id.isNotNil {
-            dictionary.users_raw.source_location_id = self.source_location_id
-        }
-
-        if self.weight.isNotNil {
-            dictionary.users_raw.weight = self.weight
-        }
-
-        if self.status.isNotNil {
-            dictionary.users_raw.status = self.status
+        if self.description.isNotNil {
+            dictionary.class_date.description = self.description
         }
 
         return dictionary
@@ -290,54 +181,26 @@ public class UsersRaw: PostgresStORM {
         
         var diff = true
         
-        if diff == true, self.account_id != targetItem.account_id {
+        if diff == true, self.start_time != targetItem.start_time {
             diff = false
         }
         
-        if diff == true, self.email != targetItem.email {
+        if diff == true, self.end_time != targetItem.end_time {
             diff = false
         }
         
-        if diff == true, self.gender != targetItem.gender {
+        if diff == true, self.class_id != targetItem.class_id {
             diff = false
         }
         
-        if diff == true, self.name_first != targetItem.name_first {
+        if diff == true, self.class_status_id != targetItem.class_status_id {
             diff = false
         }
         
-        if diff == true, self.name_full != targetItem.name_full {
+        if diff == true, self.description != targetItem.description {
             diff = false
         }
         
-        if diff == true, self.name_last != targetItem.name_last {
-            diff = false
-        }
-        
-        if diff == true, self.nickname != targetItem.nickname {
-            diff = false
-        }
-        
-        if diff == true, self.phone != targetItem.phone {
-            diff = false
-        }
-        
-        if diff == true, self.source != targetItem.source {
-            diff = false
-        }
-        
-        if diff == true, self.source_id != targetItem.source_id {
-            diff = false
-        }
-        
-        if diff == true, self.weight != targetItem.weight {
-            diff = false
-        }
-
-        if diff == true, self.status != targetItem.status {
-            diff = false
-        }
-
         return diff
         
     }

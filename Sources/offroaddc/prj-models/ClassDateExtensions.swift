@@ -5,9 +5,9 @@
 //
 
 extension Dictionary where Key == String, Value == Any {
-    var users_raw : UsersRawDictionary {
+    var class_date : ClassDateDictionary {
         get {
-            var bc = UsersRawDictionary()
+            var bc = ClassDateDictionary()
             bc.dic = self
             return bc
         }
@@ -18,7 +18,7 @@ extension Dictionary where Key == String, Value == Any {
 }
 
 //MARK: Badge-Key Dictionary Variable Values
-struct UsersRawDictionary {
+struct ClassDateDictionary {
     fileprivate var dic : [String:Any]!
     /// This variable key is "id". Set nil to remove from the dictionary.
     var id : Int? {
@@ -34,174 +34,69 @@ struct UsersRawDictionary {
         }
     }
 
-    var source : String? {
+    var start_time : Int? {
         get {
-            return self.dic["source"] as? String
+            return self.dic["start_time"] as? Int
         }
         set {
             if newValue != nil {
-                self.dic["source"] = newValue!.lowercased()
+                self.dic["start_time"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "source")
+                self.dic.removeValue(forKey: "start_time")
             }
         }
     }
 
-    var account_id : String? {
+    var end_time : Int? {
         get {
-            return self.dic["account_id"] as? String
+            return self.dic["end_time"] as? Int
         }
         set {
             if newValue != nil {
-                self.dic["account_id"] = newValue!
+                self.dic["end_time"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "account_id")
-            }
-        }
-    }
-    
-    var source_id : String? {
-        get {
-            return self.dic["source_id"] as? String
-        }
-        set {
-            if newValue != nil {
-                self.dic["source_id"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "source_id")
-            }
-        }
-    }
-    
-    var source_location_id : String? {
-        get {
-            return self.dic["source_location_id"] as? String
-        }
-        set {
-            if newValue != nil {
-                self.dic["source_location_id"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "source_location_id")
-            }
-        }
-    }
-    
-    var name_first : String? {
-        get {
-            return self.dic["name_first"] as? String
-        }
-        set {
-            if newValue != nil {
-                self.dic["name_first"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "name_first")
-            }
-        }
-    }
-    
-    var name_last : String? {
-        get {
-            return self.dic["name_last"] as? String
-        }
-        set {
-            if newValue != nil {
-                self.dic["name_last"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "name_last")
-            }
-        }
-    }
-    
-    var name_full : String? {
-        get {
-            return self.dic["name_full"] as? String
-        }
-        set {
-            if newValue != nil {
-                self.dic["name_full"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "name_full")
-            }
-        }
-    }
-    
-    var nickname : String? {
-        get {
-            return self.dic["nickname"] as? String
-        }
-        set {
-            if newValue != nil {
-                self.dic["nickname"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "nickname")
+                self.dic.removeValue(forKey: "end_time")
             }
         }
     }
 
-    var email : String? {
+    var class_id : Int? {
         get {
-            return self.dic["email"] as? String
+            return self.dic["class_id"] as? Int
         }
         set {
             if newValue != nil {
-                self.dic["email"] = newValue!.lowercased()
+                self.dic["class_id"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "email")
+                self.dic.removeValue(forKey: "class_id")
             }
         }
     }
 
-    var weight    : Float?    {
+    var class_status_id : Int? {
         get {
-            return self.dic["weight"] as? Float
+            return self.dic["class_status_id"] as? Int
         }
         set {
             if newValue != nil {
-                self.dic["weight"] = newValue!
+                self.dic["class_status_id"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "weight")
+                self.dic.removeValue(forKey: "class_status_id")
             }
         }
     }
 
-    var gender : String? {
+    var description : String? {
         get {
-            return self.dic["gender"] as? String
+            return self.dic["description"] as? String
         }
         set {
             if newValue != nil {
-                self.dic["gender"] = newValue!.lowercased()
+                self.dic["description"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "gender")
+                self.dic.removeValue(forKey: "description")
             }
         }
     }
-    
-    var phone    : String?    {
-        get {
-            return self.dic["phone"] as? String
-        }
-        set {
-            if newValue != nil {
-                self.dic["phone"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "phone")
-            }
-        }
-    }
-
-    var status    : String?    {
-        get {
-            return self.dic["status"] as? String
-        }
-        set {
-            if newValue != nil {
-                self.dic["status"] = newValue!.lowercased()
-            } else {
-                self.dic.removeValue(forKey: "status")
-            }
-        }
-    }
-
 }
 

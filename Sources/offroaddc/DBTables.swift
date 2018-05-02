@@ -187,6 +187,7 @@ final class PRJDBTables {
             // create the postgis tables here
             UsersRawTable.sharedInstance.create()
             ClassCompetitionTable.sharedInstance.create()
+            ClassDateTable.sharedInstance.create()
             
             // finally - lets add sample data - controlled by the condif table entry for sampledata (0 = no, 1 = yes)
 
