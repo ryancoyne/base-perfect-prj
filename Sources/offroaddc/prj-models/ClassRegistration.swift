@@ -11,7 +11,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class UsersRaw: PostgresStORM {
+public class ClassRegistration: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -36,7 +36,7 @@ public class UsersRaw: PostgresStORM {
     var phone      : String?    = nil
 
     //MARK: Table name
-    override public func table() -> String { return "users_raw" }
+    override public func table() -> String { return "class_registration" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -61,64 +61,32 @@ public class UsersRaw: PostgresStORM {
             modifiedby = data
         }
         
-        if let data = this.data.users_raw.account_id {
+        if let data = this.data.class_registration.account_id {
             account_id = data
         }
         
-        if let data = this.data.users_raw.email {
+        if let data = this.data.class_registration.email {
             email = data.lowercased()
         }
         
-        if let data = this.data.users_raw.gender {
+        if let data = this.data.class_registration.gender {
             gender = data.lowercased()
         }
         
-        if let data = this.data.users_raw.name_first {
+        if let data = this.data.class_registration.name_first {
             name_first = data
         }
         
-        if let data = this.data.users_raw.name_last {
+        if let data = this.data.class_registration.name_last {
             name_last = data
         }
         
-        if let data = this.data.users_raw.name_full {
-            name_full = data
-        }
-        
-        if let data = this.data.users_raw.nickname {
-            nickname = data
-        }
-        
-        if let data = this.data.users_raw.phone {
-            phone = data
-        }
-        
-        if let data = this.data.users_raw.source {
-            source = data.lowercased()
-        }
-        
-        if let data = this.data.users_raw.source_id {
-            source_id = data
-        }
-        
-        if let data = this.data.users_raw.weight {
-            weight = data
-        }
-
-        if let data = this.data.users_raw.status {
-            status = data.lowercased()
-        }
-        
-        if let data = this.data.users_raw.source_location_id {
-            source_location_id = data
-        }
-
     }
     
-    func rows() -> [UsersRaw] {
-        var rows = [UsersRaw]()
+    func rows() -> [ClassRegistration] {
+        var rows = [ClassRegistration]()
         for i in 0..<self.results.rows.count {
-            let row = UsersRaw()
+            let row = ClassRegistration()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -231,62 +199,30 @@ public class UsersRaw: PostgresStORM {
         }
         
         if self.account_id.isNotNil {
-            dictionary.users_raw.account_id = self.account_id
+            dictionary.class_registration.account_id = self.account_id
         }
         
         if self.email.isNotNil {
-            dictionary.users_raw.email = self.email
+            dictionary.class_registration.email = self.email
         }
 
         if self.gender.isNotNil {
-            dictionary.users_raw.gender = self.gender
+            dictionary.class_registration.gender = self.gender
         }
 
         if self.name_first.isNotNil {
-            dictionary.users_raw.name_first = self.name_first
+            dictionary.class_registration.name_first = self.name_first
         }
 
         if self.name_full.isNotNil {
-            dictionary.users_raw.name_full = self.name_full
-        }
-
-        if self.name_last.isNotNil {
-            dictionary.users_raw.name_last = self.name_last
-        }
-        
-        if self.nickname.isNotNil {
-            dictionary.users_raw.nickname = self.nickname
-        }
-        
-        if self.phone.isNotNil {
-            dictionary.users_raw.phone = self.phone
-        }
-        
-        if self.source.isNotNil {
-            dictionary.users_raw.source = self.source
-        }
-        
-        if self.source_id.isNotNil {
-            dictionary.users_raw.source_id = self.source_id
-        }
-
-        if self.source_location_id.isNotNil {
-            dictionary.users_raw.source_location_id = self.source_location_id
-        }
-
-        if self.weight.isNotNil {
-            dictionary.users_raw.weight = self.weight
-        }
-
-        if self.status.isNotNil {
-            dictionary.users_raw.status = self.status
+            dictionary.class_registration.name_full = self.name_full
         }
 
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: UsersRaw)-> Bool {
+    func compare(targetItem: ClassRegistration)-> Bool {
         
         var diff = true
         
