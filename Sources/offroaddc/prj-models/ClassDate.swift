@@ -20,11 +20,12 @@ public class ClassDate: PostgresStORM {
     var modified   : Int?    = nil
     var modifiedby : String? = nil
     
-    var start_time      : Int? = nil
-    var end_time        : Int? = nil
-    var class_id        : Int? = nil
-    var class_status_id : Int? = nil
-    var description     : String? = nil
+    var start_time          : Int? = nil
+    var end_time            : Int? = nil
+    var class_id            : Int? = nil
+    var class_status_id     : Int? = nil
+    var description         : String? = nil
+    var instructor_user_id  : String? = nil
 
     //MARK: Table name
     override public func table() -> String { return "class_date" }
@@ -74,6 +75,10 @@ public class ClassDate: PostgresStORM {
             description = data
         }
 
+        if let data = this.data.class_date.instructor_user_id {
+            instructor_user_id = data
+        }
+
     }
     
     func rows() -> [ClassDate] {
@@ -108,7 +113,7 @@ public class ClassDate: PostgresStORM {
                 }
 
             case "class_status_id":
-                if let v = (value as! String) {
+                if let v = (value as! Int) {
                     self.class_status_id = v
                 }
 
@@ -116,6 +121,12 @@ public class ClassDate: PostgresStORM {
                 if let v = (value as! String) {
                     self.description = v
                 }
+                
+            case "instructor_user_id":
+                if let v = (value as! String) {
+                    self.description = v
+                }
+                
 
             default:
                 print("This should not occur")
@@ -172,6 +183,10 @@ public class ClassDate: PostgresStORM {
         if self.description.isNotNil {
             dictionary.class_date.description = self.description
         }
+        
+        if self.instructor_user_id.isNotNil {
+            dictionary.class_date.instructor_user_id = self.instructor_user_id
+        }
 
         return dictionary
     }
@@ -201,6 +216,10 @@ public class ClassDate: PostgresStORM {
             diff = false
         }
         
+        if diff == true, self.instructor_user_id != targetItem.instructor_user_id {
+            diff = false
+        }
+
         return diff
         
     }

@@ -98,5 +98,19 @@ struct ClassDateDictionary {
             }
         }
     }
+    
+    var instructor_user_id : String? {
+        get {
+            return self.dic["instructor_user_id"] as? String
+        }
+        set {
+            if newValue != nil {
+                self.dic["instructor_user_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "instructor_user_id")
+            }
+        }
+    }
+
 }
 

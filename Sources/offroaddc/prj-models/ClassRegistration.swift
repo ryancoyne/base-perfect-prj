@@ -20,7 +20,7 @@ public class ClassRegistration: PostgresStORM {
     var modified   : Int?    = nil
     var modifiedby : String? = nil
     
-    var source     : String? = nil
+    var user_id    : String? = nil
     var account_id : String? = nil
     var source_id  : String? = nil
     var source_location_id : String? = nil
