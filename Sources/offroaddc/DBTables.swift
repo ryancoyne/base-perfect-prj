@@ -178,21 +178,18 @@ final class PRJDBTables {
             print(error)
         }
 
-        
         // tables not needing postgis
+        UsersRawTable.sharedInstance.create()
+        ClassCompetitionTable.sharedInstance.create()
+        ClassDateTable.sharedInstance.create()
+        ClassDateTable.sharedInstance.create()
+        ClassRegistrationTable.sharedInstance.create()
+        ClassStatusTable.sharedInstance.create()
 
         // make sure the tables exist.... if not - then create it
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
         if thereturn.postgis && thereturn.postgis_topo {
             // create the postgis tables here
-            UsersRawTable.sharedInstance.create()
-            ClassCompetitionTable.sharedInstance.create()
-            ClassDateTable.sharedInstance.create()
-            ClassDateTable.sharedInstance.create()
-            ClassRegistrationTable.sharedInstance.create()
-            ClassStatusTable.sharedInstance.create()
-            
-            
             
             // finally - lets add sample data - controlled by the condif table entry for sampledata (0 = no, 1 = yes)
 
