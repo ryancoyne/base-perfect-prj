@@ -57,7 +57,7 @@ public class ClassMain: PostgresStORM {
             name = data
         }
         
-        if let data = this.data.class_main.desciption {
+        if let data = this.data.class_main.description {
             description = data
         }
         

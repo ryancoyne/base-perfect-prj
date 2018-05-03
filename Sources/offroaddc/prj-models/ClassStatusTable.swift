@@ -13,7 +13,7 @@ final class ClassStatusTable {
     }
 
     static let sharedInstance = ClassStatusTable()
-    let tbl = ClassStatusTable()
+    let tbl = ClassStatus()
 
     let tablelevel = 1.00
 

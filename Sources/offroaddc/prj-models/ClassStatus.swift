@@ -120,7 +120,7 @@ public class ClassStatus: PostgresStORM {
             dictionary.class_status.status = self.status
         }
         
-        if self.email.isNotNil {
+        if self.description.isNotNil {
             dictionary.class_status.description = self.description
         }
 

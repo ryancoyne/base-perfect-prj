@@ -13,7 +13,7 @@ final class ClassRegistrationTable {
     }
 
     static let sharedInstance = ClassRegistrationTable()
-    let tbl = ClassRegistrationTable()
+    let tbl = ClassRegistration()
 
     let tablelevel = 1.00
 

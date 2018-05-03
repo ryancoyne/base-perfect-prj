@@ -96,12 +96,12 @@ public class ClassRegistration: PostgresStORM {
                 }
 
             case "class_date_id":
-                if  let v = (value as Int) {
+                if let v = (value as? Int) {
                     self.class_date_id = v
                 }
 
             case "registered":
-                if  let v = (value as Int) {
+                if let v = (value as? Int) {
                     self.registered = v
                 }
 
@@ -111,7 +111,7 @@ public class ClassRegistration: PostgresStORM {
                 }
 
             case "wait_list_order":
-                if  let v = (value as Int) {
+                if let v = (value as? Int) {
                     self.wait_list_order = v
                 }
 

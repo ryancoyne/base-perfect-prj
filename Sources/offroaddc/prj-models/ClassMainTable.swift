@@ -13,7 +13,7 @@ final class ClassMainTable {
     }
 
     static let sharedInstance = ClassMainTable()
-    let tbl = ClassMainTable()
+    let tbl = ClassMain()
 
     let tablelevel = 1.00
 

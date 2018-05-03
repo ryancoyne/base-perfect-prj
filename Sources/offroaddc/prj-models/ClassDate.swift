@@ -84,7 +84,7 @@ public class ClassDate: PostgresStORM {
     func rows() -> [ClassDate] {
         var rows = [ClassDate]()
         for i in 0..<self.results.rows.count {
-            let row = UsersRaw()
+            let row = ClassDate()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -98,32 +98,32 @@ public class ClassDate: PostgresStORM {
             switch key.lowercased() {
                 
             case "start_time":
-                if let v = (value as! Int) {
+                if let v = (value as? Int) {
                     self.start_time = v
                 }
 
             case "end_time":
-                if let v = (value as! Int) {
+                if let v = (value as? Int) {
                     self.end_time = v
                 }
 
             case "class_id":
-                if let v = (value as! Int) {
+                if let v = (value as? Int) {
                     self.class_id = v
                 }
 
             case "class_status_id":
-                if let v = (value as! Int) {
+                if let v = (value as? Int) {
                     self.class_status_id = v
                 }
 
             case "description":
-                if let v = (value as! String) {
+                if let v = (value as? String) {
                     self.description = v
                 }
                 
             case "instructor_user_id":
-                if let v = (value as! String) {
+                if let v = (value as? String) {
                     self.description = v
                 }
                 

@@ -13,7 +13,7 @@ final class ClassDateTable {
     }
 
     static let sharedInstance = ClassDateTable()
-    let tbl = ClassDateTable()
+    let tbl = ClassDate()
 
     let tablelevel = 1.00
 

@@ -100,18 +100,18 @@ public class ClassCompetition: PostgresStORM {
                 }
 
             case "start_time":
-                if !(value as! Int).isEmpty {
-                    self.start_time = (value as! Int)
+                if let v = (value as? Int) {
+                    self.start_time = v
                 }
 
             case "end_time":
-                if !(value as! Int).isEmpty {
-                    self.end_time = (value as! Int)
+                if let v = (value as? Int) {
+                    self.end_time = v
                 }
 
             case "private_competition":
-                if !(value as! Bool).isEmpty {
-                    self.private_competition = (value as! Bool)
+                if let v = (value as? Bool) {
+                    self.private_competition = v
                 }
 
             case "leader_user_id":
@@ -120,8 +120,8 @@ public class ClassCompetition: PostgresStORM {
                 }
 
             case "competition_type_id":
-                if !(value as! Int).isEmpty {
-                    self.competition_type_id = (value as! Int)
+                if let v = (value as? Int) {
+                    self.competition_type_id = v
                 }
 
             default:
@@ -172,9 +172,8 @@ public class ClassCompetition: PostgresStORM {
             dictionary.class_competition.end_time = self.end_time
         }
 
-        if self.private_competition.isNotNil {
-            dictionary.class_competition.private_competition = self.private_competition
-        }
+        // the default is TRUE
+        dictionary.class_competition.private_competition = self.private_competition
 
         if self.leader_user_id.isNotNil {
             dictionary.class_competition.leader_user_id = self.leader_user_id
