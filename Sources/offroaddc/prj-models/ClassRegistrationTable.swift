@@ -66,10 +66,10 @@ final class ClassRegistrationTable {
     
         // table specific fields
         createsql.append("user_id text COLLATE pg_catalog.default, ")
-        createsql.append("class_date_id integer COLLATE pg_catalog.default, ")
-        createsql.append("registered integer COLLATE pg_catalog.default, ")
+        createsql.append("class_date_id integer NOT NULL DEFAULT 0, ")
+        createsql.append("registered integer NOT NULL DEFAULT 0, ")
         createsql.append("registered_by text COLLATE pg_catalog.default, ")
-        createsql.append("wait_list_order integer COLLATE pg_catalog.default, ")
+        createsql.append("wait_list_order integer NOT NULL DEFAULT 0, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

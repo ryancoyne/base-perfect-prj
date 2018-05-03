@@ -65,10 +65,10 @@ final class ClassDateTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
     
         // table specific fields
-        createsql.append("start_time integer COLLATE pg_catalog.default, ")
-        createsql.append("end_time integer COLLATE pg_catalog.default, ")
-        createsql.append("class_id integer COLLATE pg_catalog.default, ")
-        createsql.append("class_status_id integer COLLATE pg_catalog.default, ")
+        createsql.append("start_time integer NOT NULL DEFAULT 0, ")
+        createsql.append("end_time integer NOT NULL DEFAULT 0, ")
+        createsql.append("class_id integer NOT NULL DEFAULT 0, ")
+        createsql.append("class_status_id integer NOT NULL DEFAULT 0, ")
         createsql.append("instructor_user_id text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
 

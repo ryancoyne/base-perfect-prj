@@ -67,10 +67,10 @@ final class ClassCompetitionTable {
         // table specific fields
         createsql.append("name text COLLATE pg_catalog.default, ")
         createsql.append("leader_user_id text COLLATE pg_catalog.default, ")
-        createsql.append("start_time integer COLLATE pg_catalog.default, ")
-        createsql.append("end_time integer COLLATE pg_catalog.default, ")
-        createsql.append("private_competition boolean COLLATE pg_catalog.default, ")
-        createsql.append("competition_type_id integer COLLATE pg_catalog.default, ")
+        createsql.append("start_time integer NOT NULL DEFAULT 0, ")
+        createsql.append("end_time integer NOT NULL DEFAULT 0, ")
+        createsql.append("private_competition boolean NOT NULL DEFAULT TRUE, ")
+        createsql.append("competition_type_id integer NOT NULL DEFAULT 0, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
