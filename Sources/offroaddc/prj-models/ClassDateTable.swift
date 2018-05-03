@@ -70,7 +70,7 @@ final class ClassDateTable {
         createsql.append("class_id integer COLLATE pg_catalog.default, ")
         createsql.append("class_status_id integer COLLATE pg_catalog.default, ")
         createsql.append("instructor_user_id text COLLATE pg_catalog.default, ")
-        createsql.append("description text COLLATE pg_catalog.default ")
+        createsql.append("description text COLLATE pg_catalog.default, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

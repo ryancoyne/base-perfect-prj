@@ -20,20 +20,11 @@ public class ClassRegistration: PostgresStORM {
     var modified   : Int?    = nil
     var modifiedby : String? = nil
     
-    var user_id    : String? = nil
-    var account_id : String? = nil
-    var source_id  : String? = nil
-    var source_location_id : String? = nil
-    var name_first : String? = nil
-    var name_last  : String? = nil
-    var name_full  : String? = nil
-    var nickname   : String? = nil
-    var email      : String? = nil
-    var gender     : String? = nil
-    var status     : String? = nil
-
-    var weight     : Float?    = nil
-    var phone      : String?    = nil
+    var user_id         : String? = nil
+    var class_date_id   : Int? = nil
+    var registered      : Int? = nil
+    var registered_by   : String? = nil
+    var wait_list_order : Int? = nil
 
     //MARK: Table name
     override public func table() -> String { return "class_registration" }
@@ -61,24 +52,24 @@ public class ClassRegistration: PostgresStORM {
             modifiedby = data
         }
         
-        if let data = this.data.class_registration.account_id {
-            account_id = data
+        if let data = this.data.class_registration.user_id {
+            user_id = data
         }
         
-        if let data = this.data.class_registration.email {
-            email = data.lowercased()
+        if let data = this.data.class_registration.class_date_id {
+            class_date_id = data
         }
         
-        if let data = this.data.class_registration.gender {
-            gender = data.lowercased()
+        if let data = this.data.class_registration.registered {
+            registered = data
         }
         
-        if let data = this.data.class_registration.name_first {
-            name_first = data
+        if let data = this.data.class_registration.registered_by {
+            registered_by = data
         }
         
-        if let data = this.data.class_registration.name_last {
-            name_last = data
+        if let data = this.data.class_registration.wait_list_order {
+            wait_list_order = data
         }
         
     }
@@ -99,80 +90,36 @@ public class ClassRegistration: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "account_id":
+            case "user_id":
                 if !(value as! String).isEmpty {
-                    self.account_id = (value as! String)
+                    self.user_id = (value as! String)
                 }
 
-            case "source_location_id":
+            case "class_date_id":
+                if  let v = (value as Int) {
+                    self.class_date_id = v
+                }
+
+            case "registered":
+                if  let v = (value as Int) {
+                    self.registered = v
+                }
+
+            case "registered_by":
                 if !(value as! String).isEmpty {
-                    self.source_location_id = (value as! String)
+                    self.user_id = (value as! String)
                 }
 
-            case "email":
-                if !(value as! String).isEmpty {
-                    self.email = (value as! String).lowercased()
-                }
-
-            case "gender":
-                if !(value as! String).isEmpty {
-                    self.gender = (value as! String).lowercased()
-                }
-
-            case "name_first":
-                if !(value as! String).isEmpty {
-                    self.name_first = (value as! String)
-                }
-
-            case "name_last":
-                if !(value as! String).isEmpty {
-                    self.name_last = (value as! String)
-                }
-
-            case "name_full":
-                if !(value as! String).isEmpty {
-                    self.name_full = (value as! String)
-                }
-
-            case "nickname":
-                if !(value as! String).isEmpty {
-                    self.nickname = (value as! String)
-                }
-
-            case "phone":
-                if let val = value as? String {
-                    self.phone = val
-                }
-
-            case "source":
-                if !(value as! String).isEmpty {
-                    self.source = (value as! String).lowercased()
-                }
-
-            case "source_id":
-                if !(value as! String).isEmpty {
-                    self.source_id = (value as! String)
-                }
-
-            case "weight":
-                if (value as! Float) != 0.0 {
-                    self.weight = (value as! Float)
-                }
-
-            case "status":
-                if !(value as! String).isEmpty {
-                    self.status = (value as! String).lowercased()
+            case "wait_list_order":
+                if  let v = (value as Int) {
+                    self.wait_list_order = v
                 }
 
             default:
                 print("This should not occur")
             }
-            
-            
         }
-        
     }
-    
     
     func asDictionary() -> [String: Any] {
         
@@ -198,24 +145,24 @@ public class ClassRegistration: PostgresStORM {
             dictionary.modifiedBy = self.modifiedby
         }
         
-        if self.account_id.isNotNil {
-            dictionary.class_registration.account_id = self.account_id
+        if self.user_id.isNotNil {
+            dictionary.class_registration.user_id = self.user_id
         }
         
-        if self.email.isNotNil {
-            dictionary.class_registration.email = self.email
+        if self.class_date_id.isNotNil {
+            dictionary.class_registration.class_date_id = self.class_date_id
         }
 
-        if self.gender.isNotNil {
-            dictionary.class_registration.gender = self.gender
+        if self.registered.isNotNil {
+            dictionary.class_registration.registered = self.registered
         }
 
-        if self.name_first.isNotNil {
-            dictionary.class_registration.name_first = self.name_first
+        if self.registered_by.isNotNil {
+            dictionary.class_registration.registered_by = self.registered_by
         }
 
-        if self.name_full.isNotNil {
-            dictionary.class_registration.name_full = self.name_full
+        if self.wait_list_order.isNotNil {
+            dictionary.class_registration.wait_list_order = self.wait_list_order
         }
 
         return dictionary
@@ -226,54 +173,26 @@ public class ClassRegistration: PostgresStORM {
         
         var diff = true
         
-        if diff == true, self.account_id != targetItem.account_id {
+        if diff == true, self.user_id != targetItem.user_id {
             diff = false
         }
         
-        if diff == true, self.email != targetItem.email {
+        if diff == true, self.class_date_id != targetItem.class_date_id {
             diff = false
         }
         
-        if diff == true, self.gender != targetItem.gender {
+        if diff == true, self.registered != targetItem.registered {
             diff = false
         }
         
-        if diff == true, self.name_first != targetItem.name_first {
+        if diff == true, self.registered_by != targetItem.registered_by {
             diff = false
         }
         
-        if diff == true, self.name_full != targetItem.name_full {
+        if diff == true, self.wait_list_order != targetItem.wait_list_order {
             diff = false
         }
         
-        if diff == true, self.name_last != targetItem.name_last {
-            diff = false
-        }
-        
-        if diff == true, self.nickname != targetItem.nickname {
-            diff = false
-        }
-        
-        if diff == true, self.phone != targetItem.phone {
-            diff = false
-        }
-        
-        if diff == true, self.source != targetItem.source {
-            diff = false
-        }
-        
-        if diff == true, self.source_id != targetItem.source_id {
-            diff = false
-        }
-        
-        if diff == true, self.weight != targetItem.weight {
-            diff = false
-        }
-
-        if diff == true, self.status != targetItem.status {
-            diff = false
-        }
-
         return diff
         
     }

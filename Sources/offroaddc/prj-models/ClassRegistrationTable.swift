@@ -5,15 +5,15 @@
 import Foundation
 import PostgresStORM
 
-final class UsersRawTable {
+final class ClassRegistrationTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
 
-    static let sharedInstance = UsersRawTable()
-    let tbl = UsersRaw()
+    static let sharedInstance = ClassRegistrationTable()
+    let tbl = ClassRegistrationTable()
 
     let tablelevel = 1.00
 
@@ -65,19 +65,11 @@ final class UsersRawTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
     
         // table specific fields
-        createsql.append("source text COLLATE pg_catalog.default, ")
-        createsql.append("account_id text COLLATE pg_catalog.default, ")
-        createsql.append("source_id text COLLATE pg_catalog.default, ")
-        createsql.append("source_location_id text COLLATE pg_catalog.default, ")
-        createsql.append("name_first text COLLATE pg_catalog.default, ")
-        createsql.append("name_last text COLLATE pg_catalog.default, ")
-        createsql.append("name_full text COLLATE pg_catalog.default, ")
-        createsql.append("weight numeric(12,8) DEFAULT 0, ")
-        createsql.append("nickname text COLLATE pg_catalog.default, ")
-        createsql.append("email text COLLATE pg_catalog.default, ")
-        createsql.append("gender text COLLATE pg_catalog.default, ")
-        createsql.append("phone text COLLATE pg_catalog.default, ")
-        createsql.append("status text COLLATE pg_catalog.default, ")
+        createsql.append("user_id text COLLATE pg_catalog.default, ")
+        createsql.append("class_date_id integer COLLATE pg_catalog.default, ")
+        createsql.append("registered integer COLLATE pg_catalog.default, ")
+        createsql.append("registered_by text COLLATE pg_catalog.default, ")
+        createsql.append("wait_list_order integer COLLATE pg_catalog.default, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
