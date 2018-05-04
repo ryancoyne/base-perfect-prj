@@ -5,9 +5,9 @@
 //
 
 extension Dictionary where Key == String, Value == Any {
-    var location_type : LocationTypeDictionary {
+    var studio_location_type : StudioLocationTypeDictionary {
         get {
-            var bc = LocationTypeDictionary()
+            var bc = StudioLocationTypeDictionary()
             bc.dic = self
             return bc
         }
@@ -18,7 +18,7 @@ extension Dictionary where Key == String, Value == Any {
 }
 
 //MARK: Badge-Key Dictionary Variable Values
-struct LocationTypeDictionary {
+struct StudioLocationTypeDictionary {
     fileprivate var dic : [String:Any]!
     /// This variable key is "id". Set nil to remove from the dictionary.
     var id : Int? {

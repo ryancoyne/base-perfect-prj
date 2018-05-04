@@ -11,7 +11,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class LocationType: PostgresStORM {
+public class StudioLocationType: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -24,7 +24,7 @@ public class LocationType: PostgresStORM {
     var description : String? = nil
 
     //MARK: Table name
-    override public func table() -> String { return "location_type" }
+    override public func table() -> String { return "studio_location_type" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -49,20 +49,20 @@ public class LocationType: PostgresStORM {
             modifiedby = data
         }
         
-        if let data = this.data.location_type.name {
+        if let data = this.data.studio_location_type.name {
             name = data
         }
         
-        if let data = this.data.location_type.description {
+        if let data = this.data.studio_location_type.description {
             description = data
         }
         
     }
     
-    func rows() -> [ClassStatus] {
-        var rows = [ClassStatus]()
+    func rows() -> [StudioLocationType] {
+        var rows = [StudioLocationType]()
         for i in 0..<self.results.rows.count {
-            let row = ClassStatus()
+            let row = StudioLocationType()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -117,11 +117,11 @@ public class LocationType: PostgresStORM {
         }
         
         if self.name.isNotNil {
-            dictionary.location_type.name = self.name
+            dictionary.studio_location_type.name = self.name
         }
         
         if self.description.isNotNil {
-            dictionary.location_type.description = self.description
+            dictionary.studio_location_type.description = self.description
         }
 
         return dictionary

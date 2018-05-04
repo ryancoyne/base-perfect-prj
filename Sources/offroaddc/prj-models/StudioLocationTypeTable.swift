@@ -5,15 +5,15 @@
 import Foundation
 import PostgresStORM
 
-final class LocationTypeTable {
+final class StudioLocationTypeTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
 
-    static let sharedInstance = LocationTypeTable()
-    let tbl = LocationType()
+    static let sharedInstance = StudioLocationTypeTable()
+    let tbl = StudioLocationType()
 
     let tablelevel = 1.00
 

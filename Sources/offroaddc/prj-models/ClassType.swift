@@ -59,10 +59,10 @@ public class ClassType: PostgresStORM {
         
     }
     
-    func rows() -> [ClassStatus] {
-        var rows = [ClassStatus]()
+    func rows() -> [ClassType] {
+        var rows = [ClassType]()
         for i in 0..<self.results.rows.count {
-            let row = ClassStatus()
+            let row = ClassType()
             row.to(self.results.rows[i])
             rows.append(row)
         }
