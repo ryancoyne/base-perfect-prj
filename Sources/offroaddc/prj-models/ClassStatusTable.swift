@@ -65,7 +65,7 @@ final class ClassStatusTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
     
         // table specific fields
-        createsql.append("status text COLLATE pg_catalog.default, ")
+        createsql.append("name text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
 
         // ending fields

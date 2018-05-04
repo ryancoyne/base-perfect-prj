@@ -34,15 +34,15 @@ struct ClassStatusDictionary {
         }
     }
 
-    var status : String? {
+    var name : String? {
         get {
-            return self.dic["status"] as? String
+            return self.dic["name"] as? String
         }
         set {
             if newValue != nil {
-                self.dic["status"] = newValue!
+                self.dic["name"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "status")
+                self.dic.removeValue(forKey: "name")
             }
         }
     }

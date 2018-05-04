@@ -20,7 +20,7 @@ public class ClassStatus: PostgresStORM {
     var modified   : Int?    = nil
     var modifiedby : String? = nil
     
-    var status      : String? = nil
+    var name      : String? = nil
     var description : String? = nil
 
     //MARK: Table name
@@ -49,8 +49,8 @@ public class ClassStatus: PostgresStORM {
             modifiedby = data
         }
         
-        if let data = this.data.class_status.status {
-            status = data
+        if let data = this.data.class_status.name {
+            name = data
         }
         
         if let data = this.data.class_status.description {
@@ -75,9 +75,9 @@ public class ClassStatus: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "status":
+            case "name":
                 if !(value as! String).isEmpty {
-                    self.status = (value as! String)
+                    self.name = (value as! String)
                 }
 
             case "description":
@@ -116,8 +116,8 @@ public class ClassStatus: PostgresStORM {
             dictionary.modifiedBy = self.modifiedby
         }
         
-        if self.status.isNotNil {
-            dictionary.class_status.status = self.status
+        if self.name.isNotNil {
+            dictionary.class_status.name = self.name
         }
         
         if self.description.isNotNil {
@@ -132,7 +132,7 @@ public class ClassStatus: PostgresStORM {
         
         var diff = true
         
-        if diff == true, self.status != targetItem.status {
+        if diff == true, self.name != targetItem.name {
             diff = false
         }
         
