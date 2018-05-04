@@ -112,5 +112,31 @@ struct ClassDateDictionary {
         }
     }
 
+    var number_of_registrations : Int? {
+        get {
+            return self.dic["number_of_registrations"] as? Int
+        }
+        set {
+            if newValue != nil {
+                self.dic["number_of_registrations"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "number_of_registrations")
+            }
+        }
+    }
+
+    var number_of_waitlist : Int? {
+        get {
+            return self.dic["number_of_waitlist"] as? Int
+        }
+        set {
+            if newValue != nil {
+                self.dic["number_of_waitlist"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "number_of_waitlist")
+            }
+        }
+    }
+
 }
 

@@ -20,12 +20,14 @@ public class ClassDate: PostgresStORM {
     var modified   : Int?    = nil
     var modifiedby : String? = nil
     
-    var start_time          : Int? = nil
-    var end_time            : Int? = nil
-    var class_id            : Int? = nil
-    var class_status_id     : Int? = nil
-    var description         : String? = nil
-    var instructor_user_id  : String? = nil
+    var start_time              : Int? = nil
+    var end_time                : Int? = nil
+    var class_id                : Int? = nil
+    var class_status_id         : Int? = nil
+    var number_of_registrations : Int? = nil
+    var number_of_waitlist      : Int? = nil
+    var description             : String? = nil
+    var instructor_user_id      : String? = nil
 
     //MARK: Table name
     override public func table() -> String { return "class_date" }
@@ -79,6 +81,14 @@ public class ClassDate: PostgresStORM {
             instructor_user_id = data
         }
 
+        if let data = this.data.class_date.number_of_registrations {
+            number_of_registrations = data
+        }
+
+        if let data = this.data.class_date.number_of_waitlist {
+            number_of_waitlist = data
+        }
+
     }
     
     func rows() -> [ClassDate] {
@@ -115,6 +125,16 @@ public class ClassDate: PostgresStORM {
             case "class_status_id":
                 if let v = (value as? Int) {
                     self.class_status_id = v
+                }
+
+            case "number_of_registrations":
+                if let v = (value as? Int) {
+                    self.number_of_registrations = v
+                }
+
+            case "number_of_waitlist":
+                if let v = (value as? Int) {
+                    self.number_of_waitlist = v
                 }
 
             case "description":
@@ -188,6 +208,14 @@ public class ClassDate: PostgresStORM {
             dictionary.class_date.instructor_user_id = self.instructor_user_id
         }
 
+        if self.number_of_registrations.isNotNil {
+            dictionary.class_date.number_of_registrations = self.number_of_registrations
+        }
+
+        if self.number_of_waitlist.isNotNil {
+            dictionary.class_date.number_of_waitlist = self.number_of_waitlist
+        }
+
         return dictionary
     }
     
@@ -217,6 +245,14 @@ public class ClassDate: PostgresStORM {
         }
         
         if diff == true, self.instructor_user_id != targetItem.instructor_user_id {
+            diff = false
+        }
+
+        if diff == true, self.number_of_registrations != targetItem.number_of_registrations {
+            diff = false
+        }
+
+        if diff == true, self.number_of_waitlist != targetItem.number_of_waitlist {
             diff = false
         }
 

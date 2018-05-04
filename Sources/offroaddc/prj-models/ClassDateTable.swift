@@ -71,6 +71,8 @@ final class ClassDateTable {
         createsql.append("class_status_id integer NOT NULL DEFAULT 0, ")
         createsql.append("instructor_user_id text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
+        createsql.append("number_of_registrations integer NOT NULL DEFAULT 0, ")
+        createsql.append("number_of_waitlist integer NOT NULL DEFAULT 0, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
