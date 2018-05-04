@@ -1,16 +1,8 @@
 Tables To Complete:
 
-Competition.swift
-CompetitionTable.swift
-CompetitionExtensions.swift
-
-CompetitionAthletes.swift
-CompetitionAthletesTable.swift
-CompetitionAthletesExtensions.swift
-
-CompetitionType.swift
-CompetitionTypeTable.swift
-CompetitionTypeExtensions.swift
+ClassCompetitionAthletes.swift
+ClassCompetitionAthletesTable.swift
+ClassCompetitionAthletesExtensions.swift
 
 GarminActivity.swift
 GarminActivityTable.swift
@@ -47,10 +39,6 @@ StudioExtensions.swift
 StudioLocation.swift
 StudioLocationTable.swift
 StudioLocationExtensions.swift
-
-StudioLocationType.swift
-StudioLocationTypeTable.swift
-StudioLocationTypeExtensions.swift
 
 .swift
 Table.swift

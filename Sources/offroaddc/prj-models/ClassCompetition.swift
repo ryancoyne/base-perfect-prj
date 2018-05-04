@@ -26,6 +26,7 @@ public class ClassCompetition: PostgresStORM {
     var private_competition : Bool    = true
     var leader_user_id      : String? = nil
     var competition_type_id : Int?    = nil
+    var class_type_id       : Int?    = nil
 
     //MARK: Table name
     override public func table() -> String { return "class_competition" }
@@ -76,6 +77,11 @@ public class ClassCompetition: PostgresStORM {
         if let data = this.data.class_competition.competition_type_id {
             competition_type_id = data
         }
+        
+        if let data = this.data.class_competition.class_type_id {
+            class_type_id = data
+        }
+
     }
     
     func rows() -> [ClassCompetition] {
@@ -122,6 +128,11 @@ public class ClassCompetition: PostgresStORM {
             case "competition_type_id":
                 if let v = (value as? Int) {
                     self.competition_type_id = v
+                }
+
+            case "class_type_id":
+                if let v = (value as? Int) {
+                    self.class_type_id = v
                 }
 
             default:
@@ -182,7 +193,11 @@ public class ClassCompetition: PostgresStORM {
         if self.competition_type_id.isNotNil {
             dictionary.class_competition.competition_type_id = self.competition_type_id
         }
-        
+
+        if self.class_type_id.isNotNil {
+            dictionary.class_competition.class_type_id = self.class_type_id
+        }
+
         return dictionary
     }
     
@@ -214,7 +229,11 @@ public class ClassCompetition: PostgresStORM {
         if diff == true, self.leader_user_id != targetItem.leader_user_id {
             diff = false
         }
-        
+
+        if diff == true, self.class_type_id != targetItem.class_type_id {
+            diff = false
+        }
+
         return diff
         
     }

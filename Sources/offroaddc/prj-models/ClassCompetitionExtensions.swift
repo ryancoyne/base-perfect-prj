@@ -111,5 +111,19 @@ struct ClassCompetitionDictionary {
             }
         }
     }
+    
+    var class_type_id : Int? {
+        get {
+            return self.dic["class_type_id"] as? Int
+        }
+        set {
+            if newValue != nil {
+                self.dic["class_type_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "class_type_id")
+            }
+        }
+    }
+
 }
 

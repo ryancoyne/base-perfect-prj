@@ -180,13 +180,16 @@ final class PRJDBTables {
 
         // tables not needing postgis
         UsersRawTable.sharedInstance.create()
-        ClassCompetitionTable.sharedInstance.create()
+
         ClassDateTable.sharedInstance.create()
         ClassMainTable.sharedInstance.create()
         ClassRegistrationTable.sharedInstance.create()
         ClassStatusTable.sharedInstance.create()
         ClassTypeTable.sharedInstance.create()
-        
+
+        ClassCompetitionTable.sharedInstance.create()
+        ClassCompetitionTypeTable.sharedInstance.create()
+
         StudioLocationTypeTable.sharedInstance.create()
 
         // make sure the tables exist.... if not - then create it
