@@ -187,7 +187,7 @@ final class PRJDBTables {
         ClassStatusTable.sharedInstance.create()
         ClassTypeTable.sharedInstance.create()
 
-        ClassCompetitionTable.sharedInstance.create()
+        ClassCompetitionDateTable.sharedInstance.create()
         ClassCompetitionTypeTable.sharedInstance.create()
         ClassCompetitionRegistrationTable.sharedInstance.create()
 

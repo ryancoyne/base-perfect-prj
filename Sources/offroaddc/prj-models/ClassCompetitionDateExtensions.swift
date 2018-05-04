@@ -5,9 +5,9 @@
 //
 
 extension Dictionary where Key == String, Value == Any {
-    var class_competition : ClassCompetitionDictionary {
+    var class_competition_date : ClassCompetitionDateDictionary {
         get {
-            var bc = ClassCompetitionDictionary()
+            var bc = ClassCompetitionDateDictionary()
             bc.dic = self
             return bc
         }
@@ -18,7 +18,7 @@ extension Dictionary where Key == String, Value == Any {
 }
 
 //MARK: Badge-Key Dictionary Variable Values
-struct ClassCompetitionDictionary {
+struct ClassCompetitionDateDictionary {
     fileprivate var dic : [String:Any]!
     /// This variable key is "id". Set nil to remove from the dictionary.
     var id : Int? {
@@ -121,6 +121,32 @@ struct ClassCompetitionDictionary {
                 self.dic["class_type_id"] = newValue!
             } else {
                 self.dic.removeValue(forKey: "class_type_id")
+            }
+        }
+    }
+
+    var number_of_registrations : Int? {
+        get {
+            return self.dic["number_of_registrations"] as? Int
+        }
+        set {
+            if newValue != nil {
+                self.dic["number_of_registrations"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "number_of_registrations")
+            }
+        }
+    }
+
+    var number_of_waitlist : Int? {
+        get {
+            return self.dic["number_of_waitlist"] as? Int
+        }
+        set {
+            if newValue != nil {
+                self.dic["number_of_waitlist"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "number_of_waitlist")
             }
         }
     }

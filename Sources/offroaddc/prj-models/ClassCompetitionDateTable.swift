@@ -5,15 +5,15 @@
 import Foundation
 import PostgresStORM
 
-final class ClassCompetitionTable {
+final class ClassCompetitionDateTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
 
-    static let sharedInstance = ClassCompetitionTable()
-    let tbl = ClassCompetition()
+    static let sharedInstance = ClassCompetitionDateTable()
+    let tbl = ClassCompetitionDate()
 
     let tablelevel = 1.00
 
@@ -72,6 +72,8 @@ final class ClassCompetitionTable {
         createsql.append("private_competition boolean NOT NULL DEFAULT TRUE, ")
         createsql.append("competition_type_id integer NOT NULL DEFAULT 0, ")
         createsql.append("class_type_id integer NOT NULL DEFAULT 0, ")
+        createsql.append("number_of_registrations integer NOT NULL DEFAULT 0, ")
+        createsql.append("number_of_waitlist integer NOT NULL DEFAULT 0, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

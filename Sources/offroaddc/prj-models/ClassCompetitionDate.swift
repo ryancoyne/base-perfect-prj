@@ -11,7 +11,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class ClassCompetition: PostgresStORM {
+public class ClassCompetitionDate: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id                  : Int?    = nil
@@ -28,8 +28,11 @@ public class ClassCompetition: PostgresStORM {
     var competition_type_id : Int?    = nil
     var class_type_id       : Int?    = nil
 
+    var number_of_registrations : Int?    = nil
+    var number_of_waitlist      : Int?    = nil
+
     //MARK: Table name
-    override public func table() -> String { return "class_competition" }
+    override public func table() -> String { return "class_competition_date" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -54,40 +57,48 @@ public class ClassCompetition: PostgresStORM {
             modifiedby = data
         }
         
-        if let data = this.data.class_competition.name {
+        if let data = this.data.class_competition_date.name {
             name = data
         }
         
-        if let data = this.data.class_competition.start_time {
+        if let data = this.data.class_competition_date.start_time {
             start_time = data
         }
         
-        if let data = this.data.class_competition.end_time {
+        if let data = this.data.class_competition_date.end_time {
             end_time = data
         }
         
-        if let data = this.data.class_competition.private_competition {
+        if let data = this.data.class_competition_date.private_competition {
             private_competition = data
         }
         
-        if let data = this.data.class_competition.leader_user_id {
+        if let data = this.data.class_competition_date.leader_user_id {
             leader_user_id = data
         }
         
-        if let data = this.data.class_competition.competition_type_id {
+        if let data = this.data.class_competition_date.competition_type_id {
             competition_type_id = data
         }
         
-        if let data = this.data.class_competition.class_type_id {
+        if let data = this.data.class_competition_date.class_type_id {
             class_type_id = data
+        }
+
+        if let data = this.data.class_competition_date.number_of_registrations {
+            number_of_registrations = data
+        }
+
+        if let data = this.data.class_competition_date.number_of_waitlist {
+            number_of_waitlist = data
         }
 
     }
     
-    func rows() -> [ClassCompetition] {
-        var rows = [ClassCompetition]()
+    func rows() -> [ClassCompetitionDate] {
+        var rows = [ClassCompetitionDate]()
         for i in 0..<self.results.rows.count {
-            let row = ClassCompetition()
+            let row = ClassCompetitionDate()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -135,6 +146,16 @@ public class ClassCompetition: PostgresStORM {
                     self.class_type_id = v
                 }
 
+            case "number_of_registrations":
+                if let v = (value as? Int) {
+                    self.number_of_registrations = v
+                }
+
+            case "number_of_waitlist":
+                if let v = (value as? Int) {
+                    self.number_of_waitlist = v
+                }
+
             default:
                 print("This should not occur")
             }
@@ -172,37 +193,45 @@ public class ClassCompetition: PostgresStORM {
         
         
         if self.name.isNotNil {
-            dictionary.class_competition.name = self.name
+            dictionary.class_competition_date.name = self.name
         }
         
         if self.start_time.isNotNil {
-            dictionary.class_competition.start_time = self.start_time
+            dictionary.class_competition_date.start_time = self.start_time
         }
 
         if self.end_time.isNotNil {
-            dictionary.class_competition.end_time = self.end_time
+            dictionary.class_competition_date.end_time = self.end_time
         }
 
         // the default is TRUE
-        dictionary.class_competition.private_competition = self.private_competition
+        dictionary.class_competition_date.private_competition = self.private_competition
 
         if self.leader_user_id.isNotNil {
-            dictionary.class_competition.leader_user_id = self.leader_user_id
+            dictionary.class_competition_date.leader_user_id = self.leader_user_id
         }
 
         if self.competition_type_id.isNotNil {
-            dictionary.class_competition.competition_type_id = self.competition_type_id
+            dictionary.class_competition_date.competition_type_id = self.competition_type_id
         }
 
         if self.class_type_id.isNotNil {
-            dictionary.class_competition.class_type_id = self.class_type_id
+            dictionary.class_competition_date.class_type_id = self.class_type_id
+        }
+
+        if self.number_of_registrations.isNotNil {
+            dictionary.class_competition_date.number_of_registrations = self.number_of_registrations
+        }
+
+        if self.number_of_waitlist.isNotNil {
+            dictionary.class_competition_date.number_of_waitlist = self.number_of_waitlist
         }
 
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: ClassCompetition)-> Bool {
+    func compare(targetItem: ClassCompetitionDate)-> Bool {
         
         var diff = true
         
@@ -231,6 +260,14 @@ public class ClassCompetition: PostgresStORM {
         }
 
         if diff == true, self.class_type_id != targetItem.class_type_id {
+            diff = false
+        }
+
+        if diff == true, self.number_of_registrations != targetItem.number_of_registrations {
+            diff = false
+        }
+
+        if diff == true, self.number_of_waitlist != targetItem.number_of_waitlist {
             diff = false
         }
 
