@@ -189,6 +189,7 @@ final class PRJDBTables {
 
         ClassCompetitionTable.sharedInstance.create()
         ClassCompetitionTypeTable.sharedInstance.create()
+        ClassCompetitionRegistrationTable.sharedInstance.create()
 
         StudioLocationTypeTable.sharedInstance.create()
 

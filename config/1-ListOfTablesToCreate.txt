@@ -1,8 +1,6 @@
 Tables To Complete:
 
-ClassCompetitionAthletes.swift
-ClassCompetitionAthletesTable.swift
-ClassCompetitionAthletesExtensions.swift
+Add number_of_registrations, number_of_waitlist to class_competition and class_date
 
 GarminActivity.swift
 GarminActivityTable.swift

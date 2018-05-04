@@ -11,7 +11,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class ClassRegistration: PostgresStORM {
+public class ClassCompetitionRegistration: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -20,14 +20,14 @@ public class ClassRegistration: PostgresStORM {
     var modified   : Int?    = nil
     var modifiedby : String? = nil
     
-    var user_id         : String? = nil
-    var class_date_id   : Int? = nil
-    var registered      : Int? = nil
-    var registered_by   : String? = nil
-    var wait_list_order : Int? = nil
+    var user_id                     : String? = nil
+    var class_competition_date_id   : Int? = nil
+    var registered                  : Int? = nil
+    var registered_by               : String? = nil
+    var wait_list_order             : Int? = nil
 
     //MARK: Table name
-    override public func table() -> String { return "class_registration" }
+    override public func table() -> String { return "class_competition_registration" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -52,32 +52,32 @@ public class ClassRegistration: PostgresStORM {
             modifiedby = data
         }
         
-        if let data = this.data.class_registration.user_id {
+        if let data = this.data.class_competition_registration.user_id {
             user_id = data
         }
         
-        if let data = this.data.class_registration.class_date_id {
-            class_date_id = data
+        if let data = this.data.class_competition_registration.class_competition_date_id {
+            class_competition_date_id = data
         }
         
-        if let data = this.data.class_registration.registered {
+        if let data = this.data.class_competition_registration.registered {
             registered = data
         }
         
-        if let data = this.data.class_registration.registered_by {
+        if let data = this.data.class_competition_registration.registered_by {
             registered_by = data
         }
         
-        if let data = this.data.class_registration.wait_list_order {
+        if let data = this.data.class_competition_registration.wait_list_order {
             wait_list_order = data
         }
         
     }
     
-    func rows() -> [ClassRegistration] {
-        var rows = [ClassRegistration]()
+    func rows() -> [ClassCompetitionRegistration] {
+        var rows = [ClassCompetitionRegistration]()
         for i in 0..<self.results.rows.count {
-            let row = ClassRegistration()
+            let row = ClassCompetitionRegistration()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -95,9 +95,9 @@ public class ClassRegistration: PostgresStORM {
                     self.user_id = (value as! String)
                 }
 
-            case "class_date_id":
+            case "class_competition_date_id":
                 if let v = (value as? Int) {
-                    self.class_date_id = v
+                    self.class_competition_date_id = v
                 }
 
             case "registered":
@@ -146,30 +146,30 @@ public class ClassRegistration: PostgresStORM {
         }
         
         if self.user_id.isNotNil {
-            dictionary.class_registration.user_id = self.user_id
+            dictionary.class_competition_registration.user_id = self.user_id
         }
         
-        if self.class_date_id.isNotNil {
-            dictionary.class_registration.class_date_id = self.class_date_id
+        if self.class_competition_date_id.isNotNil {
+            dictionary.class_competition_registration.class_competition_date_id = self.class_competition_date_id
         }
 
         if self.registered.isNotNil {
-            dictionary.class_registration.registered = self.registered
+            dictionary.class_competition_registration.registered = self.registered
         }
 
         if self.registered_by.isNotNil {
-            dictionary.class_registration.registered_by = self.registered_by
+            dictionary.class_competition_registration.registered_by = self.registered_by
         }
 
         if self.wait_list_order.isNotNil {
-            dictionary.class_registration.wait_list_order = self.wait_list_order
+            dictionary.class_competition_registration.wait_list_order = self.wait_list_order
         }
 
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: ClassRegistration)-> Bool {
+    func compare(targetItem: ClassCompetitionRegistration)-> Bool {
         
         var diff = true
         
@@ -177,7 +177,7 @@ public class ClassRegistration: PostgresStORM {
             diff = false
         }
         
-        if diff == true, self.class_date_id != targetItem.class_date_id {
+        if diff == true, self.class_competition_date_id != targetItem.class_competition_date_id {
             diff = false
         }
         
