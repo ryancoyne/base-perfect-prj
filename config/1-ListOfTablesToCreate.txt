@@ -1,9 +1,5 @@
 Tables To Complete:
 
-ClassType.swift
-ClassTypeTable.swift
-ClassTypeExtensions.swift
-
 Competition.swift
 CompetitionTable.swift
 CompetitionExtensions.swift

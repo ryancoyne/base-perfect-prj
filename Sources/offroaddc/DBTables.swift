@@ -185,6 +185,7 @@ final class PRJDBTables {
         ClassMainTable.sharedInstance.create()
         ClassRegistrationTable.sharedInstance.create()
         ClassStatusTable.sharedInstance.create()
+        ClassTypeTable.sharedInstance.create()
 
         // make sure the tables exist.... if not - then create it
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
