@@ -83,7 +83,8 @@
                     "url":"",
                     "username":"",
                     "password":"",
-                    "location_service_id":""
+                    "location_service_id":"",
+                    "api_key":""
                 },
                 "server2": {
                     "server_id": 2,
@@ -92,7 +93,8 @@
                     "url":"",
                     "username":"",
                     "password":"",
-                    "location_service_id":""
+                    "location_service_id":"",
+                    "api_key":""
                 }
             }
         }

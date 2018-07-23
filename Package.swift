@@ -15,5 +15,6 @@ let package = Package(
 		.Package(url: "https://github.com/michaelsilvers/SwiftGD.git", majorVersion: 1),
 		.Package(url: "https://mikesilvers@bitbucket.org/clearcodex/jsonconfigenhanced.git", majorVersion: 1),
 		.Package(url: "https://github.com/iamjono/SwiftMoment.git", majorVersion: 1),
+        .Package(url: "https://github.com/gcharita/XMLMapper.git", majorVersion: 1),
 	]
 )
