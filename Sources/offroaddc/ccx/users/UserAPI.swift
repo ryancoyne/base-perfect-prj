@@ -1032,39 +1032,69 @@ func appExtras(_ request: HTTPRequest) -> [String : Any] {
 //MARK: - Oauth Support:
 typealias JSONOAuthReturn = (passed: Bool, data: [String:Any], foreignuserid : String)
 struct FacebookOAuth  {
+    var appId : String = "823706624496654"
+    var appSecret : String = "1aef7c76d58bfae425e91a5b5209c333"
     func verifyCredentials(_ data : [String:Any]) throws -> JSONOAuthReturn {
+        
+        // We need to hit the debug token api, not the graph api about the user:
         if let access_token = data.facebook["access_token"].stringValue, let userid = data.facebook["id"].stringValue {
+            let verifyURL = "https://graph.facebook.com/debug_token?input_token=\(access_token)&access_token=\(appId+"|"+appSecret)"
+            // Okay we need to make sure this token is for our app:
+            let result = Utility2.makeRequest(.get, verifyURL)
             
-            var fbdata = getFBData(access_token, fields: ["id", "first_name", "last_name","email", "picture.width(500).height(500).as(large_picture)", "picture.width(75).height(75).as(small_picture)"])
-            
-            // Overwrite the fbData dictionary to normalize it for the createOrLogin function.
-            if let smallpic = fbdata["small_picture"].dicValue["data"].dicValue["url"].stringValue {
-                fbdata["small_picture"] = smallpic
-            }
-            if let largepic = fbdata["large_picture"].dicValue["data"].dicValue["url"].stringValue {
-                fbdata["large_picture"] = largepic
-            }
-            if fbdata["first_name"].isNotNil {
-                fbdata["firstname"] = fbdata["first_name"]
-                fbdata.removeValue(forKey: "first_name")
-            }
-            if fbdata["last_name"].isNotNil {
-                fbdata["lastname"] = fbdata["last_name"]
-                fbdata.removeValue(forKey: "last_name")
-            }
-            if fbdata["email"].isNotNil {
-                fbdata["email_verified"] = true
+            // Lets see if the result is successful:
+            if let data = result["data"].dicValue {
+                // We have data to check!
+                if let appId = data["app_id"].stringValue {
+                    // Check the app id to what we have:
+                    return (appId == self.appId, result, userid)
+                } else {
+                    return (false, result, userid)
+                }
+                
+            } else {
+                // There must have been an error:
+                return (false, result, userid)
             }
             
-            return (userid == fbdata["id"].stringValue, fbdata, userid)
-            
+        } else {
+            // Send an indication error?
+            return (false, [:], "")
         }
-        return (false, [:], "")
+        
+        
+//        if let access_token = data.facebook["access_token"].stringValue, let userid = data.facebook["id"].stringValue {
+//
+//            var fbdata = getFBData(access_token, fields: ["id", "first_name", "last_name","email", "picture.width(500).height(500).as(large_picture)", "picture.width(75).height(75).as(small_picture)"])
+//
+//            // Overwrite the fbData dictionary to normalize it for the createOrLogin function.
+//            if let smallpic = fbdata["small_picture"].dicValue["data"].dicValue["url"].stringValue {
+//                fbdata["small_picture"] = smallpic
+//            }
+//            if let largepic = fbdata["large_picture"].dicValue["data"].dicValue["url"].stringValue {
+//                fbdata["large_picture"] = largepic
+//            }
+//            if fbdata["first_name"].isNotNil {
+//                fbdata["firstname"] = fbdata["first_name"]
+//                fbdata.removeValue(forKey: "first_name")
+//            }
+//            if fbdata["last_name"].isNotNil {
+//                fbdata["lastname"] = fbdata["last_name"]
+//                fbdata.removeValue(forKey: "last_name")
+//            }
+//            if fbdata["email"].isNotNil {
+//                fbdata["email_verified"] = true
+//            }
+//
+//            return (userid == fbdata["id"].stringValue, fbdata, userid)
+//
+//        }
+//        return (false, [:], "")
     }
     func getFBData(_ accessToken : String, fields : [String]) -> [String:Any] {
-        let checkURL = "https://graph.facebook.com/v2.8/me?fields=\(fields.joined(separator: "%2C"))&access_token=\(accessToken)"
+        let dataURL = "https://graph.facebook.com/v2.8/me?fields=\(fields.joined(separator: "%2C"))&access_token=\(accessToken)"
         // Okay lets make sure it matches the id passed in:
-        return Utility2.makeRequest(.get, checkURL)
+        return Utility2.makeRequest(.get, dataURL)
     }
 }
 
