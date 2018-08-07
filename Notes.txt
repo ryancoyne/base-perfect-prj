@@ -1,3 +1,8 @@
+After creating the XCODE project, change the working directory in the Scheme.
+1. Select the project Scheme.  Use "Edit Scheme"
+2. Check "Working Directory"
+3. Select the current working directory so the base directory is correct.
+
 For development on the MAC - you will need the CD lib installed:
 
 brew uninstall libgd
@@ -9,9 +14,17 @@ Also install libxml2 for Perfect-XML:
 brew install libxml2
 brew link --force libxml2
 
+For POSTGRES:
+Install POSTGIS:
+brew install postgis
 
+Create the user in Postgres:
+CREATE USER bucket WITH
+  LOGIN
+  SUPERUSER
+  INHERIT
+  NOCREATEDB
+  NOCREATEROLE
+  NOREPLICATION;
 
-
-
-
-
+  Add the password to the user in POSTGRES

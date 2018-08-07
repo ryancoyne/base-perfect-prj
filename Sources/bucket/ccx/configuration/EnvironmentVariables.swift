@@ -104,6 +104,7 @@ final class EnvironmentVariables {
                     var thedata:String?
                     try thedata = file.readString()
 
+                    print(thedata)
                     // this section will parse out the servers and add them to the service
                     var json:[String:Any]?
                     if thedata.isNotNil {
