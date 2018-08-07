@@ -249,6 +249,8 @@ final class CCXDBTables {
         createsql.append("createdby text COLLATE pg_catalog.default, ")
         createsql.append("modified integer NOT NULL DEFAULT 0, ")
         createsql.append("modifiedby text COLLATE pg_catalog.default, ")
+        createsql.append("deleted integer NOT NULL DEFAULT 0, ")
+        createsql.append("deletedby text COLLATE pg_catalog.default, ")
 
         return createsql
     }
