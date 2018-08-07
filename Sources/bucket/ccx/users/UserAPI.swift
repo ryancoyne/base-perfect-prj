@@ -985,8 +985,9 @@ struct UserAPI {
         
         var returnDict:[String:Any] = [:]
         
-        // call stages and return the user associations
-        let results = StagesConnecter.sharedInstance.associateUsers(user)
+        // Call outside associations, if needed
+//        let results = StagesConnecter.sharedInstance.associateUsers(user)
+        let results:[String:Any] = [:]
         for (key,value) in results {
             returnDict[key] = value
         }

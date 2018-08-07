@@ -254,7 +254,6 @@ routes = routes + UserAPI.web.routes
 routes = routes + InstallationsV1Controller.json.routes
 routes = routes + CCXStatisticsV1Controller.json.routes
 routes = routes + FriendAPI.json.routes
-routes = routes + ExternalServicesAPI.json.routes
 
 //MARK:-
 //MARK: Initilization functions - only when we move to a new server that has not been initilized
@@ -292,39 +291,39 @@ func filters() -> [[String: Any]] {
 
 //MARK: -
 //MARK: External API Call configuration - this is where you set the service_id to process the correct service.
-if let servicelist = EnvironmentVariables.sharedInstance.ConnectionServices {
-    for service in servicelist {
-        
-        if let srv_id = service.service_id {
-            switch srv_id {
-            case 1:
-                
-                // we want to connect even if we are not using it right away
-                StagesConnecter.sharedInstance.services = service
-                StagesConnecter.sharedInstance.login()
-
-                // check to see if you should run the entire process on startup
-                if let chk = EnvironmentVariables.sharedInstance.CheckOnStart_Server1, chk {
-                
-                    // GET USERS and associate
-                    ExternalServicesConnecter.sharedInstance.server1SyncUsers()
-                }
-                
-            case 2:
-                if let chk = EnvironmentVariables.sharedInstance.CheckOnStart_Server2, chk {
-
-                    // MINDBODY CONNECTOR
-                    ExternalServicesConnecter.sharedInstance.server2SyncUsers()
-
-                }
-
-            default:
-                // not really doing anything here as this should not occur
-                print("This should not occur, but it did.  service_id: \(srv_id)")
-            }
-        }
-    }
-}
+//if let servicelist = EnvironmentVariables.sharedInstance.ConnectionServices {
+//    for service in servicelist {
+//        
+//        if let srv_id = service.service_id {
+//            switch srv_id {
+//            case 1:
+//                
+//                // we want to connect even if we are not using it right away
+//                StagesConnecter.sharedInstance.services = service
+//                StagesConnecter.sharedInstance.login()
+//
+//                // check to see if you should run the entire process on startup
+//                if let chk = EnvironmentVariables.sharedInstance.CheckOnStart_Server1, chk {
+//                
+//                    // GET USERS and associate
+//                    ExternalServicesConnecter.sharedInstance.server1SyncUsers()
+//                }
+//                
+//            case 2:
+//                if let chk = EnvironmentVariables.sharedInstance.CheckOnStart_Server2, chk {
+//
+//                    // MINDBODY CONNECTOR
+//                    ExternalServicesConnecter.sharedInstance.server2SyncUsers()
+//
+//                }
+//
+//            default:
+//                // not really doing anything here as this should not occur
+//                print("This should not occur, but it did.  service_id: \(srv_id)")
+//            }
+//        }
+//    }
+//}
 
 //MARK:-
 //MARK: Server configuration

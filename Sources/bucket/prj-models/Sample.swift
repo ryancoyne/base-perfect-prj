@@ -1,5 +1,5 @@
 //
-//  Installation.swift
+//  Sample.swift
 //  findapride
 //
 //  Created by Mike Silvers on 7/2/17.
@@ -11,7 +11,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class UsersRaw: PostgresStORM {
+public class Sample: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -36,7 +36,7 @@ public class UsersRaw: PostgresStORM {
     var phone      : String?    = nil
 
     //MARK: Table name
-    override public func table() -> String { return "users_raw" }
+    override public func table() -> String { return "sample" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -115,10 +115,10 @@ public class UsersRaw: PostgresStORM {
 
     }
     
-    func rows() -> [UsersRaw] {
-        var rows = [UsersRaw]()
+    func rows() -> [Sample] {
+        var rows = [Sample]()
         for i in 0..<self.results.rows.count {
-            let row = UsersRaw()
+            let row = Sample()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -286,7 +286,7 @@ public class UsersRaw: PostgresStORM {
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: UsersRaw)-> Bool {
+    func compare(targetItem: Sample)-> Bool {
         
         var diff = true
         

@@ -1,13 +1,13 @@
 //
-//  BadgeExtensions.swift
+//  SampleExtensions.swift
 //
 //  Created by Mike Silvers on 01/21/18.
 //
 
 extension Dictionary where Key == String, Value == Any {
-    var users_raw : UsersRawDictionary {
+    var users_raw : SampleDictionary {
         get {
-            var bc = UsersRawDictionary()
+            var bc = SampleDictionary()
             bc.dic = self
             return bc
         }
@@ -18,7 +18,7 @@ extension Dictionary where Key == String, Value == Any {
 }
 
 //MARK: Badge-Key Dictionary Variable Values
-struct UsersRawDictionary {
+struct SampleDictionary {
     fileprivate var dic : [String:Any]!
     /// This variable key is "id". Set nil to remove from the dictionary.
     var id : Int? {

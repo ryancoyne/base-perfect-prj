@@ -114,24 +114,25 @@ final class EnvironmentVariables {
                             servers = ss
                         }
                         
-                        if servers.isNotNil {
-                            // process the servers individually
-                            var tmpConnectionServices:[Service] = []
-                            for (_,value) in servers! {
-                                if let _value = value as? [String:Any] {
-                                    if let tmpsrv = Service(json: _value) {
-                                        // this is where we are adding the connection services to the mix
-                                        tmpConnectionServices.append(tmpsrv)
-                                    }
-                                }
-                            }
-                            // if we parsed services, then save them
-                            if tmpConnectionServices.count > 0 {
-                                self.ConnectionServices = tmpConnectionServices
-                            } else {
-                                self.ConnectionServices = nil
-                            }
-                        }
+//                        if servers.isNotNil {
+//                            // process the servers individually
+//                            var tmpConnectionServices:[Service] = []
+//                            for (_,value) in servers! {
+//                                if let _value = value as? [String:Any] {
+//                                    if let tmpsrv = Service(json: _value) {
+//                                        // this is where we are adding the connection services to the mix
+//                                        tmpConnectionServices.append(tmpsrv)
+//                                    }
+//                                }
+//                            }
+//                            // if we parsed services, then save them
+//                            if tmpConnectionServices.count > 0 {
+//                                self.ConnectionServices = tmpConnectionServices
+//                            } else {
+//                                self.ConnectionServices = nil
+//                            }
+//                        }
+                        
                     }
                 } catch {
                     print("There was a problem with the conversion of the servers.")
@@ -839,19 +840,19 @@ final class EnvironmentVariables {
         }
     }
     
-    private var _ConnectionServices: [Service]?
-    public var ConnectionServices: [Service]? {
-        get {
-            return _ConnectionServices
-        }
-        set {
-            if newValue != nil {
-                _ConnectionServices = newValue!
-            } else {
-                _ConnectionServices = nil
-            }
-        }
-    }
+//    private var _ConnectionServices: [Service]?
+//    public var ConnectionServices: [Service]? {
+//        get {
+//            return _ConnectionServices
+//        }
+//        set {
+//            if newValue != nil {
+//                _ConnectionServices = newValue!
+//            } else {
+//                _ConnectionServices = nil
+//            }
+//        }
+//    }
 
 
     

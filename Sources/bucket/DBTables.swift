@@ -59,8 +59,8 @@ struct PRJTableLevels {
 }
 
 struct PRJDBTableDefaults {
-    static let title       = "OffRoad DC"
-    static let subTitle    = ""
+    static let title       = "Bucket Technologies"
+    static let subTitle    = "Goodbye Coins, Hello Change"
     static let logo        = "/assets/images/no-logo.png"
     static let logoSet     = "/assets/images/no-logo.png 1x, /assets/images/no-logo.svg 2x"
     static let sysinit     = "1"
@@ -179,19 +179,10 @@ final class PRJDBTables {
         }
 
         // tables not needing postgis
-        UsersRawTable.sharedInstance.create()
+        SampleTable.sharedInstance.create()
 
-        ClassDateTable.sharedInstance.create()
-        ClassMainTable.sharedInstance.create()
-        ClassRegistrationTable.sharedInstance.create()
-        ClassStatusTable.sharedInstance.create()
-        ClassTypeTable.sharedInstance.create()
-
-        ClassCompetitionDateTable.sharedInstance.create()
-        ClassCompetitionTypeTable.sharedInstance.create()
-        ClassCompetitionRegistrationTable.sharedInstance.create()
-
-        StudioLocationTypeTable.sharedInstance.create()
+        // Bucket specific tables
+        
 
         // make sure the tables exist.... if not - then create it
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
@@ -313,7 +304,7 @@ final class PRJDBTables {
     //MARK: creating table template
     private func createTable() {
         
-        let tbl = SampleTable()
+        let tbl = SampleTable.sharedInstance.tbl
         
         // make sure the table level is correct
         let config = Config()
@@ -341,7 +332,7 @@ final class PRJDBTables {
     
     private func updateSample(currentlevel: Double) {
         
-        let tbl = SampleTable()
+        let tbl = SampleTable.sharedInstance.tbl
         
         // PERFORM THE UPDATE ACCORFING TO REQUIREMENTS
         print("UPDATE \(tbl.table().uppercased()).  Current Level \(currentlevel), Required Level: \(PRJTableLevels.sampletable)")
