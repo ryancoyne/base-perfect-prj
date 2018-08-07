@@ -1045,56 +1045,54 @@ struct FacebookOAuth  {
             // Lets see if the result is successful:
             if let data = result["data"].dicValue {
                 // We have data to check!
-                if let appId = data["app_id"].stringValue {
+                if let appId = data["app_id"].stringValue, let userId = data["user_id"].stringValue {
                     // Check the app id to what we have:
-                    return (appId == self.appId, result, userid)
+                    if appId == self.appId && userid == userId {
+                        // We need to go and get the data now from fb:
+                        let fbdata = getFBData(access_token, fields: ["id", "first_name", "last_name","email", "picture.width(500).height(500).as(large_picture)", "picture.width(75).height(75).as(small_picture)"])
+                        return (true, fbdata, userid)
+                        
+                    } else {
+                        // Return an error indicating the incorrect app?
+                        return (false, [:], userid)
+                    }
                 } else {
                     return (false, result, userid)
                 }
-                
             } else {
                 // There must have been an error:
                 return (false, result, userid)
             }
-            
         } else {
             // Send an indication error?
             return (false, [:], "")
         }
-        
-        
-//        if let access_token = data.facebook["access_token"].stringValue, let userid = data.facebook["id"].stringValue {
-//
-//            var fbdata = getFBData(access_token, fields: ["id", "first_name", "last_name","email", "picture.width(500).height(500).as(large_picture)", "picture.width(75).height(75).as(small_picture)"])
-//
-//            // Overwrite the fbData dictionary to normalize it for the createOrLogin function.
-//            if let smallpic = fbdata["small_picture"].dicValue["data"].dicValue["url"].stringValue {
-//                fbdata["small_picture"] = smallpic
-//            }
-//            if let largepic = fbdata["large_picture"].dicValue["data"].dicValue["url"].stringValue {
-//                fbdata["large_picture"] = largepic
-//            }
-//            if fbdata["first_name"].isNotNil {
-//                fbdata["firstname"] = fbdata["first_name"]
-//                fbdata.removeValue(forKey: "first_name")
-//            }
-//            if fbdata["last_name"].isNotNil {
-//                fbdata["lastname"] = fbdata["last_name"]
-//                fbdata.removeValue(forKey: "last_name")
-//            }
-//            if fbdata["email"].isNotNil {
-//                fbdata["email_verified"] = true
-//            }
-//
-//            return (userid == fbdata["id"].stringValue, fbdata, userid)
-//
-//        }
-//        return (false, [:], "")
     }
+    
     func getFBData(_ accessToken : String, fields : [String]) -> [String:Any] {
         let dataURL = "https://graph.facebook.com/v2.8/me?fields=\(fields.joined(separator: "%2C"))&access_token=\(accessToken)"
-        // Okay lets make sure it matches the id passed in:
-        return Utility2.makeRequest(.get, dataURL)
+        
+        var fbdata = Utility2.makeRequest(.get, dataURL)
+        // Lets reformat the JSON:
+        if let smallpic = fbdata["small_picture"].dicValue["data"].dicValue["url"].stringValue {
+            fbdata["small_picture"] = smallpic
+        }
+        if let largepic = fbdata["large_picture"].dicValue["data"].dicValue["url"].stringValue {
+            fbdata["large_picture"] = largepic
+        }
+        if fbdata["first_name"].isNotNil {
+            fbdata["firstname"] = fbdata["first_name"]
+            fbdata.removeValue(forKey: "first_name")
+        }
+        if fbdata["last_name"].isNotNil {
+            fbdata["lastname"] = fbdata["last_name"]
+            fbdata.removeValue(forKey: "last_name")
+        }
+        if fbdata["email"].isNotNil {
+            fbdata["email_verified"] = true
+        }
+        
+        return fbdata
     }
 }
 
