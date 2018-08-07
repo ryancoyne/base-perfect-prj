@@ -1,42 +1,11 @@
 Tables To Complete:
 
-GarminActivity.swift
-GarminActivityTable.swift
-GarminActivityExtensions.swift
-
-GarminHeartRateZones.swift
-GarminHeartRateZonesTable.swift
-GarminHeartRateZonesExtensions.swift
-
-GarminLxExtension.swift
-GarminLxExtensionTable.swift
-GarminLxExtensionExtensions.swift
-
-GarminProfile.swift
-GarminProfileTable.swift
-GarminProfileExtensions.swift
-
-GarminSpeedZones.swift
-GarminSpeedZonesTable.swift
-GarminSpeedZonesExtensions.swift
-
-GarminTpxExtension.swift
-GarminTpxExtensionTable.swift
-GarminTpxExtensionExtensions.swift
+.swift
+Table.swift
+Extensions.swift
 
 States.swift
 StatesTable.swift
 StatesExtensions.swift
 
-Studio.swift
-StudioTable.swift
-StudioExtensions.swift
-
-StudioLocation.swift
-StudioLocationTable.swift
-StudioLocationExtensions.swift
-
-.swift
-Table.swift
-Extensions.swift
 

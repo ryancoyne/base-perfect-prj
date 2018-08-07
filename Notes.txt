@@ -1,38 +1,17 @@
-CREATE TABLE public.schedule
-(
-    schedule_type_id integer,
-    start_date integer,
-    end_date integer,
-    source_1_external_id text COLLATE pg_catalog."default",
-    source_2_external_id text COLLATE pg_catalog."default",
-    source_1 integer,
-    source_2 integer
-)
+For development on the MAC - you will need the CD lib installed:
 
-CREATE TABLE public.schedule_athlete
-(
-    schedule_id integer,
-    user_id text COLLATE pg_catalog."default"
-)
+brew uninstall libgd
+brew install libgd --with-freetype --with-libtiff --with-libvpx
+brew info libgd
 
-CREATE TABLE public.schedule_type
-(
-    description text COLLATE pg_catalog."default"
-)
+Also install libxml2 for Perfect-XML:
 
-CREATE TABLE public.sources
-(
-    name text COLLATE pg_catalog."default",
-    external_id text COLLATE pg_catalog."default",
-    url text COLLATE pg_catalog."default",
-    display_name text COLLATE pg_catalog."default"
-)
+brew install libxml2
+brew link --force libxml2
 
-CREATE TABLE public.account_ext
-(
-    account_id text COLLATE pg_catalog."default",
-    source_1_external_id text COLLATE pg_catalog."default",
-    source_2_external_id text COLLATE pg_catalog."default",
-    source_1 integer,
-    source_2 integer
-)
+
+
+
+
+
+
