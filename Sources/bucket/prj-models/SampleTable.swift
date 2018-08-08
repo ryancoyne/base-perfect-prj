@@ -40,14 +40,42 @@ final class SampleTable {
             
             let _ = try! tbl.sqlRows(self.table(), params: [])
             
-            // add the deleted views
-            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsYes(tbl.table()), params: [])
-            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsNo(tbl.table()), params: [])
-
             // new one - set the default 1.00
             thesql = "INSERT INTO config(name,val) VALUES('table_\(tbl.table())','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
         }
+        
+        thesql = "SELECT val, name FROM config WHERE name = $1"
+        tr = try! config.sqlRows(thesql, params: ["view_\(tbl.table())_deleted_yes"])
+        if tr.count > 0 {
+            let testval = Double(tr[0].data["val"] as! String)
+            if testval != tablelevel {
+                // update to the new installation
+                self.update(currentlevel: testval!)
+            }
+        } else {
+            // add the deleted views
+            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsYes(tbl.table()), params: [])
+            // new one - set the default 1.00
+            thesql = "INSERT INTO config(name,val) VALUES('view_\(tbl.table())_deleted_yes','1.00')"
+            let _ = try! config.sqlRows(thesql, params: [])
+        }
+        
+        thesql = "SELECT val, name FROM config WHERE name = $1"
+        tr = try! config.sqlRows(thesql, params: ["view_\(tbl.table())_deleted_no"])
+        if tr.count > 0 {
+            let testval = Double(tr[0].data["val"] as! String)
+            if testval != tablelevel {
+                // update to the new installation
+                self.update(currentlevel: testval!)
+            }
+        } else {
+            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsNo(tbl.table()), params: [])
+            // new one - set the default 1.00
+            thesql = "INSERT INTO config(name,val) VALUES('view_\(tbl.table())_deleted_no','1.00')"
+            let _ = try! config.sqlRows(thesql, params: [])
+        }
+
     }
 
     private func update(currentlevel: Double) {
