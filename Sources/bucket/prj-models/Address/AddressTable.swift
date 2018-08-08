@@ -1,5 +1,5 @@
 //
-//  POSTable.swift
+//  AddressTable.swift
 //  bucket
 //
 //  Created by Ryan Coyne on 8/8/18.
@@ -8,15 +8,15 @@
 import Foundation
 import PostgresStORM
 
-final class POSTable {
+final class AddressTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
     
-    static let sharedInstance = POSTable()
-    let tbl = POS()
+    static let sharedInstance = AddressTable()
+    let tbl = Address()
     
     let tablelevel = 1.00
     
@@ -100,11 +100,20 @@ final class POSTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
-        createsql.append("name text COLLATE pg_catalog.default, ")
-        createsql.append("model text COLLATE pg_catalog.default, ")
-        createsql.append("description text COLLATE pg_catalog.default, ")
-        createsql.append("imageURL text COLLATE pg_catalog.default, ")
-    
+        createsql.append("source text COLLATE pg_catalog.default, ")
+        createsql.append("account_id text COLLATE pg_catalog.default, ")
+        createsql.append("source_id text COLLATE pg_catalog.default, ")
+        createsql.append("source_location_id text COLLATE pg_catalog.default, ")
+        createsql.append("name_first text COLLATE pg_catalog.default, ")
+        createsql.append("name_last text COLLATE pg_catalog.default, ")
+        createsql.append("name_full text COLLATE pg_catalog.default, ")
+        createsql.append("weight numeric(12,8) DEFAULT 0, ")
+        createsql.append("nickname text COLLATE pg_catalog.default, ")
+        createsql.append("email text COLLATE pg_catalog.default, ")
+        createsql.append("gender text COLLATE pg_catalog.default, ")
+        createsql.append("phone text COLLATE pg_catalog.default, ")
+        createsql.append("status text COLLATE pg_catalog.default, ")
+        
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
         createsql.append("); ")
@@ -114,4 +123,3 @@ final class POSTable {
         return createsql
     }
 }
-
