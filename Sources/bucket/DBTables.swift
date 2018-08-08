@@ -182,7 +182,8 @@ final class PRJDBTables {
         SampleTable.sharedInstance.create()
 
         // Bucket specific tables
-        
+        CountryTable.sharedInstance.create()
+        CurrencyTable.sharedInstance.create()
 
         // make sure the tables exist.... if not - then create it
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
