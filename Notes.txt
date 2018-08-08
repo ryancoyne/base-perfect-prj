@@ -18,6 +18,10 @@ For POSTGRES:
 Install POSTGIS:
 brew install postgis
 
+To Start and Stop Postgres:
+brew services start postgres
+brew services stop postgres
+
 Create the user in Postgres:
 CREATE USER bucket WITH
   LOGIN
