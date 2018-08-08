@@ -1,5 +1,5 @@
 //
-//  Retailer.swift
+//  ContactType.swift
 //  bucket
 //
 //  Created by Ryan Coyne on 8/8/18.
@@ -10,7 +10,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class Retailer: PostgresStORM {
+public class ContactType: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -22,13 +22,10 @@ public class Retailer: PostgresStORM {
     var deletedby  : String? = nil
     
     var contact_id     : Int? = nil
-    var name     : String? = nil
-    var is_suspended     : Bool? = nil
-    var is_verified     : Bool? = nil
-    var send_settlement_confirmation     : Bool? = nil
+    var description     : String? = nil
     
     //MARK: Table name
-    override public func table() -> String { return "retailer" }
+    override public func table() -> String { return "contact_type" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -61,32 +58,20 @@ public class Retailer: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.retailerDic.contactId {
+        if let data = this.data.contactsDic.contactId {
             contact_id = data
         }
         
-        if let data = this.data.retailerDic.name {
-            name = data
-        }
-        
-        if let data = this.data.retailerDic.isVerified {
-            is_verified = data
-        }
-        
-        if let data = this.data.retailerDic.isSuspended {
-            is_suspended = data
-        }
-    
-        if let data = this.data.retailerDic.sendSettlementConfirmation {
-            send_settlement_confirmation = data
+        if let data = this.data.shortdescription {
+            description = data
         }
         
     }
     
-    func rows() -> [Retailer] {
-        var rows = [Retailer]()
+    func rows() -> [ContactType] {
+        var rows = [ContactType]()
         for i in 0..<self.results.rows.count {
-            let row = Retailer()
+            let row = ContactType()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -99,24 +84,14 @@ public class Retailer: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "country_id":
+            case "contact_id":
                 if (value as? Int).isNotNil {
                     self.contact_id = (value as! Int)
                 }
                 
-            case "name":
+            case "description":
                 if (value as? String).isNotNil {
-                    self.name = (value as! String)
-                }
-                
-            case "is_suspended":
-                if (value as? Bool).isNotNil {
-                    self.is_suspended = (value as! Bool)
-                }
-                
-            case "is_approved":
-                if (value as? Bool).isNotNil {
-                    self.is_verified = (value as! Bool)
+                    self.description = (value as! String)
                 }
                 
             default:
@@ -164,23 +139,19 @@ public class Retailer: PostgresStORM {
             dictionary.retailerDic.contactId = self.contact_id
         }
         
-        if self.name.isNotNil {
-            dictionary.retailerDic.name = self.name
+        if self.contact_id.isNotNil {
+            dictionary.contactsDic.contactId = self.contact_id
         }
         
-        if self.is_suspended.isNotNil {
-            dictionary.retailerDic.isSuspended = self.is_suspended
-        }
-        
-        if self.is_verified.isNotNil {
-            dictionary.retailerDic.isVerified = self.is_verified
+        if self.description.isNotNil {
+            dictionary.shortdescription = self.description
         }
         
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: Retailer)-> Bool {
+    func compare(targetItem: ContactType)-> Bool {
         
         var diff = true
         
@@ -188,23 +159,12 @@ public class Retailer: PostgresStORM {
             diff = false
         }
         
-        if diff == true, self.name != targetItem.name {
+        if diff == true, self.description != targetItem.description {
             diff = false
         }
-        
-        if diff == true, self.is_verified != targetItem.is_verified {
-            diff = false
-        }
-        
-        if diff == true, self.is_suspended != targetItem.is_suspended {
-            diff = false
-        }
-        
-        if diff == true, self.send_settlement_confirmation != targetItem.send_settlement_confirmation {
-            diff = false
-        }
-        
+            
         return diff
         
     }
 }
+

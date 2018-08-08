@@ -27,7 +27,7 @@ public class RetailerContacts: PostgresStORM {
     var phone_number     : String? = nil
     
     //MARK: Table name
-    override public func table() -> String { return "terminal" }
+    override public func table() -> String { return "retailer_contacts" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
