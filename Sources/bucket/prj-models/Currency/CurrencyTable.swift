@@ -101,11 +101,9 @@ final class CurrencyTable {
         
         // table specific fields
         createsql.append("name text COLLATE pg_catalog.default, ")
-        createsql.append("local_name text COLLATE pg_catalog.default, ")
         createsql.append("code_numeric integer COLLATE pg_catalog.default, ")
-        createsql.append("code_alpha_2 text COLLATE pg_catalog.default, ")
-        createsql.append("code_alpha_3 text COLLATE pg_catalog.default, ")
-        
+        createsql.append("country_id text COLLATE pg_catalog.default, ")
+    
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
         createsql.append("); ")
