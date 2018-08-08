@@ -102,7 +102,6 @@ public class ContactType: PostgresStORM {
         
     }
     
-    
     func asDictionary() -> [String: Any] {
         
         var dictionary:[String:Any] = [:]
