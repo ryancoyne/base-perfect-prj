@@ -74,10 +74,10 @@ public class POS: PostgresStORM {
         
     }
     
-    func rows() -> [Currency] {
-        var rows = [Currency]()
+    func rows() -> [POS] {
+        var rows = [POS]()
         for i in 0..<self.results.rows.count {
-            let row = Currency()
+            let row = POS()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -95,14 +95,19 @@ public class POS: PostgresStORM {
                     self.name = (value as! String)
                 }
                 
-            case "code_numeric":
+            case "description":
                 if !(value as! String).isEmpty {
-                    self.code_numeric = (value as! String)
+                    self.description = (value as! String)
                 }
                 
-            case "country_id":
-                if (value as? Int).isNotNil {
-                    self.country_id = (value as! Int)
+            case "model":
+                if (value as? String).isNotNil {
+                    self.model = (value as! String)
+                }
+                
+            case "imageURL":
+                if (value as? String).isNotNil {
+                    self.imageURL = (value as! String)
                 }
                 
             default:
@@ -166,7 +171,7 @@ public class POS: PostgresStORM {
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: Currency)-> Bool {
+    func compare(targetItem: POS)-> Bool {
         
         var diff = true
         
@@ -174,11 +179,15 @@ public class POS: PostgresStORM {
             diff = false
         }
         
-        if diff == true, self.code_numeric != targetItem.code_numeric {
+        if diff == true, self.imageURL != targetItem.imageURL {
             diff = false
         }
         
-        if diff == true, self.country_id != targetItem.country_id {
+        if diff == true, self.model != targetItem.model {
+            diff = false
+        }
+        
+        if diff == true, self.description != targetItem.description {
             diff = false
         }
         
