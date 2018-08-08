@@ -255,14 +255,19 @@ final class CCXDBTables {
         return createsql
     }
     
-    public func addDeletedViews(_ tablename: String)-> String {
+    public func addDeletedViewsYes(_ tablename: String)-> String {
         
-        var deleteviewsql = "CREATE VIEW public.\(tablename)_view_deleted_yes "
+        var deleteviewsql = "CREATE VIEW public.\(tablename)_view_deleted_yes AS "
         deleteviewsql.append("SELECT * FROM \(tablename) WHERE deleted > 0; ")
 
-        deleteviewsql.append("CREATE VIEW public.\(tablename)_view_deleted_no ")
+        return deleteviewsql
+    }
+    
+    public func addDeletedViewsNo(_ tablename: String)-> String {
+        
+        var deleteviewsql = "CREATE VIEW public.\(tablename)_view_deleted_no AS "
         deleteviewsql.append("SELECT * FROM \(tablename) WHERE deleted = 0; ")
-
+        
         return deleteviewsql
     }
     

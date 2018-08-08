@@ -40,6 +40,10 @@ final class SampleTable {
             
             let _ = try! tbl.sqlRows(self.table(), params: [])
             
+            // add the deleted views
+            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsYes(tbl.table()), params: [])
+            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsNo(tbl.table()), params: [])
+
             // new one - set the default 1.00
             thesql = "INSERT INTO config(name,val) VALUES('table_\(tbl.table())','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
@@ -82,9 +86,6 @@ final class SampleTable {
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
         createsql.append("); ")
-        
-        // this adds the deleted views - only when the common fields have been added
-        createsql.append(CCXDBTables.sharedInstance.addDeletedViews(tbl.table()))
         
         print(createsql)
         
