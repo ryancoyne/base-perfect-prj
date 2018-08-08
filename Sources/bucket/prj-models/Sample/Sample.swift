@@ -240,6 +240,14 @@ public class Sample: PostgresStORM {
             dictionary.modifiedBy = self.modifiedby
         }
         
+        if self.deleted.isNotNil {
+            dictionary.deleted = self.deleted
+        }
+        
+        if self.deletedby.isNotNil {
+            dictionary.deletedBy = self.deletedby
+        }
+        
         if self.account_id.isNotNil {
             dictionary.users_raw.account_id = self.account_id
         }

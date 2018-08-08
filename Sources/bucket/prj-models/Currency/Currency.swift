@@ -137,6 +137,14 @@ public class Currency: PostgresStORM {
             dictionary.modifiedBy = self.modifiedby
         }
         
+        if self.deleted.isNotNil {
+            dictionary.deleted = self.deleted
+        }
+        
+        if self.deletedby.isNotNil {
+            dictionary.deletedBy = self.deletedby
+        }
+        
         if self.name.isNotNil {
             dictionary.countryDic.name = self.name
         }
