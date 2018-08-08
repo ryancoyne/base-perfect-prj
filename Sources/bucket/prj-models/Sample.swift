@@ -19,7 +19,9 @@ public class Sample: PostgresStORM {
     var createdby  : String? = nil
     var modified   : Int?    = nil
     var modifiedby : String? = nil
-    
+    var deleted    : Int?    = nil
+    var deletedby  : String? = nil
+
     var source     : String? = nil
     var account_id : String? = nil
     var source_id  : String? = nil
@@ -52,7 +54,11 @@ public class Sample: PostgresStORM {
         if let data = this.data.modified.intValue {
             modified = data
         }
-        
+
+        if let data = this.data.deleted.intValue {
+            deleted = data
+        }
+
         if let data = this.data.createdBy {
             createdby = data
         }
@@ -60,7 +66,11 @@ public class Sample: PostgresStORM {
         if let data = this.data.modifiedBy {
             modifiedby = data
         }
-        
+
+        if let data = this.data.deletedBy {
+            deletedby = data
+        }
+
         if let data = this.data.users_raw.account_id {
             account_id = data
         }

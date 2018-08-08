@@ -216,6 +216,18 @@ extension Dictionary where Key == String, Value == Any {
             return self["modified"].intValue ?? self["modified"] as? String
         }
     }
+    var deleted : Any? {
+        set {
+            if newValue != nil, newValue.intValue != 0 {
+                self["deleted"] = newValue
+            } else {
+                self.removeValue(forKey: "deleted")
+            }
+        }
+        get {
+            return self["deleted"].intValue ?? self["deleted"] as? String
+        }
+    }
     var createdBy : String? {
         set {
             if newValue != nil, !newValue.stringValue!.isEmpty {
@@ -238,6 +250,18 @@ extension Dictionary where Key == String, Value == Any {
         }
         get {
             return self["modifiedby"] as? String
+        }
+    }
+    var deletedBy : String? {
+        set {
+            if newValue != nil, !newValue.stringValue!.isEmpty {
+                self["deletedby"] = newValue
+            } else {
+                self.removeValue(forKey: "deletedby")
+            }
+        }
+        get {
+            return self["deletedby"] as? String
         }
     }
     var longdescription : String? {
