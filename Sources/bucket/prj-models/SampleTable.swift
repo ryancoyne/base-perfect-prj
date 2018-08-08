@@ -83,6 +83,9 @@ final class SampleTable {
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
         createsql.append("); ")
         
+        // this adds the deleted views - only when the common fields have been added
+        createsql.append(CCXDBTables.sharedInstance.addDeletedViews(tbl.table()))
+        
         print(createsql)
         
         return createsql
