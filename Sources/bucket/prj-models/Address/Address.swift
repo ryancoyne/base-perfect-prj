@@ -21,6 +21,9 @@ public class Address: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
+    var country_id     : Int? = nil
+    var retailer_id     : Int? = nil
+    var retailer_contact_id     : Int? = nil
     var postal_code     : String? = nil
     var state     : String? = nil
     var city : String? = nil
@@ -29,7 +32,7 @@ public class Address: PostgresStORM {
     var address3 : String? = nil
     
     //MARK: Table name
-    override public func table() -> String { return "pos" }
+    override public func table() -> String { return "address" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -62,16 +65,40 @@ public class Address: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.addressDic.name {
-            name = data
+        if let data = this.data.addressDic.countryId {
+           country_id  = data
         }
         
-        if let data = this.data.addressDic.model {
-            model = data
+        if let data = this.data.addressDic.retailerId {
+            retailer_id = data
         }
         
-        if let data = this.addressDic.shortdescription {
-            description = data
+        if let data = this.data.addressDic.retailerContactId {
+            retailer_contact_id = data
+        }
+        
+        if let data = this.data.addressDic.address1 {
+            address1 = data
+        }
+        
+        if let data = this.data.addressDic.address2 {
+            address2 = data
+        }
+        
+        if let data = this.data.addressDic.address3 {
+            address3 = data
+        }
+        
+        if let data = this.data.addressDic.city {
+            city = data
+        }
+        
+        if let data = this.data.addressDic.state {
+            state = data
+        }
+        
+        if let data = this.data.addressDic.postalCode {
+            postal_code = data
         }
         
     }
@@ -92,24 +119,49 @@ public class Address: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "name":
-                if !(value as! String).isEmpty {
-                    self.name = (value as! String)
+            case "country_id":
+                if (value as? Int).isNotNil {
+                    self.country_id = (value as! Int)
                 }
                 
-            case "description":
-                if !(value as! String).isEmpty {
-                    self.description = (value as! String)
+            case "retailer_id":
+                if (value as? Int).isNotNil {
+                    self.retailer_id = (value as! Int)
                 }
                 
-            case "model":
+            case "retailer_contact_id":
+                if (value as? Int).isNotNil {
+                    self.retailer_id = (value as! Int)
+                }
+                
+            case "address1":
                 if (value as? String).isNotNil {
-                    self.model = (value as! String)
+                    self.address1 = (value as! String)
                 }
                 
-            case "imageURL":
+            case "address2":
                 if (value as? String).isNotNil {
-                    self.imageURL = (value as! String)
+                    self.address2 = (value as! String)
+                }
+                
+            case "address3":
+                if (value as? String).isNotNil {
+                    self.address3 = (value as! String)
+                }
+                
+            case "postal_code":
+                if (value as? String).isNotNil {
+                    self.postal_code = (value as! String)
+                }
+                
+            case "city":
+                if (value as? String).isNotNil {
+                    self.city = (value as! String)
+                }
+                
+            case "state":
+                if (value as? String).isNotNil {
+                    self.state = (value as! String)
                 }
                 
             default:
@@ -153,20 +205,40 @@ public class Address: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
-        if self.name.isNotNil {
-            dictionary.posDic.name = self.name
+        if self.country_id.isNotNil {
+            dictionary.addressDic.countryId = self.country_id
         }
         
-        if self.model.isNotNil {
-            dictionary.posDic.model = self.model
+        if self.retailer_id.isNotNil {
+            dictionary.addressDic.retailerId = self.retailer_id
         }
         
-        if self.imageURL.isNotNil {
-            dictionary.posDic.imageURL = self.imageURL
+        if self.retailer_contact_id.isNotNil {
+            dictionary.addressDic.retailerContactId = self.retailer_contact_id
         }
         
-        if self.description.isNotNil {
-            dictionary.shortdescription = self.description
+        if self.address3.isNotNil {
+            dictionary.addressDic.address3 = self.address3
+        }
+        
+        if self.address2.isNotNil {
+            dictionary.addressDic.address2 = self.address2
+        }
+        
+        if self.address1.isNotNil {
+            dictionary.addressDic.address1 = self.address1
+        }
+        
+        if self.city.isNotNil {
+            dictionary.addressDic.city = self.city
+        }
+        
+        if self.state.isNotNil {
+            dictionary.addressDic.state = self.state
+        }
+        
+        if self.postal_code.isNotNil {
+            dictionary.addressDic.postalCode = self.postal_code
         }
         
         return dictionary
@@ -177,19 +249,39 @@ public class Address: PostgresStORM {
         
         var diff = true
         
-        if diff == true, self.name != targetItem.name {
+        if diff == true, self.country_id != targetItem.country_id {
             diff = false
         }
         
-        if diff == true, self.imageURL != targetItem.imageURL {
+        if diff == true, self.retailer_id != targetItem.retailer_id {
             diff = false
         }
         
-        if diff == true, self.model != targetItem.model {
+        if diff == true, self.retailer_contact_id != targetItem.retailer_contact_id {
             diff = false
         }
         
-        if diff == true, self.description != targetItem.description {
+        if diff == true, self.state != targetItem.state {
+            diff = false
+        }
+        
+        if diff == true, self.city != targetItem.city {
+            diff = false
+        }
+        
+        if diff == true, self.postal_code != targetItem.postal_code {
+            diff = false
+        }
+        
+        if diff == true, self.address3 != targetItem.address3 {
+            diff = false
+        }
+        
+        if diff == true, self.address2 != targetItem.address2 {
+            diff = false
+        }
+        
+        if diff == true, self.address1 != targetItem.address1 {
             diff = false
         }
         

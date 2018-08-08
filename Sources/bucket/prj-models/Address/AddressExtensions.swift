@@ -35,9 +35,9 @@ struct AddressDictionary {
         }
     }
     
-    var countryId : String? {
+    var countryId : Int? {
         get {
-            return self.dic["country_id"].stringValue
+            return self.dic["country_id"].intValue
         }
         set {
             if newValue != nil {
@@ -47,15 +47,27 @@ struct AddressDictionary {
             }
         }
     }
-    var retailerId : String? {
+    var retailerId : Int? {
         get {
-            return self.dic["retailer_id"].stringValue
+            return self.dic["retailer_id"].intValue
         }
         set {
             if newValue != nil {
                 self.dic["retailer_id"] = newValue!
             } else {
                 self.dic.removeValue(forKey: "retailer_id")
+            }
+        }
+    }
+    var retailerContactId : Int? {
+        get {
+            return self.dic["retailer_contact_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["retailer_contact_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "retailer_contact_id")
             }
         }
     }

@@ -100,19 +100,15 @@ final class AddressTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
-        createsql.append("source text COLLATE pg_catalog.default, ")
-        createsql.append("account_id text COLLATE pg_catalog.default, ")
-        createsql.append("source_id text COLLATE pg_catalog.default, ")
-        createsql.append("source_location_id text COLLATE pg_catalog.default, ")
-        createsql.append("name_first text COLLATE pg_catalog.default, ")
-        createsql.append("name_last text COLLATE pg_catalog.default, ")
-        createsql.append("name_full text COLLATE pg_catalog.default, ")
-        createsql.append("weight numeric(12,8) DEFAULT 0, ")
-        createsql.append("nickname text COLLATE pg_catalog.default, ")
-        createsql.append("email text COLLATE pg_catalog.default, ")
-        createsql.append("gender text COLLATE pg_catalog.default, ")
-        createsql.append("phone text COLLATE pg_catalog.default, ")
-        createsql.append("status text COLLATE pg_catalog.default, ")
+        createsql.append("country_id int NOT NULL DEFAULT 0, ")
+        createsql.append("retailer_id int NOT NULL DEFAULT 0, ")
+        createsql.append("retailer_contact_id int NOT NULL DEFAULT 0, ")
+        createsql.append("address1 text COLLATE pg_catalog.default, ")
+        createsql.append("address2 text COLLATE pg_catalog.default, ")
+        createsql.append("address3 text COLLATE pg_catalog.default, ")
+        createsql.append("state text COLLATE pg_catalog.default, ")
+        createsql.append("postal_code text COLLATE pg_catalog.default, ")
+        createsql.append("city text COLLATE pg_catalog.default, ")
         
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

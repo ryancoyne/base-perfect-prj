@@ -179,7 +179,7 @@ final class PRJDBTables {
         }
 
         // tables not needing postgis
-        SampleTable.sharedInstance.create()
+//        SampleTable.sharedInstance.create()
 
         // Bucket specific tables
         CountryTable.sharedInstance.create()
