@@ -173,7 +173,18 @@ final class PRJDBTables {
                 conf.val = PRJDBTableDefaults.logoSet
                 try conf.create()
             }
-                        
+
+            try conf.find([("name", "defaultdata-prj")])
+            if conf.name == "" {
+                conf.name = "defaultdata-prj"
+                conf.val = PRJDBTableDefaults.defaultdata
+                try conf.create()
+            }
+
+            // do the config file
+            var conf = Config()
+            try? conf.setup()
+            
         } catch {
             print(error)
         }
@@ -191,8 +202,15 @@ final class PRJDBTables {
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
         if thereturn.postgis && thereturn.postgis_topo {
             // create the postgis tables here
+
             
+            
+            
+            // add the default data
+            self.insertDefaultData()
+
             // finally - lets add sample data - controlled by the condif table entry for sampledata (0 = no, 1 = yes)
+            self.insertSampleData()
 
         } else {
             // postgis support not on
@@ -205,6 +223,7 @@ final class PRJDBTables {
             LogFile.critical("psql -d \(PostgresConnector.database) -c \"CREATE EXTENSION postgis_topology;\"", eventid: eid)
 
         }
+        
     }
     
     //MARK:-
@@ -235,7 +254,12 @@ final class PRJDBTables {
         
         do {
             
+            // set the flag to allow sample data to be added:
+            // UPDATE config SET val=1 WHERE name='sampledata-prj'
+            
             // This is where we are adding the sample data
+            SampleData.sharedInstance.addUserData()
+            SampleData.sharedInstance.addAddressData()
 
         } catch {
             print(error)
@@ -265,11 +289,6 @@ final class PRJDBTables {
             let conf = Config()
             
             try conf.find([("name", "defaultdata-prj")])
-            if conf.name == "" {
-                conf.name = "defaultdata-prj"
-                conf.val = PRJDBTableDefaults.defaultdata
-                try conf.create()
-            }
 
             createsample = conf.val.toBool()!
 
@@ -283,7 +302,8 @@ final class PRJDBTables {
         
         do {
             
-            // This is where we are adding the sample data
+            // This is where we are adding the default data
+            InitializeData.sharedInstance.addCountryCodes()
 
         } catch {
             print(error)
