@@ -102,6 +102,7 @@ final class RetailerContactsTable {
         // table specific fields
         createsql.append("user_id text COLLATE pg_catalog.default, ")
         createsql.append("retailer_id int NOT NULL DEFAULT 0, ")
+        createsql.append("contact_type_id int NOT NULL DEFAULT 0, ")
         createsql.append("name text COLLATE pg_catalog.default, ")
         createsql.append("email_address text COLLATE pg_catalog.default, ")
         createsql.append("phone_number text COLLATE pg_catalog.default, ")

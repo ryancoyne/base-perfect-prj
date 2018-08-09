@@ -35,7 +35,7 @@ struct RetailerAPI {
             
                 guard let retailerId = request.retailerId else { return response.completed(status: .forbidden)  }
                 
-                
+                return response.completed(status: .ok)
                 
             }
         }

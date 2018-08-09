@@ -23,6 +23,7 @@ public class RetailerContacts: PostgresStORM {
     
     var user_id     : String? = nil
     var retailer_id : Int? = nil
+    var contact_type_id : Int? = nil
     var email_address     : String? = nil
     var name     : String? = nil
     var phone_number     : String? = nil
@@ -81,6 +82,10 @@ public class RetailerContacts: PostgresStORM {
             phone_number = data
         }
         
+        if let data = this.data.retailerContactsDic.contactTypeId {
+            contact_type_id = data
+        }
+        
     }
     
     func rows() -> [Retailer] {
@@ -102,6 +107,11 @@ public class RetailerContacts: PostgresStORM {
             case "user_id":
                 if (value as? String).isNotNil {
                     self.user_id = (value as! String)
+                }
+                
+            case "contact_type_id":
+                if (value as? Int).isNotNil {
+                    self.contact_type_id = (value as! Int)
                 }
                 
             case "name":
@@ -164,6 +174,10 @@ public class RetailerContacts: PostgresStORM {
             dictionary.retailerContactsDic.userId = self.user_id
         }
         
+        if self.contact_type_id.isNotNil {
+            dictionary.retailerContactsDic.contactTypeId = self.contact_type_id
+        }
+        
         if self.name.isNotNil {
             dictionary.retailerContactsDic.name = self.name
         }
@@ -185,6 +199,10 @@ public class RetailerContacts: PostgresStORM {
         var diff = true
         
         if diff == true, self.user_id != targetItem.user_id {
+            diff = false
+        }
+        
+        if diff == true, self.contact_type_id != targetItem.contact_type_id {
             diff = false
         }
         

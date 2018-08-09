@@ -21,8 +21,8 @@ public class ContactType: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var contact_id     : Int? = nil
     var description     : String? = nil
+    var name     : String? = nil
     
     //MARK: Table name
     override public func table() -> String { return "contact_type" }
@@ -58,12 +58,12 @@ public class ContactType: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.contactsDic.contactId {
-            contact_id = data
-        }
-        
         if let data = this.data.shortdescription {
             description = data
+        }
+        
+        if let data = this.data.contactTypeDic.name {
+            name = data
         }
         
     }
@@ -84,9 +84,9 @@ public class ContactType: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "contact_id":
-                if (value as? Int).isNotNil {
-                    self.contact_id = (value as! Int)
+            case "name":
+                if (value as? String).isNotNil {
+                    self.name = (value as! String)
                 }
                 
             case "description":
@@ -134,14 +134,10 @@ public class ContactType: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
-        if self.contact_id.isNotNil {
-            dictionary.contactsDic.contactId = self.contact_id
+        if self.name.isNotNil {
+            dictionary.contactTypeDic.name = self.name
         }
-        
-        if self.contact_id.isNotNil {
-            dictionary.contactsDic.contactId = self.contact_id
-        }
-        
+    
         if self.description.isNotNil {
             dictionary.shortdescription = self.description
         }
@@ -154,7 +150,7 @@ public class ContactType: PostgresStORM {
         
         var diff = true
         
-        if diff == true, self.contact_id != targetItem.contact_id {
+        if diff == true, self.name != targetItem.name {
             diff = false
         }
         
