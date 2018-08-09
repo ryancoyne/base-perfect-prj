@@ -25,7 +25,7 @@ struct RetailerAPI {
             return [
                 ["method":"get",    "uri":"/api/v1/closeInterval/{retailerId}", "handler":closeInterval],
                 ["method":"post",    "uri":"/api/v1/registerterminal", "handler":registerTerminal],
-                ["method":"get",    "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction]
+                ["method":"post",    "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction]
             ]
         }
         //MARK: - Close Interval Function
