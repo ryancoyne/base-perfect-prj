@@ -23,7 +23,7 @@ public class Currency: PostgresStORM {
     
     var name     : String? = nil
     var country_id     : Int? = nil
-    var code_numeric : String? = nil
+    var code_numeric : Int? = nil
 
     //MARK: Table name
     override public func table() -> String { return "currency" }
@@ -95,8 +95,8 @@ public class Currency: PostgresStORM {
                 }
                 
             case "code_numeric":
-                if !(value as! String).isEmpty {
-                    self.code_numeric = (value as! String)
+                if (value as? Int).isNotNil {
+                    self.code_numeric = (value as! Int)
                 }
                 
             case "country_id":

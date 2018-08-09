@@ -23,7 +23,7 @@ public class Country: PostgresStORM {
     
     var name     : String? = nil
     var local_name     : String? = nil
-    var code_numeric : String? = nil
+    var code_numeric : Int? = nil
     var code_alpha_3  : String? = nil
     var code_alpha_2 : String? = nil
     
@@ -115,8 +115,8 @@ public class Country: PostgresStORM {
                 }
                 
             case "code_numeric":
-                if !(value as! String).isEmpty {
-                    self.code_numeric = (value as! String)
+                if (value as? Int).isNotNil {
+                    self.code_numeric = (value as! Int)
                 }
                 
             case "code_alpha_3":

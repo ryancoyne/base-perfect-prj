@@ -49,7 +49,7 @@ struct CountryDictionary {
     }
     var localName : String? {
         get {
-            return self.dic["local_name"] as? String
+            return self.dic["local_name"].stringValue
         }
         set {
             if newValue != nil {
@@ -59,9 +59,9 @@ struct CountryDictionary {
             }
         }
     }
-    var codeNumeric : String? {
+    var codeNumeric : Int? {
         get {
-            return self.dic["code_numeric"] as? String
+            return self.dic["code_numeric"].intValue
         }
         set {
             if newValue != nil {
@@ -73,7 +73,7 @@ struct CountryDictionary {
     }
     var codeAlpha2 : String? {
         get {
-            return self.dic["code_alpha_2"] as? String
+            return self.dic["code_alpha_2"].stringValue
         }
         set {
             if newValue != nil {
@@ -85,7 +85,7 @@ struct CountryDictionary {
     }
     var codeAlpha3 : String? {
         get {
-            return self.dic["code_alpha_3"] as? String
+            return self.dic["code_alpha_3"].stringValue
         }
         set {
             if newValue != nil {

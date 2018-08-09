@@ -59,9 +59,9 @@ struct CurrencyDictionary {
             }
         }
     }
-    var codeNumeric : String? {
+    var codeNumeric : Int? {
         get {
-            return self.dic["code_numeric"].stringValue
+            return self.dic["code_numeric"].intValue
         }
         set {
             if newValue != nil {
