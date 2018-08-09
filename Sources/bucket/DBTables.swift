@@ -293,6 +293,11 @@ final class PRJDBTables {
             let conf = Config()
             
             try conf.find([("name", "defaultdata-prj")])
+            if conf.name == "" {
+                conf.name = "defaultdata-prj"
+                conf.val = PRJDBTableDefaults.defaultdata
+                try conf.create()
+            }
 
             createsample = conf.val.toBool()!
 
