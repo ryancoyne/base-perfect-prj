@@ -201,6 +201,11 @@ final class PRJDBTables {
         RetailerTable.sharedInstance.create()
         RetailerContactsTable.sharedInstance.create()
         ContactTypeTable.sharedInstance.create()
+        FormTable.sharedInstance.create()
+        FormFieldTable.sharedInstance.create()
+        FormFieldsTable.sharedInstance.create()
+        FormFieldTypeTable.sharedInstance.create()
+        CompletedFormsTable.sharedInstance.create()
 
         // make sure the tables exist.... if not - then create it
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
