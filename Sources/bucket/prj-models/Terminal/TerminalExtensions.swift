@@ -71,6 +71,18 @@ struct TerminalDictionary {
             }
         }
     }
+    var key : String? {
+        get {
+            return self.dic["key"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["key"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "key")
+            }
+        }
+    }
     var name : String? {
         get {
             return self.dic["name"].stringValue

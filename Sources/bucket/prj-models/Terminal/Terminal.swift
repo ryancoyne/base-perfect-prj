@@ -26,6 +26,7 @@ public class Terminal: PostgresStORM {
     var serial_number     : String? = nil
     var name     : String? = nil
     var is_approved     : Bool? = nil
+    var key : String? = nil
     
     //MARK: Table name
     override public func table() -> String { return "terminal" }
@@ -81,6 +82,10 @@ public class Terminal: PostgresStORM {
             is_approved = data
         }
         
+        if let data = this.data.terminalDic.key {
+            key = data
+        }
+        
     }
     
     func rows() -> [Terminal] {
@@ -112,6 +117,11 @@ public class Terminal: PostgresStORM {
             case "serial_number":
                 if (value as? String).isNotNil {
                     self.serial_number = (value as! String)
+                }
+                
+            case "key":
+                if (value as? String).isNotNil {
+                    self.key = (value as! String)
                 }
                 
             case "name":
@@ -169,6 +179,10 @@ public class Terminal: PostgresStORM {
             dictionary.terminalDic.posId = self.pos_id
         }
         
+        if self.key.isNotNil {
+            dictionary.terminalDic.key = self.key
+        }
+        
         if self.retailer_id.isNotNil {
             dictionary.terminalDic.retailerId = self.retailer_id
         }
@@ -198,6 +212,10 @@ public class Terminal: PostgresStORM {
         }
         
         if diff == true, self.retailer_id != targetItem.retailer_id {
+            diff = false
+        }
+        
+        if diff == true, self.key != targetItem.key {
             diff = false
         }
         
