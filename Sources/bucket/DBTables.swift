@@ -324,6 +324,10 @@ final class PRJDBTables {
             InitializeData.sharedInstance.addContactTypes()
             InitializeData.sharedInstance.addCashoutTypes()
             InitializeData.sharedInstance.addPOS()
+            InitializeData.sharedInstance.addFormFieldType()
+            InitializeData.sharedInstance.addFormField()
+            InitializeData.sharedInstance.addForms()
+            InitializeData.sharedInstance.addFormFields()
 
         } catch {
             print(error)
