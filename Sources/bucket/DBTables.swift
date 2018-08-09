@@ -194,6 +194,7 @@ final class PRJDBTables {
         FormFieldTable.sharedInstance.create()
         FormFieldsTable.sharedInstance.create()
         FormFieldTypeTable.sharedInstance.create()
+        CashoutTypesTable.sharedInstance.create()
         CompletedFormsTable.sharedInstance.create()
 
         // make sure the tables exist.... if not - then create it
