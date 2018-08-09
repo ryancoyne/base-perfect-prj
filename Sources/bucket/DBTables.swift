@@ -197,6 +197,10 @@ final class PRJDBTables {
         CurrencyTable.sharedInstance.create()
         POSTable.sharedInstance.create()
         AddressTable.sharedInstance.create()
+        TerminalTable.sharedInstance.create()
+        RetailerTable.sharedInstance.create()
+        RetailerContactsTable.sharedInstance.create()
+        ContactTypeTable.sharedInstance.create()
 
         // make sure the tables exist.... if not - then create it
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()

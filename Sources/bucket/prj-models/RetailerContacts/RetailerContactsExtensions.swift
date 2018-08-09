@@ -1,14 +1,14 @@
 //
-//  CurrencyExtensions.swift
+//  RetailerContactsExtensions.swift
 //  bucket
 //
 //  Created by Ryan Coyne on 8/8/18.
 //
 
 extension Dictionary where Key == String, Value == Any {
-    var currencyDic : CurrencyDictionary {
+    var retailerContactsDic : RetailerContactsDictionary {
         get {
-            var bc = CurrencyDictionary()
+            var bc = RetailerContactsDictionary()
             bc.dic = self
             return bc
         }
@@ -19,7 +19,7 @@ extension Dictionary where Key == String, Value == Any {
 }
 
 //MARK: Badge-Key Dictionary Variable Values
-struct CurrencyDictionary {
+struct RetailerContactsDictionary {
     fileprivate var dic : [String:Any]!
     /// This variable key is "id". Set nil to remove from the dictionary.
     var id : Int? {
@@ -35,6 +35,18 @@ struct CurrencyDictionary {
         }
     }
     
+    var userId : String? {
+        get {
+            return self.dic["user_id"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["user_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "user_id")
+            }
+        }
+    }
     var name : String? {
         get {
             return self.dic["name"].stringValue
@@ -47,39 +59,27 @@ struct CurrencyDictionary {
             }
         }
     }
-    var localName : String? {
+    var emailAddress : String? {
         get {
-            return self.dic["local_name"].stringValue
+            return self.dic["email_address"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["local_name"] = newValue!
+                self.dic["email_address"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "local_name")
+                self.dic.removeValue(forKey: "email_address")
             }
         }
     }
-    var codeNumeric : Int? {
+    var phoneNumber : String? {
         get {
-            return self.dic["code_numeric"].intValue
+            return self.dic["phone_number"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["code_numeric"] = newValue!
+                self.dic["phone_number"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "code_numeric")
-            }
-        }
-    }
-    var countryId : Int? {
-        get {
-            return self.dic["country_id"].intValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["country_id"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "country_id")
+                self.dic.removeValue(forKey: "phone_number")
             }
         }
     }

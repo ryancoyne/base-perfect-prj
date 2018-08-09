@@ -1,5 +1,5 @@
 //
-//  Currency.swift
+//  RetailerContacts.swift
 //  bucket
 //
 //  Created by Ryan Coyne on 8/8/18.
@@ -10,7 +10,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class Currency: PostgresStORM {
+public class RetailerContacts: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -21,12 +21,13 @@ public class Currency: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
+    var user_id     : String? = nil
+    var email_address     : String? = nil
     var name     : String? = nil
-    var country_id     : Int? = nil
-    var code_numeric : Int? = nil
-
+    var phone_number     : String? = nil
+    
     //MARK: Table name
-    override public func table() -> String { return "currency" }
+    override public func table() -> String { return "retailer_contacts" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -59,24 +60,28 @@ public class Currency: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.currencyDic.name {
+        if let data = this.data.retailerContactsDic.userId {
+            user_id = data
+        }
+        
+        if let data = this.data.retailerContactsDic.name {
             name = data
         }
         
-        if let data = this.data.currencyDic.codeNumeric {
-            code_numeric = data
+        if let data = this.data.retailerContactsDic.emailAddress {
+            email_address = data
         }
         
-        if let data = this.data.currencyDic.countryId {
-            country_id = data
+        if let data = this.data.retailerContactsDic.phoneNumber {
+            phone_number = data
         }
         
     }
     
-    func rows() -> [Currency] {
-        var rows = [Currency]()
+    func rows() -> [Retailer] {
+        var rows = [Retailer]()
         for i in 0..<self.results.rows.count {
-            let row = Currency()
+            let row = Retailer()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -89,19 +94,24 @@ public class Currency: PostgresStORM {
             
             switch key.lowercased() {
                 
+            case "user_id":
+                if (value as? String).isNotNil {
+                    self.user_id = (value as! String)
+                }
+                
             case "name":
-                if !(value as! String).isEmpty {
+                if (value as? String).isNotNil {
                     self.name = (value as! String)
                 }
                 
-            case "code_numeric":
-                if (value as? Int).isNotNil {
-                    self.code_numeric = (value as! Int)
+            case "email_address":
+                if (value as? String).isNotNil {
+                    self.email_address = (value as! String)
                 }
                 
-            case "country_id":
-                if (value as? Int).isNotNil {
-                    self.country_id = (value as! Int)
+            case "phone_number":
+                if (value as? String).isNotNil {
+                    self.phone_number = (value as! String)
                 }
                 
             default:
@@ -145,38 +155,46 @@ public class Currency: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
+        if self.user_id.isNotNil {
+            dictionary.retailerContactsDic.userId = self.user_id
+        }
+        
         if self.name.isNotNil {
-            dictionary.countryDic.name = self.name
+            dictionary.retailerContactsDic.name = self.name
         }
         
-        if self.country_id.isNotNil {
-            dictionary.currencyDic.countryId = self.country_id
+        if self.email_address.isNotNil {
+            dictionary.retailerContactsDic.emailAddress = self.email_address
         }
         
-        if self.code_numeric.isNotNil {
-            dictionary.countryDic.codeNumeric = self.code_numeric
+        if self.phone_number.isNotNil {
+            dictionary.retailerContactsDic.phoneNumber = self.phone_number
         }
         
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: Currency)-> Bool {
+    func compare(targetItem: RetailerContacts)-> Bool {
         
         var diff = true
+        
+        if diff == true, self.user_id != targetItem.user_id {
+            diff = false
+        }
         
         if diff == true, self.name != targetItem.name {
             diff = false
         }
         
-        if diff == true, self.code_numeric != targetItem.code_numeric {
+        if diff == true, self.email_address != targetItem.email_address {
             diff = false
         }
         
-        if diff == true, self.country_id != targetItem.country_id {
+        if diff == true, self.phone_number != targetItem.phone_number {
             diff = false
         }
-    
+        
         return diff
         
     }

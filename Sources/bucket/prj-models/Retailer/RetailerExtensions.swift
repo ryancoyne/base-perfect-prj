@@ -1,14 +1,14 @@
 //
-//  CountryExtensions.swift
-//  COpenSSL
+//  RetailerExtensions.swift
+//  bucket
 //
 //  Created by Ryan Coyne on 8/8/18.
 //
 
 extension Dictionary where Key == String, Value == Any {
-    var countryDic : CountryDictionary {
+    var retailerDic : RetailerDictionary {
         get {
-            var bc = CountryDictionary()
+            var bc = RetailerDictionary()
             bc.dic = self
             return bc
         }
@@ -19,7 +19,7 @@ extension Dictionary where Key == String, Value == Any {
 }
 
 //MARK: Badge-Key Dictionary Variable Values
-struct CountryDictionary {
+struct RetailerDictionary {
     fileprivate var dic : [String:Any]!
     /// This variable key is "id". Set nil to remove from the dictionary.
     var id : Int? {
@@ -35,9 +35,21 @@ struct CountryDictionary {
         }
     }
     
+    var contactId : Int? {
+        get {
+            return self.dic["contact_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["pos_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "pos_id")
+            }
+        }
+    }
     var name : String? {
         get {
-            return self.dic["name"] as? String
+            return self.dic["name"].stringValue
         }
         set {
             if newValue != nil {
@@ -47,51 +59,39 @@ struct CountryDictionary {
             }
         }
     }
-    var localName : String? {
+    var isSuspended : Bool? {
         get {
-            return self.dic["local_name"].stringValue
+            return self.dic["is_suspended"].boolValue
         }
         set {
             if newValue != nil {
-                self.dic["local_name"] = newValue!
+                self.dic["is_suspended"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "local_name")
+                self.dic.removeValue(forKey: "is_suspended")
             }
         }
     }
-    var codeNumeric : Int? {
+    var isVerified : Bool? {
         get {
-            return self.dic["code_numeric"].intValue
+            return self.dic["is_verified"].boolValue
         }
         set {
             if newValue != nil {
-                self.dic["code_numeric"] = newValue!
+                self.dic["is_verified"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "code_numeric")
+                self.dic.removeValue(forKey: "is_verified")
             }
         }
     }
-    var codeAlpha2 : String? {
+    var sendSettlementConfirmation : Bool? {
         get {
-            return self.dic["code_alpha_2"].stringValue
+            return self.dic["send_settlement_confirmation"].boolValue
         }
         set {
             if newValue != nil {
-                self.dic["code_alpha_2"] = newValue!
+                self.dic["send_settlement_confirmation"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "code_alpha_2")
-            }
-        }
-    }
-    var codeAlpha3 : String? {
-        get {
-            return self.dic["code_alpha_3"].stringValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["code_alpha_3"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "code_alpha_3")
+                self.dic.removeValue(forKey: "send_settlement_confirmation")
             }
         }
     }

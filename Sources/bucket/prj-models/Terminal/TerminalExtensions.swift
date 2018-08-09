@@ -1,14 +1,14 @@
 //
-//  CountryExtensions.swift
-//  COpenSSL
+//  TerminalExtensions.swift
+//  bucket
 //
 //  Created by Ryan Coyne on 8/8/18.
 //
 
 extension Dictionary where Key == String, Value == Any {
-    var countryDic : CountryDictionary {
+    var terminalDic : TerminalDictionary {
         get {
-            var bc = CountryDictionary()
+            var bc = TerminalDictionary()
             bc.dic = self
             return bc
         }
@@ -19,7 +19,7 @@ extension Dictionary where Key == String, Value == Any {
 }
 
 //MARK: Badge-Key Dictionary Variable Values
-struct CountryDictionary {
+struct TerminalDictionary {
     fileprivate var dic : [String:Any]!
     /// This variable key is "id". Set nil to remove from the dictionary.
     var id : Int? {
@@ -35,9 +35,45 @@ struct CountryDictionary {
         }
     }
     
+    var posId : Int? {
+        get {
+            return self.dic["pos_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["pos_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "pos_id")
+            }
+        }
+    }
+    var retailerId : Int? {
+        get {
+            return self.dic["retailer_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["retailer_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "retailer_id")
+            }
+        }
+    }
+    var serialNumber : String? {
+        get {
+            return self.dic["serial_number"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["serial_number"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "serial_number")
+            }
+        }
+    }
     var name : String? {
         get {
-            return self.dic["name"] as? String
+            return self.dic["name"].stringValue
         }
         set {
             if newValue != nil {
@@ -47,51 +83,15 @@ struct CountryDictionary {
             }
         }
     }
-    var localName : String? {
+    var isApproved : Bool? {
         get {
-            return self.dic["local_name"].stringValue
+            return self.dic["serial_number"].boolValue
         }
         set {
             if newValue != nil {
-                self.dic["local_name"] = newValue!
+                self.dic["serial_number"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "local_name")
-            }
-        }
-    }
-    var codeNumeric : Int? {
-        get {
-            return self.dic["code_numeric"].intValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["code_numeric"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "code_numeric")
-            }
-        }
-    }
-    var codeAlpha2 : String? {
-        get {
-            return self.dic["code_alpha_2"].stringValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["code_alpha_2"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "code_alpha_2")
-            }
-        }
-    }
-    var codeAlpha3 : String? {
-        get {
-            return self.dic["code_alpha_3"].stringValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["code_alpha_3"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "code_alpha_3")
+                self.dic.removeValue(forKey: "serial_number")
             }
         }
     }

@@ -1,5 +1,5 @@
 //
-//  Currency.swift
+//  Retailer.swift
 //  bucket
 //
 //  Created by Ryan Coyne on 8/8/18.
@@ -10,7 +10,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class Currency: PostgresStORM {
+public class Retailer: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -21,12 +21,14 @@ public class Currency: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
+    var contact_id     : Int? = nil
     var name     : String? = nil
-    var country_id     : Int? = nil
-    var code_numeric : Int? = nil
-
+    var is_suspended     : Bool? = nil
+    var is_verified     : Bool? = nil
+    var send_settlement_confirmation     : Bool? = nil
+    
     //MARK: Table name
-    override public func table() -> String { return "currency" }
+    override public func table() -> String { return "retailer" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -59,24 +61,32 @@ public class Currency: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.currencyDic.name {
+        if let data = this.data.retailerDic.contactId {
+            contact_id = data
+        }
+        
+        if let data = this.data.retailerDic.name {
             name = data
         }
         
-        if let data = this.data.currencyDic.codeNumeric {
-            code_numeric = data
+        if let data = this.data.retailerDic.isVerified {
+            is_verified = data
         }
         
-        if let data = this.data.currencyDic.countryId {
-            country_id = data
+        if let data = this.data.retailerDic.isSuspended {
+            is_suspended = data
+        }
+    
+        if let data = this.data.retailerDic.sendSettlementConfirmation {
+            send_settlement_confirmation = data
         }
         
     }
     
-    func rows() -> [Currency] {
-        var rows = [Currency]()
+    func rows() -> [Retailer] {
+        var rows = [Retailer]()
         for i in 0..<self.results.rows.count {
-            let row = Currency()
+            let row = Retailer()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -89,19 +99,24 @@ public class Currency: PostgresStORM {
             
             switch key.lowercased() {
                 
+            case "country_id":
+                if (value as? Int).isNotNil {
+                    self.contact_id = (value as! Int)
+                }
+                
             case "name":
-                if !(value as! String).isEmpty {
+                if (value as? String).isNotNil {
                     self.name = (value as! String)
                 }
                 
-            case "code_numeric":
-                if (value as? Int).isNotNil {
-                    self.code_numeric = (value as! Int)
+            case "is_suspended":
+                if (value as? Bool).isNotNil {
+                    self.is_suspended = (value as! Bool)
                 }
                 
-            case "country_id":
-                if (value as? Int).isNotNil {
-                    self.country_id = (value as! Int)
+            case "is_approved":
+                if (value as? Bool).isNotNil {
+                    self.is_verified = (value as! Bool)
                 }
                 
             default:
@@ -145,38 +160,50 @@ public class Currency: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
+        if self.contact_id.isNotNil {
+            dictionary.retailerDic.contactId = self.contact_id
+        }
+        
         if self.name.isNotNil {
-            dictionary.countryDic.name = self.name
+            dictionary.retailerDic.name = self.name
         }
         
-        if self.country_id.isNotNil {
-            dictionary.currencyDic.countryId = self.country_id
+        if self.is_suspended.isNotNil {
+            dictionary.retailerDic.isSuspended = self.is_suspended
         }
         
-        if self.code_numeric.isNotNil {
-            dictionary.countryDic.codeNumeric = self.code_numeric
+        if self.is_verified.isNotNil {
+            dictionary.retailerDic.isVerified = self.is_verified
         }
         
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: Currency)-> Bool {
+    func compare(targetItem: Retailer)-> Bool {
         
         var diff = true
+        
+        if diff == true, self.contact_id != targetItem.contact_id {
+            diff = false
+        }
         
         if diff == true, self.name != targetItem.name {
             diff = false
         }
         
-        if diff == true, self.code_numeric != targetItem.code_numeric {
+        if diff == true, self.is_verified != targetItem.is_verified {
             diff = false
         }
         
-        if diff == true, self.country_id != targetItem.country_id {
+        if diff == true, self.is_suspended != targetItem.is_suspended {
             diff = false
         }
-    
+        
+        if diff == true, self.send_settlement_confirmation != targetItem.send_settlement_confirmation {
+            diff = false
+        }
+        
         return diff
         
     }
