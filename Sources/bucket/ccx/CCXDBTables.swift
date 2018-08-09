@@ -47,13 +47,16 @@ final class CCXDBTables {
     //MARK: Sample data
     var useradminsql : String {
         get {
+            
+            let create_time = Int(Date().timeIntervalSince1970)
+            
             var u1 = "INSERT INTO account (id,username,email,source,usertype,detail) VALUES("
             u1.append("'\(CCXSystemData.admin)',")
-            u1.append("'mike',")
-            u1.append("'mike@clearcodex.com',")
+            u1.append("'ADMIN_USER',")
+            u1.append("'engineering@buckettechnologies.com',")
             u1.append("'local',")
             u1.append("'admin',")
-            u1.append("'{ \"lastname\":\"Silvers\",\"firstname\":\"Mike\",\"created\":1509930276 }') ")
+            u1.append("'{ \"lastname\":\"Admin\",\"firstname\":\"Bucket\",\"created\":\(create_time) }') ")
             u1.append("RETURNING id")
             print("Sample user SQL: \(u1)")
             return u1
