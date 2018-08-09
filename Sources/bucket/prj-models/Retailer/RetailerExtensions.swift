@@ -47,6 +47,18 @@ struct RetailerDictionary {
             }
         }
     }
+    var retailerCode : String? {
+        get {
+            return self.dic["retailer_code"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["retailer_code"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "retailer_code")
+            }
+        }
+    }
     var name : String? {
         get {
             return self.dic["name"].stringValue

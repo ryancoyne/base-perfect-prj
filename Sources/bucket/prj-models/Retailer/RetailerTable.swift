@@ -101,6 +101,7 @@ final class RetailerTable {
         
         // table specific fields
         createsql.append("contact_id int NOT NULL DEFAULT 0, ")
+        createsql.append("retailer_code int NOT NULL DEFAULT 0, ")
         createsql.append("name text COLLATE pg_catalog.default, ")
         createsql.append("is_suspended bool NOT NULL DEFAULT false, ")
         createsql.append("is_verified bool NOT NULL DEFAULT false, ")

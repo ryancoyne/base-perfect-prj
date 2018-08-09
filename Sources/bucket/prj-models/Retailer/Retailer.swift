@@ -22,6 +22,7 @@ public class Retailer: PostgresStORM {
     var deletedby  : String? = nil
     
     var contact_id     : Int? = nil
+    var retailer_code : String? = nil
     var name     : String? = nil
     var is_suspended     : Bool? = nil
     var is_verified     : Bool? = nil
@@ -69,6 +70,10 @@ public class Retailer: PostgresStORM {
             name = data
         }
         
+        if let data = this.data.retailerDic.retailerCode {
+            retailer_code = data
+        }
+        
         if let data = this.data.retailerDic.isVerified {
             is_verified = data
         }
@@ -107,6 +112,11 @@ public class Retailer: PostgresStORM {
             case "name":
                 if (value as? String).isNotNil {
                     self.name = (value as! String)
+                }
+                
+            case "retailer_code":
+                if (value as? String).isNotNil {
+                    self.retailer_code = (value as! String)
                 }
                 
             case "is_suspended":
@@ -168,6 +178,10 @@ public class Retailer: PostgresStORM {
             dictionary.retailerDic.name = self.name
         }
         
+        if self.retailer_code.isNotNil {
+            dictionary.retailerDic.retailerCode = self.retailer_code
+        }
+        
         if self.is_suspended.isNotNil {
             dictionary.retailerDic.isSuspended = self.is_suspended
         }
@@ -185,6 +199,10 @@ public class Retailer: PostgresStORM {
         var diff = true
         
         if diff == true, self.contact_id != targetItem.contact_id {
+            diff = false
+        }
+        
+        if diff == true, self.retailer_code != targetItem.retailer_code {
             diff = false
         }
         
