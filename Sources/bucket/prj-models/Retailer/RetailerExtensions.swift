@@ -35,18 +35,6 @@ struct RetailerDictionary {
         }
     }
     
-    var contactId : Int? {
-        get {
-            return self.dic["contact_id"].intValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["pos_id"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "pos_id")
-            }
-        }
-    }
     var retailerCode : String? {
         get {
             return self.dic["retailer_code"].stringValue

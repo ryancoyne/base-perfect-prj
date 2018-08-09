@@ -135,7 +135,7 @@ public class ContactType: PostgresStORM {
         }
         
         if self.contact_id.isNotNil {
-            dictionary.retailerDic.contactId = self.contact_id
+            dictionary.contactsDic.contactId = self.contact_id
         }
         
         if self.contact_id.isNotNil {

@@ -22,6 +22,7 @@ public class RetailerContacts: PostgresStORM {
     var deletedby  : String? = nil
     
     var user_id     : String? = nil
+    var retailer_id : Int? = nil
     var email_address     : String? = nil
     var name     : String? = nil
     var phone_number     : String? = nil
@@ -62,6 +63,10 @@ public class RetailerContacts: PostgresStORM {
         
         if let data = this.data.retailerContactsDic.userId {
             user_id = data
+        }
+        
+        if let data = this.data.retailerContactsDic.retailerId {
+            retailer_id = data
         }
         
         if let data = this.data.retailerContactsDic.name {

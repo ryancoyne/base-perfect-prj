@@ -20,8 +20,7 @@ public class Retailer: PostgresStORM {
     var modifiedby : String? = nil
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
-    
-    var contact_id     : Int? = nil
+
     var retailer_code : String? = nil
     var name     : String? = nil
     var is_suspended     : Bool? = nil
@@ -62,10 +61,6 @@ public class Retailer: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.retailerDic.contactId {
-            contact_id = data
-        }
-        
         if let data = this.data.retailerDic.name {
             name = data
         }
@@ -103,11 +98,6 @@ public class Retailer: PostgresStORM {
         for (key, value) in sourceDictionary {
             
             switch key.lowercased() {
-                
-            case "country_id":
-                if (value as? Int).isNotNil {
-                    self.contact_id = (value as! Int)
-                }
                 
             case "name":
                 if (value as? String).isNotNil {
@@ -170,10 +160,6 @@ public class Retailer: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
-        if self.contact_id.isNotNil {
-            dictionary.retailerDic.contactId = self.contact_id
-        }
-        
         if self.name.isNotNil {
             dictionary.retailerDic.name = self.name
         }
@@ -197,10 +183,6 @@ public class Retailer: PostgresStORM {
     func compare(targetItem: Retailer)-> Bool {
         
         var diff = true
-        
-        if diff == true, self.contact_id != targetItem.contact_id {
-            diff = false
-        }
         
         if diff == true, self.retailer_code != targetItem.retailer_code {
             diff = false
