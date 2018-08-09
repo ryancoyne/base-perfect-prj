@@ -64,9 +64,10 @@ struct PRJDBTableDefaults {
     static let logo        = "/assets/images/no-logo.png"
     static let logoSet     = "/assets/images/no-logo.png 1x, /assets/images/no-logo.svg 2x"
     static let sysinit     = "1"
-//    static let sampledata  = "1"
-    static let sampledata  = "0"
+    static let sampledata  = "1"
+//    static let sampledata  = "0"
     static let defaultdata = "1"
+//    static let defaultdata = "0"
 }
 
 struct PRJSampleData {
@@ -269,7 +270,8 @@ final class PRJDBTables {
             
             // This is where we are adding the sample data
             SampleData.sharedInstance.addUserData()
-            SampleData.sharedInstance.addAddressData()
+            SampleData.sharedInstance.addRetailerData()
+            SampleData.sharedInstance.addRetailerUsers()
 
         } catch {
             print(error)
