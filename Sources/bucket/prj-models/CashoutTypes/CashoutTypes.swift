@@ -1,8 +1,8 @@
 //
-//  RetailerContacts.swift
+//  CashoutTypes.swift
 //  bucket
 //
-//  Created by Ryan Coyne on 8/8/18.
+//  Created by Ryan Coyne on 8/9/18.
 //
 
 import Foundation
@@ -10,7 +10,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class RetailerContacts: PostgresStORM {
+public class CashoutTypes: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -21,14 +21,11 @@ public class RetailerContacts: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var user_id     : String? = nil
-    var retailer_id : Int? = nil
-    var email_address     : String? = nil
     var name     : String? = nil
-    var phone_number     : String? = nil
+    var description     : String? = nil
     
     //MARK: Table name
-    override public func table() -> String { return "retailer_contacts" }
+    override public func table() -> String { return "cashout_types" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -61,32 +58,20 @@ public class RetailerContacts: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.retailerContactsDic.userId {
-            user_id = data
-        }
-        
-        if let data = this.data.retailerContactsDic.retailerId {
-            retailer_id = data
-        }
-        
-        if let data = this.data.retailerContactsDic.name {
+        if let data = this.data.cashoutTypesDic.name {
             name = data
         }
         
-        if let data = this.data.retailerContactsDic.emailAddress {
-            email_address = data
-        }
-        
-        if let data = this.data.retailerContactsDic.phoneNumber {
-            phone_number = data
+        if let data = this.data.shortdescription {
+            description = data
         }
         
     }
     
-    func rows() -> [Retailer] {
-        var rows = [Retailer]()
+    func rows() -> [CashoutTypes] {
+        var rows = [CashoutTypes]()
         for i in 0..<self.results.rows.count {
-            let row = Retailer()
+            let row = CashoutTypes()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -99,24 +84,14 @@ public class RetailerContacts: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "user_id":
-                if (value as? String).isNotNil {
-                    self.user_id = (value as! String)
-                }
-                
             case "name":
                 if (value as? String).isNotNil {
                     self.name = (value as! String)
                 }
                 
-            case "email_address":
+            case "description":
                 if (value as? String).isNotNil {
-                    self.email_address = (value as! String)
-                }
-                
-            case "phone_number":
-                if (value as? String).isNotNil {
-                    self.phone_number = (value as! String)
+                    self.description = (value as! String)
                 }
                 
             default:
@@ -126,7 +101,6 @@ public class RetailerContacts: PostgresStORM {
         }
         
     }
-    
     
     func asDictionary() -> [String: Any] {
         
@@ -160,43 +134,27 @@ public class RetailerContacts: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
-        if self.user_id.isNotNil {
-            dictionary.retailerContactsDic.userId = self.user_id
-        }
-        
         if self.name.isNotNil {
-            dictionary.retailerContactsDic.name = self.name
+            dictionary.cashoutTypesDic.name = self.name
         }
         
-        if self.email_address.isNotNil {
-            dictionary.retailerContactsDic.emailAddress = self.email_address
-        }
-        
-        if self.phone_number.isNotNil {
-            dictionary.retailerContactsDic.phoneNumber = self.phone_number
+        if self.description.isNotNil {
+            dictionary.shortdescription = self.description
         }
         
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: RetailerContacts)-> Bool {
+    func compare(targetItem: CashoutTypes)-> Bool {
         
         var diff = true
-        
-        if diff == true, self.user_id != targetItem.user_id {
-            diff = false
-        }
         
         if diff == true, self.name != targetItem.name {
             diff = false
         }
         
-        if diff == true, self.email_address != targetItem.email_address {
-            diff = false
-        }
-        
-        if diff == true, self.phone_number != targetItem.phone_number {
+        if diff == true, self.description != targetItem.description {
             diff = false
         }
         
@@ -204,3 +162,4 @@ public class RetailerContacts: PostgresStORM {
         
     }
 }
+

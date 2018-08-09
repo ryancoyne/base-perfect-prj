@@ -35,15 +35,15 @@ struct RetailerDictionary {
         }
     }
     
-    var contactId : Int? {
+    var retailerCode : String? {
         get {
-            return self.dic["contact_id"].intValue
+            return self.dic["retailer_code"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["pos_id"] = newValue!
+                self.dic["retailer_code"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "pos_id")
+                self.dic.removeValue(forKey: "retailer_code")
             }
         }
     }

@@ -1,22 +1,22 @@
 //
-//  RetailerContactsTable.swift
+//  CashoutTypesTable.swift
 //  bucket
 //
-//  Created by Ryan Coyne on 8/8/18.
+//  Created by Ryan Coyne on 8/9/18.
 //
 
 import Foundation
 import PostgresStORM
 
-final class RetailerContactsTable {
+final class CashoutTypesTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
     
-    static let sharedInstance = RetailerContactsTable()
-    let tbl = RetailerContacts()
+    static let sharedInstance = CashoutTypesTable()
+    let tbl = CashoutTypes()
     
     let tablelevel = 1.00
     
@@ -100,11 +100,8 @@ final class RetailerContactsTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
-        createsql.append("user_id text COLLATE pg_catalog.default, ")
-        createsql.append("retailer_id int NOT NULL DEFAULT 0, ")
         createsql.append("name text COLLATE pg_catalog.default, ")
-        createsql.append("email_address text COLLATE pg_catalog.default, ")
-        createsql.append("phone_number text COLLATE pg_catalog.default, ")
+        createsql.append("description text COLLATE pg_catalog.default, ")
         
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
@@ -115,3 +112,4 @@ final class RetailerContactsTable {
         return createsql
     }
 }
+
