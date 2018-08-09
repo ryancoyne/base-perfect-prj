@@ -59,6 +59,18 @@ struct RetailerContactsDictionary {
             }
         }
     }
+    var contactTypeId : Int? {
+        get {
+            return self.dic["contact_type_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["contact_type_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "contact_type_id")
+            }
+        }
+    }
     var name : String? {
         get {
             return self.dic["name"].stringValue

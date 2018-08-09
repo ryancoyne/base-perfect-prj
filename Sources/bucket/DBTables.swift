@@ -195,7 +195,7 @@ final class PRJDBTables {
 
         // Bucket specific tables
         CountryTable.sharedInstance.create()
-        CurrencyTable.sharedInstance.create()
+//        CurrencyTable.sharedInstance.create()
         POSTable.sharedInstance.create()
         AddressTable.sharedInstance.create()
         TerminalTable.sharedInstance.create()

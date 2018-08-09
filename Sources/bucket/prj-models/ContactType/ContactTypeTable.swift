@@ -100,7 +100,7 @@ final class ContactTypeTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
-        createsql.append("contact_id int NOT NULL DEFAULT 0, ")
+        createsql.append("name text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
         
         // ending fields

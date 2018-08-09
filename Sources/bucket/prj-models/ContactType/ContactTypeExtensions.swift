@@ -6,7 +6,7 @@
 //
 
 extension Dictionary where Key == String, Value == Any {
-    var contactsDic : ContactTypeDictionary {
+    var contactTypeDic : ContactTypeDictionary {
         get {
             var bc = ContactTypeDictionary()
             bc.dic = self
@@ -35,15 +35,15 @@ struct ContactTypeDictionary {
         }
     }
     
-    var contactId : Int? {
+    var name : String? {
         get {
-            return self.dic["contact_id"].intValue
+            return self.dic["name"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["contact_id"] = newValue!
+                self.dic["name"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "contact_id")
+                self.dic.removeValue(forKey: "name")
             }
         }
     }
