@@ -85,11 +85,11 @@ final class SampleData {
         
         var sqlstatement = "INSERT INTO \(tbl.table()) "
         
-        sqlstatement.append("(created, createdby, name, is_verified) ")
+        sqlstatement.append("(created, createdby, name, is_verified, retailer_code) ")
         sqlstatement.append(" VALUES ")
-        sqlstatement.append(" (\(created_time), 'ADMIN_USER','Bucket Coffee Shop', TRUE), ")
-        sqlstatement.append(" (\(created_time), 'ADMIN_USER','Ryans Bike Shop', TRUE), ")
-        sqlstatement.append(" (\(created_time), 'ADMIN_USER','M&R Corner Market', TRUE) ")
+        sqlstatement.append(" (\(created_time), 'ADMIN_USER','Bucket Coffee Shop', TRUE, 'BCKT-1'), ")
+        sqlstatement.append(" (\(created_time), 'ADMIN_USER','Ryans Bike Shop', TRUE, 'BCKT-2'), ")
+        sqlstatement.append(" (\(created_time), 'ADMIN_USER','M&R Corner Market', TRUE, 'BCKT-3') ")
 
         print("Adding user: \(sqlstatement)")
         _ = try? tbl.sqlRows(sqlstatement, params: [])
@@ -112,12 +112,7 @@ final class SampleData {
         _ = try? tbl.sqlRows(checkuser, params: [])
 
         // update the retailer with the new userid
-        checkuser = "SELECT id FROM retailer WHERE contact_id = 0 LIMIT 1"
-        var theid = try? tbl.sqlRows(checkuser, params: [])
-        var retailerid = 0
-        if theid.isNotNil, let usemeid = theid![0].data["id"].intValue , usemeid > 0 {
-            retailerid = usemeid
-        }
+        var retailerid = 1
 
         // add the retailer user
         checkuser = "INSERT INTO retailer_contacts "
@@ -136,12 +131,7 @@ final class SampleData {
         _ = try? tbl.sqlRows(checkuser, params: [])
 
         // update the retailer with the new userid
-        checkuser = "SELECT id FROM retailer WHERE contact_id = 0 LIMIT 1"
-        theid = try? tbl.sqlRows(checkuser, params: [])
-        retailerid = 0
-        if theid.isNotNil, let usemeid = theid![0].data["id"].intValue , usemeid > 0 {
-            retailerid = usemeid
-        }
+        retailerid = 2
 
         // add the retailer user
         checkuser = "INSERT INTO retailer_contacts "
@@ -160,12 +150,7 @@ final class SampleData {
         _ = try? tbl.sqlRows(checkuser, params: [])
 
         // update the retailer with the new userid
-        checkuser = "SELECT id FROM retailer WHERE contact_id = 0 LIMIT 1"
-        theid = try? tbl.sqlRows(checkuser, params: [])
-        retailerid = 0
-        if theid.isNotNil, let usemeid = theid![0].data["id"].intValue , usemeid > 0 {
-            retailerid = usemeid
-        }
+        retailerid = 3
 
         // add the retailer user
         checkuser = "INSERT INTO retailer_contacts "
