@@ -22,6 +22,62 @@ final class InitializeData {
     
     static let sharedInstance = InitializeData()
     
+    func addPOS() {
+        let tbl = POS()
+
+        let created_time = Int(Date().timeIntervalSince1970)
+        
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby, name,model) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Clover', 'C300'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Clover','Clover Station') ")
+        
+        print("Adding user: \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
+
+        
+    }
+
+    func addContactTypes() {
+        
+        let tbl = ContactType()
+        
+        let created_time = Int(Date().timeIntervalSince1970)
+        
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby, name,description) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','billing','This is the main billing contact for the account.'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','manager','This is a manager for the account.'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','admin','This is the main billing contact for the account.'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','billing','This is an administrative contact for the account.')")
+
+        print("Adding user: \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
+        
+    }
+
+    
+    func addCashoutTypes() {
+        
+        let tbl = CashoutTypes()
+        
+        let created_time = Int(Date().timeIntervalSince1970)
+        
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby, name,description) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Open Loop Gift Card','This card allows users to purchase anything using the giftcard.'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Closed Loop Gift Card','This card allows users to purchase from specific retailers using the giftcard.'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Donate','This allows the user to donate to a specific cause.'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Bucket Coin','This is the cryptocurrency for the Bucket users.')")
+        
+        print("Adding user: \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
+        
+    }
+    
     func addCountryCodes() {
         let tbl = Country()
         
@@ -285,11 +341,4 @@ final class InitializeData {
         _ = try? tbl.sqlRows(insertstatement, params: [])
         
     }
-    
-    func addAddressData() {
-        let tbl = Address()
-        
-        
-    }
-    
 }

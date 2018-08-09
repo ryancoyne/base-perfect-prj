@@ -321,6 +321,9 @@ final class PRJDBTables {
             
             // This is where we are adding the default data
             InitializeData.sharedInstance.addCountryCodes()
+            InitializeData.sharedInstance.addContactTypes()
+            InitializeData.sharedInstance.addCashoutTypes()
+            InitializeData.sharedInstance.addPOS()
 
         } catch {
             print(error)
