@@ -55,6 +55,30 @@ struct RetailerAPI {
                     guard let retailerId = json?["retailerId"].stringValue else { return response.invalidRetailer }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
                     
+                    // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
+                    let terminal = Terminal()
+                    let theTry = try? terminal.find(["serial_number": serialNumber])
+                    if theTry.isNil { /* It failed... we may want to do something here? */ }
+                    
+                    // Check and make sure the terminal is approved or not:
+                    if terminal.id.isNil {
+                        // The terminal does not exist for this retailer.  Lets create the terminal & password and send it back to the client:
+                        let term = Terminal()
+                        term.serial_number = serialNumber
+                        term.retailer_id = Int(retailerId)
+                        
+                        // Create the new password:
+                        let retailerSecret = UUID().uuidString
+                        guard let hexBytes = retailerSecret.digest(.sha256), let validate = hexBytes.encode(.hex), let theSavedPassword = String(validatingUTF8: validate)  else { return  }
+                        
+                        term.terminal_key = theSavedPassword
+                        
+                    } else {
+                        // The terminal does exist.  Lets see if we retailer id is the same as what they are saying:
+                        
+                    }
+                
+                    
                     //TODO: Process the request:
                     
                 } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
