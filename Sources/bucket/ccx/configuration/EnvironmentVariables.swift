@@ -68,6 +68,15 @@ final class EnvironmentVariables {
 
         self.CheckOnStart_Server1 = env_variables["SERVER_1_ON_START"].boolValue
         self.CheckOnStart_Server2 = env_variables["SERVER_2_ON_START"].boolValue
+        
+        let public_url = env_variables["SERVER_PUBLIC_URL"].stringValue
+        if !public_url.isEmptyOrNil {
+            
+            self.PublicServerURL = URL(string: public_url!)
+            
+        } else {
+            self.PublicServerURL = nil
+        }
 
     }
     
@@ -263,6 +272,12 @@ final class EnvironmentVariables {
                 self.CheckOnStart_Server2 = value
             }
 
+            if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["SERVER_PUBLIC_URL"] as? String {
+
+                let testurl = URL(string: value)
+                self.PublicServerURL = URL(string: value)
+                
+            }
         }
     }
 
@@ -840,7 +855,21 @@ final class EnvironmentVariables {
             }
         }
     }
-    
+
+    private var _PublicServerURL: URL?
+    public var PublicServerURL: URL? {
+        get {
+            return _PublicServerURL
+        }
+        set {
+            if newValue != nil {
+                _PublicServerURL = newValue!
+            } else {
+                _PublicServerURL = nil
+            }
+        }
+    }
+
 //    private var _ConnectionServices: [Service]?
 //    public var ConnectionServices: [Service]? {
 //        get {
