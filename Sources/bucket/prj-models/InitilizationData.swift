@@ -78,6 +78,91 @@ final class InitializeData {
         
     }
     
+    func addForms() {
+        
+        let tbl = Form()
+        
+        let created_time = Int(Date().timeIntervalSince1970)
+        
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby, name, title) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','BUX Coin', 'BUX'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','US Open Loop', 'Prepaid Card'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','US Closed Loop', 'Gift Card'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','US Donation', 'Donate') ")
+        
+        print("Adding user: \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
+        
+    }
+    
+    func addFormFieldType() {
+
+        let tbl = FormFieldType()
+        
+        let created_time = Int(Date().timeIntervalSince1970)
+        
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby, name) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Checkbox'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Text'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Number'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','E-Mail'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Phone'), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Currency')")
+        
+        print("Adding user: \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
+
+    }
+    
+    func addFormField() {
+
+        let tbl = FormField()
+        
+        let created_time = Int(Date().timeIntervalSince1970)
+        
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby, name, type_id, length, is_required, needs_confirmation) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Full Name', 2, 25, TRUE, FALSE), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Email Address', 4, 50, TRUE, TRUE), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER','Keep me updated with new offers!', 1, 1, FALSE, FALSE) ")
+        
+        print("Adding user: \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
+
+    }
+    
+    func addFormFields() {
+
+        let tbl = FormFields()
+        
+        let created_time = Int(Date().timeIntervalSince1970)
+        
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby, form_id, field_id, display_order) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER', 1, 1, 1), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER', 1, 2, 2), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER', 1, 3, 3), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER', 2, 1, 1), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER', 2, 2, 2), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER', 2, 3, 3), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER', 3, 1, 1), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER', 3, 2, 2), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER', 3, 3, 3), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER', 4, 1, 1), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER', 4, 2, 2), ")
+        checkuser.append(" ('\(created_time)','ADMIN_USER', 4, 3, 3) ")
+
+        print("Adding user: \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
+
+    }
+    
     func addCountryCodes() {
         let tbl = Country()
         

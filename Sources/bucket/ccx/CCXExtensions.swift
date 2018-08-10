@@ -23,6 +23,18 @@ struct CCXGeographyPoint {
     var longitude   : Double = 0.0
 }
 
+class BucketDecimal : ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral {
+    
+    var value : Double = 0.00
+    required init(floatLiteral value: FloatLiteralType) {
+        self.value = value
+    }
+    required init(integerLiteral value: IntegerLiteralType) {
+        self.value = Double(exactly: value)!
+    }
+    
+}
+
 extension Optional {
     var isNil : Bool {
         return self == nil
@@ -1128,6 +1140,11 @@ extension PostgresStORM {
                         keys.append(i.0)
                         vals.append(gisstring)
                     } else { continue }
+                case is BucketDecimal.Type:
+                    let decimal = i.1 as! BucketDecimal
+                    keys.append(i.0)
+                    let decimalValueString = ""
+                    vals.append(decimalValueString)
                 case is Int.Type, is Double.Type, is Float.Type:
                     let value = String(describing: i.1)
                     keys.append(i.0)
