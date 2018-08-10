@@ -1,5 +1,5 @@
 //
-//  TransactionHistoryTable.swift
+//  TransactionTable.swift
 //  bucket
 //
 //  Created by Ryan Coyne on 8/8/18.
@@ -8,15 +8,15 @@
 import Foundation
 import PostgresStORM
 
-final class TransactionHistoryTable {
+final class CodeTransactionTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
     
-    static let sharedInstance = TransactionHistoryTable()
-    let tbl = TransactionHistory()
+    static let sharedInstance = CodeTransactionTable()
+    let tbl = CodeTransaction()
     
     let tablelevel = 1.00
     
@@ -102,6 +102,8 @@ final class TransactionHistoryTable {
         // table specific fields
         createsql.append("country_id int NOT NULL DEFAULT 0, ")
         createsql.append("retailer_id int NOT NULL DEFAULT 0, ")
+        createsql.append("amount numeric(10,5) NOT NULL DEFAULT 0, ")
+        createsql.append("total_amount numeric(10,5) NOT NULL DEFAULT 0, ")
         createsql.append("terminal_id int NOT NULL DEFAULT 0, ")
         createsql.append("batch_id text COLLATE pg_catalog.default, ")
         createsql.append("location text COLLATE pg_catalog.default, ")

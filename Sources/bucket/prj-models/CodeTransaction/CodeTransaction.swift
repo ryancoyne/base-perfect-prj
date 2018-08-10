@@ -10,7 +10,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class Transaction: PostgresStORM {
+public class CodeTransaction: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -37,7 +37,7 @@ public class Transaction: PostgresStORM {
     var redeemedby : String? = nil
     
     //MARK: Table name
-    override public func table() -> String { return "transaction" }
+    override public func table() -> String { return "code_transaction" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -70,64 +70,64 @@ public class Transaction: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.transactionDic.countryId {
+        if let data = this.data.codeTransactionDic.countryId {
             country_id = data
         }
         
-        if let data = this.data.transactionDic.retailerId {
+        if let data = this.data.codeTransactionDic.retailerId {
             retailer_id = data
         }
         
-        if let data = this.data.transactionDic.batchId {
+        if let data = this.data.codeTransactionDic.batchId {
             batch_id = data
         }
         
-        if let data = this.data.transactionDic.location {
+        if let data = this.data.codeTransactionDic.location {
             location = data
         }
         
-        if let data = this.data.transactionDic.customerCode {
+        if let data = this.data.codeTransactionDic.customerCode {
             customer_code = data
         }
         
-        if let data = this.data.transactionDic.customerCodeURL {
+        if let data = this.data.codeTransactionDic.customerCodeURL {
             customer_codeURL = data
         }
         
-        if let data = this.data.transactionDic.redeemed {
+        if let data = this.data.codeTransactionDic.redeemed {
             redeemed = data
         }
         
-        if let data = this.data.transactionDic.redeemedBy {
+        if let data = this.data.codeTransactionDic.redeemedBy {
             redeemedby = data
         }
         
-        if let data = this.data.transactionDic.disputedBy {
+        if let data = this.data.codeTransactionDic.disputedBy {
             disputedby = data
         }
         
-        if let data = this.data.transactionDic.disputed {
+        if let data = this.data.codeTransactionDic.disputed {
             disputed = data
         }
         
-        if let data = this.data.transactionDic.terminalId {
+        if let data = this.data.codeTransactionDic.terminalId {
             terminal_id = data
         }
         
-        if let data = this.data.transactionDic.amount {
+        if let data = this.data.codeTransactionDic.amount {
             amount = data
         }
         
-        if let data = this.data.transactionDic.totalAmount {
+        if let data = this.data.codeTransactionDic.totalAmount {
             total_amount = data
         }
         
     }
     
-    func rows() -> [Transaction] {
-        var rows = [Transaction]()
+    func rows() -> [CodeTransaction] {
+        var rows = [CodeTransaction]()
         for i in 0..<self.results.rows.count {
-            let row = Transaction()
+            let row = CodeTransaction()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -246,50 +246,50 @@ public class Transaction: PostgresStORM {
         }
         
         if self.country_id.isNotNil {
-            dictionary.transactionDic.countryId = self.country_id
+            dictionary.codeTransactionDic.countryId = self.country_id
         }
         
         if self.retailer_id.isNotNil {
-            dictionary.transactionDic.retailerId = self.retailer_id
+            dictionary.codeTransactionDic.retailerId = self.retailer_id
         }
         
         if self.redeemedby.isNotNil {
-            dictionary.transactionDic.redeemedBy = self.redeemedby
+            dictionary.codeTransactionDic.redeemedBy = self.redeemedby
         }
         
         if self.redeemed.isNotNil {
-            dictionary.transactionDic.redeemed = self.redeemed
+            dictionary.codeTransactionDic.redeemed = self.redeemed
         }
         
         if self.disputedby.isNotNil {
-            dictionary.transactionDic.disputedBy = self.disputedby
+            dictionary.codeTransactionDic.disputedBy = self.disputedby
         }
         
         if self.disputed.isNotNil {
-            dictionary.transactionDic.disputed = self.disputed
+            dictionary.codeTransactionDic.disputed = self.disputed
         }
         
         if self.batch_id.isNotNil {
-            dictionary.transactionDic.batchId = self.batch_id
+            dictionary.codeTransactionDic.batchId = self.batch_id
         }
         
         if self.location.isNotNil {
-            dictionary.transactionDic.location = self.location
+            dictionary.codeTransactionDic.location = self.location
         }
         
         if self.customer_code.isNotNil {
-            dictionary.transactionDic.customerCode = self.customer_code
+            dictionary.codeTransactionDic.customerCode = self.customer_code
         }
         
         if self.customer_codeURL.isNotNil {
-            dictionary.transactionDic.customerCodeURL = self.customer_codeURL
+            dictionary.codeTransactionDic.customerCodeURL = self.customer_codeURL
         }
         
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: Transaction)-> Bool {
+    func compare(targetItem: CodeTransaction)-> Bool {
         
         var diff = true
         

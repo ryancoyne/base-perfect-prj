@@ -6,9 +6,9 @@
 //
 
 extension Dictionary where Key == String, Value == Any {
-    var transactionHistoryDic : TransactionHistoryDictionary {
+    var codeTransactionHistoryDic : CodeTransactionHistoryDictionary {
         get {
-            var bc = TransactionHistoryDictionary()
+            var bc = CodeTransactionHistoryDictionary()
             bc.dic = self
             return bc
         }
@@ -19,7 +19,7 @@ extension Dictionary where Key == String, Value == Any {
 }
 
 //MARK: Badge-Key Dictionary Variable Values
-struct TransactionHistoryDictionary {
+struct CodeTransactionHistoryDictionary {
     fileprivate var dic : [String:Any]!
     /// This variable key is "id". Set nil to remove from the dictionary.
     var id : Int? {
