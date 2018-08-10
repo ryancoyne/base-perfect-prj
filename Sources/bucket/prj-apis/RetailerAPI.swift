@@ -54,7 +54,6 @@ struct RetailerAPI {
                 request, response in
                 
                 
-                
             }
         }
     }
@@ -64,4 +63,27 @@ fileprivate extension HTTPRequest {
     var retailerId : String? {
         return self.urlVariables["retailerId"]
     }
+}
+
+
+extension Retailer {
+
+    public static func retailerBounce(_ request: HTTPRequest, _ response: HTTPResponse) {
+        
+        let sqlCheck = "SELECT "
+        
+        let terminal = Terminal()
+        
+        // this is where we will check the temrminal ID, retailer and the secret to make sure the terminal is approved.
+        
+        do {
+            try terminal.get(request.session?.userid ?? "")
+//            if user.usertype != .admin {
+//                response.redirect(path: "/")
+//            }
+        } catch {
+            print(error)
+        }
+    }
+ 
 }
