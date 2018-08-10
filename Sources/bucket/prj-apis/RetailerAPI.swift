@@ -68,12 +68,20 @@ struct RetailerAPI {
                         term.serial_number = serialNumber
                         term.retailer_id = Int(retailerId)
                         
-                        let results = try term.saveWithGIS()
+                        do {
+                            
+                            try term.saveWithGIS()
+                            try? response.setBody(json: [])
+                                .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                                .completed(status: .created)
+                            
+                        } catch {
+                            // TODO:  Return some error:
+                            try? response.setBody(json: ["error":error.localizedDescription])
+                                .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                                .completed(status: .internalServerError)
+                        }
                         
-                        try? response.setBody(json: [])
-                                                 .setHeader(.contentType, value: "application/json; charset=UTF-8")
-                                                 .completed(status: .created)
-
                         // We want to do the following after the 201 to give back the password.
 //                        // Create the new password:
 //                        let retailerSecret = UUID().uuidString
@@ -81,8 +89,11 @@ struct RetailerAPI {
 //
 //                        term.terminal_key = theSavedPassword
                         
-                    } else {
-                        // The terminal does exist.  Lets see if we retailer id is the same as what they are saying:
+                    } else if terminal.retailer_id.isNotNil && terminal.is_approved {
+                        // The terminal does exist.  Lets see if we retailer id is the same as what they are saying, if so.. send them a password:
+                        guard retailerId == "\(terminal.retailer_id!)" else { /* Send back an error indicating this device is on another account */  return }
+                        
+                        
                         
                     }
                 

@@ -26,7 +26,7 @@ public class Terminal: PostgresStORM {
     var serial_number     : String? = nil
     var address_id     : Int? = nil
     var name     : String? = nil
-    var is_approved     : Bool? = nil
+    var is_approved     : Bool = false
     var terminal_key : String? = nil
     
     //MARK: Table name
@@ -141,7 +141,7 @@ public class Terminal: PostgresStORM {
             
             case "is_approved":
                 if (value as? Bool).isNotNil {
-                    self.is_approved = (value as Any?).boolValue
+                    self.is_approved = (value as Any?).boolValue ?? false
                 }
                 
             default:
@@ -209,9 +209,7 @@ public class Terminal: PostgresStORM {
             dictionary.terminalDic.name = self.name
         }
         
-        if self.is_approved.isNotNil {
-            dictionary.terminalDic.isApproved = self.is_approved
-        }
+        dictionary.terminalDic.isApproved = self.is_approved
         
         return dictionary
     }
