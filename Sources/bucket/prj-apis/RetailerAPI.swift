@@ -64,10 +64,17 @@ struct RetailerAPI {
                     if terminal.id.isNil {
                         // The terminal does not exist for this retailer.  Lets create the terminal & password and send it back to the client:
                         let term = Terminal()
+                        
                         term.serial_number = serialNumber
                         term.retailer_id = Int(retailerId)
+                        
+                        let results = try term.saveWithGIS()
+                        
+                        try? response.setBody(json: [])
+                                                 .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                                                 .completed(status: .created)
 
-                        // We want to do the following after the 201 to give back the password. 
+                        // We want to do the following after the 201 to give back the password.
 //                        // Create the new password:
 //                        let retailerSecret = UUID().uuidString
 //                        guard let hexBytes = retailerSecret.digest(.sha256), let validate = hexBytes.encode(.hex), let theSavedPassword = String(validatingUTF8: validate)  else { return  }
