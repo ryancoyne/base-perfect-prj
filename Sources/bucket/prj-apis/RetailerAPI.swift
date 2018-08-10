@@ -103,7 +103,7 @@ struct RetailerAPI {
             return {
                 request, response in
             
-                Retailer.retailerBounce(request, response)
+                Retailer.retailerTerminalBounce(request, response)
                 
                 do {
 
@@ -117,10 +117,23 @@ struct RetailerAPI {
                     
                     // put together the return dictionary
                     if ccode.success {
+                        
                         json!["customerCode"] = ccode.message
                         
+                        var qrCodeURL = ""
+                        qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerURL?.absoluteString ?? "")
+                        qrCodeURL.append("/redeem/")
+                        qrCodeURL.append(ccode.message)
+                        json!["qrCodeContent"] = qrCodeURL
+                        
+                        // if we are here then everything went well
+                        try? response.setBody(json: json!)
+                            .completed(status: .ok)
+
                     }
                     
+                    // we have to work on the correct error return codes
+                    // ideas?
                     try? response.setBody(json: json!)
                         .completed(status: .ok)
                     
@@ -218,5 +231,50 @@ extension Retailer {
             print(error)
         }
     }
- 
+
+    public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) {
+        
+        //Make sure we have the retailer Id and retailer secret:
+        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { return response.unauthorizedRetailer }
+        guard let terminalSerialNumber = request.terminalId else { return response.noTerminalId }
+        
+        // Get our secret code formatted properly to check what we have in the DB:
+        if let digestBytes = retailerSecret.digest(.sha256), let hexBytes = digestBytes.encode(.hex), let hexByteString = String(validatingUTF8: hexBytes) {
+            // Essentially, we need to make sure a record for the retailer Id exists, and then also make sure we can find a record for the terminal with its serial number and the retailer secret key:
+            
+            let terminalQuery = Terminal()
+            try? terminalQuery.find(["serial_number":terminalSerialNumber])
+            
+            // Checking three conditions:
+            //  1. The terminal is not registered
+            //  2. The terminal is not active
+            //  3. The terminal is not for this retailer
+
+            // this means the terminal number is invalid - RETURN the appropriate error code
+            if terminalQuery.id.isNil {
+                try? response.setBody(json: ["errorCode":"InvalidRetailer","message":"Please Check Retailer Id and Secret Code"])
+                response.completed(status: .custom(code: 401, message: "Please check Retailer Id and Secret Code."))
+            }
+
+            // this means the terminal is not approved
+            if terminalQuery.is_approved! == false {
+                try? response.setBody(json: ["errorCode":"TerminalNotApproved","message":"You must approve the terminal using the Bucket website."])
+                response.completed(status: .custom(code: 403, message: "You must approve the terminal using the Bucket website."))
+            }
+
+            // Checking the final condition (last condition to minimize the number of queries during error)
+            let retailerQuery = Retailer()
+            try? retailerQuery.find(["retailer_id":retailerId])
+            
+            // now lets look to make sure the serial number is to the current retailer
+            if retailerQuery.id != terminalQuery.retailer_id {
+                // there is a retailer problem
+                try? response.setBody(json: ["errorCode":"InvalidRetailerTerminal","message":"Please Check Retailer Id and Secret Code"])
+                response.completed(status: .custom(code: 401, message: "Please check Retailer Id and Secret Code."))
+            }
+            
+        }
+        
+    }
+
 }

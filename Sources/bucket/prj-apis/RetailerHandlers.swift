@@ -82,34 +82,6 @@ extension Handlers {
         }
     }
 
-    static func terminalTransaction(data: [String:Any]) throws -> RequestHandler {
-        return {
-            request, response in
-
-            // Verify Retailer
-            Retailer.retailerBounce(request, response)
-            
-            // pull the terminal information
-            var thedata:[String:Any] = [:]
-            
-            
-            
-            
-            // create the customer code
-            let ccode = Retailer().createCustomerCode(thedata)
-
-            // setup the JSON return
-            var returnJSON = "{ \"test\":TRUE, \"code\": \"\(ccode)\" }"
-
-            
-            
-            
-            try? response.setBody(json: returnJSON)
-            
-            // return
-            response.completed(status: .ok)
-        }
-    }
 
     static func terminalCloseInterval(data: [String:Any]) throws -> RequestHandler {
         return {
