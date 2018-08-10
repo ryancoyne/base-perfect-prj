@@ -230,7 +230,7 @@ public class Retailer: PostgresStORM {
             let terminal_id = data["terminalId"].stringValue ?? ""
             
             // lets create a code that is unique
-            var thecustomercode = 
+//            var thecustomercode = 
 
         }
         

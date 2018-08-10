@@ -1,3 +1,6 @@
+import PerfectHTTP
+import Foundation
+
 extension String {
     /// Create new instance with random numeric/alphabetic/alphanumeric String of given length.
     ///
@@ -67,14 +70,43 @@ extension String {
     }
 }
 
+enum BucketAPIError: Error {
+    case unparceableJSON(String)
+}
+
+extension HTTPRequest {
+    func postBodyJSON() throws -> [String:Any]? {
+        if let json = try? self.postBodyString?.jsonDecode() as? [String:Any], json.isNotNil {
+            return json
+        } else if let str = self.postBodyString {
+            throw BucketAPIError.unparceableJSON(str)
+        } else {
+            return nil
+        }
+    }
+}
+
+extension HTTPResponse {
+    func invalidRequest(_ invalidJsonString : String) {
+        return try! self
+            .setBody(json: ["errorCode":"InvalidRequest", "message":"Unable to parse JSON body: \(invalidJsonString)"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .badRequest)
+    }
+    var emptyJSONBody : Void {
+        return try! self
+            .setBody(json: ["errorCode":"InvalidRequest", "message":"Empty JSON body sent."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .badRequest)
+    }
+}
+
 extension Int {
     /// Initializes a new `Int ` instance with a random value below a given `Int`.
     ///
     /// - Parameters:
     ///   - randomBelow: The upper bound value to create a random value with.
     public init?(randomBelow upperLimit: Int) {
-        
-        
         
         guard upperLimit > 0 else { return nil }
         #if os(Linux)
