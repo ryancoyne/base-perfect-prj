@@ -49,12 +49,13 @@ struct RetailerAPI {
                 // If this is development, then we can automatically verify the device.  If we are production, then we will make them to go the web and verify the device is theirs.
                 do {
                     let json = try request.postBodyJSON()
+                
+                    guard !json!.isEmpty else { return response.emptyJSONBody }
                     
-                    guard !jsonBody.isEmpty else { return response.emptyJSONBody }
-                    
-                    if let retailerId = jsonBody["retailerId"].stringValue {
-                        
-                    }
+                    guard let retailerId = json?["retailerId"].stringValue else { return response.invalidRetailer }
+                    guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
+                
+                    //TODO: Process the request:
                     
                 } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
                     return response.invalidRequest(invalidJSONString)
@@ -74,6 +75,21 @@ struct RetailerAPI {
                 
             }
         }
+    }
+}
+
+fileprivate extension HTTPResponse {
+    var invalidRetailer : Void {
+        return try! self
+            .setBody(json: ["errorCode":"InvalidRetailer", "message":"Please Check Retailer Id"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .unauthorized)
+    }
+    var noTerminalId : Void {
+        return try! self
+            .setBody(json: ["errorCode":"NoTerminalId", "message":"You must send in a 'terminalId' key with the serial number of the device as the value."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .unauthorized)
     }
 }
 
