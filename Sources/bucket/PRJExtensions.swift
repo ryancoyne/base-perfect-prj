@@ -68,6 +68,10 @@ extension String {
         case alphaNumeric
         case allCharactersIn(String)
     }
+    
+    var intValue : Int? {
+        return Int(self)
+    }
 }
 
 enum BucketAPIError: Error {

@@ -35,7 +35,13 @@ extension Optional {
     }
     // Going to use this for the Optional<Any> date fields from our dictionary :)
     var stringValue : String? {
-        return self as? String
+        if self.isNil { return nil }
+        switch self {
+        case is Int?, is Int:
+            return String(self as! Int)
+        default:
+            return self as? String
+        }
     }
     var dicValue : [String:Any]! {
         get {

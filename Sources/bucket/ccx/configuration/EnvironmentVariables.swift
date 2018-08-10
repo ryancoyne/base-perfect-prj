@@ -3,6 +3,10 @@ import Foundation
 import PerfectLib
 import JSONConfigEnhanced
 
+enum ServerEnvironment : String {
+    case production = "PROD", development = "DEV", staging = "STAGE"
+}
+
 final class EnvironmentVariables {
     
     private init() {
@@ -62,7 +66,9 @@ final class EnvironmentVariables {
         self.EMAIL_FROM_DISPLAY_NAME = env_variables["EMAIL_FROM_DISPLAY_NAME"].stringValue
 
         self.StORMdebug           = env_variables["STORM_DEBUG"].boolValue
-        self.ServerEnvironment    = env_variables["SERVER_ENVIRONMENT"].stringValue
+        if let serverString = env_variables["SERVER_ENVIRONMENT"].stringValue, let server = ServerEnvironment(rawValue: serverString) {
+            self.Server    = server
+        }
         self.SessionName          = env_variables["SESSION_NAME"].stringValue
         self.HTTP_DOCUMENT_ROOT   = env_variables["HTTP_DOCUMENT_ROOT"].stringValue
 
@@ -250,8 +256,8 @@ final class EnvironmentVariables {
             }
             
 //            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "misc.SERVER_ENVIRONMENT") as? String {
-            if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["SERVER_ENVIRONMENT"] as? String {
-                self.ServerEnvironment = value
+            if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["SERVER_ENVIRONMENT"] as? String, let server = ServerEnvironment(rawValue: value) {
+                self.Server = server
             }
             
 //            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "misc.SESSION_NAME") as? String {
@@ -380,8 +386,8 @@ final class EnvironmentVariables {
             self.StORMdebug = false
         }
         
-        if self.ServerEnvironment == nil {
-            self.ServerEnvironment = "DEV"
+        if self.Server == nil {
+            self.Server = ServerEnvironment.development
         }
 
         if self.SessionName == nil {
@@ -786,17 +792,17 @@ final class EnvironmentVariables {
         }
     }
     
-    private var _ServerEnvironment: String?
-    public var ServerEnvironment: String? {
+    private var _Server: String?
+    public var Server: ServerEnvironment? {
         get {
-            return _ServerEnvironment
+            if _Server.isNotNil {
+                return ServerEnvironment(rawValue: _Server!)
+            } else {
+                return nil
+            }
         }
         set {
-            if newValue != nil {
-                _ServerEnvironment = newValue!
-            } else {
-                _ServerEnvironment = nil
-            }
+            _Server = newValue?.rawValue
         }
     }
     

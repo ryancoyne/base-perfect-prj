@@ -41,6 +41,7 @@ struct RetailerAPI {
                 
             }
         }
+        
         //MARK: - Register Terminal Function
         public static func registerTerminal(_ data: [String:Any]) throws -> RequestHandler {
             return {
@@ -52,42 +53,105 @@ struct RetailerAPI {
                     
                     guard !json!.isEmpty else { return response.emptyJSONBody }
                     
-                    guard let retailerId = json?["retailerId"].stringValue else { return response.invalidRetailer }
+                    guard let retailerCode = json?["retailerId"].stringValue else { return response.invalidRetailer }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
                     
-                    // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
-                    let terminal = Terminal()
-                    let theTry = try? terminal.find(["serial_number": serialNumber])
-                    if theTry.isNil { /* It failed... we may want to do something here? */ }
-                    
-                    // Check and make sure the terminal is approved or not:
-                    if terminal.id.isNil {
-                        // The terminal does not exist for this retailer.  Lets create the terminal & password and send it back to the client:
-                        let term = Terminal()
-                        
-                        term.serial_number = serialNumber
-                        term.retailer_id = Int(retailerId)
-                        
-                        let results = try term.saveWithGIS()
-                        
-                        try? response.setBody(json: [])
-                                                 .setHeader(.contentType, value: "application/json; charset=UTF-8")
-                                                 .completed(status: .created)
-
-                        // We want to do the following after the 201 to give back the password.
-//                        // Create the new password:
-//                        let retailerSecret = UUID().uuidString
-//                        guard let hexBytes = retailerSecret.digest(.sha256), let validate = hexBytes.encode(.hex), let theSavedPassword = String(validatingUTF8: validate)  else { return  }
-//
-//                        term.terminal_key = theSavedPassword
-                        
-                    } else {
-                        // The terminal does exist.  Lets see if we retailer id is the same as what they are saying:
-                        
-                    }
+                    let retailer = Retailer()
+                    try? retailer.find(["retailer_code": retailerCode])
                 
+                    // Lets first check and see if this is a valid retailer:
+                    guard retailer.id.isNotNil else { return response.unauthorizedRetailer }
                     
-                    //TODO: Process the request:
+                    switch EnvironmentVariables.sharedInstance.Server {
+                    case .production?:
+                        // We should do everything like regular here:
+                        break
+                    case .development?:
+                    // We should be automatically making the terminals available:
+                        
+                        // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
+                        let terminal = Terminal()
+                        try terminal.find(["serial_number": serialNumber])
+                        
+                        // Check and make sure the terminal is approved or not:
+                        if terminal.id.isNil {
+                            // The terminal does not exist for this retailer.  Lets create the terminal & password and send it back to the client:
+                            let term = Terminal()
+                            
+                            term.serial_number = serialNumber
+                            term.retailer_id = retailer.id
+                            
+                            do {
+                                
+                                try term.saveWithGIS()
+                                try? response.setBody(json: ["isApproved":false, "apiKey":""])
+                                    .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                                    .completed(status: .created)
+                                
+                            } catch {
+                                // TODO:  Return some error:
+                                try? response.setBody(json: ["error":error.localizedDescription])
+                                    .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                                    .completed(status: .internalServerError)
+                            }
+                            
+                        } else if terminal.retailer_id.isNotNil && terminal.is_approved {
+                            // The terminal does exist.  Lets see if we retailer id is the same as what they are saying, if so.. send them a password:
+                            guard retailer.id! == terminal.retailer_id else { /* Send back an error indicating this device is on another account */  return }
+                            
+                            // Save the new password, and return the response:
+                            let thePassword = UUID().uuidString
+                            
+                            // Build the response:
+                            var responseDictionary = [String:Any]()
+                            responseDictionary["isApproved"] = true
+                            responseDictionary["apiKey"] = thePassword
+                            
+                            // Create and assign the hashed password:
+                            guard let hexBytes = thePassword.digest(.sha256), let validate = hexBytes.encode(.hex), let theSavedPassword = String(validatingUTF8: validate)  else { return  }
+                            terminal.terminal_key = theSavedPassword
+                            
+                            // Save:
+                            try terminal.saveWithGIS()
+                            
+                            // Return the response:
+                            try? response.setBody(json: responseDictionary)
+                                .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                                .completed(status: .ok)
+                            
+                            // The following case is ONLY for development:
+                        } else if terminal.retailer_id.isNotNil && !terminal.is_approved {
+                            
+                            // First check the retailer id:
+                            guard retailer.id! == terminal.retailer_id! else { /* Send back an error indicating this device is on another account */  return response.alreadyRegistered(serialNumber) }
+                            
+                            terminal.is_approved = true
+                            
+                            // Lets create the password and send it back:
+                            let thePassword = UUID().uuidString
+                            
+                            // Build the response:
+                            var responseDictionary = [String:Any]()
+                            responseDictionary["isApproved"] = true
+                            responseDictionary["apiKey"] = thePassword
+                            
+                            // Create and assign the hashed password:
+                            guard let hexBytes = thePassword.digest(.sha256), let validate = hexBytes.encode(.hex), let theSavedPassword = String(validatingUTF8: validate)  else { return  }
+                            terminal.terminal_key = theSavedPassword
+                            
+                            // Save:
+                            try terminal.saveWithGIS()
+                            
+                            // Return the response:
+                            try? response.setBody(json: responseDictionary)
+                                .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                                .completed(status: .ok)
+                            
+                        }
+                        
+                    default:
+                        break
+                    }
                     
                 } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
                     return response.invalidRequest(invalidJSONString)
@@ -169,6 +233,12 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .unauthorized)
     }
+    func alreadyRegistered(_ serialNumber: String) -> Void {
+        return try! self
+            .setBody(json: ["errorCode":"AlreadyRegistered", "message":"The terminal with the serial number (\(serialNumber)) is registered to another retailer.  Contact Bucket support."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .conflict)
+    }
 }
 
 fileprivate extension HTTPRequest {
@@ -198,6 +268,12 @@ fileprivate extension HTTPRequest {
 
 extension Retailer {
 
+    public static func exists(_ with: String) -> Bool {
+        let retailer = Retailer()
+        try? retailer.find(["retailer_code":with])
+        return retailer.id.isNotNil
+    }
+    
     public static func retailerBounce(_ request: HTTPRequest, _ response: HTTPResponse) {
         
         //Make sure we have the retailer Id and retailer secret:
