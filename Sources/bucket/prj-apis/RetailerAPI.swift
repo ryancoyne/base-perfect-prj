@@ -53,8 +53,14 @@ struct RetailerAPI {
                     
                     guard !json!.isEmpty else { return response.emptyJSONBody }
                     
-                    guard let retailerId = json?["retailerId"].stringValue else { return response.invalidRetailer }
+                    guard let retailerCode = json?["retailerId"].stringValue else { return response.invalidRetailer }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
+                    
+                    let retailer = Retailer()
+                    try? retailer.find(["retailer_code": retailerCode])
+                
+                    // Lets first check and see if this is a valid retailer:
+                    guard retailer.id.isNotNil else { return response.unauthorizedRetailer }
                     
                     switch EnvironmentVariables.sharedInstance.Server {
                     case .production?:
@@ -74,7 +80,7 @@ struct RetailerAPI {
                             let term = Terminal()
                             
                             term.serial_number = serialNumber
-                            term.retailer_id = Int(retailerId)
+                            term.retailer_id = retailer.id
                             
                             do {
                                 
@@ -92,7 +98,7 @@ struct RetailerAPI {
                             
                         } else if terminal.retailer_id.isNotNil && terminal.is_approved {
                             // The terminal does exist.  Lets see if we retailer id is the same as what they are saying, if so.. send them a password:
-                            guard retailerId == "\(terminal.retailer_id!)" else { /* Send back an error indicating this device is on another account */  return }
+                            guard retailer.id! == terminal.retailer_id else { /* Send back an error indicating this device is on another account */  return }
                             
                             // Save the new password, and return the response:
                             let thePassword = UUID().uuidString
@@ -118,7 +124,7 @@ struct RetailerAPI {
                         } else if terminal.retailer_id.isNotNil && !terminal.is_approved {
                             
                             // First check the retailer id:
-                            guard retailerId == "\(terminal.retailer_id!)" else { /* Send back an error indicating this device is on another account */  return }
+                            guard retailer.id! == terminal.retailer_id! else { /* Send back an error indicating this device is on another account */  return response.alreadyRegistered(serialNumber) }
                             
                             terminal.is_approved = true
                             
@@ -209,6 +215,12 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .unauthorized)
     }
+    func alreadyRegistered(_ serialNumber: String) -> Void {
+        return try! self
+            .setBody(json: ["errorCode":"AlreadyRegistered", "message":"The terminal with the serial number (\(serialNumber)) is registered to another retailer.  Contact Bucket support."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .conflict)
+    }
 }
 
 fileprivate extension HTTPRequest {
@@ -238,6 +250,12 @@ fileprivate extension HTTPRequest {
 
 extension Retailer {
 
+    public static func exists(_ with: String) -> Bool {
+        let retailer = Retailer()
+        try? retailer.find(["retailer_code":with])
+        return retailer.id.isNotNil
+    }
+    
     public static func retailerBounce(_ request: HTTPRequest, _ response: HTTPResponse) {
         
         //Make sure we have the retailer Id and retailer secret:
