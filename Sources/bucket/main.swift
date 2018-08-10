@@ -41,8 +41,8 @@ import Foundation
 let _ = PerfectCrypto.isInitialized
 
 var isProduction = false
-switch EnvironmentVariables.sharedInstance.ServerEnvironment!.uppercased() {
-    case "PROD":
+switch EnvironmentVariables.sharedInstance.Server {
+    case .production?:
         isProduction = true
     default:
         isProduction = false
