@@ -24,3 +24,18 @@ extension HTTPRequest {
     }
 }
 
+extension HTTPResponse {
+    func invalidRequest(_ invalidJsonString : String) {
+        return try! self
+            .setBody(json: ["errorCode":"InvalidRequest", "message":"Unable to parse JSON body: \(invalidJsonString)"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .badRequest)
+    }
+    var emptyJSONBody : Void {
+        return try! self
+            .setBody(json: ["errorCode":"InvalidRequest", "message":"Empty JSON body sent."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .badRequest)
+    }
+}
+

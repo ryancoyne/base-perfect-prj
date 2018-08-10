@@ -965,7 +965,7 @@ extension HTTPResponse {
                      .completed(status: .unauthorized)
     }
     func unableToDecodeJSON() {
-        try! self.setBody(string: ["error":"Unable to decode JSON."].jsonEncodedString())
+        try! self.setBody(json: ["error":"Unable to decode JSON."])
             .setHeader(.contentType, value: "application/json")
             .completed(status: .badRequest)
     }

@@ -50,11 +50,17 @@ struct RetailerAPI {
                 do {
                     let json = try request.postBodyJSON()
                     
+                    guard !jsonBody.isEmpty else { return response.emptyJSONBody }
+                    
+                    if let retailerId = jsonBody["retailerId"].stringValue {
+                        
+                    }
+                    
                 } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
-                    return try! response
-                        .setBody(json: ["errorCode":"InvalidRequest", "message":"Unable to parse JSON body: \(invalidJSONString)"])
-                        .completed(status: .badRequest)
+                    return response.invalidRequest(invalidJSONString)
+                
                 } catch {
+                    // Not sure what error could be thrown here, but the only one we throw right now is if the JSON is unparceable.
                     
                 }
             }
