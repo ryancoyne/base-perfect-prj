@@ -207,4 +207,34 @@ public class Retailer: PostgresStORM {
         return diff
         
     }
+    
+    //MARK: Function to create Customer Codes
+    func createCustomerCode(_ data: [String:Any])->(success:Bool, message:String) {
+        
+        var messagereturn = ""
+        
+        // lets make sure the correct parameters were passed in..
+        if data[""].stringValue.isEmptyOrNil {
+            messagereturn = "missing"
+        }
+
+        if messagereturn.isEmpty {
+            // we are good - all of the info is there
+            
+//            let tbl = CodeTransaction()
+            
+            // pull the relevent information
+            let trans_amount = data["amount"].doubleValue
+            let total_trans_amount = data["totalTransactionAmount"].doubleValue ?? 0.0
+            let client_trans_id = data["clientTransactionId"].stringValue ?? ""
+            let terminal_id = data["terminalId"].stringValue ?? ""
+            
+            // lets create a code that is unique
+//            var thecustomercode = 
+
+        }
+        
+        // if we are here there was a problem so we should return the message
+        return (false, messagereturn)
+    }
 }
