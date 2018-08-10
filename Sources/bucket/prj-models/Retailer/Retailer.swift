@@ -222,6 +222,7 @@ public class Retailer: PostgresStORM {
             // we are good - all of the info is there
             
 //            let tbl = CodeTransaction()
+            let retailerid = data["retailerId"].stringValue ?? ""
             
             // pull the relevent information
             let trans_amount = data["amount"].doubleValue

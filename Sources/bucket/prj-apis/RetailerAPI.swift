@@ -74,16 +74,22 @@ struct RetailerAPI {
                 Retailer.retailerBounce(request, response)
                 
                 do {
-                    let json = try request.postBodyJSON()
+
+                    // we are using the json variable to return the code too.
+                    var json = try request.postBodyJSON()
                     
-                    let transaction = CodeTransaction()
-                    let amount = json!["amount"].doubleValue
-                    let total = json!["totalTransactionAmount"].doubleValue
-                    transaction.amount = amount
-                    transaction.total_amount = total
-                    try! transaction.saveWithGIS()
+                    json!["retailerId"] = request.retailerId ?? ""
+
+                    // get the code
+                    let ccode = Retailer().createCustomerCode(json!)
                     
-                    try? response.setBody(json: ["amount": amount!, "totalTransactionAmount": total!])
+                    // put together the return dictionary
+                    if ccode.success {
+                        json!["customerCode"] = ccode.message
+                        
+                    }
+                    
+                    try? response.setBody(json: json!)
                         .completed(status: .ok)
                     
                 } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
