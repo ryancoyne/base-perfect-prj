@@ -208,6 +208,9 @@ final class PRJDBTables {
         FormFieldTypeTable.sharedInstance.create()
         CashoutTypesTable.sharedInstance.create()
         CompletedFormsTable.sharedInstance.create()
+        
+        CodeTransactionTable.sharedInstance.create()
+        CodeTransactionHistoryTable.sharedInstance.create()
 
         // make sure the tables exist.... if not - then create it
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
