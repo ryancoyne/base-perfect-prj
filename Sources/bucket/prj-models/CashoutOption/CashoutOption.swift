@@ -225,7 +225,7 @@ public class CashoutOption: PostgresStORM {
         }
         
         if self.country_id.isNotNil {
-            dictionary.transactionDic.countryId = self.country_id
+            dictionary.cashoutOptionsDic.countryId = self.country_id
         }
         
         if self.type_id.isNotNil {

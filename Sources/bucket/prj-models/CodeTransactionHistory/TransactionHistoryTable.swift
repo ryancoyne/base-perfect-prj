@@ -8,15 +8,15 @@
 import Foundation
 import PostgresStORM
 
-final class TransactionHistoryTable {
+final class CodeTransactionHistoryTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
     
-    static let sharedInstance = TransactionHistoryTable()
-    let tbl = TransactionHistory()
+    static let sharedInstance = CodeTransactionHistoryTable()
+    let tbl = CodeTransactionHistory()
     
     let tablelevel = 1.00
     
