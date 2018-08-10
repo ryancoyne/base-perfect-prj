@@ -71,8 +71,7 @@ struct RetailerAPI {
                         
                         // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
                         let terminal = Terminal()
-                        let theTry = try? terminal.find(["serial_number": serialNumber])
-                        if theTry.isNil { /* It failed... we may want to do something here? */ }
+                        try terminal.find(["serial_number": serialNumber])
                         
                         // Check and make sure the terminal is approved or not:
                         if terminal.id.isNil {
