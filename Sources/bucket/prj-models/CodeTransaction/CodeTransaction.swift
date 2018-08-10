@@ -26,7 +26,7 @@ public class CodeTransaction: PostgresStORM {
     var customer_code     : String? = nil
     var customer_codeURL     : String? = nil
     var terminal_id : Int? = nil
-    var location : String? = nil
+    var client_location : String? = nil
     var batch_id : String? = nil
     var amount : Double? = nil
     var total_amount : Double? = nil
@@ -82,8 +82,8 @@ public class CodeTransaction: PostgresStORM {
             batch_id = data
         }
         
-        if let data = this.data.codeTransactionDic.location {
-            location = data
+        if let data = this.data.codeTransactionDic.clientLocation {
+            client_location = data
         }
         
         if let data = this.data.codeTransactionDic.customerCode {
@@ -175,9 +175,9 @@ public class CodeTransaction: PostgresStORM {
                     self.customer_codeURL = (value as! String)
                 }
                 
-            case "location":
+            case "client_location":
                 if (value as? String).isNotNil {
-                    self.location = (value as! String)
+                    self.client_location = (value as! String)
                 }
                 
             case "batch_id":
@@ -273,8 +273,8 @@ public class CodeTransaction: PostgresStORM {
             dictionary.codeTransactionDic.batchId = self.batch_id
         }
         
-        if self.location.isNotNil {
-            dictionary.codeTransactionDic.location = self.location
+        if self.client_location.isNotNil {
+            dictionary.codeTransactionDic.clientLocation = self.client_location
         }
         
         if self.customer_code.isNotNil {
@@ -294,6 +294,10 @@ public class CodeTransaction: PostgresStORM {
         var diff = true
         
         if diff == true, self.retailer_id != targetItem.retailer_id {
+            diff = false
+        }
+        
+        if diff == true, self.client_location != targetItem.client_location {
             diff = false
         }
         

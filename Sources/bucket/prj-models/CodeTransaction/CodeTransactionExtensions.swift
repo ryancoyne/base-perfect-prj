@@ -179,15 +179,15 @@ struct CodeTransactionDictionary {
             }
         }
     }
-    var location : String? {
+    var clientLocation : String? {
         get {
-            return self.dic["location"].stringValue
+            return self.dic["client_location"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["location"] = newValue!
+                self.dic["client_location"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "location")
+                self.dic.removeValue(forKey: "client_location")
             }
         }
     }
