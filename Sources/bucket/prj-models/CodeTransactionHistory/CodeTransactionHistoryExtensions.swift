@@ -179,15 +179,27 @@ struct CodeTransactionHistoryDictionary {
             }
         }
     }
-    var location : String? {
+    var clientLocation : String? {
         get {
-            return self.dic["location"].stringValue
+            return self.dic["clientLocation"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["location"] = newValue!
+                self.dic["clientLocation"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "location")
+                self.dic.removeValue(forKey: "clientLocation")
+            }
+        }
+    }
+    var clientTransactionId : String? {
+        get {
+            return self.dic["client_transaction_id"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["client_transaction_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "client_transaction_id")
             }
         }
     }

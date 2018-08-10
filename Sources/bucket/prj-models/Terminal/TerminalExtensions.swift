@@ -47,6 +47,18 @@ struct TerminalDictionary {
             }
         }
     }
+    var addressId : Int? {
+        get {
+            return self.dic["address_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["address_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "address_id")
+            }
+        }
+    }
     var retailerId : Int? {
         get {
             return self.dic["retailer_id"].intValue
