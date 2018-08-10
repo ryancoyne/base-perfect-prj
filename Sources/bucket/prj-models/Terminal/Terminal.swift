@@ -25,6 +25,7 @@ public class Terminal: PostgresStORM {
     var retailer_id     : Int? = nil
     var serial_number     : String? = nil
     var client_transaction_id     : String? = nil
+    var client_location     : String? = nil
     var name     : String? = nil
     var is_approved     : Bool? = nil
     var terminal_key : String? = nil
@@ -75,6 +76,10 @@ public class Terminal: PostgresStORM {
             client_transaction_id = data
         }
         
+        if let data = this.data.terminalDic.clientLocation {
+            client_location = data
+        }
+        
         if let data = this.data.terminalDic.serialNumber {
             serial_number = data
         }
@@ -122,6 +127,11 @@ public class Terminal: PostgresStORM {
             case "serial_number":
                 if (value as? String).isNotNil {
                     self.serial_number = (value as! String)
+                }
+                
+            case "client_location":
+                if (value as? String).isNotNil {
+                    self.client_location = (value as! String)
                 }
                 
             case "client_transaction_id":
@@ -189,6 +199,10 @@ public class Terminal: PostgresStORM {
             dictionary.terminalDic.posId = self.pos_id
         }
         
+        if self.client_location.isNotNil {
+            dictionary.terminalDic.clientLocation = self.client_location
+        }
+        
         if self.terminal_key.isNotNil {
             dictionary.terminalDic.terminalKey = self.terminal_key
         }
@@ -226,6 +240,10 @@ public class Terminal: PostgresStORM {
         }
         
         if diff == true, self.retailer_id != targetItem.retailer_id {
+            diff = false
+        }
+        
+        if diff == true, self.client_location != targetItem.client_location {
             diff = false
         }
         

@@ -59,6 +59,18 @@ struct TerminalDictionary {
             }
         }
     }
+    var clientLocation : String? {
+        get {
+            return self.dic["client_location"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["client_location"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "client_location")
+            }
+        }
+    }
     var retailerId : Int? {
         get {
             return self.dic["retailer_id"].intValue
