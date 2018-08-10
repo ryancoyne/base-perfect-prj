@@ -49,17 +49,17 @@ struct RetailerAPI {
                 // If this is development, then we can automatically verify the device.  If we are production, then we will make them to go the web and verify the device is theirs.
                 do {
                     let json = try request.postBodyJSON()
-                
+                    
                     guard !json!.isEmpty else { return response.emptyJSONBody }
                     
                     guard let retailerId = json?["retailerId"].stringValue else { return response.invalidRetailer }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
-                
+                    
                     //TODO: Process the request:
                     
                 } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
                     return response.invalidRequest(invalidJSONString)
-                
+                    
                 } catch {
                     // Not sure what error could be thrown here, but the only one we throw right now is if the JSON is unparceable.
                     
@@ -106,6 +106,12 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .unauthorized)
     }
+    var unauthorizedRetailer : Void {
+        return try! self
+            .setBody(json: ["errorCode":"InvalidRetailer", "message":"Please Check Retailer Id and Secret Code."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .unauthorized)
+    }
     var noTerminalId : Void {
         return try! self
             .setBody(json: ["errorCode":"NoTerminalId", "message":"You must send in a 'terminalId' key with the serial number of the device as the value."])
@@ -117,6 +123,17 @@ fileprivate extension HTTPResponse {
 fileprivate extension HTTPRequest {
     var retailerId : String? {
         return self.urlVariables["retailerId"]
+    }
+    var retailerSecret : String? {
+        return self.header(.custom(name: "x-functions-key"))
+    }
+    var terminalId : String? {
+        let theTry = try? self.postBodyJSON()?["terminalId"].stringValue
+        if theTry.isNil {
+            return nil
+        } else {
+            return theTry!
+        }
     }
     
     var terminal : Terminal? {
@@ -132,6 +149,22 @@ extension Retailer {
 
     public static func retailerBounce(_ request: HTTPRequest, _ response: HTTPResponse) {
         
+        //Make sure we have the retailer Id and retailer secret:
+        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { return response.unauthorizedRetailer }
+        guard let terminalSerialNumber = request.terminalId else { return response.noTerminalId }
+        
+        // Get our secret code formatted properly to check what we have in the DB:
+        if let digestBytes = retailerSecret.digest(.sha256), let hexBytes = digestBytes.encode(.hex), let hexByteString = String(validatingUTF8: hexBytes) {
+            // Essentially, we need to make sure a record for the retailer Id exists, and then also make sure we can find a record for the terminal with its serial number and the retailer secret key:
+            
+            let terminalQuery = Terminal()
+            let response = try? terminalQuery.find(["terminal_key":hexByteString, "serial_number":terminalSerialNumber])
+            
+            if response.isNil { /* See what we should do here. */ }
+            // Make sure the retailer_id is the same as whats passed in, otherwise, theres an issue with this device.  See Status Code 409:
+            
+        }
+
         let sqlCheck = "SELECT "
         
         let terminal = Terminal()
