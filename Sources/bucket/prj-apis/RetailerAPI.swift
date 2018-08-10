@@ -70,7 +70,29 @@ struct RetailerAPI {
         public static func createTransaction(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+            
+                Retailer.retailerBounce(request, response)
                 
+                do {
+                    let json = try request.postBodyJSON()
+                    
+                    let transaction = CodeTransaction()
+                    let amount = json!["amount"].doubleValue
+                    let total = json!["totalTransactionAmount"].doubleValue
+                    transaction.amount = amount
+                    transaction.total_amount = total
+                    try! transaction.saveWithGIS()
+                    
+                    try? response.setBody(json: ["amount": amount!, "totalTransactionAmount": total!])
+                        .completed(status: .ok)
+                    
+                } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
+                    return response.invalidRequest(invalidJSONString)
+                    
+                } catch {
+                    // Not sure what error could be thrown here, but the only one we throw right now is if the JSON is unparceable.
+                    
+                }
                 
             }
         }

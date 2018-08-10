@@ -48,8 +48,6 @@ switch EnvironmentVariables.sharedInstance.ServerEnvironment!.uppercased() {
         isProduction = false
 }
 
-let currency : BucketDecimal = 0.00
-
 // make sure the log directory exists
 var logfilelocation = "/"
 let logFileName = "default.txt"
