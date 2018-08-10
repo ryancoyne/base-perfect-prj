@@ -1,43 +1,25 @@
-extension Dictionary where Key == String, Value == Any {
-    var capsuleskin : CapsuleskinDictionary! {
-        get {
-            var bc = CapsuleskinDictionary()
-            bc.dic = self
-            return bc
-        }
-        set {
-            self = newValue.dic
-        }
-    }
+
+//
+//  PRJExtensions.swift
+//  bucket
+//
+//  Created by Ryan Coyne on 8/10/18.
+//
+
+import PerfectHTTP
+
+enum BucketAPIError: Error {
+    case unparceableJSON(String)
 }
 
-//MARK: Capsuleskin Dictionary Variable Values
-struct CapsuleskinDictionary {
-    fileprivate var dic : [String:Any]!
-    /// This variable key is "description". Set nil to remove from the dictionary.
-    var capsuleskin_description : String? {
-        get {
-            return self.dic["capsuleskin_description"] as? String
-        }
-        set {
-            if newValue != nil {
-                self.dic["capsuleskin_description"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "capsuleskin_description")
-            }
-        }
-    }
-    /// This variable key is "capsuleidentifier". Set nil to remove from the dictionary.
-    var capsuleskin_identifier : Int? {
-        get {
-            return self.dic["capsuleskin_identifier"] as? Int
-        }
-        set {
-            if newValue != nil {
-                self.dic["capsuleskin_identifier"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "capsuleskin_identifier")
-            }
+extension HTTPRequest {
+    func postBodyJSON() throws -> [String:Any]? {
+        if let json = try? self.postBodyString?.jsonDecode() as? [String:Any], json.isNotNil {
+            return json
+        } else if let str = self.postBodyString {
+            throw BucketAPIError.unparceableJSON(str)
+        } else {
+            return nil
         }
     }
 }
