@@ -191,4 +191,16 @@ struct CodeTransactionHistoryDictionary {
             }
         }
     }
+    var clientTransactionId : String? {
+        get {
+            return self.dic["client_transaction_id"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["client_transaction_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "client_transaction_id")
+            }
+        }
+    }
 }

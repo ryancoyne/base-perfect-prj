@@ -27,6 +27,7 @@ public class CodeTransactionHistory: PostgresStORM {
     var customer_codeURL     : String? = nil
     var terminal_id : Int? = nil
     var client_location : String? = nil
+    var client_transaction_id     : String? = nil
     var batch_id : String? = nil
     var amount : Double? = nil
     var total_amount : Double? = nil
@@ -84,6 +85,10 @@ public class CodeTransactionHistory: PostgresStORM {
         
         if let data = this.data.codeTransactionHistoryDic.clientLocation {
             client_location = data
+        }
+        
+        if let data = this.data.codeTransactionHistoryDic.clientTransactionId {
+            client_transaction_id = data
         }
         
         if let data = this.data.codeTransactionHistoryDic.customerCode {
@@ -146,6 +151,11 @@ public class CodeTransactionHistory: PostgresStORM {
                 }
                 
             case "retailer_id":
+                if (value as? Int).isNotNil {
+                    self.retailer_id = (value as! Int)
+                }
+                
+            case "client_transaction_id":
                 if (value as? Int).isNotNil {
                     self.retailer_id = (value as! Int)
                 }
@@ -253,6 +263,10 @@ public class CodeTransactionHistory: PostgresStORM {
             dictionary.codeTransactionHistoryDic.retailerId = self.retailer_id
         }
         
+        if self.client_transaction_id.isNotNil {
+            dictionary.codeTransactionHistoryDic.clientTransactionId = self.client_transaction_id
+        }
+        
         if self.redeemedby.isNotNil {
             dictionary.codeTransactionHistoryDic.redeemedBy = self.redeemedby
         }
@@ -298,6 +312,10 @@ public class CodeTransactionHistory: PostgresStORM {
         }
         
         if diff == true, self.client_location != targetItem.client_location {
+            diff = false
+        }
+        
+        if diff == true, self.client_transaction_id != targetItem.client_transaction_id {
             diff = false
         }
         

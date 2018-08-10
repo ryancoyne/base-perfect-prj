@@ -24,8 +24,7 @@ public class Terminal: PostgresStORM {
     var pos_id     : Int? = nil
     var retailer_id     : Int? = nil
     var serial_number     : String? = nil
-    var client_transaction_id     : String? = nil
-    var client_location     : String? = nil
+    var address_id     : String? = nil
     var name     : String? = nil
     var is_approved     : Bool? = nil
     var terminal_key : String? = nil
