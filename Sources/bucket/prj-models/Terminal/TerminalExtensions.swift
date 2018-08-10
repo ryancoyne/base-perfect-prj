@@ -71,15 +71,15 @@ struct TerminalDictionary {
             }
         }
     }
-    var key : String? {
+    var terminalKey : String? {
         get {
-            return self.dic["key"].stringValue
+            return self.dic["terminal_key"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["key"] = newValue!
+                self.dic["terminal_key"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "key")
+                self.dic.removeValue(forKey: "terminal_key")
             }
         }
     }

@@ -102,6 +102,8 @@ final class CashoutOptionTable {
         // table specific fields
         createsql.append("country_id int NOT NULL DEFAULT 0, ")
         createsql.append("type_id int NOT NULL DEFAULT 0, ")
+        createsql.append("maximum numeric(10,5) NOT NULL DEFAULT 0, ")
+        createsql.append("minimum numeric(10,5) NOT NULL DEFAULT 0, ")
         createsql.append("form_id int NOT NULL DEFAULT 0, ")
         createsql.append("name text COLLATE pg_catalog.default, ")
         createsql.append("pictureURL text COLLATE pg_catalog.default, ")
