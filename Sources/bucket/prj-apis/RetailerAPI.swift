@@ -66,12 +66,13 @@ struct RetailerAPI {
                         let term = Terminal()
                         term.serial_number = serialNumber
                         term.retailer_id = Int(retailerId)
-                        
-                        // Create the new password:
-                        let retailerSecret = UUID().uuidString
-                        guard let hexBytes = retailerSecret.digest(.sha256), let validate = hexBytes.encode(.hex), let theSavedPassword = String(validatingUTF8: validate)  else { return  }
-                        
-                        term.terminal_key = theSavedPassword
+
+                        // We want to do the following after the 201 to give back the password. 
+//                        // Create the new password:
+//                        let retailerSecret = UUID().uuidString
+//                        guard let hexBytes = retailerSecret.digest(.sha256), let validate = hexBytes.encode(.hex), let theSavedPassword = String(validatingUTF8: validate)  else { return  }
+//
+//                        term.terminal_key = theSavedPassword
                         
                     } else {
                         // The terminal does exist.  Lets see if we retailer id is the same as what they are saying:
