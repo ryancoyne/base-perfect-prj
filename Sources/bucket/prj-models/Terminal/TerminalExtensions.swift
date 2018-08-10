@@ -47,27 +47,15 @@ struct TerminalDictionary {
             }
         }
     }
-    var clientTransactionId : String? {
+    var addressId : Int? {
         get {
-            return self.dic["client_transaction_id"].stringValue
+            return self.dic["address_id"].intValue
         }
         set {
             if newValue != nil {
-                self.dic["client_transaction_id"] = newValue!
+                self.dic["address_id"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "client_transaction_id")
-            }
-        }
-    }
-    var clientLocation : String? {
-        get {
-            return self.dic["client_location"].stringValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["client_location"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "client_location")
+                self.dic.removeValue(forKey: "address_id")
             }
         }
     }

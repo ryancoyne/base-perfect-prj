@@ -102,9 +102,8 @@ final class TerminalTable {
         // table specific fields
         createsql.append("pos_id int NOT NULL DEFAULT 0, ")
         createsql.append("retailer_id int NOT NULL DEFAULT 0, ")
+        createsql.append("address_id int NOT NULL DEFAULT 0, ")
         createsql.append("serial_number text COLLATE pg_catalog.default, ")
-        createsql.append("client_transaction_id text COLLATE pg_catalog.default, ")
-        createsql.append("client_location text COLLATE pg_catalog.default, ")
         createsql.append("terminal_key text COLLATE pg_catalog.default, ")
         createsql.append("name text COLLATE pg_catalog.default, ")
         createsql.append("is_approved bool NOT NULL DEFAULT false, ")

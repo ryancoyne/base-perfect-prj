@@ -24,7 +24,7 @@ public class Terminal: PostgresStORM {
     var pos_id     : Int? = nil
     var retailer_id     : Int? = nil
     var serial_number     : String? = nil
-    var address_id     : String? = nil
+    var address_id     : Int? = nil
     var name     : String? = nil
     var is_approved     : Bool? = nil
     var terminal_key : String? = nil
@@ -71,12 +71,8 @@ public class Terminal: PostgresStORM {
             retailer_id = data
         }
         
-        if let data = this.data.terminalDic.clientTransactionId {
-            client_transaction_id = data
-        }
-        
-        if let data = this.data.terminalDic.clientLocation {
-            client_location = data
+        if let data = this.data.terminalDic.addressId {
+            address_id = data
         }
         
         if let data = this.data.terminalDic.serialNumber {
@@ -123,19 +119,14 @@ public class Terminal: PostgresStORM {
                     self.retailer_id = (value as! Int)
                 }
                 
+            case "address_id":
+                if (value as? Int).isNotNil {
+                    self.retailer_id = (value as! Int)
+                }
+                
             case "serial_number":
                 if (value as? String).isNotNil {
                     self.serial_number = (value as! String)
-                }
-                
-            case "client_location":
-                if (value as? String).isNotNil {
-                    self.client_location = (value as! String)
-                }
-                
-            case "client_transaction_id":
-                if (value as? String).isNotNil {
-                    self.client_transaction_id = (value as! String)
                 }
                 
             case "terminal_key":
@@ -198,16 +189,12 @@ public class Terminal: PostgresStORM {
             dictionary.terminalDic.posId = self.pos_id
         }
         
-        if self.client_location.isNotNil {
-            dictionary.terminalDic.clientLocation = self.client_location
-        }
-        
         if self.terminal_key.isNotNil {
             dictionary.terminalDic.terminalKey = self.terminal_key
         }
         
-        if self.client_transaction_id.isNotNil {
-            dictionary.terminalDic.clientTransactionId = self.client_transaction_id
+        if self.address_id.isNotNil {
+            dictionary.terminalDic.addressId = self.address_id
         }
         
         if self.retailer_id.isNotNil {
@@ -242,15 +229,11 @@ public class Terminal: PostgresStORM {
             diff = false
         }
         
-        if diff == true, self.client_location != targetItem.client_location {
+        if diff == true, self.address_id != targetItem.address_id {
             diff = false
         }
         
         if diff == true, self.terminal_key != targetItem.terminal_key {
-            diff = false
-        }
-        
-        if diff == true, self.client_transaction_id != targetItem.client_transaction_id {
             diff = false
         }
         
