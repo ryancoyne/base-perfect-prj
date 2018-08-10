@@ -132,6 +132,18 @@ final class PRJDBTables {
 
     
     //MARK:-
+    //MARK: Core DB Table Views
+    public func addCodeTransactionNotRedeemedView(_ tablename: String)-> String {
+    
+        var viewsql = "CREATE VIEW public.\(tablename)_view_not_redeemed AS "
+        viewsql.append("SELECT * FROM \(tablename) WHERE redeemed = 0; ")
+        
+        return viewsql
+    
+    }
+    
+    
+    //MARK:-
     //MARK: Core DB creation processes
     public func createTables() {
         
