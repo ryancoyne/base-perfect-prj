@@ -35,6 +35,8 @@ struct RetailerAPI {
             
                 guard let retailerId = request.retailerId else { return response.completed(status: .forbidden)  }
                 
+                
+                
                 return response.completed(status: .ok)
                 
             }
@@ -44,8 +46,17 @@ struct RetailerAPI {
             return {
                 request, response in
                 
-                
-                
+                // If this is development, then we can automatically verify the device.  If we are production, then we will make them to go the web and verify the device is theirs.
+                do {
+                    let json = try request.postBodyJSON()
+                    
+                } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
+                    return try! response
+                        .setBody(json: ["errorCode":"InvalidRequest", "message":"Unable to parse JSON body: \(invalidJSONString)"])
+                        .completed(status: .badRequest)
+                } catch {
+                    
+                }
             }
         }
         //MARK: - Create Transaction
@@ -64,4 +75,11 @@ fileprivate extension HTTPRequest {
     var retailerId : String? {
         return self.urlVariables["retailerId"]
     }
+    
+    var terminal : Terminal? {
+        // Lets see if we have a terminal from the input data:
+        // They need to input the x-functions-key as their retailer password.
+        return nil
+    }
+    
 }

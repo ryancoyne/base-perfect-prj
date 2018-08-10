@@ -941,6 +941,23 @@ extension Double {
         return self * 1609.34
     }
 }
+
+enum BucketAPIError: Error {
+    case unparceableJSON(String)
+}
+
+extension HTTPRequest {
+    func postBodyJSON() throws -> [String:Any]? {
+        if let json = try? self.postBodyString?.jsonDecode() as? [String:Any], json.isNotNil {
+            return json
+        } else if let str = self.postBodyString {
+            throw BucketAPIError.unparceableJSON(str)
+        } else {
+            return nil
+        }
+    }
+}
+
 extension HTTPResponse {
     func notLoggedIn(_ message : String?=nil) {
         var returnD = ["error" : "Please log in"]
