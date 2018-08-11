@@ -78,13 +78,15 @@ struct RetailerAPI {
                             // The terminal does not exist for this retailer.  Lets create the terminal & password and send it back to the client:
                             let term = Terminal()
                             
+                            let apiKey = UUID().uuidString
                             term.serial_number = serialNumber
                             term.retailer_id = retailer.id
+                            term.terminal_key = apiKey.ourPasswordHash
                             
                             do {
                                 
                                 try term.saveWithGIS()
-                                try? response.setBody(json: ["isApproved":false, "apiKey":""])
+                                try? response.setBody(json: ["isApproved":false, "apiKey":apiKey])
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
                                 
@@ -108,8 +110,7 @@ struct RetailerAPI {
                             responseDictionary["apiKey"] = thePassword
                             
                             // Create and assign the hashed password:
-                            guard let hexBytes = thePassword.digest(.sha256), let validate = hexBytes.encode(.hex), let theSavedPassword = String(validatingUTF8: validate)  else { return  }
-                            terminal.terminal_key = theSavedPassword
+                            terminal.terminal_key = thePassword.ourPasswordHash
                             
                             // Save:
                             try terminal.saveWithGIS()
@@ -333,7 +334,7 @@ extension Retailer {
             }
 
             // this means the terminal is not approved
-            if terminalQuery.is_approved! == false {
+            if !terminalQuery.is_approved {
                 try? response.setBody(json: ["errorCode":"TerminalNotApproved","message":"You must approve the terminal using the Bucket website."])
                 response.completed(status: .custom(code: 403, message: "You must approve the terminal using the Bucket website."))
             }

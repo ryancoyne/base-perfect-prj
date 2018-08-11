@@ -1442,6 +1442,11 @@ extension String {
         return self.replacingOccurrences(of: "'", with: "''")
     }
     
+    var ourPasswordHash : String? {
+        guard let hexBytes = self.digest(.sha256), let validate = hexBytes.encode(.hex), let theHashedPassword = String(validatingUTF8: validate)  else { return nil }
+        return theHashedPassword
+    }
+    
     func chompLeft(_ prefix: String) -> String {
         if let prefixRange = range(of: prefix) {
             if prefixRange.upperBound >= endIndex {
