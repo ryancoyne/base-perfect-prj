@@ -227,13 +227,16 @@ struct RetailerAPI {
                         try? terminal.find(["serial_number":request.terminalId!])
                         
                         let transaction = CodeTransaction()
-                        transaction.amount = data["amount"].doubleValue
-                        transaction.total_amount = data["totalTransactionAmount"].doubleValue
-                        transaction.client_location = data["locationId"].stringValue
-                        transaction.client_transaction_id = data["clientTransactionId"].stringValue
+                        transaction.amount = json?["amount"].doubleValue
+                        transaction.total_amount = json?["totalTransactionAmount"].doubleValue
+                        transaction.client_location = json?["locationId"].stringValue
+                        transaction.client_transaction_id = json?["clientTransactionId"].stringValue
                         transaction.terminal_id = terminal.id
                         transaction.retailer_id = retailer.id
-                        transaction.customer_code = json!["customerCode"].stringValue
+                        transaction.customer_code = json?["customerCode"].stringValue
+                        transaction.customer_codeURL = json?["qrCodeContent"].stringValue
+                        
+                        // Save the transaction
                         try? transaction.saveWithGIS()
                         
                         // if we are here then everything went well
