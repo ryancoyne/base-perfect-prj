@@ -25,7 +25,8 @@ struct RetailerAPI {
             return [
                 ["method":"get",    "uri":"/api/v1/closeInterval/{retailerId}", "handler":closeInterval],
                 ["method":"post",    "uri":"/api/v1/registerterminal", "handler":registerTerminal],
-                ["method":"post",    "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction]
+                ["method":"post",    "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],
+                ["method":"post",    "uri":"/api/v1/transaction", "handler":createTransaction]
             ]
         }
         //MARK: - Close Interval Function
@@ -196,6 +197,7 @@ struct RetailerAPI {
             return {
                 request, response in
             
+                // We should first bouce the retailer (takes care of all the general retailer errors):
                 Retailer.retailerTerminalBounce(request, response)
                 
                 do {
@@ -250,7 +252,7 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .unauthorized)
     }
-    var unauthorizedRetailer : Void {
+    var unauthorizedTerminal : Void {
         return try! self
             .setBody(json: ["errorCode":"InvalidRetailer", "message":"Please Check Retailer Id and Secret Code."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
@@ -331,45 +333,32 @@ extension Retailer {
     public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) {
         
         //Make sure we have the retailer Id and retailer secret:
-        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { return response.unauthorizedRetailer }
+        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { return response.unauthorizedTerminal }
         guard let terminalSerialNumber = request.terminalId else { return response.noTerminalId }
         
         // Get our secret code formatted properly to check what we have in the DB:
-        if let digestBytes = retailerSecret.digest(.sha256), let hexBytes = digestBytes.encode(.hex), let hexByteString = String(validatingUTF8: hexBytes) {
-            // Essentially, we need to make sure a record for the retailer Id exists, and then also make sure we can find a record for the terminal with its serial number and the retailer secret key:
-            
-            let terminalQuery = Terminal()
-            try? terminalQuery.find(["serial_number":terminalSerialNumber])
-            
-            // Checking three conditions:
-            //  1. The terminal is not registered
-            //  2. The terminal is not active
-            //  3. The terminal is not for this retailer
-
-            // this means the terminal number is invalid - RETURN the appropriate error code
-            if terminalQuery.id.isNil {
-                try? response.setBody(json: ["errorCode":"InvalidRetailer","message":"Please Check Retailer Id and Secret Code"])
-                response.completed(status: .custom(code: 401, message: "Please check Retailer Id and Secret Code."))
-            }
-
-            // this means the terminal is not approved
-            if !terminalQuery.is_approved {
-                try? response.setBody(json: ["errorCode":"TerminalNotApproved","message":"You must approve the terminal using the Bucket website."])
-                response.completed(status: .custom(code: 403, message: "You must approve the terminal using the Bucket website."))
-            }
-
-            // Checking the final condition (last condition to minimize the number of queries during error)
-            let retailerQuery = Retailer()
-            try? retailerQuery.find(["retailer_id":retailerId])
-            
-            // now lets look to make sure the serial number is to the current retailer
-            if retailerQuery.id != terminalQuery.retailer_id {
-                // there is a retailer problem
-                try? response.setBody(json: ["errorCode":"InvalidRetailerTerminal","message":"Please Check Retailer Id and Secret Code"])
-                response.completed(status: .custom(code: 401, message: "Please check Retailer Id and Secret Code."))
-            }
-            
-        }
+        let passwordToCheck = retailerSecret.ourPasswordHash!
+        
+        let terminalQuery = Terminal()
+        try? terminalQuery.find(["serial_number":terminalSerialNumber, "terminal_key":passwordToCheck])
+        
+        // Checking three conditions:
+        //  1. The terminal is not registered
+        //  2. The terminal is not active
+        //  3. The terminal is not for this retailer
+        
+        // this means the terminal number is invalid - RETURN the appropriate error code
+        if terminalQuery.id.isNil { return response.unauthorizedTerminal }
+        
+        // this means the terminal is not approved
+        if !terminalQuery.is_approved { return response.unauthorizedTerminal }
+        
+        // Checking the final condition (last condition to minimize the number of queries during error)
+        let retailerQuery = Retailer()
+        try? retailerQuery.find(["retailer_code":retailerId])
+        
+        // now lets look to make sure the serial number is to the current retailer
+        if retailerQuery.id != terminalQuery.retailer_id { return response.alreadyRegistered(terminalSerialNumber) }
         
     }
 
