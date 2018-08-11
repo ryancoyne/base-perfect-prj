@@ -277,6 +277,8 @@ fileprivate extension HTTPResponse {
 }
 
 fileprivate extension HTTPRequest {
+    
+//    @available(*, deprecated, message: "no longer available in version v1.1")
     var retailerId : String? {
         return self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
     }
