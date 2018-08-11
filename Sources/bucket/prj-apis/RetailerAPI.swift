@@ -205,14 +205,12 @@ struct RetailerAPI {
                     // we are using the json variable to return the code too.
                     var json = try request.postBodyJSON()
                     
-                    json!["retailerId"] = request.retailerId ?? ""
-
                     // get the code
                     let ccode = Retailer().createCustomerCode(json!)
                     
                     // put together the return dictionary
                     if ccode.success {
-                        
+                    
                         json!["customerCode"] = ccode.message
                         
                         var qrCodeURL = ""
@@ -220,6 +218,23 @@ struct RetailerAPI {
                         qrCodeURL.append("/redeem/")
                         qrCodeURL.append(ccode.message)
                         json!["qrCodeContent"] = qrCodeURL
+                        
+                        // We need to go and get the integer terminal id:
+                        let retailer = Retailer()
+                        try? retailer.find(["retailer_code":request.retailerId!])
+                        
+                        let terminal = Terminal()
+                        try? terminal.find(["serial_number":request.terminalId!])
+                        
+                        let transaction = CodeTransaction()
+                        transaction.amount = data["amount"].doubleValue
+                        transaction.total_amount = data["totalTransactionAmount"].doubleValue
+                        transaction.client_location = data["locationId"].stringValue
+                        transaction.client_transaction_id = data["clientTransactionId"].stringValue
+                        transaction.terminal_id = terminal.id
+                        transaction.retailer_id = retailer.id
+                        transaction.customer_code = json!["customerCode"].stringValue
+                        try? transaction.saveWithGIS()
                         
                         // if we are here then everything went well
                         try? response.setBody(json: json!)

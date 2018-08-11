@@ -211,21 +211,20 @@ public class Retailer: PostgresStORM {
     //MARK: Function to create Customer Codes
     func createCustomerCode(_ data: [String:Any])->(success:Bool, message:String) {
         
-        var messagereturn = ""
-        
         // lets make sure the correct parameters were passed in..
-//        if data[""].stringValue.isEmptyOrNil {
-//            messagereturn = "missing"
-//        }
-
-        if messagereturn.isEmpty {
-
-            // lets create a code that is unique
-            messagereturn = String(randomWithLength: 30, allowedCharactersType: .alphaNumeric) ?? ""
-            
-        }
+        guard let customerCode = String(randomWithLength: 12, allowedCharactersType: .alphaNumeric)?.uppercased() else { /* Send an error back indicating a server error? */ return (false, "Error creating customer code") }
+        // Make sure a transaction does not exist with this customer code already:
+        let trans = CodeTransaction()
+        try? trans.find(["customer_code": customerCode])
         
-        // if we are here there was a problem so we should return the message
-        return (false, messagereturn)
+        if trans.id.isNotNil {
+            guard let customerCode = String(randomWithLength: 12, allowedCharactersType: .alphaNumeric)?.uppercased() else { /* Send an error back indicating a server error? */ return (false, "Error creating customer code") }
+            
+            return (true, customerCode)
+            
+        } else {
+            
+            return (true, customerCode)
+        }
     }
 }
