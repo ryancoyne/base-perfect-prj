@@ -46,23 +46,82 @@ struct RetailerAPI {
         public static func registerTerminal(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                // *IMPORTANT*  If this is development, then we can automatically verify the device.  If we are production, then we will make them to go the web and verify the device is theirs.
                 
-                // If this is development, then we can automatically verify the device.  If we are production, then we will make them to go the web and verify the device is theirs.
                 do {
                     
+                    // Get our post body JSON.  This will throw an error, along with the string that it tried parsing.
                     let json = try request.postBodyJSON()
+                    // Throw an error if the json body is empty.  We should have something in the post body JSON here.
                     guard !json!.isEmpty else { return response.emptyJSONBody }
                     
                     // This should be the retailerBounce part:
                     guard let retailerIntegerId = Retailer.retailerBounce(request, response) else { return }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
-                    
-                    switch EnvironmentVariables.sharedInstance.Server {
-                    case .production?:
+                    guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
+                
+                    switch server {
+                    // Production & Staging are acting the same.
+                    case .production, .staging:
                         // We should do everything like regular here:
+                        
+                        // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
+                        let terminal = Terminal()
+                        try terminal.find(["serial_number": serialNumber])
+                        
+                        // Check and make sure the terminal is approved or not:
+                        if terminal.id.isNil {
+                            // The terminal does not exist for this retailer.  Lets create the terminal & password and send it back to the client:
+                            let term = Terminal()
+                            
+                            let apiKey = UUID().uuidString
+                            term.serial_number = serialNumber
+                            term.retailer_id = retailerIntegerId
+                            term.terminal_key = apiKey.ourPasswordHash
+                            
+                            do {
+                                
+                                try term.saveWithGIS()
+                                try? response.setBody(json: ["isApproved":false, "apiKey":apiKey])
+                                    .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                                    .completed(status: .created)
+                                
+                            } catch {
+                                // Return some caught error:
+                                try? response.setBody(json: ["error":error.localizedDescription])
+                                    .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                                    .completed(status: .internalServerError)
+                            }
+                            
+                        } else {
+                            
+                            // The terminal does exist.  Lets see if we retailer id is the same as what they are saying, if so.. send them a password:
+                            guard retailerIntegerId == terminal.retailer_id else { return response.alreadyRegistered(serialNumber) }
+                            
+                            // Save the new password, and return the response:
+                            let thePassword = UUID().uuidString
+                            
+                            // Build the response:
+                            var responseDictionary = [String:Any]()
+                            responseDictionary["isApproved"] = terminal.is_approved
+                            responseDictionary["apiKey"] = thePassword
+                            
+                            // Create and assign the hashed password:
+                            terminal.terminal_key = thePassword.ourPasswordHash
+                            
+                            // Save:
+                            try terminal.saveWithGIS()
+                            
+                            // Return the response:
+                            try? response.setBody(json: responseDictionary)
+                                .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                                .completed(status: .ok)
+                            
+                        }
+                        
                         break
-                    case .development?:
-                    // We should be automatically making the terminals available:
+                    case .development:
+                        // In development, we are automatically setting the terminal as approved, so they do not need to go to the web.
                         
                         // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
                         let terminal = Terminal()
@@ -118,8 +177,6 @@ struct RetailerAPI {
                             
                         }
                         
-                    default:
-                        break
                     }
                     
                 } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
@@ -205,6 +262,12 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .unauthorized)
     }
+    var serverEnvironmentError : Void {
+        return try! self
+            .setBody(json: ["errorCode":"ServerEnvironmentError", "message":"There is a current configuration issue with the system.  Please Contact Bucket's Tech Team."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .unauthorized)
+    }
     func alreadyRegistered(_ serialNumber: String) -> Void {
         return try! self
             .setBody(json: ["errorCode":"AlreadyRegistered", "message":"The terminal with the serial number (\(serialNumber)) is registered to another retailer.  Contact Bucket support."])
@@ -246,6 +309,7 @@ extension Retailer {
         return retailer.id.isNotNil
     }
     
+    @discardableResult
     public static func retailerBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> Int? {
         
         //Make sure we have the retailer Id and retailer secret:

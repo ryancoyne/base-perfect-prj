@@ -5,14 +5,6 @@ import PerfectLogger
 import PerfectLocalAuthentication
 
 extension Handlers {
-
-    static func createNewTerminalPassword(data: [String:Any]) throws -> RequestHandler {
-        return {
-            request, response in
-            
-            
-        }
-    }
     
     static func terminalDelete(data: [String:Any]) throws -> RequestHandler {
         return {
