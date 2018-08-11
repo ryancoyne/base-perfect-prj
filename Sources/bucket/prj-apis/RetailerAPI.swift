@@ -53,14 +53,9 @@ struct RetailerAPI {
                     let json = try request.postBodyJSON()
                     guard !json!.isEmpty else { return response.emptyJSONBody }
                     
-                    guard let retailerCode = json?["retailerId"].stringValue else { return response.invalidRetailer }
+                    // This should be the retailerBounce part:
+                    guard let retailerIntegerId = Retailer.retailerBounce(request, response) else { return }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
-                    
-                    let retailer = Retailer()
-                    try? retailer.find(["retailer_code": retailerCode])
-            
-                    // Lets first check and see if this is a valid retailer:
-                    guard retailer.id.isNotNil else { return response.invalidRetailer }
                     
                     switch EnvironmentVariables.sharedInstance.Server {
                     case .production?:
@@ -81,7 +76,7 @@ struct RetailerAPI {
                             let apiKey = UUID().uuidString
                             term.is_approved = true
                             term.serial_number = serialNumber
-                            term.retailer_id = retailer.id
+                            term.retailer_id = retailerIntegerId
                             term.terminal_key = apiKey.ourPasswordHash
                             
                             do {
@@ -92,7 +87,7 @@ struct RetailerAPI {
                                     .completed(status: .created)
                                 
                             } catch {
-                                // TODO:  Return some error:
+                                // Return some caught error:
                                 try? response.setBody(json: ["error":error.localizedDescription])
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .internalServerError)
@@ -100,7 +95,7 @@ struct RetailerAPI {
                             
                         } else if terminal.retailer_id.isNotNil && terminal.is_approved {
                             // The terminal does exist.  Lets see if we retailer id is the same as what they are saying, if so.. send them a password:
-                            guard retailer.id! == terminal.retailer_id else { /* Send back an error indicating this device is on another account */  return response.alreadyRegistered(serialNumber) }
+                            guard retailerIntegerId == terminal.retailer_id else { /* Send back an error indicating this device is on another account */  return response.alreadyRegistered(serialNumber) }
                             
                             // Save the new password, and return the response:
                             let thePassword = UUID().uuidString
@@ -121,36 +116,7 @@ struct RetailerAPI {
                                 .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                 .completed(status: .ok)
                             
-                            // The following case is ONLY for development:
                         }
-//                        else if terminal.retailer_id.isNotNil && !terminal.is_approved {
-//
-//                            // First check the retailer id:
-//                            guard retailer.id! == terminal.retailer_id! else { /* Send back an error indicating this device is on another account */  return  }
-//
-//                            terminal.is_approved = true
-//
-//                            // Lets create the password and send it back:
-//                            let thePassword = UUID().uuidString
-//
-//                            // Build the response:
-//                            var responseDictionary = [String:Any]()
-//                            responseDictionary["isApproved"] = true
-//                            responseDictionary["apiKey"] = thePassword
-//
-//                            // Create and assign the hashed password:
-//                            guard let hexBytes = thePassword.digest(.sha256), let validate = hexBytes.encode(.hex), let theSavedPassword = String(validatingUTF8: validate)  else { return  }
-//                            terminal.terminal_key = theSavedPassword
-//
-//                            // Save:
-//                            try terminal.saveWithGIS()
-//
-//                            // Return the response:
-//                            try? response.setBody(json: responseDictionary)
-//                                .setHeader(.contentType, value: "application/json; charset=UTF-8")
-//                                .completed(status: .ok)
-//
-//                        }
                         
                     default:
                         break
@@ -161,7 +127,10 @@ struct RetailerAPI {
                     
                 } catch {
                     // Not sure what error could be thrown here, but the only one we throw right now is if the JSON is unparceable.
-                    
+                    // Return some caught error:
+                    try? response.setBody(json: ["error":error.localizedDescription])
+                        .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                        .completed(status: .internalServerError)
                 }
             }
         }
@@ -246,7 +215,7 @@ fileprivate extension HTTPResponse {
 
 fileprivate extension HTTPRequest {
     var retailerId : String? {
-        return self.urlVariables["retailerId"]
+        return self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
     }
     var retailerSecret : String? {
         return self.header(.custom(name: "x-functions-key"))
@@ -277,38 +246,20 @@ extension Retailer {
         return retailer.id.isNotNil
     }
     
-    public static func retailerBounce(_ request: HTTPRequest, _ response: HTTPResponse) {
+    public static func retailerBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> Int? {
         
         //Make sure we have the retailer Id and retailer secret:
-        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { return response.unauthorizedRetailer }
-        guard let terminalSerialNumber = request.terminalId else { return response.noTerminalId }
+        guard let retailerId = request.retailerId else { response.invalidRetailer; return nil }
         
-        // Get our secret code formatted properly to check what we have in the DB:
-        if let digestBytes = retailerSecret.digest(.sha256), let hexBytes = digestBytes.encode(.hex), let hexByteString = String(validatingUTF8: hexBytes) {
-            // Essentially, we need to make sure a record for the retailer Id exists, and then also make sure we can find a record for the terminal with its serial number and the retailer secret key:
-            
-            let terminalQuery = Terminal()
-            let response = try? terminalQuery.find(["terminal_key":hexByteString, "serial_number":terminalSerialNumber])
-            
-            if response.isNil { /* See what we should do here. */ }
-            // Make sure the retailer_id is the same as whats passed in, otherwise, theres an issue with this device.  See Status Code 409:
-            
-        }
-
-        let sqlCheck = "SELECT "
-        
-        let terminal = Terminal()
-        
+        // Find the terminal
+        let retailer = Retailer()
+        try? retailer.find(["retailer_code":retailerId])
         // this is where we will check the temrminal ID, retailer and the secret to make sure the terminal is approved.
         
-        do {
-            try terminal.get(request.session?.userid ?? "")
-//            if user.usertype != .admin {
-//                response.redirect(path: "/")
-//            }
-        } catch {
-            print(error)
-        }
+        if retailer.id.isNil { response.invalidRetailer; return nil }
+        
+        return retailer.id
+        
     }
 
     public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) {

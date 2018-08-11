@@ -1118,7 +1118,7 @@ extension PostgresStORM {
                         keys.append(i.0)
                         vals.append(gisstring)
                     } else { continue }
-                case is Int.Type, is Double.Type, is Float.Type:
+                case is Int.Type, is Double.Type, is Float.Type, is Bool.Type:
                     let value = String(describing: i.1)
                     keys.append(i.0)
                     vals.append(value)
@@ -1135,6 +1135,10 @@ extension PostgresStORM {
                     keys.append(i.0)
                     vals.append(value)
                     break
+                case is Bool?.Type:
+                    let value = String(describing: i.1 as! Bool)
+                    keys.append(i.0)
+                    vals.append(value)
                 case is Double?.Type:
                     let value = String(describing: i.1 as! Double)
                     keys.append(i.0)
