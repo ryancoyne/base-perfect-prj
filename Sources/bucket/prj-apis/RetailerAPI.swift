@@ -49,8 +49,9 @@ struct RetailerAPI {
                 
                 // If this is development, then we can automatically verify the device.  If we are production, then we will make them to go the web and verify the device is theirs.
                 do {
-                    let json = try request.postBodyJSON()
                     
+                    let json = try request.postBodyJSON()
+                
                     guard !json!.isEmpty else { return response.emptyJSONBody }
                     
                     guard let retailerCode = json?["retailerId"].stringValue else { return response.invalidRetailer }
@@ -58,9 +59,9 @@ struct RetailerAPI {
                     
                     let retailer = Retailer()
                     try? retailer.find(["retailer_code": retailerCode])
-                
+            
                     // Lets first check and see if this is a valid retailer:
-                    guard retailer.id.isNotNil else { return response.unauthorizedRetailer }
+                    guard retailer.id.isNotNil else { return response.invalidRetailer }
                     
                     switch EnvironmentVariables.sharedInstance.Server {
                     case .production?:
@@ -79,6 +80,7 @@ struct RetailerAPI {
                             let term = Terminal()
                             
                             let apiKey = UUID().uuidString
+                            term.is_approved = true
                             term.serial_number = serialNumber
                             term.retailer_id = retailer.id
                             term.terminal_key = apiKey.ourPasswordHash
@@ -86,7 +88,7 @@ struct RetailerAPI {
                             do {
                                 
                                 try term.saveWithGIS()
-                                try? response.setBody(json: ["isApproved":false, "apiKey":apiKey])
+                                try? response.setBody(json: ["isApproved":true, "apiKey":apiKey])
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
                                 
@@ -99,7 +101,7 @@ struct RetailerAPI {
                             
                         } else if terminal.retailer_id.isNotNil && terminal.is_approved {
                             // The terminal does exist.  Lets see if we retailer id is the same as what they are saying, if so.. send them a password:
-                            guard retailer.id! == terminal.retailer_id else { /* Send back an error indicating this device is on another account */  return }
+                            guard retailer.id! == terminal.retailer_id else { /* Send back an error indicating this device is on another account */  return response.alreadyRegistered(serialNumber) }
                             
                             // Save the new password, and return the response:
                             let thePassword = UUID().uuidString
@@ -121,34 +123,35 @@ struct RetailerAPI {
                                 .completed(status: .ok)
                             
                             // The following case is ONLY for development:
-                        } else if terminal.retailer_id.isNotNil && !terminal.is_approved {
-                            
-                            // First check the retailer id:
-                            guard retailer.id! == terminal.retailer_id! else { /* Send back an error indicating this device is on another account */  return response.alreadyRegistered(serialNumber) }
-                            
-                            terminal.is_approved = true
-                            
-                            // Lets create the password and send it back:
-                            let thePassword = UUID().uuidString
-                            
-                            // Build the response:
-                            var responseDictionary = [String:Any]()
-                            responseDictionary["isApproved"] = true
-                            responseDictionary["apiKey"] = thePassword
-                            
-                            // Create and assign the hashed password:
-                            guard let hexBytes = thePassword.digest(.sha256), let validate = hexBytes.encode(.hex), let theSavedPassword = String(validatingUTF8: validate)  else { return  }
-                            terminal.terminal_key = theSavedPassword
-                            
-                            // Save:
-                            try terminal.saveWithGIS()
-                            
-                            // Return the response:
-                            try? response.setBody(json: responseDictionary)
-                                .setHeader(.contentType, value: "application/json; charset=UTF-8")
-                                .completed(status: .ok)
-                            
                         }
+//                        else if terminal.retailer_id.isNotNil && !terminal.is_approved {
+//
+//                            // First check the retailer id:
+//                            guard retailer.id! == terminal.retailer_id! else { /* Send back an error indicating this device is on another account */  return  }
+//
+//                            terminal.is_approved = true
+//
+//                            // Lets create the password and send it back:
+//                            let thePassword = UUID().uuidString
+//
+//                            // Build the response:
+//                            var responseDictionary = [String:Any]()
+//                            responseDictionary["isApproved"] = true
+//                            responseDictionary["apiKey"] = thePassword
+//
+//                            // Create and assign the hashed password:
+//                            guard let hexBytes = thePassword.digest(.sha256), let validate = hexBytes.encode(.hex), let theSavedPassword = String(validatingUTF8: validate)  else { return  }
+//                            terminal.terminal_key = theSavedPassword
+//
+//                            // Save:
+//                            try terminal.saveWithGIS()
+//
+//                            // Return the response:
+//                            try? response.setBody(json: responseDictionary)
+//                                .setHeader(.contentType, value: "application/json; charset=UTF-8")
+//                                .completed(status: .ok)
+//
+//                        }
                         
                     default:
                         break
