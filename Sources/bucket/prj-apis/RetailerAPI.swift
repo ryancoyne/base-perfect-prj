@@ -51,7 +51,6 @@ struct RetailerAPI {
                 do {
                     
                     let json = try request.postBodyJSON()
-                
                     guard !json!.isEmpty else { return response.emptyJSONBody }
                     
                     guard let retailerCode = json?["retailerId"].stringValue else { return response.invalidRetailer }
