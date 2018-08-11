@@ -109,13 +109,13 @@ struct TerminalDictionary {
     }
     var isApproved : Bool? {
         get {
-            return self.dic["serial_number"].boolValue
+            return self.dic["is_approved"].boolValue
         }
         set {
             if newValue != nil {
-                self.dic["serial_number"] = newValue!
+                self.dic["is_approved"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "serial_number")
+                self.dic.removeValue(forKey: "is_approved")
             }
         }
     }

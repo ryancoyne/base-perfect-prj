@@ -141,7 +141,7 @@ public class Terminal: PostgresStORM {
             
             case "is_approved":
                 if (value as? Bool).isNotNil {
-                    self.is_approved = (value as Any?).boolValue ?? false
+                    self.is_approved = value as? Bool ?? false
                 }
                 
             default:
