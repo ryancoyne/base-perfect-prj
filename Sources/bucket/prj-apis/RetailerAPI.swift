@@ -227,6 +227,8 @@ struct RetailerAPI {
                         try? terminal.find(["serial_number":request.terminalId!])
                         
                         let transaction = CodeTransaction()
+                        transaction.created = Int(Date().timeIntervalSince1970)
+                        transaction.createdby = "AUTO_SERVER_USER"
                         transaction.amount = json?["amount"].doubleValue
                         transaction.total_amount = json?["totalTransactionAmount"].doubleValue
                         transaction.client_location = json?["locationId"].stringValue
@@ -335,7 +337,8 @@ extension Retailer {
     public static func retailerBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> Int? {
         
         //Make sure we have the retailer Id and retailer secret:
-        guard let retailerId = request.retailerId else { response.invalidRetailer; return nil }
+        guard let retailerId = request.retailerId else {
+            response.invalidRetailer; return nil }
         
         // Find the terminal
         let retailer = Retailer()

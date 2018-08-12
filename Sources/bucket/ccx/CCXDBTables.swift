@@ -33,6 +33,12 @@ struct CCXSampleData {
     static let user5 = "CA5DA361-9259-4132-A117-EA5F26E0B89B"
 }
 
+struct CCXDefaultUserValues {
+    static let server_user = "SERVER_USER"
+}
+
+
+
 final class CCXDBTables {
 
     //MARK:-
@@ -51,8 +57,9 @@ final class CCXDBTables {
             let create_time = Int(Date().timeIntervalSince1970)
             
             var u1 = "INSERT INTO account (id,username,email,source,usertype,detail) VALUES("
-            u1.append("'\(CCXSystemData.admin)',")
-            u1.append("'ADMIN_USER',")
+//            u1.append("'\(CCXSystemData.admin)',")
+            u1.append("'\(CCXDefaultUserValues.server_user)',")
+            u1.append("'\(CCXDefaultUserValues.server_user)',")
             u1.append("'engineering@buckettechnologies.com',")
             u1.append("'local',")
             u1.append("'admin',")
@@ -324,7 +331,8 @@ final class CCXDBTables {
                 let a = Account()
                 try a.find(["id":"\(ra[0].data["id"].stringValue!)"])
                 a.makePassword("mike")
-                try a.saveWithGIS(CCXSystemData.admin)
+//                try a.saveWithGIS(CCXSystemData.admin)
+                try a.saveWithGIS(CCXDefaultUserValues.server_user)
             }
 
         } catch {

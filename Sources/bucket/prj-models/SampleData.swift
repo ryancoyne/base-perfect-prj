@@ -87,9 +87,9 @@ final class SampleData {
         
         sqlstatement.append("(created, createdby, name, is_verified, retailer_code) ")
         sqlstatement.append(" VALUES ")
-        sqlstatement.append(" (\(created_time), 'ADMIN_USER','Bucket Coffee Shop', TRUE, 'BCKT-1'), ")
-        sqlstatement.append(" (\(created_time), 'ADMIN_USER','Ryans Bike Shop', TRUE, 'BCKT-2'), ")
-        sqlstatement.append(" (\(created_time), 'ADMIN_USER','M&R Corner Market', TRUE, 'BCKT-3') ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.server_user)','Bucket Coffee Shop', TRUE, 'BCKT-1'), ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.server_user)','Ryans Bike Shop', TRUE, 'BCKT-2'), ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.server_user)','M&R Corner Market', TRUE, 'BCKT-3') ")
 
         print("Adding user: \(sqlstatement)")
         _ = try? tbl.sqlRows(sqlstatement, params: [])
@@ -117,7 +117,7 @@ final class SampleData {
         // add the retailer user
         checkuser = "INSERT INTO retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
-        checkuser.append(" (\(created_time), 'ADMIN_USER', '\(userid)', 'The Bucket','bucket1@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
+        checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.server_user)', '\(userid)', 'The Bucket','bucket1@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
         var results = try? tbl.sqlRows(checkuser, params: [])
 
         // new one
@@ -136,7 +136,7 @@ final class SampleData {
         // add the retailer user
         checkuser = "INSERT INTO retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
-        checkuser.append(" (\(created_time), 'ADMIN_USER', '\(userid)', 'Ryan Coyne','bucket2@buckettechnologies.com','4102026292', \(retailerid)) RETURNING id ")
+        checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.server_user)', '\(userid)', 'Ryan Coyne','bucket2@buckettechnologies.com','4102026292', \(retailerid)) RETURNING id ")
         results = try? tbl.sqlRows(checkuser, params: [])
 
         // new one
@@ -155,7 +155,7 @@ final class SampleData {
         // add the retailer user
         checkuser = "INSERT INTO retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
-        checkuser.append(" (\(created_time), 'ADMIN_USER', '\(userid)', 'Mike Silvers','bucket3@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
+        checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.server_user)', '\(userid)', 'Mike Silvers','bucket3@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
         results = try? tbl.sqlRows(checkuser, params: [])
 
     }
