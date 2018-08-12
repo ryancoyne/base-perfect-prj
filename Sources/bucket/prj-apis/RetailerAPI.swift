@@ -34,9 +34,10 @@ struct RetailerAPI {
             return {
                 request, response in
             
-                guard let retailerId = request.retailerId else { return response.completed(status: .forbidden)  }
+                // Take care of checking the retailer & terminal:
+                guard !Retailer.retailerTerminalBounce(request, response) else { return }
                 
-                
+                // Okay.. they are good to go.  Here we need to query for all the transactions for right now (minus one day), sum them up, list them, and send them out.
                 
                 return response.completed(status: .ok)
                 
@@ -198,7 +199,7 @@ struct RetailerAPI {
                 request, response in
             
                 // We should first bouce the retailer (takes care of all the general retailer errors):
-                Retailer.retailerTerminalBounce(request, response)
+                guard !Retailer.retailerTerminalBounce(request, response) else { return }
                 
                 do {
 
@@ -350,11 +351,11 @@ extension Retailer {
         
     }
 
-    public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) {
+    public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> Bool {
         
         //Make sure we have the retailer Id and retailer secret:
-        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { return response.unauthorizedTerminal }
-        guard let terminalSerialNumber = request.terminalId else { return response.noTerminalId }
+        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
+        guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return true }
         
         // Get our secret code formatted properly to check what we have in the DB:
         let passwordToCheck = retailerSecret.ourPasswordHash!
@@ -368,18 +369,19 @@ extension Retailer {
         //  3. The terminal is not for this retailer
         
         // this means the terminal number is invalid - RETURN the appropriate error code
-        if terminalQuery.id.isNil { return response.unauthorizedTerminal }
+        if terminalQuery.id.isNil { response.unauthorizedTerminal; return true }
         
         // this means the terminal is not approved
-        if !terminalQuery.is_approved { return response.unauthorizedTerminal }
+        if !terminalQuery.is_approved { response.unauthorizedTerminal; return true }
         
         // Checking the final condition (last condition to minimize the number of queries during error)
         let retailerQuery = Retailer()
         try? retailerQuery.find(["retailer_code":retailerId])
         
         // now lets look to make sure the serial number is to the current retailer
-        if retailerQuery.id != terminalQuery.retailer_id { return response.alreadyRegistered(terminalSerialNumber) }
+        if retailerQuery.id != terminalQuery.retailer_id { response.alreadyRegistered(terminalSerialNumber); return true }
         
+        return false
     }
 
 }
