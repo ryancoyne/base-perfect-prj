@@ -13,6 +13,7 @@ import PerfectLib
 import PerfectLocalAuthentication
 import PerfectSessionPostgreSQL
 import PerfectSession
+import SwiftMoment
 
 //MARK: - Retailer API
 /// This Retailer structure supports all the normal endpoints for a user based login application.
@@ -23,7 +24,8 @@ struct RetailerAPI {
     struct json {
         static var routes : [[String:Any]] {
             return [
-                ["method":"get",    "uri":"/api/v1/closeInterval/{retailerId}", "handler":closeInterval],
+                ["method":"get",    "uri":"/api/v1/closeInterval/{intervalId}", "handler":closeInterval],
+                ["method":"get",    "uri":"/api/v1/closeInterval", "handler":closeInterval],
                 ["method":"post",    "uri":"/api/v1/registerterminal", "handler":registerTerminal],
                 ["method":"post",    "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],
                 ["method":"post",    "uri":"/api/v1/transaction", "handler":createTransaction]
@@ -39,7 +41,14 @@ struct RetailerAPI {
                 
                 // Okay.. they are good to go.  Here we need to query for all the transactions for right now (minus one day), sum them up, list them, and send them out.
                 
-                return response.completed(status: .ok)
+                // Lets see if they passed in an intervalId (the yyyyMMdd string):
+                let intervalId = request.intervalId ?? moment().intervalString
+            
+                guard var startDate = moment(intervalId, dateFormat: "yyyyMMdd") else { return }
+                startDate = startDate - 4.hours
+                let endDate = startDate + (1.days - 1.seconds)
+                
+//                return response.completed(status: .ok)
                 
             }
         }
@@ -298,16 +307,29 @@ fileprivate extension HTTPResponse {
     }
 }
 
+fileprivate extension Moment {
+    /// This is the yyyyMMdd formatted string for right now.
+    var intervalString : String {
+        return self.format("yyyyMMdd")
+    }
+}
+
 fileprivate extension HTTPRequest {
     
 //    @available(*, deprecated, message: "no longer available in version v1.1")
     var retailerId : String? {
         return self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
     }
+    var intervalId : String? {
+        return self.urlVariables["intervalId"]
+    }
     var retailerSecret : String? {
         return self.header(.custom(name: "x-functions-key"))
     }
     var terminalId : String? {
+        if let terminalIdFromHeader = self.header(.custom(name: "terminalId")).stringValue {
+            return terminalIdFromHeader
+        }
         let theTry = try? self.postBodyJSON()?["terminalId"].stringValue
         if theTry.isNil {
             return nil
