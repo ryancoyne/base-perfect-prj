@@ -228,7 +228,6 @@ struct RetailerAPI {
                         
                         let transaction = CodeTransaction()
                         transaction.created = Int(Date().timeIntervalSince1970)
-                        transaction.createdby = "AUTO_SERVER_USER"
                         transaction.amount = json?["amount"].doubleValue
                         transaction.total_amount = json?["totalTransactionAmount"].doubleValue
                         transaction.client_location = json?["locationId"].stringValue
@@ -239,7 +238,7 @@ struct RetailerAPI {
                         transaction.customer_codeURL = json?["qrCodeContent"].stringValue
                         
                         // Save the transaction
-                        try? transaction.saveWithGIS()
+                        try? transaction.saveWithGIS(CCXDefaultUserValues.user_server)
                         
                         // if we are here then everything went well
                         try? response.setBody(json: json!)

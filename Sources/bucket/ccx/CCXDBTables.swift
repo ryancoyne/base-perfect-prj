@@ -34,7 +34,8 @@ struct CCXSampleData {
 }
 
 struct CCXDefaultUserValues {
-    static let server_user = "SERVER_USER"
+    static let user_admin  = "ADMIN_USER"
+    static let user_server = "SERVER_USER"
 }
 
 
@@ -57,9 +58,8 @@ final class CCXDBTables {
             let create_time = Int(Date().timeIntervalSince1970)
             
             var u1 = "INSERT INTO account (id,username,email,source,usertype,detail) VALUES("
-//            u1.append("'\(CCXSystemData.admin)',")
-            u1.append("'\(CCXDefaultUserValues.server_user)',")
-            u1.append("'\(CCXDefaultUserValues.server_user)',")
+            u1.append("'\(CCXSystemData.admin)',")
+            u1.append("'\(CCXDefaultUserValues.user_admin)',")
             u1.append("'engineering@buckettechnologies.com',")
             u1.append("'local',")
             u1.append("'admin',")
@@ -69,7 +69,25 @@ final class CCXDBTables {
             return u1
         }
     }
-    
+
+    var usersql : String {
+        get {
+            
+            let create_time = Int(Date().timeIntervalSince1970)
+            
+            var u1 = "INSERT INTO account (id,username,email,source,usertype,detail) VALUES("
+            u1.append("'\(CCXDefaultUserValues.user_server)',")
+            u1.append("'\(CCXDefaultUserValues.user_server)',")
+            u1.append("'noreply@buckettechnologies.com',")
+            u1.append("'local',")
+            u1.append("'standard',")
+            u1.append("'{ \"lastname\":\"Server\",\"firstname\":\"Bucket\",\"created\":\(create_time) }') ")
+            u1.append("RETURNING id")
+            print("Sample user SQL: \(u1)")
+            return u1
+        }
+    }
+
     var user1sql : String {
         get {
             var u1 = "INSERT INTO account (id,username,email,source,usertype,detail) VALUES("
@@ -331,9 +349,11 @@ final class CCXDBTables {
                 let a = Account()
                 try a.find(["id":"\(ra[0].data["id"].stringValue!)"])
                 a.makePassword("mike")
-//                try a.saveWithGIS(CCXSystemData.admin)
-                try a.saveWithGIS(CCXDefaultUserValues.server_user)
+                try a.saveWithGIS(CCXSystemData.admin)
             }
+
+            // add the user for
+            ra = try user.sqlRows(self.usersql, params: [])
 
         } catch {
             
