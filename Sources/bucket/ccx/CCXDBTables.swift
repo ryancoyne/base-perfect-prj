@@ -329,7 +329,7 @@ final class CCXDBTables {
             
             try conf.find([("name", "sysinit-ccx")])
             conf.val = "0"
-            try conf.saveWithGIS()
+            try conf.saveWithCustomType()
 
             
         } catch {
@@ -349,7 +349,7 @@ final class CCXDBTables {
                 let a = Account()
                 try a.find(["id":"\(ra[0].data["id"].stringValue!)"])
                 a.makePassword("mike")
-                try a.saveWithGIS(CCXSystemData.admin)
+                try a.saveWithCustomType(CCXSystemData.admin)
             }
 
             // add the user for
@@ -406,7 +406,7 @@ final class CCXDBTables {
                 let a = Account()
                 try a.find(["id":"\(ra[0].data["id"].stringValue!)"])
                 a.makePassword("user1")
-                try a.saveWithGIS(CCXSampleData.user1)
+                try a.saveWithCustomType(CCXSampleData.user1)
             }
 
             // Add the sample user 2
@@ -416,7 +416,7 @@ final class CCXDBTables {
                 let a = Account()
                 try a.find(["id":"\(ra[0].data["id"].stringValue!)"])
                 a.makePassword("user2")
-                try a.saveWithGIS(CCXSampleData.user2)
+                try a.saveWithCustomType(CCXSampleData.user2)
             }
 
             // Add the sample user 3
@@ -426,7 +426,7 @@ final class CCXDBTables {
                 let a = Account()
                 try a.find(["id":"\(ra[0].data["id"].stringValue!)"])
                 a.makePassword("user3")
-                try a.saveWithGIS(CCXSampleData.user3)
+                try a.saveWithCustomType(CCXSampleData.user3)
             }
 
             // Add the sample user 4
@@ -436,7 +436,7 @@ final class CCXDBTables {
                 let a = Account()
                 try a.find(["id":"\(ra[0].data["id"].stringValue!)"])
                 a.makePassword("user4")
-                try a.saveWithGIS(CCXSampleData.user4)
+                try a.saveWithCustomType(CCXSampleData.user4)
             }
 
             // Add the sample user 5
@@ -446,7 +446,7 @@ final class CCXDBTables {
                 let a = Account()
                 try a.find(["id":"\(ra[0].data["id"].stringValue!)"])
                 a.makePassword("user5")
-                try a.saveWithGIS(CCXSampleData.user5)
+                try a.saveWithCustomType(CCXSampleData.user5)
             }
 
             // add a friend
@@ -459,7 +459,7 @@ final class CCXDBTables {
             f1.user_id    = CCXSampleData.user2
             f1.invited    = 1509932034
             f1.accepted   = 1509935634
-            try f1.saveWithGIS()
+            try f1.saveWithCustomType()
             
             // add a pending friend
             let f2 = Friends()
@@ -470,7 +470,7 @@ final class CCXDBTables {
             f2.friend_id  = CCXSampleData.user3
             f2.user_id    = CCXSampleData.user5
             f2.invited    = 1509932034
-            try f2.saveWithGIS()
+            try f2.saveWithCustomType()
             
             // add a rejected friend
             let f3 = Friends()
@@ -482,7 +482,7 @@ final class CCXDBTables {
             f3.user_id    = CCXSampleData.user3
             f3.invited    = 1509932034
             f3.rejected   = 1509935634
-            try f3.saveWithGIS()
+            try f3.saveWithCustomType()
 
             // another firiendship
             let f4 = Friends()
@@ -494,7 +494,7 @@ final class CCXDBTables {
             f4.user_id    = CCXSampleData.user2
             f4.invited    = 1509932034
             f4.accepted   = 1509935634
-            try f4.saveWithGIS()
+            try f4.saveWithCustomType()
 
         } catch {
             print(error)
@@ -506,7 +506,7 @@ final class CCXDBTables {
             
             try conf.find([("name", "sampledata-ccx")])
             conf.val = "0"
-            try conf.saveWithGIS()
+            try conf.saveWithCustomType()
             
         } catch {
             print(error)

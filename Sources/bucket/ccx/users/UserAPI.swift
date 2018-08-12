@@ -649,7 +649,7 @@ struct UserAPI {
 
             // update the user
             do {
-                try c.saveWithGIS(session.userid)
+                try c.saveWithCustomType(session.userid)
                 
                 retd["id"] = c.id
                 retd["\(imagetype)_picture"] = c.detail["\(imagetype)_picture"]
@@ -943,7 +943,7 @@ struct UserAPI {
                     loc.removeValue(forKey: "distance")
                 }
                 user.detail["currentlocation"] = loc
-                try user.saveWithGIS(user.id)
+                try user.saveWithCustomType(user.id)
                 
                 // now lets add a current location record
                 let ul = UserLocation()
@@ -953,7 +953,7 @@ struct UserAPI {
                 //MARK: CHECK USER ID FOR NEW USERS
                 //MARK:-
                 ul.user_id = user.id
-                try ul.saveWithGIS(user.id)    // note: this is the account table - audit fields are in the detail
+                try ul.saveWithCustomType(user.id)    // note: this is the account table - audit fields are in the detail
                 
                 // lets see if the user needs something with location
                 if let attn = user.detail["locationAttention"].boolValue, attn {

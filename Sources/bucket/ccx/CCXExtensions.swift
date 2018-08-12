@@ -1065,14 +1065,14 @@ extension PostgresStORM {
      - Returns: An Any type.  For a new inser, we will return the id
      */
     @discardableResult
-    func saveWithGIS(_ user: String? = nil) throws -> [StORMRow] {
+    func saveWithCustomType(_ user: String? = nil) throws -> [StORMRow] {
         
         // act accordingly if this is an add or an update
         do {
             if keyIsEmpty() {
-                return try addWithGIS(user)
+                return try addWithCustomTypes(user)
             } else {
-                return try updateWithGIS(user)
+                return try updateWithCustomType(user)
             }
         } catch {
             LogFile.error("Error: \(error)", logFile: "./StORMlog.txt")
@@ -1084,7 +1084,7 @@ extension PostgresStORM {
      Adds a new record with GIS coordinates in a geography type field and other field values.
      - Returns: An Any type.  For a new inser, we will return the id
      */
-    private func addWithGIS(_ user: String? = nil) throws -> [StORMRow] {
+    private func addWithCustomTypes(_ user: String? = nil) throws -> [StORMRow] {
         
         // get the variables with their values in the dictionary
         let thedata = asData()
@@ -1104,6 +1104,9 @@ extension PostgresStORM {
             } else if (i.0 == "createdby") && (user != nil) {
                 keys.append(i.0)
                 vals.append("'\(user!)'")
+            } else if (i.0 == "createdby") && (user == nil) {
+                keys.append(i.0)
+                vals.append("'\(CCXDefaultUserValues.user_server)'")
             } else if (i.0 != idcolumn) && (String(describing: i.1) != "nil") {
                 
                 let c = type(of: i.1)
@@ -1156,7 +1159,7 @@ extension PostgresStORM {
                     keys.append(i.0)
                     vals.append(gisstring)
                 default:
-                    print("[CCXStORMExtensions] [updateWithGIS] [\(CCXServiceClass.sharedInstance.getNow().dateString)]  WARNING: Need to add the following type to update/add/saveWithGIS: \(c)")
+                    print("[CCXStORMExtensions] [updateWithGIS] [\(CCXServiceClass.sharedInstance.getNow().dateString)]  WARNING: Need to add the following type to update/add/saveWithCustomType: \(c)")
                     continue
                 }
             }
@@ -1190,7 +1193,7 @@ extension PostgresStORM {
      Updates a record with GIS coordinates in a geography type field and other field values.
      - Returns: An Any type.  For a new inser, we will return the id
      */
-    private func updateWithGIS(_ user: String? = nil) throws -> [StORMRow] {
+    private func updateWithCustomType(_ user: String? = nil) throws -> [StORMRow] {
         
         // get the variables with their values in the dictionary
         let thedata = self.asData()

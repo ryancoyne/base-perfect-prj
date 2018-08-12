@@ -82,7 +82,7 @@ struct RetailerAPI {
                             
                             do {
                                 
-                                try term.saveWithGIS()
+                                try term.saveWithCustomType()
                                 try? response.setBody(json: ["isApproved":false, "apiKey":apiKey])
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
@@ -111,7 +111,7 @@ struct RetailerAPI {
                             terminal.terminal_key = thePassword.ourPasswordHash
                             
                             // Save:
-                            try terminal.saveWithGIS()
+                            try terminal.saveWithCustomType()
                             
                             // Return the response:
                             try? response.setBody(json: responseDictionary)
@@ -141,7 +141,7 @@ struct RetailerAPI {
                             
                             do {
                                 
-                                try term.saveWithGIS()
+                                try term.saveWithCustomType()
                                 try? response.setBody(json: ["isApproved":true, "apiKey":apiKey])
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
@@ -169,7 +169,7 @@ struct RetailerAPI {
                             terminal.terminal_key = thePassword.ourPasswordHash
                             
                             // Save:
-                            try terminal.saveWithGIS()
+                            try terminal.saveWithCustomType()
                             
                             // Return the response:
                             try? response.setBody(json: responseDictionary)
@@ -238,7 +238,7 @@ struct RetailerAPI {
                         transaction.customer_codeURL = json?["qrCodeContent"].stringValue
                         
                         // Save the transaction
-                        try? transaction.saveWithGIS(CCXDefaultUserValues.user_server)
+                        try? transaction.saveWithCustomType(CCXDefaultUserValues.user_server)
                         
                         // if we are here then everything went well
                         try? response.setBody(json: json!)

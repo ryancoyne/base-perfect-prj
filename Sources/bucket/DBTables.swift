@@ -298,7 +298,7 @@ final class PRJDBTables {
             
             try conf.find([("name", "sampledata-prj")])
             conf.val = "0"
-            try conf.saveWithGIS()
+            try conf.saveWithCustomType()
             
         } catch {
             print(error)
@@ -354,7 +354,7 @@ final class PRJDBTables {
             
             try conf.find([("name", "defaultdata-prj")])
             conf.val = "0"
-            try conf.saveWithGIS()
+            try conf.saveWithCustomType()
             
         } catch {
             print(error)

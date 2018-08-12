@@ -372,7 +372,7 @@ class Friends: PostgresStORM {
                     frnd.accepted = CCXServiceClass.sharedInstance.getNow()
                     // ok - if we are here the record is not mine
                     do {
-                        try frnd.saveWithGIS()
+                        try frnd.saveWithCustomType()
                         return FriendStatusReturn.friendsConnected
                     } catch {
                         // do nothing
@@ -392,7 +392,7 @@ class Friends: PostgresStORM {
         friend.createdby = session.userid
         friend.user_id = session.userid
         friend.friend_id = id
-        if (try? friend.saveWithGIS(session.userid)).isNotNil {
+        if (try? friend.saveWithCustomType(session.userid)).isNotNil {
             return FriendStatusReturn.friendsRequestAdded
         } else {
             return FriendStatusReturn.friendsRequestError
@@ -411,7 +411,7 @@ class Friends: PostgresStORM {
 //            friend.createdby = session.userid
 //            friend.user_id = session.userid
 //            friend.friend_id = id
-//            if (try? friend.saveWithGIS()).isNil {
+//            if (try? friend.saveWithCustomType()).isNil {
 //                // If we havent failed yet,set the return to true:
 //                if !failed { failed = true }
 //                // If we havent set any ids yet, initialize the array:
@@ -448,7 +448,7 @@ class Friends: PostgresStORM {
                 if let id = result!.first?.data["id"].intValue {
                     friend.id = id
                     friend.rejected = CCXServiceClass.sharedInstance.getNow()
-                    if let yup = try? friend.saveWithGIS(session.userid), !yup.isEmpty {
+                    if let yup = try? friend.saveWithCustomType(session.userid), !yup.isEmpty {
                         return true
                     } else {
                         return false

@@ -98,9 +98,9 @@ struct InstallationsV1Controller {
                             var retrow:[StORMRow] = []
                             
                             if uid.isEmpty {
-                                retrow = try! inst.saveWithGIS()
+                                retrow = try! inst.saveWithCustomType()
                             } else {
-                                retrow = try! inst.saveWithGIS(uid)
+                                retrow = try! inst.saveWithCustomType(uid)
                             }
                             
                             if retrow.count > 0, let installationid = retrow.first?.data["id"].intValue {
@@ -138,7 +138,7 @@ struct InstallationsV1Controller {
                                         
                                         // now lets try to save this notification
                                         if therewerechanges {
-                                            try notif.saveWithGIS(uid)
+                                            try notif.saveWithCustomType(uid)
                                         }
                                     } catch {
                                         // do NOTHING - there was a problem with the notification record.
