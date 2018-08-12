@@ -13,6 +13,7 @@ import PerfectLib
 import PerfectLocalAuthentication
 import PerfectSessionPostgreSQL
 import PerfectSession
+import SwiftMoment
 
 //MARK: - Retailer API
 /// This Retailer structure supports all the normal endpoints for a user based login application.
@@ -23,7 +24,8 @@ struct RetailerAPI {
     struct json {
         static var routes : [[String:Any]] {
             return [
-                ["method":"get",    "uri":"/api/v1/closeInterval/{retailerId}", "handler":closeInterval],
+                ["method":"get",    "uri":"/api/v1/closeInterval/{intervalId}", "handler":closeInterval],
+                ["method":"get",    "uri":"/api/v1/closeInterval", "handler":closeInterval],
                 ["method":"post",    "uri":"/api/v1/registerterminal", "handler":registerTerminal],
                 ["method":"post",    "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],
                 ["method":"post",    "uri":"/api/v1/transaction", "handler":createTransaction]
@@ -34,11 +36,19 @@ struct RetailerAPI {
             return {
                 request, response in
             
-                guard let retailerId = request.retailerId else { return response.completed(status: .forbidden)  }
+                // Take care of checking the retailer & terminal:
+                guard !Retailer.retailerTerminalBounce(request, response) else { return }
                 
+                // Okay.. they are good to go.  Here we need to query for all the transactions for right now (minus one day), sum them up, list them, and send them out.
                 
+                // Lets see if they passed in an intervalId (the yyyyMMdd string):
+                let intervalId = request.intervalId ?? moment().intervalString
+            
+                guard var startDate = moment(intervalId, dateFormat: "yyyyMMdd") else { return }
+                startDate = startDate - 4.hours
+                let endDate = startDate + (1.days - 1.seconds)
                 
-                return response.completed(status: .ok)
+//                return response.completed(status: .ok)
                 
             }
         }
@@ -198,7 +208,7 @@ struct RetailerAPI {
                 request, response in
             
                 // We should first bouce the retailer (takes care of all the general retailer errors):
-                Retailer.retailerTerminalBounce(request, response)
+                guard !Retailer.retailerTerminalBounce(request, response) else { return }
                 
                 do {
 
@@ -309,16 +319,29 @@ fileprivate extension HTTPResponse {
     }
 }
 
+fileprivate extension Moment {
+    /// This is the yyyyMMdd formatted string for right now.
+    var intervalString : String {
+        return self.format("yyyyMMdd")
+    }
+}
+
 fileprivate extension HTTPRequest {
     
 //    @available(*, deprecated, message: "no longer available in version v1.1")
     var retailerId : String? {
         return self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
     }
+    var intervalId : String? {
+        return self.urlVariables["intervalId"]
+    }
     var retailerSecret : String? {
         return self.header(.custom(name: "x-functions-key"))
     }
     var terminalId : String? {
+        if let terminalIdFromHeader = self.header(.custom(name: "terminalId")).stringValue {
+            return terminalIdFromHeader
+        }
         let theTry = try? self.postBodyJSON()?["terminalId"].stringValue
         if theTry.isNil {
             return nil
@@ -362,11 +385,11 @@ extension Retailer {
         
     }
 
-    public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) {
+    public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> Bool {
         
         //Make sure we have the retailer Id and retailer secret:
-        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { return response.unauthorizedTerminal }
-        guard let terminalSerialNumber = request.terminalId else { return response.noTerminalId }
+        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
+        guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return true }
         
         // Get our secret code formatted properly to check what we have in the DB:
         let passwordToCheck = retailerSecret.ourPasswordHash!
@@ -380,18 +403,19 @@ extension Retailer {
         //  3. The terminal is not for this retailer
         
         // this means the terminal number is invalid - RETURN the appropriate error code
-        if terminalQuery.id.isNil { return response.unauthorizedTerminal }
+        if terminalQuery.id.isNil { response.unauthorizedTerminal; return true }
         
         // this means the terminal is not approved
-        if !terminalQuery.is_approved { return response.unauthorizedTerminal }
+        if !terminalQuery.is_approved { response.unauthorizedTerminal; return true }
         
         // Checking the final condition (last condition to minimize the number of queries during error)
         let retailerQuery = Retailer()
         try? retailerQuery.find(["retailer_code":retailerId])
         
         // now lets look to make sure the serial number is to the current retailer
-        if retailerQuery.id != terminalQuery.retailer_id { return response.alreadyRegistered(terminalSerialNumber) }
+        if retailerQuery.id != terminalQuery.retailer_id { response.alreadyRegistered(terminalSerialNumber); return true }
         
+        return false
     }
 
 }
