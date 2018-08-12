@@ -248,7 +248,7 @@ struct RetailerAPI {
                         transaction.customer_codeURL = json?["qrCodeContent"].stringValue
                         
                         // Save the transaction
-                        try? transaction.saveWithCustomType(CCXDefaultUserValues.user_server)
+                        let _ = try? transaction.saveWithCustomType(CCXDefaultUserValues.user_server)
                         
                         // if we are here then everything went well
                         try? response.setBody(json: json!)
@@ -271,6 +271,18 @@ struct RetailerAPI {
                 
             }
         }
+        
+        //MARK: - Delete Terminal
+        static func terminalDelete(data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Verify Retailer
+                Retailer.retailerBounce(request, response)
+                
+            }
+        }
+
     }
 }
 
