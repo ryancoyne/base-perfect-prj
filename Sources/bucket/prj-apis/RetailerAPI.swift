@@ -261,6 +261,18 @@ struct RetailerAPI {
                 
             }
         }
+        
+        //MARK: - Delete Terminal
+        static func terminalDelete(data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Verify Retailer
+                Retailer.retailerBounce(request, response)
+                
+            }
+        }
+
     }
 }
 
