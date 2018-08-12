@@ -1081,6 +1081,108 @@ extension PostgresStORM {
     }
     
     /**
+     Deletes a record with GIS coordinates in a geography type field and other field values.
+     - Returns: An Any type.  For a new inser, we will return the id
+     */
+    @discardableResult
+    func softDeleteWithCustomType(_ user: String? = nil) throws -> [StORMRow] {
+
+        // get the key (id)
+        let (idcolumn, _) = firstAsKey()
+
+        var idnumber: String = ""
+        
+        let thedata = self.asData()
+
+        for i in thedata.enumerated() {
+        
+            if i.element.0 == idcolumn {
+                switch i.element.1 {
+                case is Int:
+                    idnumber = String(describing: i.element.1 as! Int)
+                case is String:
+                    idnumber = "'\(String(describing: i.element.1 as! String))'"
+                default:
+                    break
+                }
+            }
+        }
+
+        var deleteuser = ""
+        if user == nil {
+            deleteuser = CCXDefaultUserValues.user_admin
+        } else {
+            deleteuser = user!
+        }
+        
+        // build the sql
+        var str = "UPDATE \(self.table()) "
+        str.append("SET \"deleted\"  = \(String(describing: CCXServiceClass.sharedInstance.getNow())), \"deletedby\"  = '\(deleteuser)', ")
+        str.append("    \"modified\" = \(String(describing: CCXServiceClass.sharedInstance.getNow())), \"modifiedby\" = '\(deleteuser)' ")
+        str.append("WHERE \"\(idcolumn.lowercased())\" = \(idnumber)")
+ 
+        do {
+            return try self.execRows(str, params: [])
+        } catch {
+            LogFile.error("Error msg: \(error)", logFile: "./StORMlog.txt")
+            self.error = StORMError.error("\(error)")
+            throw error
+        }
+    }
+
+    /**
+     Deletes a record with GIS coordinates in a geography type field and other field values.
+     - Returns: An Any type.  For a new inser, we will return the id
+     */
+    @discardableResult
+    func softUnDeleteWithCustomType(_ user: String? = nil) throws -> [StORMRow] {
+        
+        // get the key (id)
+        let (idcolumn, _) = firstAsKey()
+        
+        var idnumber: String = ""
+        
+        let thedata = self.asData()
+        
+        for i in thedata.enumerated() {
+            
+            if i.element.0 == idcolumn {
+                switch i.element.1 {
+                case is Int:
+                    idnumber = String(describing: i.element.1 as! Int)
+                case is String:
+                    idnumber = "'\(String(describing: i.element.1 as! String))'"
+                default:
+                    break
+                }
+            }
+        }
+        
+        var deleteuser = ""
+        if user == nil {
+            deleteuser = CCXDefaultUserValues.user_server
+        } else {
+            deleteuser = user!
+        }
+        
+        // build the sql
+        var str = "UPDATE \(self.table()) "
+        str.append("SET \"deleted\"  = 0, \"deletedby\" = NULL, ")
+        str.append("    \"modified\" = \(String(describing: CCXServiceClass.sharedInstance.getNow())), \"modifiedby\" = '\(deleteuser)' ")
+        str.append("WHERE \"\(idcolumn.lowercased())\" = \(idnumber)")
+        
+        do {
+            return try self.execRows(str, params: [])
+        } catch {
+            LogFile.error("Error msg: \(error)", logFile: "./StORMlog.txt")
+            self.error = StORMError.error("\(error)")
+            throw error
+        }
+
+    }
+
+    
+    /**
      Adds a new record with GIS coordinates in a geography type field and other field values.
      - Returns: An Any type.  For a new inser, we will return the id
      */
@@ -1188,7 +1290,7 @@ extension PostgresStORM {
             throw error
         }
     }
-    
+
     /**
      Updates a record with GIS coordinates in a geography type field and other field values.
      - Returns: An Any type.  For a new inser, we will return the id
@@ -1227,6 +1329,8 @@ extension PostgresStORM {
                 set.append(" \(i.element.0) = \(value),")
             } else if (i.element.0 == "modifiedby") && (user != nil) {
                 set.append(" \(i.element.0) = '\(user!)',")
+            } else if (i.element.0 == "modifiedby") && (user == nil) {
+                set.append(" \(i.element.0) = '\(CCXDefaultUserValues.user_server)',")
             } else if (i.element.0 != idcolumn) && value != "nil" {
                 
                 // we are doing this to remove the quotes around the GIS functions (it will not work)
