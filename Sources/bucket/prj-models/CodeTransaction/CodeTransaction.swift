@@ -370,7 +370,7 @@ public class CodeTransaction: PostgresStORM {
     /**
      This function will move the record to the archive table
     */
-    func archiveRecord(_ archiveUserId: String?) {
+    func archiveRecord(_ archiveUserId: String? = nil) {
         
         let cth = CodeTransactionHistory()
         
