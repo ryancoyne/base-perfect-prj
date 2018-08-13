@@ -34,7 +34,20 @@ struct CodeTransactionHistoryDictionary {
             }
         }
     }
-    
+
+    var codeTransactionId : Int? {
+        get {
+            return self.dic["code_transaction_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["code_transaction_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "code_transaction_id")
+            }
+        }
+    }
+
     var countryId : Int? {
         get {
             return self.dic["country_id"].intValue
@@ -119,6 +132,33 @@ struct CodeTransactionHistoryDictionary {
             }
         }
     }
+    
+    var archived : Int? {
+        get {
+            return self.dic["archived"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["archived"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "archived")
+            }
+        }
+    }
+    var archivedBy : String? {
+        get {
+            return self.dic["archivedby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["archivedby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "archivedby")
+            }
+        }
+    }
+
+    
     var retailerId : Int? {
         get {
             return self.dic["retailer_id"].intValue

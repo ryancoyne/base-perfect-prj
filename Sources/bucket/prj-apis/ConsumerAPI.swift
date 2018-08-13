@@ -16,7 +16,7 @@ import PerfectSession
 
 //MARK: - Retailer API
 /// This Retailer structure supports all the normal endpoints for a user based login application.
-struct RetailerAPI {
+struct ConsumerAPI {
     
     //MARK: - JSON Routes
     /// This json structure supports all the JSON endpoints that you can use in the application.
@@ -335,63 +335,3 @@ fileprivate extension HTTPRequest {
     
 }
 
-
-extension Retailer {
-
-    public static func exists(_ with: String) -> Bool {
-        let retailer = Retailer()
-        try? retailer.find(["retailer_code":with])
-        return retailer.id.isNotNil
-    }
-    
-    @discardableResult
-    public static func retailerBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> Int? {
-        
-        //Make sure we have the retailer Id and retailer secret:
-        guard let retailerId = request.retailerId else {
-            response.invalidRetailer; return nil }
-        
-        // Find the terminal
-        let retailer = Retailer()
-        try? retailer.find(["retailer_code":retailerId])
-        // this is where we will check the temrminal ID, retailer and the secret to make sure the terminal is approved.
-        
-        if retailer.id.isNil { response.invalidRetailer; return nil }
-        
-        return retailer.id
-        
-    }
-
-    public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) {
-        
-        //Make sure we have the retailer Id and retailer secret:
-        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { return response.unauthorizedTerminal }
-        guard let terminalSerialNumber = request.terminalId else { return response.noTerminalId }
-        
-        // Get our secret code formatted properly to check what we have in the DB:
-        let passwordToCheck = retailerSecret.ourPasswordHash!
-        
-        let terminalQuery = Terminal()
-        try? terminalQuery.find(["serial_number":terminalSerialNumber, "terminal_key":passwordToCheck])
-        
-        // Checking three conditions:
-        //  1. The terminal is not registered
-        //  2. The terminal is not active
-        //  3. The terminal is not for this retailer
-        
-        // this means the terminal number is invalid - RETURN the appropriate error code
-        if terminalQuery.id.isNil { return response.unauthorizedTerminal }
-        
-        // this means the terminal is not approved
-        if !terminalQuery.is_approved { return response.unauthorizedTerminal }
-        
-        // Checking the final condition (last condition to minimize the number of queries during error)
-        let retailerQuery = Retailer()
-        try? retailerQuery.find(["retailer_code":retailerId])
-        
-        // now lets look to make sure the serial number is to the current retailer
-        if retailerQuery.id != terminalQuery.retailer_id { return response.alreadyRegistered(terminalSerialNumber) }
-        
-    }
-
-}

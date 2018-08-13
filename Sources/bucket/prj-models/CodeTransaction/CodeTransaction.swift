@@ -366,4 +366,51 @@ public class CodeTransaction: PostgresStORM {
         return diff
         
     }
+    
+    /**
+     This function will move the record to the archive table
+    */
+    func archiveRecord(_ archiveUserId: String?) {
+        
+        let cth = CodeTransactionHistory()
+        
+        // save the main stuff
+        var recdict = self.asDictionary()
+        recdict["id"] = nil
+
+        // add in the core info
+        cth.fromDictionary(sourceDictionary: recdict)
+
+        // add the base audit information
+        cth.created    = self.created
+        cth.createdby  = self.createdby
+        cth.modified   = self.modified
+        cth.modifiedby = self.modifiedby
+        cth.deleted    = self.deleted
+        cth.deletedby  = self.deletedby
+
+        // add the archive audit info
+        cth.archived = CCXServiceClass.sharedInstance.getNow()
+        if archiveUserId == nil {
+            cth.archivedby = CCXDefaultUserValues.user_server
+        } else {
+            cth.archivedby = archiveUserId
+        }
+        
+        // and finally set the original code transaction id
+        cth.code_transaction_id = self.id
+        
+        // now save the record
+        do {
+            // save the archive record
+            try cth.saveWithCustomType()
+            
+            // now hard delete the original record
+            try self.delete()
+            
+        } catch {
+            // do nothing with errors
+            print("There was an error on the archive.  Main record id: \(String(describing: self.id))  The error is \(error.localizedDescription)")
+        }
+    }
 }

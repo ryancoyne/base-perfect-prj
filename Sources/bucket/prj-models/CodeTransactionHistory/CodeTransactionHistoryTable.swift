@@ -100,6 +100,7 @@ final class CodeTransactionHistoryTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
+        createsql.append("code_transaction_id int NOT NULL DEFAULT 0, ")
         createsql.append("country_id int NOT NULL DEFAULT 0, ")
         createsql.append("retailer_id int NOT NULL DEFAULT 0, ")
         createsql.append("amount numeric(10,5) NOT NULL DEFAULT 0, ")
@@ -114,7 +115,9 @@ final class CodeTransactionHistoryTable {
         createsql.append("disputedby text COLLATE pg_catalog.default, ")
         createsql.append("redeemed int NOT NULL DEFAULT 0, ")
         createsql.append("redeemedby text COLLATE pg_catalog.default, ")
-        
+        createsql.append("archived int NOT NULL DEFAULT 0, ")
+        createsql.append("archivedby text COLLATE pg_catalog.default, ")
+
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
         createsql.append("); ")
