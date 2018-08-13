@@ -24,7 +24,7 @@ public class CodeTransaction: PostgresStORM {
     var retailer_id     : Int? = nil
     var country_id     : Int? = nil
     var customer_code     : String? = nil
-    var customer_codeURL     : String? = nil
+    var customer_codeurl     : String? = nil
     var terminal_id : Int? = nil
     var client_location : String? = nil
     var client_transaction_id     : String? = nil
@@ -96,7 +96,7 @@ public class CodeTransaction: PostgresStORM {
         }
         
         if let data = this.data.codeTransactionDic.customerCodeURL {
-            customer_codeURL = data
+            customer_codeurl = data
         }
         
         if let data = this.data.codeTransactionDic.redeemed {
@@ -119,11 +119,11 @@ public class CodeTransaction: PostgresStORM {
             terminal_id = data
         }
         
-        if let data = this.data.codeTransactionDic.amount {
+        if let data = this.data.codeTransactionDic.amount.doubleValue {
             amount = data
         }
         
-        if let data = this.data.codeTransactionDic.totalAmount {
+        if let data = this.data.codeTransactionDic.totalAmount.doubleValue {
             total_amount = data
         }
         
@@ -175,9 +175,9 @@ public class CodeTransaction: PostgresStORM {
                     self.customer_code = (value as! String)
                 }
                 
-            case "customer_codeURL":
+            case "customer_codeurl":
                 if (value as? String).isNotNil {
-                    self.customer_codeURL = (value as! String)
+                    self.customer_codeurl = (value as! String)
                 }
                 
             case "client_location":
@@ -295,9 +295,35 @@ public class CodeTransaction: PostgresStORM {
             dictionary.codeTransactionDic.customerCode = self.customer_code
         }
         
-        if self.customer_codeURL.isNotNil {
-            dictionary.codeTransactionDic.customerCodeURL = self.customer_codeURL
+        if self.customer_codeurl.isNotNil {
+            dictionary.codeTransactionDic.customerCodeURL = self.customer_codeurl
         }
+        
+        if self.amount.isNotNil {
+            dictionary.codeTransactionDic.amount = self.amount
+        }
+        
+        if self.total_amount.isNotNil {
+            dictionary.codeTransactionDic.totalAmount = self.total_amount
+        }
+        
+        if self.terminal_id.isNotNil {
+            dictionary.codeTransactionDic.terminalId = self.terminal_id
+        }
+        
+        if self.batch_id.isNotNil {
+            dictionary.codeTransactionDic.batchId = self.batch_id
+        }
+        
+        if self.client_transaction_id.isNotNil  {
+            dictionary.codeTransactionDic.clientTransactionId = self.client_transaction_id
+        }
+        
+        if self.customer_codeurl.isNotNil {
+            dictionary.codeTransactionDic.customerCodeURL = self.customer_codeurl
+        }
+        
+        
         
         return dictionary
     }
@@ -327,7 +353,7 @@ public class CodeTransaction: PostgresStORM {
             diff = false
         }
         
-        if diff == true, self.customer_codeURL != targetItem.customer_codeURL {
+        if diff == true, self.customer_codeurl != targetItem.customer_codeurl {
             diff = false
         }
         
@@ -406,7 +432,7 @@ public class CodeTransaction: PostgresStORM {
             try cth.saveWithCustomType()
             
             // now hard delete the original record
-            try self.delete()
+            try self.delete(self.id!)
             
         } catch {
             // do nothing with errors

@@ -235,7 +235,7 @@ struct ConsumerAPI {
                         transaction.terminal_id = terminal.id
                         transaction.retailer_id = retailer.id
                         transaction.customer_code = json?["customerCode"].stringValue
-                        transaction.customer_codeURL = json?["qrCodeContent"].stringValue
+                        transaction.customer_codeurl = json?["qrCodeContent"].stringValue
                         
                         // Save the transaction
                         let _ = try? transaction.saveWithCustomType(CCXDefaultUserValues.user_server)

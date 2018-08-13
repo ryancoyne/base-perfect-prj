@@ -28,7 +28,7 @@ public class CodeTransactionHistory: PostgresStORM {
     var retailer_id           : Int? = nil
     var country_id            : Int? = nil
     var customer_code         : String? = nil
-    var customer_codeURL      : String? = nil
+    var customer_codeurl      : String? = nil
     var terminal_id           : Int? = nil
     var client_location       : String? = nil
     var client_transaction_id : String? = nil
@@ -114,7 +114,7 @@ public class CodeTransactionHistory: PostgresStORM {
         }
         
         if let data = this.data.codeTransactionHistoryDic.customerCodeURL {
-            customer_codeURL = data
+            customer_codeurl = data
         }
         
         if let data = this.data.codeTransactionHistoryDic.redeemed {
@@ -179,13 +179,13 @@ public class CodeTransactionHistory: PostgresStORM {
                 }
                 
             case "client_transaction_id":
-                if (value as? Int).isNotNil {
-                    self.retailer_id = (value as! Int)
+                if (value as? String).isNotNil {
+                    self.client_transaction_id = (value as! String)
                 }
                 
             case "terminal_id":
                 if (value as? Int).isNotNil {
-                    self.retailer_id = (value as! Int)
+                    self.terminal_id = (value as! Int)
                 }
                 
             case "amount":
@@ -203,9 +203,9 @@ public class CodeTransactionHistory: PostgresStORM {
                     self.customer_code = (value as! String)
                 }
                 
-            case "customer_codeURL":
+            case "customer_codeurl":
                 if (value as? String).isNotNil {
-                    self.customer_codeURL = (value as! String)
+                    self.customer_codeurl = (value as! String)
                 }
                 
             case "client_location":
@@ -332,8 +332,16 @@ public class CodeTransactionHistory: PostgresStORM {
             dictionary.codeTransactionHistoryDic.customerCode = self.customer_code
         }
         
-        if self.customer_codeURL.isNotNil {
-            dictionary.codeTransactionHistoryDic.customerCodeURL = self.customer_codeURL
+        if self.customer_codeurl.isNotNil {
+            dictionary.codeTransactionHistoryDic.customerCodeURL = self.customer_codeurl
+        }
+        
+        if self.amount.isNotNil {
+            dictionary.codeTransactionDic.amount = self.amount
+        }
+        
+        if self.total_amount.isNotNil {
+            dictionary.codeTransactionDic.totalAmount = self.total_amount
         }
         
         return dictionary
@@ -368,7 +376,7 @@ public class CodeTransactionHistory: PostgresStORM {
             diff = false
         }
         
-        if diff == true, self.customer_codeURL != targetItem.customer_codeURL {
+        if diff == true, self.customer_codeurl != targetItem.customer_codeurl {
             diff = false
         }
         

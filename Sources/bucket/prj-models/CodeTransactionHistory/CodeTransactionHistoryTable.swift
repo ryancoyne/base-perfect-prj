@@ -110,7 +110,7 @@ final class CodeTransactionHistoryTable {
         createsql.append("client_location text COLLATE pg_catalog.default, ")
         createsql.append("client_transaction_id text COLLATE pg_catalog.default, ")
         createsql.append("customer_code text COLLATE pg_catalog.default, ")
-        createsql.append("customer_codeURL text COLLATE pg_catalog.default, ")
+        createsql.append("customer_codeurl text COLLATE pg_catalog.default, ")
         createsql.append("disputed int NOT NULL DEFAULT 0, ")
         createsql.append("disputedby text COLLATE pg_catalog.default, ")
         createsql.append("redeemed int NOT NULL DEFAULT 0, ")

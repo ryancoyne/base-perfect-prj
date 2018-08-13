@@ -80,6 +80,8 @@ extension Optional {
             return Double(exactly: self as! Float)
         case is Double, is Double?:
             return self as? Double
+        case is String, is String?:
+            return Double(self as! String)
         default:
             return nil
         }

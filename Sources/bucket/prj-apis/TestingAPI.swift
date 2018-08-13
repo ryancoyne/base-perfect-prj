@@ -55,7 +55,7 @@ struct TestingAPI {
                     i.archiveRecord()
                 }
                 
-                
+                response.setBody(string: "Completed testing.")
                 return response.completed(status: .ok)
                 
             }

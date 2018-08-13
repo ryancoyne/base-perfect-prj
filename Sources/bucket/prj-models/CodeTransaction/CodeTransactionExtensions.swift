@@ -61,13 +61,13 @@ struct CodeTransactionDictionary {
     }
     var customerCodeURL : String? {
         get {
-            return self.dic["customer_codeURL"].stringValue
+            return self.dic["customer_codeurl"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["customer_codeURL"] = newValue!
+                self.dic["customer_codeurl"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "customer_codeURL")
+                self.dic.removeValue(forKey: "customer_codeurl")
             }
         }
     }
