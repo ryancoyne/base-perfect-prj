@@ -256,6 +256,11 @@ routes = routes + CCXStatisticsV1Controller.json.routes
 routes = routes + FriendAPI.json.routes
 routes.append(contentsOf: RetailerAPI.json.routes)
 
+// only if we are not in production
+if EnvironmentVariables.sharedInstance.Server.stringValue != "PROD" {
+    routes.append(contentsOf: TestingAPI.json.routes)
+}
+
 //MARK:-
 //MARK: Initilization functions - only when we move to a new server that has not been initilized
 if systemInit {

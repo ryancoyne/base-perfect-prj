@@ -20,17 +20,21 @@ public class CodeTransactionHistory: PostgresStORM {
     var modifiedby : String? = nil
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
-    
-    var retailer_id     : Int? = nil
-    var country_id     : Int? = nil
-    var customer_code     : String? = nil
-    var customer_codeURL     : String? = nil
-    var terminal_id : Int? = nil
-    var client_location : String? = nil
-    var client_transaction_id     : String? = nil
-    var batch_id : String? = nil
-    var amount : Double? = nil
-    var total_amount : Double? = nil
+
+    var archived    : Int?    = nil
+    var archivedby  : String? = nil
+
+    var code_transaction_id   : Int? = nil
+    var retailer_id           : Int? = nil
+    var country_id            : Int? = nil
+    var customer_code         : String? = nil
+    var customer_codeurl      : String? = nil
+    var terminal_id           : Int? = nil
+    var client_location       : String? = nil
+    var client_transaction_id : String? = nil
+    var batch_id              : String? = nil
+    var amount                : Double? = nil
+    var total_amount          : Double? = nil
     
     var disputed : Int? = nil
     var disputedby : String? = nil
@@ -70,7 +74,21 @@ public class CodeTransactionHistory: PostgresStORM {
         if let data = this.data.deletedBy {
             deletedby = data
         }
+
         
+        if let data = this.data.codeTransactionHistoryDic.archived.intValue {
+            archived = data
+        }
+        
+        if let data = this.data.codeTransactionHistoryDic.archivedBy {
+            archivedby = data
+        }
+
+        
+        if let data = this.data.codeTransactionHistoryDic.codeTransactionId {
+            code_transaction_id = data
+        }
+
         if let data = this.data.codeTransactionHistoryDic.countryId {
             country_id = data
         }
@@ -96,7 +114,7 @@ public class CodeTransactionHistory: PostgresStORM {
         }
         
         if let data = this.data.codeTransactionHistoryDic.customerCodeURL {
-            customer_codeURL = data
+            customer_codeurl = data
         }
         
         if let data = this.data.codeTransactionHistoryDic.redeemed {
@@ -144,7 +162,12 @@ public class CodeTransactionHistory: PostgresStORM {
         for (key, value) in sourceDictionary {
             
             switch key.lowercased() {
-                
+
+            case "code_transaction_id":
+                if (value as? Int).isNotNil {
+                    self.code_transaction_id = (value as! Int)
+                }
+
             case "country_id":
                 if (value as? Int).isNotNil {
                     self.country_id = (value as! Int)
@@ -156,13 +179,13 @@ public class CodeTransactionHistory: PostgresStORM {
                 }
                 
             case "client_transaction_id":
-                if (value as? Int).isNotNil {
-                    self.retailer_id = (value as! Int)
+                if (value as? String).isNotNil {
+                    self.client_transaction_id = (value as! String)
                 }
                 
             case "terminal_id":
                 if (value as? Int).isNotNil {
-                    self.retailer_id = (value as! Int)
+                    self.terminal_id = (value as! Int)
                 }
                 
             case "amount":
@@ -180,9 +203,9 @@ public class CodeTransactionHistory: PostgresStORM {
                     self.customer_code = (value as! String)
                 }
                 
-            case "customer_codeURL":
+            case "customer_codeurl":
                 if (value as? String).isNotNil {
-                    self.customer_codeURL = (value as! String)
+                    self.customer_codeurl = (value as! String)
                 }
                 
             case "client_location":
@@ -254,7 +277,21 @@ public class CodeTransactionHistory: PostgresStORM {
         if self.deletedby.isNotNil {
             dictionary.deletedBy = self.deletedby
         }
+
         
+        if self.archived.isNotNil {
+            dictionary.codeTransactionHistoryDic.archived = self.archived
+        }
+        
+        if self.archivedby.isNotNil {
+            dictionary.codeTransactionHistoryDic.archivedBy = self.archivedby
+        }
+
+        
+        if self.code_transaction_id.isNotNil {
+            dictionary.codeTransactionHistoryDic.codeTransactionId = self.code_transaction_id
+        }
+
         if self.country_id.isNotNil {
             dictionary.codeTransactionHistoryDic.countryId = self.country_id
         }
@@ -295,8 +332,16 @@ public class CodeTransactionHistory: PostgresStORM {
             dictionary.codeTransactionHistoryDic.customerCode = self.customer_code
         }
         
-        if self.customer_codeURL.isNotNil {
-            dictionary.codeTransactionHistoryDic.customerCodeURL = self.customer_codeURL
+        if self.customer_codeurl.isNotNil {
+            dictionary.codeTransactionHistoryDic.customerCodeURL = self.customer_codeurl
+        }
+        
+        if self.amount.isNotNil {
+            dictionary.codeTransactionDic.amount = self.amount
+        }
+        
+        if self.total_amount.isNotNil {
+            dictionary.codeTransactionDic.totalAmount = self.total_amount
         }
         
         return dictionary
@@ -306,7 +351,11 @@ public class CodeTransactionHistory: PostgresStORM {
     func compare(targetItem: CodeTransactionHistory)-> Bool {
         
         var diff = true
-        
+
+        if diff == true, self.code_transaction_id != targetItem.code_transaction_id {
+            diff = false
+        }
+
         if diff == true, self.retailer_id != targetItem.retailer_id {
             diff = false
         }
@@ -327,7 +376,7 @@ public class CodeTransactionHistory: PostgresStORM {
             diff = false
         }
         
-        if diff == true, self.customer_codeURL != targetItem.customer_codeURL {
+        if diff == true, self.customer_codeurl != targetItem.customer_codeurl {
             diff = false
         }
         
