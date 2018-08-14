@@ -1024,8 +1024,8 @@ func appExtras(_ request: HTTPRequest) -> [String : Any] {
 //MARK: - Oauth Support:
 typealias JSONOAuthReturn = (passed: Bool, data: [String:Any], foreignuserid : String)
 struct FacebookOAuth  {
-    var appId : String = "823706624496654"
-    var appSecret : String = "1aef7c76d58bfae425e91a5b5209c333"
+    var appId : String = "433918117057494"
+    var appSecret : String = "ce9ddce2028002cb658ae27942214e24"
     func verifyCredentials(_ data : [String:Any]) throws -> JSONOAuthReturn {
         
         // We need to hit the debug token api, not the graph api about the user:
