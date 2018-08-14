@@ -1241,6 +1241,12 @@ extension Account {
         // Remove out the password & pass validation:
         dic.removeValue(forKey: "password")
         dic.removeValue(forKey: "passvalidation")
+        dic.removeValue(forKey: "passreset")
+
+        // Remove the username if it is not set.
+        if dic.user.username?.isEmpty == true {
+            dic.removeValue(forKey: "username")
+        }
         
         // Get all the users friends:
         let sqlStatement = ""
