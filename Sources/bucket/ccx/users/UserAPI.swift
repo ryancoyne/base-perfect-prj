@@ -111,12 +111,12 @@ struct UserAPI {
         public static func register(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                if let i = request.session?.userid, !i.isEmpty {
-                    _ = try? response.setBody(json: ["error":"Already logged in"])
-                    response.completed(status: .ok)
+                if let s = request.session?.userid, !s.isEmpty {
+                    try? response.setBody(json: ["error" : "You are already logged in."])
+                        .setHeader(.contentType, value: "application/json")
+                        .completed(status: .ok)
                     return
                 }
-            
                 if let postBody = request.postBodyString, !postBody.isEmpty {
                     do {
                         let postBodyJSON = try postBody.jsonDecode() as? [String: String] ?? [String: String]()
@@ -255,7 +255,7 @@ struct UserAPI {
             static let twitter : TwitterOAuth = TwitterOAuth()
             
             public static func createOrLoginUser(_ json : [String:Any] /*, _ request : HTTPRequest*/, _ type: String) throws -> Account {
-                var user = Account()
+                let user = Account()
                 var json = json
                 let findDic:[String:Any] = ["source": type, "remoteid": json["id"].stringValue!]
                 try user.find(findDic)
@@ -329,6 +329,11 @@ struct UserAPI {
             public static func login(data: [String:Any]) throws -> RequestHandler {
                 return {
                     request, response in
+                    if let s = request.session?.userid, !s.isEmpty {
+                        try? response.setBody(json: ["error" : "You are already logged in."])
+                            .setHeader(.contentType, value: "application/json")
+                            .completed(status: .ok)
+                    }
                     if let json = try? request.postBodyString?.jsonDecode() as? [String:Any] {
                         if let json = json, json.keys.count == 1, let key = json.first?.key {
                             switch key {
