@@ -265,6 +265,9 @@ struct RetailerAPI {
                         // Save the transaction
                         let _ = try? transaction.saveWithCustomType(CCXDefaultUserValues.user_server)
                         
+                        // and now - lets save the transaction in the Audit table
+                        
+                        
                         // if we are here then everything went well
                         try? response.setBody(json: json!)
                             .completed(status: .ok)
