@@ -15,6 +15,8 @@ import PerfectSession
 //import SwiftRandom
 import PerfectCrypto
 import SwiftGD
+import PerfectCURL
+import cURL
 
 //MARK: - User API
 /// This UserAPI structure supports all the normal endpoints for a user based login application.
@@ -275,7 +277,6 @@ struct UserAPI {
                             } else {
                                 json["created"] = CCXServiceClass.sharedInstance.getNow()
                                 json["createdby"] = user.id
-                                json["locationAttention"] = true
                             }
                             
                             // Now remove it out since it is in the remoteid:
@@ -283,9 +284,6 @@ struct UserAPI {
                             user.source = type
                             user.detail = json
                             
-                            // add the current location (after we saved the detail)
-                            user = UserAPI.addCurrentLocationToUser(user, locationJSON: json)
-
                             // no need for the GIS save function - the location info is saved in the detail (and another table)
                             try user.save()
                             return user
@@ -312,10 +310,6 @@ struct UserAPI {
                     user.detail = json
                     user.detail["created"] = CCXServiceClass.sharedInstance.getNow()
                     user.detail["createdby"] = user.remoteid
-                    user.detail["locationAttention"] = true
-
-                    // add the current location (after we saved the detail)
-                    user = UserAPI.addCurrentLocationToUser(user, locationJSON: json)
                     
                     // no need for the GIS save function - the location info is saved in the detail (and another table)
                     try user.create()
@@ -432,9 +426,6 @@ struct UserAPI {
 //                        if !json["detail"].dicValue.isEmpty {
 //                            user.detail = json["detail"].dicValue
 //                        }
-                        
-                        // add the location and the location record
-                        user = UserAPI.addCurrentLocationToUser(user, locationJSON: json)
                         
                         user.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
                         user.detail["modifiedby"] = session.userid
@@ -1098,7 +1089,14 @@ struct FacebookOAuth  {
 }
 
 struct GoogleOAuth {
+    
+    var serverClientId : String = "399381442494-atvoitfj7av90r5ef9dh0qm6n1h5b20l.apps.googleusercontent.com"
+    var serverClientSecret : String = "f90I95GQkwIOaLBTvdwY2IYO"
+    
     func verifyCredentials(_ data : [String:Any]) throws -> JSONOAuthReturn {
+        
+        // We need to
+        
         if let access_token = data.google["access_token"].stringValue, let userid = data.google["id"].stringValue {
             
             var googleData = getGoogleData(access_token, ["family_name","given_name","id","picture"])
@@ -1128,7 +1126,11 @@ struct GoogleOAuth {
                 }
             }
             
-            return (userid == returnedGoogleData["id"].stringValue, returnedGoogleData, userid)
+            if let authCode = data.google["serverAuthCode"].stringValue, let refreshToken = getRefreshToken(authToken: authCode) {
+                returnedGoogleData["refresh_token"] = refreshToken
+            }
+            
+            return (userid == returnedGoogleData["id"].stringValue && serverClientId == googleData["aud"].stringValue, returnedGoogleData, userid)
             
         }
         
@@ -1138,6 +1140,23 @@ struct GoogleOAuth {
         
         let url = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=\(accessToken)"
         return Utility2.makeRequest(.get, url)
+        
+    }
+    func getRefreshToken(authToken : String) -> String? {
+        // We need to see about using cURL for this:
+        
+        let data = Utility2.makeRequest(.post, "https://www.googleapis.com/oauth2/v4/token?client_id=\(serverClientId)&client_secret=\(serverClientSecret)&grant_type=authorization_code&code=\(authToken)", encoding: "form")
+        
+        if let refreshToken = data["refresh_token"].stringValue {
+            return refreshToken
+        } else {
+            return nil
+        }
+        
+    }
+    
+    func refreshToken() {
+        // Make the request to refresh a token:
         
     }
 }

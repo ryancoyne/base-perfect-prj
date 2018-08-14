@@ -132,7 +132,6 @@ class Handlers {
                 user.detail["firstname"] = firstname
                 user.detail["lastname"] = lastname
                 user.detail["created"] = CCXServiceClass.sharedInstance.getNow()
-                user.detail["locationAttention"] = true
                 user.email = email
                 
                 if let pwd = request.param(name: "pw"), !pwd.isEmpty {

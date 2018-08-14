@@ -180,7 +180,6 @@ extension Handlers {
                 user.username = username.lowercased()
                 user.detail["firstname"] = firstname
                 user.detail["lastname"] = lastname
-                user.detail["locationAttention"] = true
                 user.email = email
                 
                 
