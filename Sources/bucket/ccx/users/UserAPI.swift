@@ -309,7 +309,7 @@ struct UserAPI {
                     
                     user.detail = json
                     user.detail["created"] = CCXServiceClass.sharedInstance.getNow()
-                    user.detail["createdby"] = user.remoteid
+                    user.detail["createdby"] = user.id
                     
                     // no need for the GIS save function - the location info is saved in the detail (and another table)
                     try user.create()
