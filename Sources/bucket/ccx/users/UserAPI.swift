@@ -33,21 +33,43 @@ struct UserAPI {
                     ["method":"post",   "uri":"/api/v1/forgotpassword", "handler":forgotPassword],
                     ["method":"post",   "uri":"/api/v1/user/update", "handler":updateProfile],
                     ["method":"post",   "uri":"/api/v1/user/upload", "handler":uploadPicture],
-                    ["method":"post",   "uri":"/api/v1/changepassword", "handler":changePassword],
-                    ["method":"post",   "uri":"/api/v1/check", "handler":checkEmailOrUsername]
+                    ["method":"post",   "uri":"/api/v1/changepassword", "handler":changePassword]
+//                    ["method":"post",   "uri":"/api/v1/check", "handler":checkEmailOrUsername]
             ]
         }
         //MARK: - Logout
         public static func logout(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                if let _ = request.session?.token {
+                
+                if request.session?.userid.isEmpty == false {
+                    
                     PostgresSessions().destroy(request, response)
                     request.session = PerfectSession()
                     response.request.session = PerfectSession()
+                    
+                    // We successfully logged out:
+                    _ = try? response.setBody(json: ["message":"Logout was successful"])
+                                                 .setHeader(.contentType, value: "application/json")
+                                                 .completed(status: .ok)
+                    
+                } else if let _ = request.session?.token {
+                    
+                    PostgresSessions().destroy(request, response)
+                    request.session = PerfectSession()
+                    response.request.session = PerfectSession()
+                    
+                    _ = try? response.setBody(json: ["errorCode":"NoAuth", "message":"You need to be logged in to logout."])
+                                                 .setHeader(.contentType, value: "application/json")
+                                                 .completed(status: .ok)
+                    
+                } else {
+                    
+                    _ = try? response.setBody(json: ["errorCode":"NoUserOrToken", "message":"You need to be logged in to logout."])
+                                                 .setHeader(.contentType, value: "application/json")
+                                                 .completed(status: .ok)
+                    
                 }
-                _ = try? response.setBody(json: ["result":"success"])
-                response.completed(status: .ok)
             }
         }
         //MARK: - Login: Username/Password OR Email/Password
@@ -113,15 +135,15 @@ struct UserAPI {
                 request, response in
                 if let s = request.session?.userid, !s.isEmpty {
                     try? response.setBody(json: ["error" : "You are already logged in."])
-                        .setHeader(.contentType, value: "application/json")
-                        .completed(status: .ok)
+                                            .setHeader(.contentType, value: "application/json")
+                                            .completed(status: .ok)
                     return
                 }
                 if let postBody = request.postBodyString, !postBody.isEmpty {
                     do {
                         let postBodyJSON = try postBody.jsonDecode() as? [String: String] ?? [String: String]()
-                        if let u = postBodyJSON["username"], !u.isEmpty,
-                            let e = postBodyJSON["email"], !e.isEmpty {
+                        if let e = postBodyJSON["email"], !e.isEmpty {
+                            let u = postBodyJSON["username"].stringValue ?? ""
                             let err = Account.register(u.lowercased(), e, .provisional, baseURL: AuthenticationVariables.baseURL)
                             if err != .noError {
                                 LocalAuthHandlers.error(request, response, error: "Registration Error: \(err)", code: .badRequest)
@@ -145,7 +167,6 @@ struct UserAPI {
                                 }
                                 
                                 var retDict:[String:Any] = [:]
-                                retDict["result"] = "success"
                                 retDict["message"] = "Check your email for an email from us. It contains instructions to complete your signup!"
                                 
                                 // add in the return values for the user connections

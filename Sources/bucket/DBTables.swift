@@ -219,6 +219,7 @@ final class PRJDBTables {
         FormFieldsTable.sharedInstance.create()
         FormFieldTypeTable.sharedInstance.create()
         CashoutTypesTable.sharedInstance.create()
+        CashoutOptionTable.sharedInstance.create()
         CompletedFormsTable.sharedInstance.create()
         
         CodeTransactionTable.sharedInstance.create()
