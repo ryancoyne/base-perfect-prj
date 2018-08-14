@@ -41,13 +41,35 @@ struct UserAPI {
         public static func logout(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                if let _ = request.session?.token {
+                
+                if request.session?.userid.isEmpty == false {
+                    
                     PostgresSessions().destroy(request, response)
                     request.session = PerfectSession()
                     response.request.session = PerfectSession()
+                    
+                    // We successfully logged out:
+                    _ = try? response.setBody(json: ["message":"Logout was successful"])
+                                                 .setHeader(.contentType, value: "application/json")
+                                                 .completed(status: .ok)
+                    
+                } else if let _ = request.session?.token {
+                    
+                    PostgresSessions().destroy(request, response)
+                    request.session = PerfectSession()
+                    response.request.session = PerfectSession()
+                    
+                    _ = try? response.setBody(json: ["errorCode":"NoAuth", "message":"You need to be logged in to logout."])
+                                                 .setHeader(.contentType, value: "application/json")
+                                                 .completed(status: .ok)
+                    
+                } else {
+                    
+                    _ = try? response.setBody(json: ["errorCode":"NoUserOrToken", "message":"You need to be logged in to logout."])
+                                                 .setHeader(.contentType, value: "application/json")
+                                                 .completed(status: .ok)
+                    
                 }
-                _ = try? response.setBody(json: ["message":"Logout was successful"])
-                response.completed(status: .ok)
             }
         }
         //MARK: - Login: Username/Password OR Email/Password
