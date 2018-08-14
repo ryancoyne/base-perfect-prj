@@ -46,7 +46,7 @@ struct UserAPI {
                     request.session = PerfectSession()
                     response.request.session = PerfectSession()
                 }
-                _ = try? response.setBody(json: ["result":"success"])
+                _ = try? response.setBody(json: ["message":"Logout was successful"])
                 response.completed(status: .ok)
             }
         }
