@@ -28,7 +28,7 @@ final class InitializeData {
         let created_time = Int(Date().timeIntervalSince1970)
 
         var checkuser = "INSERT INTO \(tbl.table()) "
-        checkuser.append("(created, createdby,group,title,description) ")
+        checkuser.append("(created, createdby,account_group,title,description) ")
         checkuser.append(" VALUES ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Code', 'Code Creation', 'Customer Code Creation'), ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Code', 'Code Void', 'Customer Code Void'), ")

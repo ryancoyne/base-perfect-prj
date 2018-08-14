@@ -349,6 +349,10 @@ final class PRJDBTables {
             InitializeData.sharedInstance.addForms()
             InitializeData.sharedInstance.addFormFields()
 
+            InitializeData.sharedInstance.addLedgerTypes()
+            InitializeData.sharedInstance.addLedgerAccountTypes()
+            InitializeData.sharedInstance.addLedgerAccounts()
+
         } catch {
             print(error)
         }

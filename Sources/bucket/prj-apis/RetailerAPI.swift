@@ -266,7 +266,8 @@ struct RetailerAPI {
                         let _ = try? transaction.saveWithCustomType(CCXDefaultUserValues.user_server)
                         
                         // and now - lets save the transaction in the Audit table
-                        
+                        let af = AuditFunctions()
+                        af.addCustomerCodeAuditRecord(transaction)
                         
                         // if we are here then everything went well
                         try? response.setBody(json: json!)
