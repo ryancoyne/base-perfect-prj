@@ -23,44 +23,99 @@ struct ConsumerAPI {
     struct json {
         static var routes : [[String:Any]] {
             return [
-                ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode]
+                ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
+                ["method":"get",    "uri":"/api/v1/cashout/types/{countryCode}", "handler":cashoutTypes],
+                ["method":"get",    "uri":"/api/v1/cashout/types/{countryCode}/{typeId}", "handler":cashoutType],
+                ["method":"get",    "uri":"/api/v1/cashout/{countryCode}/{typeId}/options", "handler":cashoutOptions],
+                ["method":"post",    "uri":"/api/v1/cashout/{countryCode}/{typeId}/{optionId}", "handler":cashout]
             ]
         }
         
-        //MARK: - Close Interval Function
+        //MARK: - Redeem The Transaction:
         public static func redeemCode(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
                 
-                // Okay.  We are redeeming a qr code transaction for a user.
+                // Check if the user is logged in:
+                guard let userId = request.session?.userid else { return response.notLoggedIn() }
+                
+                // Okay, the user is logged in and we have their id!  Lets see if we have the customer code!
+                guard let customerCode = request.customerCode else { return response.invalidCode }
+                
+                // Awesome.  We have the customer code, and a user.  Now, we need to find the transaction and mark it as redeemed, and add the value to the ledger table!
+                
+                
+            }
+        }
+        //MARK: - Cashout Options:
+        public static func cashoutOptions(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Check if the user is logged in:
+                guard let userId = request.session?.userid else { return response.notLoggedIn() }
+                
+                // Here we need to get all the modes, and get all the fields
+                
+                
+            }
+        }
+        
+        //MARK: - Cashout Types:
+        public static func cashoutTypes(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Check if the user is logged in:
+                guard let userId = request.session?.userid else { return response.notLoggedIn() }
+                
+                // Here we need to get all the modes, and get all the fields
+                
+                
+            }
+        }
+        
+        //MARK: - Cashout Type:
+        public static func cashoutType(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Check if the user is logged in:
+                guard let userId = request.session?.userid else { return response.notLoggedIn() }
+                
+                // Okay we are finding the specific type, and grabbing the fields we need:
+                
+                
+            }
+        }
+        
+        //MARK: - Cashout Type:
+        public static func cashout(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Check if the user is logged in:
+                guard let userId = request.session?.userid else { return response.notLoggedIn() }
+                
+                // Okay we are finding the specific type, and grabbing the fields we need:
+                
                 
             }
         }
     }
 }
 
+fileprivate extension HTTPResponse {
+    var invalidCode : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such code found"])
+                                .setHeader(.contentType, value: "application/json")
+                                .completed(status: .notAcceptable)
+    }
+}
+
 fileprivate extension HTTPRequest {
-    
 //    @available(*, deprecated, message: "no longer available in version v1.1")
-    var retailerId : String? {
-        return self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
+    var customerCode : String? {
+        return self.urlVariables["customerCode"]
     }
-    var retailerSecret : String? {
-        return self.header(.custom(name: "x-functions-key"))
-    }
-    var terminalId : String? {
-        let theTry = try? self.postBodyJSON()?["terminalId"].stringValue
-        if theTry.isNil {
-            return nil
-        } else {
-            return theTry!
-        }
-    }
-    
-    var terminal : Terminal? {
-        // Lets see if we have a terminal from the input data:
-        // They need to input the x-functions-key as their retailer password.
-        return nil
-    }
-    
 }
