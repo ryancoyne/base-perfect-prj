@@ -218,7 +218,7 @@ final class PRJDBTables {
         FormFieldTable.sharedInstance.create()
         FormFieldsTable.sharedInstance.create()
         FormFieldTypeTable.sharedInstance.create()
-        CashoutTypesTable.sharedInstance.create()
+        CashoutGroupTable.sharedInstance.create()
         CashoutOptionTable.sharedInstance.create()
         CompletedFormsTable.sharedInstance.create()
         
@@ -343,7 +343,6 @@ final class PRJDBTables {
             // This is where we are adding the default data
             InitializeData.sharedInstance.addCountryCodes()
             InitializeData.sharedInstance.addContactTypes()
-            InitializeData.sharedInstance.addCashoutTypes()
             InitializeData.sharedInstance.addPOS()
             InitializeData.sharedInstance.addFormFieldType()
             InitializeData.sharedInstance.addFormField()
@@ -354,6 +353,8 @@ final class PRJDBTables {
             InitializeData.sharedInstance.addLedgerAccountTypes()
             InitializeData.sharedInstance.addLedgerAccounts()
 
+//            InitializeData.sharedInstance.addCashoutGroup()
+//            InitializeData.sharedInstance.addCashoutOption()
         } catch {
             print(error)
         }

@@ -100,8 +100,7 @@ final class CashoutOptionTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
-        createsql.append("country_id int NOT NULL DEFAULT 0, ")
-        createsql.append("type_id int NOT NULL DEFAULT 0, ")
+        createsql.append("group_id int NOT NULL DEFAULT 0, ")
         createsql.append("maximum numeric(10,5) NOT NULL DEFAULT 0, ")
         createsql.append("minimum numeric(10,5) NOT NULL DEFAULT 0, ")
         createsql.append("form_id int NOT NULL DEFAULT 0, ")

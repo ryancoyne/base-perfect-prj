@@ -21,8 +21,7 @@ public class CashoutOption: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var type_id     : Int? = nil
-    var country_id     : Int? = nil
+    var group_id     : Int? = nil
     var form_id     : Int? = nil
     var display_order     : Int? = nil
     var name     : String? = nil
@@ -67,16 +66,12 @@ public class CashoutOption: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.cashoutOptionsDic.countryId {
-            country_id = data
-        }
-        
         if let data = this.data.cashoutOptionsDic.formId {
             form_id = data
         }
         
-        if let data = this.data.cashoutOptionsDic.typeId {
-            type_id = data
+        if let data = this.data.cashoutOptionsDic.groupId {
+            group_id = data
         }
         
         if let data = this.data.shortdescription {
@@ -129,19 +124,14 @@ public class CashoutOption: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "country_id":
-                if (value as? Int).isNotNil {
-                    self.country_id = (value as! Int)
-                }
-                
             case "form_id":
                 if (value as? Int).isNotNil {
                     self.form_id = (value as! Int)
                 }
                 
-            case "type_id":
+            case "group_id":
                 if (value as? Int).isNotNil {
-                    self.type_id = (value as! Int)
+                    self.group_id = (value as! Int)
                 }
             
             case "maximum":
@@ -224,12 +214,8 @@ public class CashoutOption: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
-        if self.country_id.isNotNil {
-            dictionary.cashoutOptionsDic.countryId = self.country_id
-        }
-        
-        if self.type_id.isNotNil {
-            dictionary.cashoutOptionsDic.typeId = self.type_id
+        if self.group_id.isNotNil {
+            dictionary.cashoutOptionsDic.groupId = self.group_id
         }
         
         if self.form_id.isNotNil {
@@ -276,11 +262,7 @@ public class CashoutOption: PostgresStORM {
         
         var diff = true
         
-        if diff == true, self.type_id != targetItem.type_id {
-            diff = false
-        }
-        
-        if diff == true, self.country_id != targetItem.country_id {
+        if diff == true, self.group_id != targetItem.group_id {
             diff = false
         }
         

@@ -35,27 +35,15 @@ struct CashoutOptionsDictionary {
         }
     }
     
-    var countryId : Int? {
+    var groupId : Int? {
         get {
-            return self.dic["country_id"].intValue
+            return self.dic["group_id"].intValue
         }
         set {
             if newValue != nil {
-                self.dic["country_id"] = newValue!
+                self.dic["group_id"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "country_id")
-            }
-        }
-    }
-    var typeId : Int? {
-        get {
-            return self.dic["type_id"].intValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["type_id"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "type_id")
+                self.dic.removeValue(forKey: "group_id")
             }
         }
     }
