@@ -149,6 +149,14 @@ struct RetailerAPI {
                             term.retailer_id = retailerIntegerId
                             term.terminal_key = apiKey.ourPasswordHash
                             
+                            // we will take the first address on file for this retailer and add the location here for them
+                            let add = Address()
+                            try? add.find(["retailer_id" : String(retailerIntegerId)])
+                            
+                            if add.id.isNotNil, add.retailer_id == retailerIntegerId {
+                                term.address_id = add.id
+                            }
+                            
                             do {
                                 
                                 try term.saveWithCustomType()
@@ -238,7 +246,7 @@ struct RetailerAPI {
                         
                         // lets get the country id for this transaction
                         let add = Address()
-                        try? add.find(["id":terminal.address_id!])
+                        try? add.find(["id":String(terminal.address_id!)])
                         
                         let transaction = CodeTransaction()
                         transaction.created = Int(Date().timeIntervalSince1970)

@@ -91,9 +91,64 @@ final class SampleData {
         sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Ryans Bike Shop', TRUE, 'BCKT-2'), ")
         sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','M&R Corner Market', TRUE, 'BCKT-3') ")
 
-        print("Adding user: \(sqlstatement)")
-        _ = try? tbl.sqlRows(sqlstatement, params: [])
+        print("Adding retailers: \(sqlstatement)")
+        try? tbl.sqlRows(sqlstatement, params: [])
+        
+        // add the addresses for the office locations
+        let usa = Country()
+        try? usa.find(["code_alpha_2":"US"])
 
+        let singapore = Country()
+        try? singapore.find(["code_alpha_2":"SG"])
+
+        let retrows = try? tbl.sqlRows("SELECT * FROM retailer", params: [])
+        var ctr = 0
+        for i in retrows! {
+            
+            let a = Address()
+            
+            switch ctr {
+            
+            case 0:
+                a.retailer_id = i.data.id
+                a.address1 = "1343 Florida Ave NW"
+                a.country_id = usa.id
+                a.city = "Washington"
+                a.state = "DC"
+                a.postal_code = "20009"
+                let _ = try? a.saveWithCustomType()
+                
+            case 1:
+                a.retailer_id = i.data.id
+                a.address1 = "2400 14th St NW"
+                a.country_id = usa.id
+                a.city = "Washington"
+                a.state = "DC"
+                a.postal_code = "20009"
+                let _ = try? a.saveWithCustomType()
+
+            case 2:
+                a.retailer_id = i.data.id
+                a.address1 = "4 Everton Park"
+                a.address2 = "#01-40"
+                a.country_id = singapore.id
+                a.state = "Singapore"
+                a.postal_code = "080004"
+                let _ = try? a.saveWithCustomType()
+
+            default:
+                a.retailer_id = i.data.id
+                a.address1 = "2303 14th St NW"
+                a.country_id = usa.id
+                a.city = "Washington"
+                a.state = "DC"
+                a.postal_code = "20009"
+                let _ = try? a.saveWithCustomType()
+                
+            }
+            
+            ctr += 1
+        }
     }
     
     func addRetailerUsers() {
