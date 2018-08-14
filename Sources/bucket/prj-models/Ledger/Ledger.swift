@@ -21,13 +21,15 @@ public class Ledger: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var ledger_account_id : Int? = nil
-    var ledger_type_id    : Int? = nil
-    var credit            : Double? = nil
-    var debit             : Double? = nil
-    var customer_code     : String? = nil
-    var blockchain_audit  : String? = nil
-    var description       : String? = nil
+    var ledger_account_id     : Int? = nil
+    var ledger_type_id        : Int? = nil
+    var credit                : Double? = nil
+    var debit                 : Double? = nil
+    var wallet_entry          : Bool? = nil
+    var wallet_bucket_user_id : String? = nil
+    var customer_code         : String? = nil
+    var blockchain_audit      : String? = nil
+    var description           : String? = nil
     
     //MARK: Table name
     override public func table() -> String { return "ledger" }
@@ -83,6 +85,14 @@ public class Ledger: PostgresStORM {
             customer_code = data
         }
 
+        if let data = this.data.ledgerDic.wallet_entry {
+            wallet_entry = data
+        }
+
+        if let data = this.data.ledgerDic.wallet_bucket_user_id {
+            wallet_bucket_user_id = data
+        }
+
         if let data = this.data.ledgerDic.blockchain_audit {
             blockchain_audit = data
         }
@@ -133,7 +143,17 @@ public class Ledger: PostgresStORM {
                 if (value as? String).isNotNil {
                     self.customer_code = (value as! String)
                 }
-                
+
+            case "wallet_entry":
+                if (value as? Bool).isNotNil {
+                    self.wallet_entry = (value as! Bool)
+                }
+
+            case "wallet_bucket_user_id":
+                if (value as? String).isNotNil {
+                    self.wallet_bucket_user_id = (value as! String)
+                }
+
             case "blockchain_audit":
                 if (value as? String).isNotNil {
                     self.blockchain_audit = (value as! String)
@@ -203,7 +223,15 @@ public class Ledger: PostgresStORM {
         if self.customer_code.isNotNil {
             dictionary.ledgerDic.customer_code = self.customer_code
         }
-        
+
+        if self.wallet_entry.isNotNil {
+            dictionary.ledgerDic.wallet_entry = self.wallet_entry
+        }
+
+        if self.wallet_bucket_user_id.isNotNil {
+            dictionary.ledgerDic.wallet_bucket_user_id = self.wallet_bucket_user_id
+        }
+
         if self.blockchain_audit.isNotNil {
             dictionary.ledgerDic.blockchain_audit = self.blockchain_audit
         }
@@ -237,6 +265,14 @@ public class Ledger: PostgresStORM {
         }
         
         if diff == true, self.customer_code != targetItem.customer_code {
+            diff = false
+        }
+        
+        if diff == true, self.wallet_bucket_user_id != targetItem.wallet_bucket_user_id {
+            diff = false
+        }
+        
+        if diff == true, self.wallet_entry != targetItem.wallet_entry {
             diff = false
         }
         

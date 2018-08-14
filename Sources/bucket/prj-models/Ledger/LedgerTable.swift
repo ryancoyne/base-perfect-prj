@@ -105,6 +105,8 @@ final class LedgerTable {
         createsql.append("debit  numeric(10,5) default 0, ")
         createsql.append("credit numeric(10,5) default 0, ")
         createsql.append("customer_code text COLLATE pg_catalog.default, ")
+        createsql.append("wallet_entry boolean default FALSE, ")
+        createsql.append("wallet_bucket_user_id text COLLATE pg_catalog.default, ")
         createsql.append("blockchain_audit text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
         

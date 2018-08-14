@@ -61,6 +61,32 @@ struct LedgerDictionary {
         }
     }
     
+    var wallet_entry : Bool? {
+        get {
+            return self.dic["wallet_entry"].boolValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["wallet_entry"] = newValue.boolValue
+            } else {
+                self.dic.removeValue(forKey: "wallet_entry")
+            }
+        }
+    }
+    
+    var wallet_bucket_user_id : String? {
+        get {
+            return self.dic["wallet_bucket_user_id"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["wallet_bucket_user_id"] = newValue.stringValue
+            } else {
+                self.dic.removeValue(forKey: "wallet_bucket_user_id")
+            }
+        }
+    }
+    
     var credit : Double? {
         get {
             return self.dic["credit"].doubleValue
