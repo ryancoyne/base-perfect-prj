@@ -26,6 +26,7 @@ public class Ledger: PostgresStORM {
     var credit                : Double? = nil
     var debit                 : Double? = nil
     var wallet_entry          : Bool? = nil
+    var code_country_id       : Int? = nil
     var wallet_bucket_user_id : String? = nil
     var customer_code         : String? = nil
     var blockchain_audit      : String? = nil
@@ -85,10 +86,14 @@ public class Ledger: PostgresStORM {
             customer_code = data
         }
 
+        if let data = this.data.ledgerDic.code_country_id {
+            code_country_id = data
+        }
+
         if let data = this.data.ledgerDic.wallet_entry {
             wallet_entry = data
         }
-
+        
         if let data = this.data.ledgerDic.wallet_bucket_user_id {
             wallet_bucket_user_id = data
         }
@@ -147,6 +152,11 @@ public class Ledger: PostgresStORM {
             case "wallet_entry":
                 if (value as? Bool).isNotNil {
                     self.wallet_entry = (value as! Bool)
+                }
+
+            case "code_country_id":
+                if (value as? Int).isNotNil {
+                    self.code_country_id = (value as! Int)
                 }
 
             case "wallet_bucket_user_id":
@@ -224,6 +234,10 @@ public class Ledger: PostgresStORM {
             dictionary.ledgerDic.customer_code = self.customer_code
         }
 
+        if self.code_country_id.isNotNil {
+            dictionary.ledgerDic.code_country_id = self.code_country_id
+        }
+
         if self.wallet_entry.isNotNil {
             dictionary.ledgerDic.wallet_entry = self.wallet_entry
         }
@@ -267,7 +281,11 @@ public class Ledger: PostgresStORM {
         if diff == true, self.customer_code != targetItem.customer_code {
             diff = false
         }
-        
+
+        if diff == true, self.code_country_id != targetItem.code_country_id {
+            diff = false
+        }
+
         if diff == true, self.wallet_bucket_user_id != targetItem.wallet_bucket_user_id {
             diff = false
         }

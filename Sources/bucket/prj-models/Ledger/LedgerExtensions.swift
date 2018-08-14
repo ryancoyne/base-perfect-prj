@@ -74,6 +74,19 @@ struct LedgerDictionary {
         }
     }
     
+    var code_country_id : Int? {
+        get {
+            return self.dic["code_country_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["code_country_id"] = newValue.intValue
+            } else {
+                self.dic.removeValue(forKey: "code_country_id")
+            }
+        }
+    }
+    
     var wallet_bucket_user_id : String? {
         get {
             return self.dic["wallet_bucket_user_id"].stringValue
