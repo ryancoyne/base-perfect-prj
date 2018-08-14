@@ -1257,5 +1257,4 @@ extension Account {
             print(error)
         }
     }
-    
 }
