@@ -353,8 +353,9 @@ final class PRJDBTables {
             InitializeData.sharedInstance.addLedgerAccountTypes()
             InitializeData.sharedInstance.addLedgerAccounts()
 
-//            InitializeData.sharedInstance.addCashoutGroup()
-//            InitializeData.sharedInstance.addCashoutOption()
+            InitializeData.sharedInstance.addCashoutGroup()
+            InitializeData.sharedInstance.addCashoutOption()
+
         } catch {
             print(error)
         }
