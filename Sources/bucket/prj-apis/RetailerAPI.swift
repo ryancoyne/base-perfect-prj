@@ -236,6 +236,10 @@ struct RetailerAPI {
                         let terminal = Terminal()
                         try? terminal.find(["serial_number":request.terminalId!])
                         
+                        // lets get the country id for this transaction
+                        let add = Address()
+                        try? add.find(["id":terminal.address_id!])
+                        
                         let transaction = CodeTransaction()
                         transaction.created = Int(Date().timeIntervalSince1970)
                         transaction.amount = json?["amount"].doubleValue
@@ -246,6 +250,9 @@ struct RetailerAPI {
                         transaction.retailer_id = retailer.id
                         transaction.customer_code = json?["customerCode"].stringValue
                         transaction.customer_codeurl = json?["qrCodeContent"].stringValue
+                        if let cc = add.country_id {
+                            transaction.country_id = cc
+                        }
                         
                         // Save the transaction
                         let _ = try? transaction.saveWithCustomType(CCXDefaultUserValues.user_server)
@@ -304,6 +311,12 @@ fileprivate extension HTTPResponse {
             .setBody(json: ["errorCode":"NoTerminalId", "message":"You must send in a 'terminalId' key with the serial number of the device as the value."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .unauthorized)
+    }
+    var noLocationTerminal : Void {
+        return try! self
+            .setBody(json: ["errorCode":"NoTerminalLocation", "message":"You must set the location for the terminal before using the terminal.  Set the location on your retailer portal."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 460, message: "No Terminal Location"))
     }
     var serverEnvironmentError : Void {
         return try! self
@@ -401,6 +414,7 @@ extension Retailer {
         //  1. The terminal is not registered
         //  2. The terminal is not active
         //  3. The terminal is not for this retailer
+        //  4. The terminal is not assigned to an address
         
         // this means the terminal number is invalid - RETURN the appropriate error code
         if terminalQuery.id.isNil { response.unauthorizedTerminal; return true }
@@ -408,6 +422,9 @@ extension Retailer {
         // this means the terminal is not approved
         if !terminalQuery.is_approved { response.unauthorizedTerminal; return true }
         
+        // and finally - make sure there is an address assigned to this terminal
+        if terminalQuery.address_id.isNil || terminalQuery.address_id == 0 { response.noLocationTerminal; return true }
+
         // Checking the final condition (last condition to minimize the number of queries during error)
         let retailerQuery = Retailer()
         try? retailerQuery.find(["retailer_code":retailerId])
