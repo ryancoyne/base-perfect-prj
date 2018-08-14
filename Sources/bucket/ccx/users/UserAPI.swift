@@ -33,8 +33,8 @@ struct UserAPI {
                     ["method":"post",   "uri":"/api/v1/forgotpassword", "handler":forgotPassword],
                     ["method":"post",   "uri":"/api/v1/user/update", "handler":updateProfile],
                     ["method":"post",   "uri":"/api/v1/user/upload", "handler":uploadPicture],
-                    ["method":"post",   "uri":"/api/v1/changepassword", "handler":changePassword],
-                    ["method":"post",   "uri":"/api/v1/check", "handler":checkEmailOrUsername]
+                    ["method":"post",   "uri":"/api/v1/changepassword", "handler":changePassword]
+//                    ["method":"post",   "uri":"/api/v1/check", "handler":checkEmailOrUsername]
             ]
         }
         //MARK: - Logout
@@ -135,15 +135,15 @@ struct UserAPI {
                 request, response in
                 if let s = request.session?.userid, !s.isEmpty {
                     try? response.setBody(json: ["error" : "You are already logged in."])
-                        .setHeader(.contentType, value: "application/json")
-                        .completed(status: .ok)
+                                            .setHeader(.contentType, value: "application/json")
+                                            .completed(status: .ok)
                     return
                 }
                 if let postBody = request.postBodyString, !postBody.isEmpty {
                     do {
                         let postBodyJSON = try postBody.jsonDecode() as? [String: String] ?? [String: String]()
-                        if let u = postBodyJSON["username"], !u.isEmpty,
-                            let e = postBodyJSON["email"], !e.isEmpty {
+                        if let e = postBodyJSON["email"], !e.isEmpty {
+                            let u = postBodyJSON["username"].stringValue ?? ""
                             let err = Account.register(u.lowercased(), e, .provisional, baseURL: AuthenticationVariables.baseURL)
                             if err != .noError {
                                 LocalAuthHandlers.error(request, response, error: "Registration Error: \(err)", code: .badRequest)
@@ -167,7 +167,6 @@ struct UserAPI {
                                 }
                                 
                                 var retDict:[String:Any] = [:]
-                                retDict["result"] = "success"
                                 retDict["message"] = "Check your email for an email from us. It contains instructions to complete your signup!"
                                 
                                 // add in the return values for the user connections
