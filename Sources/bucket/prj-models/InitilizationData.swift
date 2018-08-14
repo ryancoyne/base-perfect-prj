@@ -22,6 +22,53 @@ final class InitializeData {
     
     static let sharedInstance = InitializeData()
     
+    func addLedgerAccountTypes() {
+        let tbl = LedgerAccountType()
+        
+        let created_time = Int(Date().timeIntervalSince1970)
+
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby,group,title,description) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Code', 'Code Creation', 'Customer Code Creation'), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Code', 'Code Void', 'Customer Code Void'), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','CashOut', 'Cashout','Customer Cashout') ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Note', 'Note On Account','Note on a customer account') ")
+
+        _ = try? tbl.sqlRows(checkuser, params: [])
+
+    }
+    
+    func addLedgerTypes() {
+        let tbl = LedgerType()
+        
+        let created_time = Int(Date().timeIntervalSince1970)
+        
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby,title,description) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Liability', 'Liability Type Account'), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Asset', 'Asset Type Account'), ")
+
+        _ = try? tbl.sqlRows(checkuser, params: [])
+
+    }
+    
+    func addLedgerAccounts() {
+        
+        let tbl = LedgerAccount()
+        
+        let created_time = Int(Date().timeIntervalSince1970)
+        
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby,ledger_account_type_id,title,description) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)',1,'Code Creation', 'Customer Code Creation'), ")
+        
+        _ = try? tbl.sqlRows(checkuser, params: [])
+        
+    }
+    
     func addPOS() {
         let tbl = POS()
 
