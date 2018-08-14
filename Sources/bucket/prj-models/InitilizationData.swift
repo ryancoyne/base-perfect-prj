@@ -115,8 +115,8 @@ final class InitializeData {
         var checkuser = "INSERT INTO \(tbl.table()) "
         checkuser.append("(created, createdby, name,description) ")
         checkuser.append(" VALUES ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Open Loop Gift Card','This card allows users to purchase anything using the giftcard.'), ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Closed Loop Gift Card','This card allows users to purchase from specific retailers using the giftcard.'), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.'), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.'), ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.'), ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.')")
         
