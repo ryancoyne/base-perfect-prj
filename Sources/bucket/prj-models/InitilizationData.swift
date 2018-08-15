@@ -108,39 +108,235 @@ final class InitializeData {
     
     func addCashoutGroup() {
         
-//        let tbl = CashoutGroup()
-//
-//        let created_time = Int(Date().timeIntervalSince1970)
-//
-//        var checkuser = "INSERT INTO \(tbl.table()) "
-//        checkuser.append("(created, createdby, group_name,description, country_id) ")
-//        checkuser.append(" VALUES ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', 1), ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.'), ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.'), ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.')")
-//
-//        print("Adding user: \(checkuser)")
-//        _ = try? tbl.sqlRows(checkuser, params: [])
+        let usa = Country()
+        try? usa.find(["code_alpha_2":"US"])
+        
+        let singapore = Country()
+        try? singapore.find(["code_alpha_2":"SG"])
+        
+        let tbl = CashoutGroup()
+
+        let created_time = Int(Date().timeIntervalSince1970)
+
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby, group_name,description, country_id, picture_url, display_order) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', \(usa.id!),'', 1), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.', \(usa.id!),'',2), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.', \(usa.id!),'',3), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),'',4),")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','TopUp','', \(singapore.id!),'',1),")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),'',2), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','', \(singapore.id!),'',3)")
+
+        print("Adding cashout groups: \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
         
     }
 
     func addCashoutOption() {
+
+        let created_time = Int(Date().timeIntervalSince1970)
         
-//        let tbl = CashoutOption()
-//        
-//        let created_time = Int(Date().timeIntervalSince1970)
-//        
-//        var checkuser = "INSERT INTO \(tbl.table()) "
-//        checkuser.append("(created, createdby, group_name,description, country_id) ")
-//        checkuser.append(" VALUES ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', 1), ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.'), ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.'), ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.')")
-//        
-//        print("Adding user: \(checkuser)")
-//        _ = try? tbl.sqlRows(checkuser, params: [])
+        let usa = Country()
+        try? usa.find(["code_alpha_2":"US"])
+        
+        let singapore = Country()
+        try? singapore.find(["code_alpha_2":"SG"])
+
+        let usa_cg = CashoutGroup()
+        
+        var ussql = ""
+        let uscg = try? usa_cg.sqlRows("SELECT * FROM cashout_group WHERE country_id = \(usa.id!) ORDER BY display_order DESC ", params: [])
+        for i in uscg! {
+            switch i.data.cashoutGroupDic.group_name {
+            case "Prepaid Card":
+                // card 1
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
+                ussql.append("'Visa',")
+                ussql.append("'https://visa.com', ")
+                ussql.append("'The VISA prepaid card may be used anywhere online!', ")
+                ussql.append("'Come join the VISA family and use this card worldwide!', ")
+                ussql.append("'https://usa.visa.com/content/dam/VCOM/nav-assets/logo.png', ")
+                ussql.append("50.00,0),")
+                // card 2
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 2, ")
+                ussql.append("'MasterCard',")
+                ussql.append("'https://mastercard.com', ")
+                ussql.append("'The MasterCard prepaid card may be used anywhere online!', ")
+                ussql.append("'Come join the MasterCard family and use this card worldwide!', ")
+                ussql.append("'https://www.mastercard.us/etc/designs/mccom/en-us/jcr:content/global/logo.img.png/1472151229727.png', ")
+                ussql.append("50.00,0),")
+                break
+            case "Gift Card":
+                // card 1
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
+                ussql.append("'Amazon',")
+                ussql.append("'https://amazon.com',")
+                ussql.append("'Amazon holds the world at your fingertips.',")
+                ussql.append("'Amazon is the largest onine retailer in the world.  Use your Amazon card here!',")
+                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/5360.jpg',")
+                ussql.append("50.00,0),")
+                // card 2
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 2, ")
+                ussql.append("'Target',")
+                ussql.append("'https://target.com',")
+                ussql.append("'Target is the store with the big red dot.',")
+                ussql.append("'Target is a department store with a little bit of everything!',")
+                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/7039.jpg',")
+                ussql.append("50.00,0),")
+                // card 3
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 3, ")
+                ussql.append("'ThinkGeek',")
+                ussql.append("'https://thinkgeek.com',")
+                ussql.append("'Fun things for geeks',")
+                ussql.append("'Want to buy an amazing gift for a geek?  Get it here!',")
+                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/81112.png',")
+                ussql.append("50.00,0),")
+                // card 4
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 4, ")
+                ussql.append("'Whole Foods',")
+                ussql.append("'https://wholefoods.com',")
+                ussql.append("'Want good food?',")
+                ussql.append("'Whole Foods provides a wholistic approach to feed.',")
+                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/82068.png',")
+                ussql.append("50.00,0),")
+                // card 5
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 5, ")
+                ussql.append("'The Cheesecake Factory',")
+                ussql.append("'https://www.thecheesecakefactory.com',")
+                ussql.append("'Want Cheesecake?',")
+                ussql.append("'The Cheesecake Factory creates cheesecake masterpieces!',")
+                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/6230.jpg',")
+                ussql.append("50.00,0),")
+                // card 6
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
+                ussql.append("'Ruby Tuesday',")
+                ussql.append("'https://www.rubytuesday.com',")
+                ussql.append("'Eat here!',")
+                ussql.append("'Hungry on Tuesday?  Come here and join us for dinner.',")
+                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/81244.png',")
+                ussql.append("50.00,0),")
+
+                break
+            case "Donate":
+                // card 1
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
+                ussql.append("'Heifer International',")
+                ussql.append("'www.heifer.org',")
+                ussql.append("'Heifer International works with communities to create income, empower women, care for the Earth, and ultimately end world hunger and poverty',")
+                ussql.append("'Heifer International’s mission is to end hunger and poverty while caring for the Earth. For more than 70 years, we have provided livestock and environmentally sound agricultural training to improve the lives of those who struggle daily for reliable sources of food and income. We currently work in 25 countries, including the United States, to help families and communities become self-reliant.',")
+                ussql.append("'heifer_small.png',")
+                ussql.append("50.00,0),")
+                // card 2
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 2, ")
+                ussql.append("'Boys and Girls Club of Fayetteville',")
+                ussql.append("'www.fayettevillekids.org',")
+                ussql.append("'We are a resource for families to improve the quality of their lives through the development of youth in a safe environment.',")
+                ussql.append("'The Donald W. Reynolds Boys & Girls Club is a non-profit 501 (C)(3) organization currently serving over 10,000 community members per year through memberships, special events, facility reservations and drop-in business. Formerly known as the Fayetteville Youth Center, the Club over 75 years of service to youth and families in the local community.',")
+                ussql.append("'bgca-fayetteville_small.png',")
+                ussql.append("50.00,0),")
+                // card 3
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 3, ")
+                ussql.append("'CASA of Northwest Arkansas',")
+                ussql.append("'www.nwacasa.org',")
+                ussql.append("'Court Appointed Special Advocates of Northwest Arkansas provides compassionate volunteers who advocate for abused and neglected children.',")
+                ussql.append("'In essence, Court Appointed Special Advocates of Northwest Arkansas recruits, trains, and supervises volunteers who provide one-on-one advocacy for abused children and their families. Our CASA volunteers assist children by stabilizing their lives and moving them through the foster care system. CASAs are responsible for assessing the needs of the victims, making referrals for services (counseling, speech/occupational/physical therapy, educational interventions, medical and dental care) and making sure the emotional and physical needs of children are being met while in care.',")
+                ussql.append("'casa-small.png',")
+                ussql.append("50.00,0),")
+                // card 4
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 4, ")
+                ussql.append("'Dress for Success of NW Arkansas',")
+                ussql.append("'www.dfsnwa.org',")
+                ussql.append("'Dress for Success Northwest Arkansas helps empower women toward economic independence by providing a network of support, professional attire, and programs that help them thrive in work and in life.',")
+                ussql.append("'Dress for Success Northwest Arkansas helps empower women toward economic independence by providing a network of support, professional attire, and programs that help her secure employment, retain her job, grow her career, provide for her family and improve their lives.  We offer long-lasting solutions the enable women to break the cycle of poverty.',")
+                ussql.append("'dress%20for%20success_small.png',")
+                ussql.append("50.00,0),")
+                // card 5
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 5, ")
+                ussql.append("'KUAF',")
+                ussql.append("'kuaf.com',")
+                ussql.append("'KUAF 91.3 FM is northwest and Western Arkansas’ NPR affiliate and listener-supported radio station. We serve a 14-county area, with a population of 600,000, with NPR news programming.',")
+                ussql.append("'KUAF is northwest and western Arkansas’ NPR affiliate and listener-supported radio station. Owned by the University of Arkansas, KUAF has grown from “The 10-Watt Wonder” in 1973 to the 100,000-watt station it is today. We’ve been this area’s NPR affiliate for 33 years and have changed and grown along with the region, while also holding tight to our roots. We serve a 14-county area, with a population of 600,000, with NPR news programming - news that is highly-researched and vetted and is presented with insight and civil conversation. In today’s political climate, this kind of news programming is more important now than ever before. But more than just news, KUAF is unique in our area as the sole public radio station – and is unique in the breadth and variety of local programming offered. KUAF produces or airs 10 locally-produced programs! Very few other stations of this size produce this much local content – from the Community Spotlight Series with Pete Hartman to local news casts every morning to our daily, news magazine Ozarks at Large,hosted by Kyle Kellams. With the explosive growth in population of our area, KUAF aims to serve not just as a source for news and entertainment, but also as an anchor and introduction to the culture of our region. From The Pickin’ Post, The Generic Blues Show, and Shades of Jazz, plus the hundreds of local events featured in public service announcements and performances of local favorites in the Firmin-Garner performance studio, KUAF reflects the community it serves. We have heard from many listeners new to the area, that listening to KUAF helped them get a better understanding of their new home – from the local news to cultural coverage to the spirit of philanthropy that makes Northwest Arkansas so outstanding.',")
+                ussql.append("'kuaf-small.png',")
+                ussql.append("50.00,0),")
+                // card 6
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
+                ussql.append("'Kendrick Fincher Foundation',")
+                ussql.append("'kendrickfincher.org',")
+                ussql.append("'Mission: Promote proper hydration and prevent heat illness through education and supporting activities. Vision: Expand national awareness and education to save lives.',")
+                ussql.append("'Mission: Promote proper hydration and prevent heat illness through  education and supporting activities.  Vision: Expand national awareness and education to save lives.  Education and Supporting Activities: Be Smart. BeeHydrated! - Presentations to school aged children on the importance of proper hydration Beat the Heat - Presentations to athletes, coaches and parents on proper hydration and heat illness prevention Distribution of squeeze bottles and educational pamphlets to support our educational presentations Representation at health fairs to educate the public about our mission and activities Community involvement in support of our mission by providing “cool huts”—misting tents with free ice water—at various outdoor public events. Annual youth run in Rogers, AR, to reinforce our mission and help children and the community learn about the importance of proper hydration and physical fitness in a fun environment. Partnerships with other sports injury prevention and wellness organizations Web presence that allows for regional and national reach Developing education programs for all ages including senior adults and industrial workforce',")
+                ussql.append("'kendrick%20fincher_small.png',")
+                ussql.append("50.00,0),")
+
+                break
+            case "Bucket Coin":
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
+                ussql.append("'Bucket Coin',")
+                ussql.append("'https://buckettechnologies.com',")
+                ussql.append("'BUX: Our Crypto Coin',")
+                ussql.append("'Jump into the Crypto world!  Buy you BUX today.',")
+                ussql.append("'',")
+                ussql.append("50.00,0),")
+                break
+            default:
+                break
+
+            }
+        }
+        
+        let sgcg = try? usa_cg.sqlRows("SELECT * FROM cashout_group WHERE country_id = \(singapore.id!) ORDER BY display_order DESC ", params: [])
+        for i in sgcg! {
+            switch i.data.cashoutGroupDic.group_name {
+            case "TopUp":
+                // card 1
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
+                ussql.append("'TopUp',")
+                ussql.append("'https://www.ezetop.com/countries/asia/singapore',")
+                ussql.append("'TopUp',")
+                ussql.append("'TopUp Your Account',")
+                ussql.append("'',")
+                ussql.append("50.00,0),")
+                break
+            case "Donate":
+                // card 1
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
+                ussql.append("'Donate',")
+                ussql.append("'',")
+                ussql.append("'Donate to the cause',")
+                ussql.append("'Help make the community strong and tdonate today!',")
+                ussql.append("'',")
+                ussql.append("50.00,0),")
+                break
+            case "Bucket Coin":
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
+                ussql.append("'Bucket Coin',")
+                ussql.append("'https://buckettechnologies.com',")
+                ussql.append("'BUX: Our Crypto Coin',")
+                ussql.append("'Jump into the Crypto world!  Buy you BUX today.',")
+                ussql.append("'',")
+                ussql.append("50.00,0),")
+                break
+            default:
+                break
+                
+            }
+        }
+        
+        // remove the last comma from the groups
+        ussql.removeLast()
+        
+        let tbl = CashoutOption()
+        
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby, group_id, form_id, display_order, ")
+        checkuser.append("name, website, description, long_description, pictureurl, ")
+        checkuser.append("minimum, maximum) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(ussql)
+        
+        print("Adding cashout options: \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
         
     }
 
