@@ -1612,6 +1612,12 @@ extension Int {
 }
 //MARK: - Account Extensions
 extension Account {
+    
+    static func userBouce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {
+        guard request.session?.userid.isEmpty == false else { response.notLoggedIn(); return true }
+        return false
+    }
+    
     struct exists {
         struct with {
             static func username(_ value : String) -> Bool {
