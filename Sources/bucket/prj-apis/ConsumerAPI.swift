@@ -221,7 +221,7 @@ struct ConsumerAPI {
             }
         }
         
-        //MARK: - Cashout Type:
+        //MARK: - Cashout:
         public static func cashout(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in

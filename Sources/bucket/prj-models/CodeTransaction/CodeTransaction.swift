@@ -36,7 +36,9 @@ public class CodeTransaction: PostgresStORM {
     var disputedby : String? = nil
     var redeemed : Int? = nil
     var redeemedby : String? = nil
-    
+    var cashedout : Int? = nil
+    var cashedoutby : String? = nil
+
     //MARK: Table name
     override public func table() -> String { return "code_transaction" }
     
@@ -69,6 +71,14 @@ public class CodeTransaction: PostgresStORM {
         
         if let data = this.data.deletedBy {
             deletedby = data
+        }
+
+        if let data = this.data.codeTransactionDic.cashedoutBy {
+            cashedoutby = data
+        }
+
+        if let data = this.data.codeTransactionDic.cashedout {
+            cashedout = data
         }
         
         if let data = this.data.codeTransactionDic.countryId {
@@ -214,7 +224,17 @@ public class CodeTransaction: PostgresStORM {
                 if (value as? Int).isNotNil {
                     self.disputed = (value as! Int)
                 }
+
+            case "cashedout_by":
+                if (value as? String).isNotNil {
+                    self.cashedoutby = (value as! String)
+                }
                 
+            case "cashedout":
+                if (value as? Int).isNotNil {
+                    self.cashedout = (value as! Int)
+                }
+
             default:
                 print("This should not occur")
             }
@@ -253,6 +273,14 @@ public class CodeTransaction: PostgresStORM {
         
         if self.deletedby.isNotNil {
             dictionary.deletedBy = self.deletedby
+        }
+        
+        if self.cashedout.isNotNil {
+            dictionary.codeTransactionDic.cashedout = self.cashedout
+        }
+        
+        if self.cashedoutby.isNotNil {
+            dictionary.codeTransactionDic.cashedoutBy = self.cashedoutby
         }
         
         if self.country_id.isNotNil {
@@ -389,6 +417,14 @@ public class CodeTransaction: PostgresStORM {
             diff = false
         }
         
+        if diff == true, self.cashedout != targetItem.cashedout {
+            diff = false
+        }
+        
+        if diff == true, self.cashedoutby != targetItem.cashedoutby {
+            diff = false
+        }
+        
         return diff
         
     }
@@ -408,12 +444,14 @@ public class CodeTransaction: PostgresStORM {
         cth.fromDictionary(sourceDictionary: recdict)
 
         // add the base audit information
-        cth.created    = self.created
-        cth.createdby  = self.createdby
-        cth.modified   = self.modified
-        cth.modifiedby = self.modifiedby
-        cth.deleted    = self.deleted
-        cth.deletedby  = self.deletedby
+        cth.created     = self.created
+        cth.createdby   = self.createdby
+        cth.modified    = self.modified
+        cth.modifiedby  = self.modifiedby
+        cth.deleted     = self.deleted
+        cth.deletedby   = self.deletedby
+        cth.cashedout   = self.cashedout
+        cth.cashedoutby = self.cashedoutby
 
         // add the archive audit info
         cth.archived = CCXServiceClass.sharedInstance.getNow()

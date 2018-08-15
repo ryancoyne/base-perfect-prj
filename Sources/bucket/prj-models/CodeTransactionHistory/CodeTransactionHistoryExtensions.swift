@@ -158,7 +158,31 @@ struct CodeTransactionHistoryDictionary {
         }
     }
 
-    
+    var cashedout : Int? {
+        get {
+            return self.dic["cashedout"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["cashedout"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "cashedout")
+            }
+        }
+    }
+    var cashedoutBy : String? {
+        get {
+            return self.dic["cashedoutby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["cashedoutby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "cashedoutby")
+            }
+        }
+    }
+
     var retailerId : Int? {
         get {
             return self.dic["retailer_id"].intValue

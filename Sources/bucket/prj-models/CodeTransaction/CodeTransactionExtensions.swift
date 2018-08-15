@@ -95,6 +95,31 @@ struct CodeTransactionDictionary {
             }
         }
     }
+    var cashedout : Int? {
+        get {
+            return self.dic["cashedout"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["cashedout"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "cashedout")
+            }
+        }
+    }
+    var cashedoutBy : String? {
+        get {
+            return self.dic["cashedby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["cashedby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "cashedby")
+            }
+        }
+    }
+
     var redeemed : Int? {
         get {
             return self.dic["redeemed"].intValue

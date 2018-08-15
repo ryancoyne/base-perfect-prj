@@ -40,7 +40,9 @@ public class CodeTransactionHistory: PostgresStORM {
     var disputedby : String? = nil
     var redeemed : Int? = nil
     var redeemedby : String? = nil
-    
+    var cashedout : Int? = nil
+    var cashedoutby : String? = nil
+
     //MARK: Table name
     override public func table() -> String { return "code_transaction_history" }
     
@@ -75,7 +77,14 @@ public class CodeTransactionHistory: PostgresStORM {
             deletedby = data
         }
 
+        if let data = this.data.codeTransactionHistoryDic.cashedoutBy {
+            cashedoutby = data
+        }
         
+        if let data = this.data.codeTransactionHistoryDic.cashedout {
+            cashedout = data
+        }
+
         if let data = this.data.codeTransactionHistoryDic.archived.intValue {
             archived = data
         }
@@ -237,7 +246,17 @@ public class CodeTransactionHistory: PostgresStORM {
                 if (value as? Int).isNotNil {
                     self.disputed = (value as! Int)
                 }
+
+            case "cashedout_by":
+                if (value as? String).isNotNil {
+                    self.cashedoutby = (value as! String)
+                }
                 
+            case "cashedout":
+                if (value as? Int).isNotNil {
+                    self.cashedout = (value as! Int)
+                }
+
             default:
                 print("This should not occur")
             }
@@ -277,16 +296,22 @@ public class CodeTransactionHistory: PostgresStORM {
         if self.deletedby.isNotNil {
             dictionary.deletedBy = self.deletedby
         }
-
         
         if self.archived.isNotNil {
             dictionary.codeTransactionHistoryDic.archived = self.archived
         }
         
+        if self.cashedoutby.isNotNil {
+            dictionary.codeTransactionHistoryDic.cashedoutBy = self.cashedoutby
+        }
+
+        if self.cashedout.isNotNil {
+            dictionary.codeTransactionHistoryDic.cashedout = self.cashedout
+        }
+        
         if self.archivedby.isNotNil {
             dictionary.codeTransactionHistoryDic.archivedBy = self.archivedby
         }
-
         
         if self.code_transaction_id.isNotNil {
             dictionary.codeTransactionHistoryDic.codeTransactionId = self.code_transaction_id
@@ -411,7 +436,15 @@ public class CodeTransactionHistory: PostgresStORM {
         if diff == true, self.terminal_id != targetItem.terminal_id {
             diff = false
         }
+
+        if diff == true, self.cashedout != targetItem.cashedout {
+            diff = false
+        }
         
+        if diff == true, self.cashedoutby != targetItem.cashedoutby {
+            diff = false
+        }
+
         return diff
         
     }
