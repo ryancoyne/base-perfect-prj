@@ -61,13 +61,13 @@ struct UserAPI {
                     
                     _ = try? response.setBody(json: ["errorCode":"NoAuth", "message":"You need to be logged in to logout."])
                                                  .setHeader(.contentType, value: "application/json")
-                                                 .completed(status: .ok)
+                                                 .completed(status: .forbidden)
                     
                 } else {
                     
                     _ = try? response.setBody(json: ["errorCode":"NoUserOrToken", "message":"You need to be logged in to logout."])
                                                  .setHeader(.contentType, value: "application/json")
-                                                 .completed(status: .ok)
+                                                 .completed(status: .forbidden)
                     
                 }
             }
@@ -81,51 +81,53 @@ struct UserAPI {
                         .setHeader(.contentType, value: "application/json")
                         .completed(status: .ok)
                 }
-                if let data = try? request.postBodyString?.jsonDecode() as? [String:Any] {
-                    if let data = data {
-                        if let password = data["password"].stringValue, let username = data["username"].stringValue?.lowercased() {
+                
+                do {
+                    
+                    let json = try request.postBodyJSON()!
+                    if let password = json["password"].stringValue, let username = json["username"].stringValue?.lowercased() {
+                        
+                        if let acc = try? Account.login(username, password) {
                             
-                            if let acc = try? Account.login(username, password) {
-                                
-                                request.session?.userid = acc.id
-                                try? response.setBody(json: acc.asDictionary)
-                                    .setHeader(.contentType, value: "application/json")
-                                    .completed(status: .ok)
-                                
-                            } else {
-                                // Failed on login
-                                try? response.setBody(json: ["error":"Unable to log in."])
-                                    .setHeader(.contentType, value: "application/json")
-                                    .completed(status: .forbidden)
-                            }
-                        } else if let email = data["email"].stringValue, let password = data["password"].stringValue {
-                            // Okay they are attempting an email/password login:
+                            request.session?.userid = acc.id
+                            try? response.setBody(json: acc.asDictionary)
+                                .setHeader(.contentType, value: "application/json")
+                                .completed(status: .ok)
                             
-                            if let acc = try? Account.loginWithEmail(email, password) {
-                                
-                                request.session?.userid = acc.id
-                                
-                                try? response.setBody(json: acc.asDictionary)
-                                    .setHeader(.contentType, value: "application/json")
-                                    .completed(status: .ok)
-                                
-                            } else {
-                                // Failed on login
-                                try? response.setBody(json: ["error":"Unable to log in."])
-                                    .setHeader(.contentType, value: "application/json")
-                                    .completed(status: .forbidden)
-                            }
+                        } else {
+                            // Failed on login
+                            try? response.setBody(json: ["error":"Please check your username and password."])
+                                .setHeader(.contentType, value: "application/json")
+                                .completed(status: .forbidden)
+                        }
+                    } else if let email = json["email"].stringValue, let password = json["password"].stringValue {
+                        // Okay they are attempting an email/password login:
+                        
+                        if let acc = try? Account.loginWithEmail(email, password) {
+                            
+                            request.session?.userid = acc.id
+                            
+                            try? response.setBody(json: acc.asDictionary)
+                                .setHeader(.contentType, value: "application/json")
+                                .completed(status: .ok)
+                            
+                        } else {
+                            // Failed on login
+                            try? response.setBody(json: ["error":"Please check your email and password."])
+                                .setHeader(.contentType, value: "application/json")
+                                .completed(status: .forbidden)
                         }
                     } else {
-                        try? response.setBody(json: ["error":"Unable to cast decoded json to [String:Any]."])
+                        try? response.setBody(json: ["error":"Please send in 'email' || 'username' along with 'password'.'"])
                             .setHeader(.contentType, value: "application/json")
-                            .completed(status: .badRequest)
+                            .completed(status: .forbidden)
                     }
-                } else {
-                    // Encoding failed:
-                    try? response.setBody(json: ["error":"Unable to decode json."])
+                } catch BucketAPIError.unparceableJSON(let jsonString) {
+                    return response.invalidRequest(jsonString)
+                } catch {
+                    try? response.setBody(json: ["error":error.localizedDescription])
                         .setHeader(.contentType, value: "application/json")
-                        .completed(status: .badRequest)
+                        .completed(status: .internalServerError)
                 }
             }
         }
@@ -133,62 +135,49 @@ struct UserAPI {
         public static func register(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                if let s = request.session?.userid, !s.isEmpty {
-                    try? response.setBody(json: ["error" : "You are already logged in."])
-                                            .setHeader(.contentType, value: "application/json")
-                                            .completed(status: .ok)
-                    return
-                }
-                if let postBody = request.postBodyString, !postBody.isEmpty {
-                    do {
-                        let postBodyJSON = try postBody.jsonDecode() as? [String: String] ?? [String: String]()
-                        if let e = postBodyJSON["email"], !e.isEmpty {
-                            let u = postBodyJSON["username"].stringValue ?? ""
-                            let err = Account.register(u.lowercased(), e, .provisional, baseURL: AuthenticationVariables.baseURL)
-                            if err != .noError {
-                                LocalAuthHandlers.error(request, response, error: "Registration Error: \(err)", code: .badRequest)
-                                return
-                            } else {
-                                
-                                // success!
-                                // pull the user
-                                let thenewuser = Account()
-                                let tnu = try? thenewuser.sqlRows("SELECT id FROM account WHERE email = '\(e)'", params: [])
-                                
-                                let newuser_id = tnu?.first?.data["id"].stringValue
-                                
-                                var userret:[String:Any] = [:]
-                                
-                                if newuser_id.isNotNil {
-                                    try? thenewuser.get(newuser_id!)
-                                    // call the just created section
-                                    userret = UserAPI.UserSuccessfullyCreated(thenewuser)
-                                    
-                                }
-                                
-                                var retDict:[String:Any] = [:]
-                                retDict["message"] = "Check your email for an email from us. It contains instructions to complete your signup!"
-                                
-                                // add in the return values for the user connections
-                                for (key,value) in userret {
-                                    retDict[key] = value
-                                }
-
-                                _ = try response.setBody(json: retDict)
-                                response.completed(status: .ok)
-                                return
-                            }
-                        } else {
-                            LocalAuthHandlers.error(request, response, error: "Please supply a username and password", code: .badRequest)
-                            return
+                
+                guard request.session?.userid.isEmpty == true else { return response.alreadyLoggedIn }
+                
+                do {
+                    
+                    let json = try request.postBodyJSON()!
+                    guard !json.isEmpty else { return response.emptyJSONBody }
+                    
+                    // Okay we have json!
+                    guard let email = json["email"].stringValue else { return try! response.setBody(json: ["error":"You need to send at least an email to register."]).completed(status: .badRequest) }
+                    let username = json["username"].stringValue ?? ""
+                    
+                    let err = Account.register(username.lowercased(), email, .provisional, baseURL: AuthenticationVariables.baseURL)
+                    
+                    if err != .noError {
+                        LocalAuthHandlers.error(request, response, error: "Registration Error: \(err)", code: .badRequest)
+                        return
+                    } else {
+                        
+                        // success!
+                        // pull the user
+                        let thenewuser = Account()
+                        try? thenewuser.find(["email": email])
+                        
+                        let userret:[String:Any] = UserAPI.UserSuccessfullyCreated(thenewuser)
+                        
+                        var retDict:[String:Any] = [:]
+                        retDict["message"] = "Check your email for an email from us. It contains instructions to complete your signup!"
+                        
+                        // add in the return values for the user connections
+                        for (key,value) in userret {
+                            retDict[key] = value
                         }
-                    } catch {
-                        LocalAuthHandlers.error(request, response, error: "Invalid JSON", code: .badRequest)
+                        
+                        _ = try response.setBody(json: retDict)
+                        response.completed(status: .ok)
                         return
                     }
-                } else {
-                    LocalAuthHandlers.error(request, response, error: "Registration Error: Insufficient Data", code: .badRequest)
-                    return
+                    
+                } catch BucketAPIError.unparceableJSON(let jsonStr) {
+                    return response.invalidRequest(jsonStr)
+                } catch {
+                    return response.caughtError(error)
                 }
                 
             }
@@ -689,13 +678,12 @@ struct UserAPI {
             return {
                 request, response in
                 
-                let dic = try? request.postBodyString?.jsonDecode() as? [String:Any]
-                
-                if dic.isNotNil {
+                do {
                     
-                    let dic = dic!!
+                    let json = try request.postBodyJSON()!
+                    guard !json.isEmpty else { return response.emptyJSONBody }
                     
-                    if let email = dic["email"].stringValue {
+                    if let email = json["email"].stringValue {
                         
                         // generate the random (with safety net incase there is an issue)
                         let random = [UInt8](randomCount: 16)
@@ -710,14 +698,14 @@ struct UserAPI {
                         if theTry.isNotNil && !account.id.isEmpty {
                             account.passvalidation = secureToken
                         }
-                        
-                        if (!account.id.isEmpty || account.email != email.lowercased()) && (try? account.save()).isNotNil {
+                    
+                        if !account.id.isEmpty, (try? account.save()).isNotNil {
                             
                             // Lets send out the email to reset the password:
                             let h = "<p>To reset your password for your account, please <a href=\"\(baseURL)/verifyAccount/forgotpassword/\(account.passvalidation)\">click here</a></p>"
                             
                             Utility.sendMail(name: account.username, address: email, subject: "Password reset!", html: h, text: "")
-                            try? response.setBody(json: ["response":"success"])
+                            try? response.setBody(json: ["message":"Please check your email to update your forgotten password."])
                                 .setHeader(.contentType, value: "application/json")
                                 .completed(status: .ok)
                             
@@ -725,19 +713,27 @@ struct UserAPI {
                             // Failed to save the passvalidation.
                             try? response.setBody(json: ["error":"Unknown error"])
                                 .setHeader(.contentType, value: "application/json")
-                                .completed(status: .badRequest)
+                                .completed(status: .internalServerError)
                             
                         }
                         
                     } else {
-                        try? response.setBody(json: ["error":"You must send in an email to reset your password."])
+                        
+                        try? response.setBody(json: ["errorCode":"RequiredJSON","message":"You must send in the key 'email'  to reset your password."])
                             .setHeader(.contentType, value: "application/json")
                             .completed(status: .badRequest)
+                        
                     }
                     
-                } else {
+                } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
+                    return response.invalidRequest(invalidJSONString)
                     
-                    response.unableToDecodeJSON()
+                } catch {
+                    // Not sure what error could be thrown here, but the only one we throw right now is if the JSON is unparceable.
+                    // Return some caught error:
+                    try? response.setBody(json: ["error":error.localizedDescription])
+                        .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                        .completed(status: .internalServerError)
                 }
             }
         }

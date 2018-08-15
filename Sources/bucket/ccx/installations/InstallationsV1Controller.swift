@@ -26,148 +26,144 @@ struct InstallationsV1Controller {
             return {
                 request, response in
                 
-                if let json = try? request.postBodyString?.jsonDecode() as? [String:Any] {
-                    if let json = json {
+                do {
+                    let json = try request.postBodyJSON()!
+                    guard !json.isEmpty else { return response.emptyJSONBody }
+                    
+                    // Okay we have json:
+                    let inst = Installation()
+                    var uid: String = ""
+                    
+                    if let session = request.session {
+                        inst.user_id = session.userid
+                        uid = inst.user_id!
+                    }
+                    
+                    if json["id"].intValue.isNotNil {
+                        inst.id = json["id"].intValue!
+                    }
+                    
+                    if json["devicetoken"].stringValue.isNotNil {
+                        inst.devicetoken = json["devicetoken"].stringValue!
+                    }
+                    
+                    if json["devicetype"].stringValue.isNotNil {
+                        inst.devicetype = json["devicetype"].stringValue!
+                    }
+                    
+                    if json["name"].stringValue.isNotNil {
+                        inst.name = json["name"].stringValue!
+                    }
+                    
+                    if json["systemname"].stringValue.isNotNil {
+                        inst.systemname = json["systemname"].stringValue!
+                    }
+                    
+                    if json["systemversion"].stringValue.isNotNil {
+                        inst.systemversion = json["systemversion"].stringValue!
+                    }
+                    
+                    if json["model"].stringValue.isNotNil {
+                        inst.model = json["model"].stringValue!
+                    }
+                    
+                    if json["localizedmodel"].stringValue.isNotNil {
+                        inst.localizedmodel = json["localizedmodel"].stringValue!
+                    }
+                    
+                    if json["identifierforvendor"].stringValue.isNotNil {
+                        inst.identifierforvendor = json["identifierforvendor"].stringValue!
+                    }
+                    
+                    if json["timezone"].stringValue.isNotNil {
+                        inst.timezone = json["timezone"].stringValue!
+                    }
+                    
+                    if json["acceptedterms"].intValue.isNotNil {
+                        inst.acceptedterms = json["acceptedterms"].intValue!
+                    }
+                    
+                    if json["declinedterms"].intValue.isNotNil {
+                        inst.declinedterms = json["declinedterms"].intValue!
+                    }
+                    
+                    // save this way to make sure nil variables are correctly saved
+                    do {
                         
-                        let inst = Installation()
+                        var retrow:[StORMRow] = []
                         
-                        if json.isEmpty {
-                            try? response.setBody(json: ["error":"Empty json"])
-                                .setHeader(.contentType, value: "application/json")
-                                .completed(status: .custom(code: 420, message: "Chill dude...... The required parameters were not passed."))
-                        }
-                        
-                        var uid: String = ""
-//                        if let session = request.session, !session.userid.isEmpty {
-                        if let session = request.session {
-                            inst.user_id = session.userid
-                            uid = inst.user_id!
+                        if uid.isEmpty {
+                            retrow = try inst.saveWithCustomType()
+                        } else {
+                            retrow = try inst.saveWithCustomType(uid)
                         }
                         
-                        if json["id"].intValue.isNotNil {
-                            inst.id = json["id"].intValue!
-                        }
-                        
-                        if json["devicetoken"].stringValue.isNotNil {
-                            inst.devicetoken = json["devicetoken"].stringValue!
-                        }
-                        
-                        if json["devicetype"].stringValue.isNotNil {
-                            inst.devicetype = json["devicetype"].stringValue!
-                        }
-                        
-                        if json["name"].stringValue.isNotNil {
-                            inst.name = json["name"].stringValue!
-                        }
-                        
-                        if json["systemname"].stringValue.isNotNil {
-                            inst.systemname = json["systemname"].stringValue!
-                        }
-                        
-                        if json["systemversion"].stringValue.isNotNil {
-                            inst.systemversion = json["systemversion"].stringValue!
-                        }
-                        
-                        if json["model"].stringValue.isNotNil {
-                            inst.model = json["model"].stringValue!
-                        }
-                        
-                        if json["localizedmodel"].stringValue.isNotNil {
-                            inst.localizedmodel = json["localizedmodel"].stringValue!
-                        }
-                        
-                        if json["identifierforvendor"].stringValue.isNotNil {
-                            inst.identifierforvendor = json["identifierforvendor"].stringValue!
-                        }
-                        
-                        if json["timezone"].stringValue.isNotNil {
-                            inst.timezone = json["timezone"].stringValue!
-                        }
-
-                        if json["acceptedterms"].intValue.isNotNil {
-                            inst.acceptedterms = json["acceptedterms"].intValue!
-                        }
-
-                        if json["declinedterms"].intValue.isNotNil {
-                            inst.declinedterms = json["declinedterms"].intValue!
-                        }
-
-                        // save this way to make sure nil variables are correctly saved
-                        do {
+                        if retrow.count > 0, let installationid = retrow.first?.data["id"].intValue {
                             
-                            var retrow:[StORMRow] = []
+                            // grab the new record (or existing record)
+                            try inst.get(installationid)
                             
-                            if uid.isEmpty {
-                                retrow = try! inst.saveWithCustomType()
-                            } else {
-                                retrow = try! inst.saveWithCustomType(uid)
-                            }
-                            
-                            if retrow.count > 0, let installationid = retrow.first?.data["id"].intValue {
+                            // only deal with the notification record if there is a device token (it means that there is a yes to get notifications)
+                            if inst.devicetoken.isNotNil {
                                 
-                                // grab the new record (or existing record)
-                                try inst.get(installationid)
+                                var therewerechanges = false
                                 
-                                // only deal with the notification record if there is a device token (it means that there is a yes to get notifications)
-                                if inst.devicetoken.isNotNil {
+                                let notif = Notification()
+                                
+                                do {
+                                    try notif.find([("devicetoken", inst.devicetoken!)])
                                     
-                                    var therewerechanges = false
-                                    
-                                    let notif = Notification()
-                                    
-                                    do {
-                                        try notif.find([("devicetoken", inst.devicetoken!)])
-                                        
-                                        // now lets set the stuff....
-                                        if notif.id.isNil {
-                                            notif.devicetoken = inst.devicetoken
-                                            therewerechanges = true
-                                        }
-                                        if inst.devicetype.isNotNil && inst.devicetype != notif.devicetype {
-                                            notif.devicetype = inst.devicetype
-                                            therewerechanges = true
-                                        }
-                                        if inst.user_id.isNotNil && inst.user_id != notif.user_id {
-                                            notif.user_id = inst.user_id
-                                            therewerechanges = true
-                                        }
-                                        if inst.timezone.isNotNil && inst.timezone != notif.timezone {
-                                            notif.timezone = inst.timezone
-                                            therewerechanges = true
-                                        }
-                                        
-                                        // now lets try to save this notification
-                                        if therewerechanges {
-                                            try notif.saveWithCustomType(uid)
-                                        }
-                                    } catch {
-                                        // do NOTHING - there was a problem with the notification record.
+                                    // now lets set the stuff....
+                                    if notif.id.isNil {
+                                        notif.devicetoken = inst.devicetoken
+                                        therewerechanges = true
+                                    }
+                                    if inst.devicetype.isNotNil && inst.devicetype != notif.devicetype {
+                                        notif.devicetype = inst.devicetype
+                                        therewerechanges = true
+                                    }
+                                    if inst.user_id.isNotNil && inst.user_id != notif.user_id {
+                                        notif.user_id = inst.user_id
+                                        therewerechanges = true
+                                    }
+                                    if inst.timezone.isNotNil && inst.timezone != notif.timezone {
+                                        notif.timezone = inst.timezone
+                                        therewerechanges = true
                                     }
                                     
+                                    // now lets try to save this notification
+                                    if therewerechanges {
+                                        try notif.saveWithCustomType(uid)
+                                    }
+                                } catch {
+                                    //TODO:  Maybe log something here indicating an issue with saving to notifications table?
                                 }
                                 
                             }
                             
-                            // setup the return
-                            try? response.setBody(json: ["id":inst.id])
-                                .setHeader(.contentType, value: "application/json")
-                                .completed(status: .ok)
-
-                        } catch {
-                            // there was a problem with the saves
-                            try? response.setBody(json: ["error":"Problems saving the installation and notification"])
-                                .setHeader(.contentType, value: "application/json")
-                                .completed(status: .custom(code: 420, message: "Chill dude...... The required parameters were not passed."))
-                            
                         }
+                        
+                        // setup the return
+                        try? response.setBody(json: ["id":inst.id])
+                            .setHeader(.contentType, value: "application/json")
+                            .completed(status: .ok)
+                        
+                    } catch {
+                        // there was a problem with the saves
+                        try? response.setBody(json: ["error":"Problems saving the installation and notification"])
+                            .setHeader(.contentType, value: "application/json")
+                            .completed(status: .custom(code: 420, message: "Chill dude...... The required parameters were not passed."))
+                        
                     }
-                } else {
-                    // this is the end of the json decode
-                    try? response.setBody(json: ["error":"Problems saving the installation and notification"])
-                        .setHeader(.contentType, value: "application/json")
-                        .completed(status: .custom(code: 420, message: "Chill dude...... The required parameters were not passed."))
                     
+                } catch BucketAPIError.unparceableJSON(let attemptedJSON) {
+                    return response.invalidRequest(attemptedJSON)
+                } catch {
+                    try? response.setBody(json: ["error":error.localizedDescription])
+                        .setHeader(.contentType, value: "application/json; charset=UTF-8")
+                        .completed(status: .internalServerError)
                 }
+                
             }
         }
     }
