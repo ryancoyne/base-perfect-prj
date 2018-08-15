@@ -937,8 +937,6 @@ struct UserDictionary {
 //    }
 //}
 
-
-
 extension Float {
     var toMeters : Float {
         return self * 1609.34
@@ -957,8 +955,15 @@ extension HTTPResponse {
             returnD["message"] = message
         }
         try! self.setBody(json: returnD)
-                     .setHeader(.contentType, value: "application/json")
                      .completed(status: .unauthorized)
+    }
+    func caughtError(_ error : Error) {
+        try! self.setBody(json: ["error": error.localizedDescription])
+            .completed(status: .unauthorized)
+    }
+    var alreadyLoggedIn : Void {
+        try! self.setBody(json: ["error" : "You are already logged in."])
+                     .completed(status: .ok)
     }
 }
 

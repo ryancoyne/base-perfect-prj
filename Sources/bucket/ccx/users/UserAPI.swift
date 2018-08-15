@@ -135,62 +135,49 @@ struct UserAPI {
         public static func register(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                if let s = request.session?.userid, !s.isEmpty {
-                    try? response.setBody(json: ["error" : "You are already logged in."])
-                                            .setHeader(.contentType, value: "application/json")
-                                            .completed(status: .ok)
-                    return
-                }
-                if let postBody = request.postBodyString, !postBody.isEmpty {
-                    do {
-                        let postBodyJSON = try postBody.jsonDecode() as? [String: String] ?? [String: String]()
-                        if let e = postBodyJSON["email"], !e.isEmpty {
-                            let u = postBodyJSON["username"].stringValue ?? ""
-                            let err = Account.register(u.lowercased(), e, .provisional, baseURL: AuthenticationVariables.baseURL)
-                            if err != .noError {
-                                LocalAuthHandlers.error(request, response, error: "Registration Error: \(err)", code: .badRequest)
-                                return
-                            } else {
-                                
-                                // success!
-                                // pull the user
-                                let thenewuser = Account()
-                                let tnu = try? thenewuser.sqlRows("SELECT id FROM account WHERE email = '\(e)'", params: [])
-                                
-                                let newuser_id = tnu?.first?.data["id"].stringValue
-                                
-                                var userret:[String:Any] = [:]
-                                
-                                if newuser_id.isNotNil {
-                                    try? thenewuser.get(newuser_id!)
-                                    // call the just created section
-                                    userret = UserAPI.UserSuccessfullyCreated(thenewuser)
-                                    
-                                }
-                                
-                                var retDict:[String:Any] = [:]
-                                retDict["message"] = "Check your email for an email from us. It contains instructions to complete your signup!"
-                                
-                                // add in the return values for the user connections
-                                for (key,value) in userret {
-                                    retDict[key] = value
-                                }
-
-                                _ = try response.setBody(json: retDict)
-                                response.completed(status: .ok)
-                                return
-                            }
-                        } else {
-                            LocalAuthHandlers.error(request, response, error: "Please supply a username and password", code: .badRequest)
-                            return
+                
+                guard request.session?.userid.isEmpty == true else { return response.alreadyLoggedIn }
+                
+                do {
+                    
+                    let json = try request.postBodyJSON()!
+                    guard !json.isEmpty else { return response.emptyJSONBody }
+                    
+                    // Okay we have json!
+                    guard let email = json["email"].stringValue else { return try! response.setBody(json: ["error":"You need to send at least an email to register."]).completed(status: .badRequest) }
+                    let username = json["username"].stringValue ?? ""
+                    
+                    let err = Account.register(username.lowercased(), email, .provisional, baseURL: AuthenticationVariables.baseURL)
+                    
+                    if err != .noError {
+                        LocalAuthHandlers.error(request, response, error: "Registration Error: \(err)", code: .badRequest)
+                        return
+                    } else {
+                        
+                        // success!
+                        // pull the user
+                        let thenewuser = Account()
+                        try? thenewuser.find(["email": email])
+                        
+                        let userret:[String:Any] = UserAPI.UserSuccessfullyCreated(thenewuser)
+                        
+                        var retDict:[String:Any] = [:]
+                        retDict["message"] = "Check your email for an email from us. It contains instructions to complete your signup!"
+                        
+                        // add in the return values for the user connections
+                        for (key,value) in userret {
+                            retDict[key] = value
                         }
-                    } catch {
-                        LocalAuthHandlers.error(request, response, error: "Invalid JSON", code: .badRequest)
+                        
+                        _ = try response.setBody(json: retDict)
+                        response.completed(status: .ok)
                         return
                     }
-                } else {
-                    LocalAuthHandlers.error(request, response, error: "Registration Error: Insufficient Data", code: .badRequest)
-                    return
+                    
+                } catch BucketAPIError.unparceableJSON(let jsonStr) {
+                    return response.invalidRequest(jsonStr)
+                } catch {
+                    return response.caughtError(error)
                 }
                 
             }
