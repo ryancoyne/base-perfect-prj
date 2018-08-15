@@ -25,9 +25,8 @@ struct ConsumerAPI {
             return [
                 ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
                 ["method":"get",    "uri":"/api/v1/cashout/types/{countryCode}", "handler":cashoutTypes],
-                ["method":"get",    "uri":"/api/v1/cashout/types/{countryCode}/{typeId}", "handler":cashoutType],
-                ["method":"get",    "uri":"/api/v1/cashout/{countryCode}/{typeId}/options", "handler":cashoutOptions],
-                ["method":"post",    "uri":"/api/v1/cashout/{countryCode}/{typeId}/{optionId}", "handler":cashout]
+                ["method":"get",    "uri":"/api/v1/cashout/options/{groupId}", "handler":cashoutOptions],
+                ["method":"post",    "uri":"/api/v1/cashout/{optionId}", "handler":cashout]
             ]
         }
         
@@ -37,10 +36,10 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard let userId = request.session?.userid else { return response.notLoggedIn() }
+                guard !Account.userBouce(request, response) else { return }
                 
                 // Okay, the user is logged in and we have their id!  Lets see if we have the customer code!
-                guard let customerCode = request.customerCode else { return response.invalidCode }
+                guard let customerCode = request.customerCode, !customerCode.isEmpty else { return response.invalidCode }
                 
                 // Awesome.  We have the customer code, and a user.  Now, we need to find the transaction and mark it as redeemed, and add the value to the ledger table!
                 
@@ -53,11 +52,62 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard let userId = request.session?.userid else { return response.notLoggedIn() }
-                
+                guard !Account.userBouce(request, response) else { return }
+
+                guard let groupId = request.groupId.intValue, groupId == 0 else { return response.invalidGroupCode }
+
                 // Here we need to get all the modes, and get all the fields
+                let cashoutOptions = CashoutOption()
+                let res = try? cashoutOptions.sqlRows("SELECT * FROM cashout_option_view_deleted_no WHERE group_id = $1 ORDER BY display_order ASC", params: ["\(groupId)"])
+
+                var retJSON:[String:Any] = [:]
+
+                if res.isNotNil {
+
+                    var retJSONSub:[[String:Any]] = []
+
+                    for i in res! {
+                        var optdict:[String:Any] = [:]
+
+                        optdict["id"] = i.data.id!
+                        optdict["minimumAmount"] = i.data.cashoutOptionsDic.minimum
+                        optdict["longDescription"] = i.data.cashoutOptionsDic.longDescription
+                        optdict["name"] = i.data.cashoutOptionsDic.name
+                        optdict["description"] = i.data.shortdescription
+                        optdict["website"] = i.data.cashoutOptionsDic.website
+
+                        if let image = i.data.cashoutOptionsDic.pictureURL, image.length > 1 {
+                            
+                            var imgdict:[String:Any] = [:]
+                            // check to see if the image contains http
+                            let testimage = image.lowercased()
+                            if testimage.contains(string: "http") {
+                                imgdict["small"] = image
+                                imgdict["large"] = image
+                                imgdict["icon"]  = image
+                            } else {
+                                if let imageurl = EnvironmentVariables.sharedInstance.ImageBaseURL {
+                                    imgdict["small"] = "\(imageurl)/small/\(image)"
+                                    imgdict["large"] = "\(imageurl)/large/\(image)"
+                                    imgdict["icon"]  = "\(imageurl)/icon/\(image)"
+                                }
+                            }
+                            
+                            // add the images to the return
+                            optdict["image"] = imgdict
+                        }
+                        
+                        retJSONSub.append(optdict)
+
+                    }
+                    
+                    retJSON["options"] = retJSONSub
+                    
+                }
                 
-                
+                try? response.setBody(json: retJSON)
+                response.completed(status: .ok)
+
             }
         }
         
@@ -67,14 +117,14 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard let userId = request.session?.userid, !userId.isEmpty else { return response.notLoggedIn() }
-                
+                guard !Account.userBouce(request, response) else { return }
+
                 // Here we need to get all the modes, and get all the fields
                 guard let countryCode = request.countryCode else { return response.invalidCountryCode }
 
                 var countsql = "SELECT cog.*, COUNT(coo.id) AS option_count "
-                countsql.append("FROM cashout_group AS cog ")
-                countsql.append("LEFT JOIN cashout_option AS coo ")
+                countsql.append("FROM cashout_group_view_deleted_no AS cog ")
+                countsql.append("LEFT JOIN cashout_option_view_deleted_no AS coo ")
                 countsql.append("ON cog.id = coo.group_id ")
                 countsql.append("WHERE cog.country_id = $1 ")
                 countsql.append("GROUP BY cog.id ")
@@ -141,8 +191,8 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard let userId = request.session?.userid else { return response.notLoggedIn() }
-                
+                guard !Account.userBouce(request, response) else { return }
+
                 // Okay we are finding the specific type, and grabbing the fields we need:
                 
                 
@@ -155,8 +205,8 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard let userId = request.session?.userid else { return response.notLoggedIn() }
-                
+                guard !Account.userBouce(request, response) else { return }
+
                 // Okay we are finding the specific type, and grabbing the fields we need:
                 
                 
@@ -176,6 +226,17 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json")
             .completed(status: .notAcceptable)
     }
+    var invalidOptionCode : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such option code found"])
+            .setHeader(.contentType, value: "application/json")
+            .completed(status: .notAcceptable)
+    }
+    var invalidGroupCode : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such group code found"])
+            .setHeader(.contentType, value: "application/json")
+            .completed(status: .notAcceptable)
+    }
+
 }
 
 fileprivate extension HTTPRequest {
@@ -185,6 +246,16 @@ fileprivate extension HTTPRequest {
     }
     var countryCode : String? {
         return self.urlVariables["countryCode"]
+    }
+
+    var countryId : String? {
+        return self.urlVariables["countryId"]
+    }
+    var groupId : String? {
+        return self.urlVariables["groupId"]
+    }
+    var optionId : String? {
+        return self.urlVariables["optionId"]
     }
 
 }
