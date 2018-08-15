@@ -108,39 +108,115 @@ final class InitializeData {
     
     func addCashoutGroup() {
         
-//        let tbl = CashoutGroup()
-//
-//        let created_time = Int(Date().timeIntervalSince1970)
-//
-//        var checkuser = "INSERT INTO \(tbl.table()) "
-//        checkuser.append("(created, createdby, group_name,description, country_id) ")
-//        checkuser.append(" VALUES ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', 1), ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.'), ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.'), ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.')")
-//
-//        print("Adding user: \(checkuser)")
-//        _ = try? tbl.sqlRows(checkuser, params: [])
+        let usa = Country()
+        try? usa.find(["code_alpha_2":"US"])
+        
+        let singapore = Country()
+        try? singapore.find(["code_alpha_2":"SG"])
+        
+        let tbl = CashoutGroup()
+
+        let created_time = Int(Date().timeIntervalSince1970)
+
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby, group_name,description, country_id, display_order) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', \(usa.id!), 1), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.', \(usa.id!),2), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.', \(usa.id!),3), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),4),")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','TopUp','', \(singapore.id!),1),")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),2), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','', \(singapore.id!),3)")
+
+        print("Adding cashout groups: \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
         
     }
 
     func addCashoutOption() {
+
+        let created_time = Int(Date().timeIntervalSince1970)
         
-//        let tbl = CashoutOption()
-//        
-//        let created_time = Int(Date().timeIntervalSince1970)
-//        
-//        var checkuser = "INSERT INTO \(tbl.table()) "
-//        checkuser.append("(created, createdby, group_name,description, country_id) ")
-//        checkuser.append(" VALUES ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', 1), ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.'), ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.'), ")
-//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.')")
-//        
-//        print("Adding user: \(checkuser)")
-//        _ = try? tbl.sqlRows(checkuser, params: [])
+        let usa = Country()
+        try? usa.find(["code_alpha_2":"US"])
+        
+        let singapore = Country()
+        try? singapore.find(["code_alpha_2":"SG"])
+
+        let usa_cg = CashoutGroup()
+        
+        var ussql = ""
+        let uscg = try? usa_cg.sqlRows("SELECT * FROM cashout_group WHERE country_id = \(usa.id!) ORDER BY display_order DESC ", params: [])
+        for i in uscg! {
+            switch i.data.cashoutGroupDic.group_name {
+            case "Prepaid Card":
+                // card 1
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
+                ussql.append("'Visa',")
+                ussql.append("'https://visa.com', ")
+                ussql.append("'The VISA prepaid card may be used anywhere online!', ")
+                ussql.append("'Come join the VISA family and use this card worldwide!', ")
+                ussql.append("'https://usa.visa.com/content/dam/VCOM/nav-assets/logo.png', ")
+                ussql.append("50.00,0),")
+                // card 2
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 2, ")
+                ussql.append("'MasterCard',")
+                ussql.append("'https://mastercard.com', ")
+                ussql.append("'The MasterCard prepaid card may be used anywhere online!', ")
+                ussql.append("'Come join the MasterCard family and use this card worldwide!', ")
+                ussql.append("'https://www.mastercard.us/etc/designs/mccom/en-us/jcr:content/global/logo.img.png/1472151229727.png', ")
+                ussql.append("50.00,0),")
+                break
+            case "Gift Card":
+                // card 1
+//                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
+//                ussql.append("")
+//                ussql.append("")
+//                ussql.append("")
+//                ussql.append("")
+//                ussql.append("")
+//                ussql.append("50.00,0),")
+                break
+            case "Donate":
+                break
+            case "Bucket Coin":
+                break
+            default:
+                break
+
+            }
+        }
+        
+        let sgcg = try? usa_cg.sqlRows("SELECT * FROM cashout_group WHERE country_id = \(singapore.id!) ORDER BY display_order DESC ", params: [])
+        for i in sgcg! {
+            switch i.data.cashoutGroupDic.group_name {
+            case "TopUp":
+                break
+            case "Donate":
+                break
+            case "Bucket Coin":
+                break
+            default:
+                break
+                
+            }
+        }
+        
+        // remove the last comma from the groups
+        ussql.removeLast()
+        
+        let tbl = CashoutOption()
+        
+        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser.append("(created, createdby, group_id, form_id, display_order, ")
+        checkuser.append("name, website, description, long_description, pictureurl, ")
+        checkuser.append("minimum, maximum) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(ussql)
+        
+        print("Adding cashout options: \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
         
     }
 
