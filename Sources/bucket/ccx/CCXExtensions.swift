@@ -952,18 +952,13 @@ extension Double {
 
 extension HTTPResponse {
     func notLoggedIn(_ message : String?=nil) {
-        var returnD = ["error" : "Please log in"]
+        var returnD = ["errorCode" : "Unauthorized"]
         if message != nil {
             returnD["message"] = message
         }
         try! self.setBody(json: returnD)
                      .setHeader(.contentType, value: "application/json")
                      .completed(status: .unauthorized)
-    }
-    func unableToDecodeJSON() {
-        try! self.setBody(json: ["error":"Unable to decode JSON."])
-            .setHeader(.contentType, value: "application/json")
-            .completed(status: .badRequest)
     }
 }
 
