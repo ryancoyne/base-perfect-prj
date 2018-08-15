@@ -56,9 +56,19 @@ struct ConsumerAPI {
 
                 guard let groupId = request.groupId.intValue, groupId == 0 else { return response.invalidGroupCode }
 
+                var sqlstatement = "SELECT * FROM cashout_option_view_deleted_no WHERE group_id = $1 ORDER BY display_order ASC"
+                
+                let qp = request.getOffsetLimit()
+                if qp.limitNumber > 0 {
+                    sqlstatement.append(" LIMIT \(qp.limitNumber) ")
+                }
+                if qp.offsetNumber > 0 {
+                    sqlstatement.append(" OFFSET \(qp.offsetNumber) ")
+                }
+                
                 // Here we need to get all the modes, and get all the fields
                 let cashoutOptions = CashoutOption()
-                let res = try? cashoutOptions.sqlRows("SELECT * FROM cashout_option_view_deleted_no WHERE group_id = $1 ORDER BY display_order ASC", params: ["\(groupId)"])
+                let res = try? cashoutOptions.sqlRows(sqlstatement, params: ["\(groupId)"])
 
                 var retJSON:[String:Any] = [:]
 
@@ -117,19 +127,31 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard !Account.userBouce(request, response) else { return }
+//                guard !Account.userBouce(request, response) else { return }
 
                 // Here we need to get all the modes, and get all the fields
                 guard let countryCode = request.countryCode else { return response.invalidCountryCode }
 
                 var countsql = "SELECT cog.*, COUNT(coo.id) AS option_count "
-                countsql.append("FROM cashout_group_view_deleted_no AS cog ")
-                countsql.append("LEFT JOIN cashout_option_view_deleted_no AS coo ")
+                countsql.append("FROM cashout_group AS cog ")
+                countsql.append("JOIN cashout_option AS coo ")
                 countsql.append("ON cog.id = coo.group_id ")
                 countsql.append("WHERE cog.country_id = $1 ")
+                countsql.append("AND cog.deleted = 0 ")
+                countsql.append("AND coo.deleted = 0 ")
                 countsql.append("GROUP BY cog.id ")
                 countsql.append("ORDER BY cog.display_order ASC ")
 
+                let qp = request.getOffsetLimit()
+                if qp.limitNumber > 0 {
+                    countsql.append(" LIMIT \(qp.limitNumber) ")
+                }
+                if qp.offsetNumber > 0 {
+                    countsql.append(" OFFSET \(qp.offsetNumber) ")
+                }
+                
+//                print(countsql)
+                
                 // now lets get the types for this country
                 let cg = CashoutGroup()
 //                let res = try? cg.sqlRows("SELECT * FROM cashout_group WHERE country_id = $1 ORDER BY display_order ASC ", params: ["\(SupportFunctions.sharedInstance.getCountryId(countryCode))"])
@@ -247,7 +269,6 @@ fileprivate extension HTTPRequest {
     var countryCode : String? {
         return self.urlVariables["countryCode"]
     }
-
     var countryId : String? {
         return self.urlVariables["countryId"]
     }
@@ -257,5 +278,26 @@ fileprivate extension HTTPRequest {
     var optionId : String? {
         return self.urlVariables["optionId"]
     }
-
+    func getOffsetLimit() -> (offsetNumber:Int, limitNumber:Int) {
+        
+        var ol = 0, of = 0
+        
+        let qry = self.queryParams
+        
+        for i in qry {
+            if i.0 == "offset" {
+                if let ioo = i.1.intValue {
+                    of = ioo
+                }
+            }
+            if i.0 == "limit" {
+                if let ioo = i.1.intValue {
+                    ol = ioo
+                }
+            }
+        }
+        
+        
+        return (of, ol)
+    }
 }
