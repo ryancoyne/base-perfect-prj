@@ -255,6 +255,7 @@ routes = routes + InstallationsV1Controller.json.routes
 routes = routes + CCXStatisticsV1Controller.json.routes
 routes = routes + FriendAPI.json.routes
 routes.append(contentsOf: RetailerAPI.json.routes)
+routes.append(contentsOf: ConsumerAPI.json.routes)
 
 // only if we are not in production
 if EnvironmentVariables.sharedInstance.Server.stringValue != "PROD" {

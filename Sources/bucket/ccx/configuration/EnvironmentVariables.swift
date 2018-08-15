@@ -119,7 +119,7 @@ final class EnvironmentVariables {
                     var thedata:String?
                     try thedata = file.readString()
 
-                    print(thedata)
+//                    print(thedata)
                     // this section will parse out the servers and add them to the service
                     var json:[String:Any]?
                     if thedata.isNotNil {
@@ -284,6 +284,11 @@ final class EnvironmentVariables {
                 self.PublicServerURL = URL(string: value)
                 
             }
+            
+            if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["IMAGE_BASE_URL"] as? String {
+                self.ImageBaseURL = value
+            }
+
         }
     }
 
@@ -872,6 +877,20 @@ final class EnvironmentVariables {
                 _PublicServerURL = newValue!
             } else {
                 _PublicServerURL = nil
+            }
+        }
+    }
+
+    private var _ImageBaseURL: String?
+    public var ImageBaseURL: String? {
+        get {
+            return _ImageBaseURL
+        }
+        set {
+            if newValue != nil {
+                _ImageBaseURL = newValue!
+            } else {
+                _ImageBaseURL = nil
             }
         }
     }

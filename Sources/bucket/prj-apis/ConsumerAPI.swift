@@ -67,9 +67,69 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard let userId = request.session?.userid else { return response.notLoggedIn() }
+                guard let userId = request.session?.userid, !userId.isEmpty else { return response.notLoggedIn() }
                 
                 // Here we need to get all the modes, and get all the fields
+                guard let countryCode = request.countryCode else { return response.invalidCountryCode }
+
+                var countsql = "SELECT cog.*, COUNT(coo.id) AS option_count "
+                countsql.append("FROM cashout_group AS cog ")
+                countsql.append("LEFT JOIN cashout_option AS coo ")
+                countsql.append("ON cog.id = coo.group_id ")
+                countsql.append("WHERE cog.country_id = $1 ")
+                countsql.append("GROUP BY cog.id ")
+                countsql.append("ORDER BY cog.display_order ASC ")
+
+                // now lets get the types for this country
+                let cg = CashoutGroup()
+//                let res = try? cg.sqlRows("SELECT * FROM cashout_group WHERE country_id = $1 ORDER BY display_order ASC ", params: ["\(SupportFunctions.sharedInstance.getCountryId(countryCode))"])
+                let res = try? cg.sqlRows(countsql, params: ["\(SupportFunctions.sharedInstance.getCountryId(countryCode))"])
+
+                if res.isNotNil {
+                    // creating the return JSON with results
+                    var retJSONSub:[[String:Any]] = []
+                    for i in res! {
+                        // put it together..
+                        var s:[String:Any] = [:]
+                        if let _ = i.data.id { s["id"] = i.data.id! }
+                        if let _ = i.data.cashoutGroupDic.group_name { s["name"] = i.data.cashoutGroupDic.group_name! }
+                        if let _ = i.data.cashoutGroupDic.description { s["description"] = i.data.cashoutGroupDic.description! }
+                        if let _ = i.data.cashoutGroupDic.country_id { s["country_id"] = i.data.cashoutGroupDic.country_id! }
+                        if let _ = i.data["option_count"] { s["option_count"] = i.data["option_count"]! }
+
+                        if let image = i.data.cashoutGroupDic.picture_url, image.length > 1 {
+
+                            var imgdict:[String:Any] = [:]
+                            // check to see if the image contains http
+                            let testimage = image.lowercased()
+                            if testimage.contains(string: "http") {
+                                imgdict["small"] = image
+                                imgdict["large"] = image
+                                imgdict["icon"]  = image
+                            } else {
+                                if let imageurl = EnvironmentVariables.sharedInstance.ImageBaseURL {
+                                    imgdict["small"] = "\(imageurl)/small/\(image)"
+                                    imgdict["large"] = "\(imageurl)/large/\(image)"
+                                    imgdict["icon"]  = "\(imageurl)/icon/\(image)"
+                                }
+                            }
+                            
+                            // add the images to the return
+                            s["image"] = imgdict
+                        }
+                        
+                        // add this entry to the array of entries
+                        retJSONSub.append(s)
+                    }
+                    
+                    let retJSON:[String:Any] = ["groups":retJSONSub]
+                    
+                    try? response.setBody(json: retJSON)
+                    response.completed(status: .ok)
+                } else {
+                    // error that none were found
+                    return response.invalidCountryCode
+                }
                 
                 
             }
@@ -111,6 +171,11 @@ fileprivate extension HTTPResponse {
                                 .setHeader(.contentType, value: "application/json")
                                 .completed(status: .notAcceptable)
     }
+    var invalidCountryCode : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such country code found"])
+            .setHeader(.contentType, value: "application/json")
+            .completed(status: .notAcceptable)
+    }
 }
 
 fileprivate extension HTTPRequest {
@@ -118,4 +183,8 @@ fileprivate extension HTTPRequest {
     var customerCode : String? {
         return self.urlVariables["customerCode"]
     }
+    var countryCode : String? {
+        return self.urlVariables["countryCode"]
+    }
+
 }

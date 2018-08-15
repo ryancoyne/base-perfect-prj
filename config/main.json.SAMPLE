@@ -37,14 +37,16 @@
         "EMAIL_FROM_DISPLAY_NAME": "Mobile Project"
     },
     "misc": {
-        "note": "These are miscellaneous variables.  The StORM varible determines if StORM transactions are written to a log file.  The server environment may be either PROD for production or DEV for development.  New environments may be added in the future.  The session name is used for cookie authentication.  The HTTP document root is the place where templates and other web based content is stored. This directory is standard and is generally not changed.  The variable SERVER_PUBLIC_URL is used to create links for consumers.",
+        "note": "These are miscellaneous variables.  The StORM varible determines if StORM transactions are written to a log file.  The server environment may be either PROD for production or DEV for development.  New environments may be added in the future.  The session name is used for cookie authentication.  The HTTP document root is the place where templates and other web based content is stored. This directory is standard and is generally not changed.  The variable SERVER_PUBLIC_URL is used to create links for consumers.  The image base url is the base location where images are stored.",
         "STORM_DEBUG"       : false,
         "SERVER_ENVIRONMENT": "DEV",
         "SESSION_NAME"      : "session",
         "HTTP_DOCUMENT_ROOT": "./webroot",
         "SERVER_1_ON_START" :false,
         "SERVER_2_ON_START" :false,
-        "SERVER_PUBLIC_URL" : "http://localhost:9000/"
+        "SERVER_PUBLIC_URL" : "http://localhost:9000/",
+        "IMAGE_BASE_URL"    : "http://pictures.com"
+
     },
     "services" : {
         "service1": {
