@@ -1101,10 +1101,11 @@ extension PostgresStORM {
         for i in thedata.enumerated() {
         
             if i.element.0 == idcolumn {
-                switch i.element.1 {
-                case is Int:
+                let type = type(of: i.element.1)
+                switch type {
+                case is Int.Type, is Int?.Type:
                     idnumber = String(describing: i.element.1 as! Int)
-                case is String:
+                case is String.Type, is String?.Type:
                     idnumber = "'\(String(describing: i.element.1 as! String))'"
                 default:
                     break
@@ -1151,10 +1152,11 @@ extension PostgresStORM {
         for i in thedata.enumerated() {
             
             if i.element.0 == idcolumn {
-                switch i.element.1 {
-                case is Int:
+                let type = type(of: i.element.1)
+                switch type {
+                case is Int.Type, is Int?.Type:
                     idnumber = String(describing: i.element.1 as! Int)
-                case is String:
+                case is String.Type, is String?.Type:
                     idnumber = "'\(String(describing: i.element.1 as! String))'"
                 default:
                     break
