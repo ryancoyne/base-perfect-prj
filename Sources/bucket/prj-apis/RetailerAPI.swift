@@ -251,6 +251,7 @@ struct RetailerAPI {
                         let transaction = CodeTransaction()
                         transaction.created = Int(Date().timeIntervalSince1970)
                         transaction.amount = json?["amount"].doubleValue
+                        transaction.amount_available = json?["amount"].doubleValue
                         transaction.total_amount = json?["totalTransactionAmount"].doubleValue
                         transaction.client_location = json?["locationId"].stringValue
                         transaction.client_transaction_id = json?["clientTransactionId"].stringValue

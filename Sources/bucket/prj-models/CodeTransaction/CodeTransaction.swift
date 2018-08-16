@@ -30,8 +30,9 @@ public class CodeTransaction: PostgresStORM {
     var client_transaction_id     : String? = nil
     var batch_id : String? = nil
     var amount : Double? = nil
+    var amount_available : Double? = nil
     var total_amount : Double? = nil
-    
+
     var disputed : Int? = nil
     var disputedby : String? = nil
     var redeemed : Int? = nil
@@ -132,7 +133,11 @@ public class CodeTransaction: PostgresStORM {
         if let data = this.data.codeTransactionDic.amount.doubleValue {
             amount = data
         }
-        
+
+        if let data = this.data.codeTransactionDic.amountAvailable.doubleValue {
+            amount_available = data
+        }
+
         if let data = this.data.codeTransactionDic.totalAmount.doubleValue {
             total_amount = data
         }
@@ -174,7 +179,12 @@ public class CodeTransaction: PostgresStORM {
                 if (value as? Double).isNotNil {
                     self.amount = (value as! Double)
                 }
-            
+
+            case "amount_available":
+                if (value as? Double).isNotNil {
+                    self.amount_available = (value as! Double)
+                }
+
             case "total_amount":
                 if (value as? Double).isNotNil {
                     self.total_amount = (value as! Double)
@@ -330,7 +340,11 @@ public class CodeTransaction: PostgresStORM {
         if self.amount.isNotNil {
             dictionary.codeTransactionDic.amount = self.amount
         }
-        
+
+        if self.amount_available.isNotNil {
+            dictionary.codeTransactionDic.amountAvailable = self.amount_available
+        }
+
         if self.total_amount.isNotNil {
             dictionary.codeTransactionDic.totalAmount = self.total_amount
         }
@@ -388,7 +402,11 @@ public class CodeTransaction: PostgresStORM {
         if diff == true, self.amount != targetItem.amount {
             diff = false
         }
-        
+
+        if diff == true, self.amount_available != targetItem.amount_available {
+            diff = false
+        }
+
         if diff == true, self.total_amount != targetItem.total_amount {
             diff = false
         }

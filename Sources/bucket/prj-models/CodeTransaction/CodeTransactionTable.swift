@@ -121,6 +121,7 @@ final class CodeTransactionTable {
         createsql.append("country_id int NOT NULL DEFAULT 0, ")
         createsql.append("retailer_id int NOT NULL DEFAULT 0, ")
         createsql.append("amount numeric(10,5) NOT NULL DEFAULT 0, ")
+        createsql.append("amount_available numeric(10,5) NOT NULL DEFAULT 0, ")
         createsql.append("total_amount numeric(10,5) NOT NULL DEFAULT 0, ")
         createsql.append("terminal_id int NOT NULL DEFAULT 0, ")
         createsql.append("batch_id text COLLATE pg_catalog.default, ")

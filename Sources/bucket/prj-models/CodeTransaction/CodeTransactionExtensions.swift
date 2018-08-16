@@ -192,6 +192,18 @@ struct CodeTransactionDictionary {
             }
         }
     }
+    var amountAvailable : Double? {
+        get {
+            return self.dic["amount_available"].doubleValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["amount_available"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "amount_available")
+            }
+        }
+    }
     var totalAmount : Double? {
         get {
             return self.dic["total_amount"].doubleValue
