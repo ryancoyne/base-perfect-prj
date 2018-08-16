@@ -205,7 +205,7 @@ public class CodeTransaction: PostgresStORM {
                     self.batch_id = (value as! String)
                 }
                 
-            case "redeemed_by":
+            case "redeemedby":
                 if (value as? String).isNotNil {
                     self.redeemedby = (value as! String)
                 }
@@ -215,7 +215,7 @@ public class CodeTransaction: PostgresStORM {
                     self.redeemed = (value as! Int)
                 }
                 
-            case "disputed_by":
+            case "disputedby":
                 if (value as? String).isNotNil {
                     self.disputedby = (value as! String)
                 }

@@ -1205,12 +1205,18 @@ extension PostgresStORM {
             if (i.0 == "created") {
                 keys.append(i.0)
                 vals.append(String(describing: CCXServiceClass.sharedInstance.getNow()))
-            } else if (i.0 == "createdby") && (user != nil) {
+            } else if (i.0 == "createdby") {
+                let theUser = user ?? CCXDefaultUserValues.user_server
                 keys.append(i.0)
-                vals.append("'\(user!)'")
-            } else if (i.0 == "createdby") && (user == nil) {
-                keys.append(i.0)
-                vals.append("'\(CCXDefaultUserValues.user_server)'")
+                vals.append("'\(theUser)'")
+                switch self {
+                case is CodeTransaction:
+                    (self as! CodeTransaction).modifiedby = theUser
+                case is CodeTransactionHistory:
+                    (self as! CodeTransactionHistory).modifiedby = theUser
+                default:
+                    print("[CCXExtensions ERROR] updateWithCustomType  TYPE NOT IMPLEMENTED to update model.")
+                }
             } else if (i.0 != idcolumn) && (String(describing: i.1) != "nil") {
                 
                 let c = type(of: i.1)
@@ -1327,12 +1333,28 @@ extension PostgresStORM {
             }
             
             if (i.element.0 == "modified") {
-                let value = String(describing: CCXServiceClass.sharedInstance.getNow())
+                let now = CCXServiceClass.sharedInstance.getNow()
+                let value = String(describing: now)
                 set.append(" \(i.element.0) = \(value),")
-            } else if (i.element.0 == "modifiedby") && (user != nil) {
-                set.append(" \(i.element.0) = '\(user!)',")
-            } else if (i.element.0 == "modifiedby") && (user == nil) {
-                set.append(" \(i.element.0) = '\(CCXDefaultUserValues.user_server)',")
+                switch self {
+                case is CodeTransaction:
+                    (self as! CodeTransaction).modified = now
+                case is CodeTransactionHistory:
+                    (self as! CodeTransactionHistory).modified = now
+                default:
+                    print("[CCXExtensions ERROR] updateWithCustomType  TYPE NOT IMPLEMENTED to update model.")
+                }
+            } else if (i.element.0 == "modifiedby") {
+                let theUser = user ?? CCXDefaultUserValues.user_server
+                set.append(" \(i.element.0) = '\(theUser)',")
+                switch self {
+                case is CodeTransaction:
+                    (self as! CodeTransaction).modifiedby = theUser
+                case is CodeTransactionHistory:
+                    (self as! CodeTransactionHistory).modifiedby = theUser
+                default:
+                    print("[CCXExtensions ERROR] updateWithCustomType  TYPE NOT IMPLEMENTED to update model.")
+                }
             } else if (i.element.0 != idcolumn) && value != "nil" {
                 
                 // we are doing this to remove the quotes around the GIS functions (it will not work)

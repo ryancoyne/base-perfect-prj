@@ -30,7 +30,7 @@ public class UserBalanceFunctions {
                 var wallet:[String:Any] = [:]
                 
                 wallet["id"]     = i.data["id"]
-                wallet["amount"] = i.data["balance"]
+                wallet["amount"] = i.data["balance"].doubleValue
                 wallet["country_id"] = i.data["country_id"]
                 wallet["countryCode"] = i.data["countryCode"]
                 retArray.append(wallet)
@@ -63,7 +63,11 @@ public class UserBalanceFunctions {
         
         var balance:Double = 0.0
         
-        try? ut.find([("user_id", userid),("country_id", countryid)])
+        let sql = "SELECT id FROM \(ut.table()) WHERE user_id = '\(userid)' AND country_id = \(countryid)"
+        let theid = try? ut.sqlRows(sql, params: [])
+        if theid.isNotNil, theid!.count > 0 {
+            try? ut.get(theid!.first!.data.id!)
+        }
         
         // if the record has been found - return it
         if ut.id.isNotNil, ut.id! > 0 {
@@ -74,7 +78,9 @@ public class UserBalanceFunctions {
         balance -= decrease
         balance += increase
         
-        ut.balance = balance
+        ut.balance    = balance
+        ut.user_id    = userid
+        ut.country_id = countryid
         
         let _ = try? ut.saveWithCustomType()
 

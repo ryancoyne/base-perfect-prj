@@ -23,12 +23,28 @@ struct ConsumerAPI {
     struct json {
         static var routes : [[String:Any]] {
             return [
+                ["method":"get",    "uri":"/api/v1/history", "handler":transactionHistory],
                 ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
                 ["method":"get",    "uri":"/api/v1/cashout/types/{countryCode}", "handler":cashoutTypes],
                 ["method":"get",    "uri":"/api/v1/cashout/options/{groupId}", "handler":cashoutOptions],
                 ["method":"post",    "uri":"/api/v1/cashout/{optionId}", "handler":cashout]
             ]
         }
+        
+        //MARK: - Transaction History
+        public static func transactionHistory(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Check if the user is logged in:
+                guard !Account.userBouce(request, response) else { return }
+                
+                // Okay we are finding the transaction history
+                
+                
+            }
+        }
+
         
         //MARK: - Redeem The Transaction:
         public static func redeemCode(_ data: [String:Any]) throws -> RequestHandler {
@@ -43,14 +59,16 @@ struct ConsumerAPI {
                 
                 // Awesome.  We have the customer code, and a user.  Now, we need to find the transaction and mark it as redeemed, and add the value to the ledger table!
                 let ct = CodeTransaction()
-                let rsp = try? ct.sqlRows("SELECT * FROM code_transaction_view_delete_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
+                let rsp = try? ct.sqlRows("SELECT * FROM code_transaction_view_deleted_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
                 
-                if let test = rsp?.first, test.data.id.isNil {
-                    response.invalidCustomerCode
-                    return
-                } else if (rsp?.first?.data.codeTransactionDic.redeemed)! > 0 {
-                    // the record was already redeemed
-                    response.invalidCustomerCodeAlreadyRedeemed
+                if rsp?.first.isNil == true {
+                    // if we did not find it, check histry to see if we have already redeemed it
+                    let rsp2 = try? ct.sqlRows("SELECT * FROM code_transaction_history_view_deleted_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
+                    if let t = rsp2?.first?.data, t.codeTransactionHistoryDic.redeemed! > 0 {
+                        response.invalidCustomerCodeAlreadyRedeemed
+                    } else {
+                        response.invalidCustomerCode
+                    }
                     return
                 }
                 
@@ -58,8 +76,8 @@ struct ConsumerAPI {
                 
                 // lets redeem the code now
                 let redeemed = Int(Date().timeIntervalSince1970)
-                let redeemedby = request.session?.userid
-                try? ct.find(["id" : rsp?.first?.data.id!])
+                let redeemedby = request.session!.userid
+                try? ct.get(rsp!.first!.data.id!)
                 ct.redeemed   = redeemed
                 ct.redeemedby = redeemedby
                 if let _ = try? ct.saveWithCustomType(redeemedby) {
@@ -68,12 +86,12 @@ struct ConsumerAPI {
                     AuditFunctions().addCustomerCodeAuditRecord(ct)
                     
                     // update the users record
-                    UserBalanceFunctions().adjustUserBalance(redeemedby!, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
+                    UserBalanceFunctions().adjustUserBalance(redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
                     
                     // prepare the return
                     retCode["amount"] = ct.amount!
 
-                    let wallet = UserBalanceFunctions().getConsumerBalances(redeemedby!)
+                    let wallet = UserBalanceFunctions().getConsumerBalances(redeemedby)
                     if wallet.count > 0 {
                         retCode["buckets"] = wallet
                     }
@@ -254,20 +272,6 @@ struct ConsumerAPI {
                     // error that none were found
                     return response.invalidCountryCode
                 }
-                
-                
-            }
-        }
-        
-        //MARK: - Cashout Type:
-        public static func cashoutType(_ data: [String:Any]) throws -> RequestHandler {
-            return {
-                request, response in
-                
-                // Check if the user is logged in:
-                guard !Account.userBouce(request, response) else { return }
-
-                // Okay we are finding the specific type, and grabbing the fields we need:
                 
                 
             }
