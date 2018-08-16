@@ -1265,9 +1265,9 @@ extension Account {
             dic.removeValue(forKey: "username")
         }
         
-        // Get all the users friends:
-        let sqlStatement = ""
-        let friends = try? self.sqlRows("", params: [])
+        // Get the users wallets:
+        let wallets = UserBalanceFunctions().getConsumerBalances(self.id)
+        if !wallets.isEmpty { dic["buckets"] = wallets }
         
         return dic
     }
