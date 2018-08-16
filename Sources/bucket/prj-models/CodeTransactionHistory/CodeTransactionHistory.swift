@@ -271,6 +271,26 @@ public class CodeTransactionHistory: PostgresStORM {
                     self.archived = (value as! Int)
                 }
 
+            case "modifiedby":
+                if (value as? String).isNotNil {
+                    self.modifiedby = (value as! String)
+                }
+                
+            case "modified":
+                if (value as? Int).isNotNil {
+                    self.modified = (value as! Int)
+                }
+
+            case "createdby":
+                if (value as? String).isNotNil {
+                    self.createdby = (value as! String)
+                }
+                
+            case "created":
+                if (value as? Int).isNotNil {
+                    self.created = (value as! Int)
+                }
+
             default:
                 print("This should not occur")
             }
