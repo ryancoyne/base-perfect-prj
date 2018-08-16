@@ -1067,11 +1067,13 @@ extension PostgresStORM {
      - Returns: An Any type.  For a new inser, we will return the id
      */
     @discardableResult
-    func saveWithCustomType(_ user: String? = nil, _ forceAdd:Bool = false) throws -> [StORMRow] {
+    func saveWithCustomType(_ user: String? = nil, copyOver : Bool = false) throws -> [StORMRow] {
         
         // act accordingly if this is an add or an update
         do {
-            if keyIsEmpty() || forceAdd {
+            if copyOver {
+                return try insertWithCustomTypes()
+            } else if keyIsEmpty() {
                 return try addWithCustomTypes(user)
             } else {
                 return try updateWithCustomType(user)
@@ -1099,10 +1101,11 @@ extension PostgresStORM {
         for i in thedata.enumerated() {
         
             if i.element.0 == idcolumn {
-                switch i.element.1 {
-                case is Int:
+                let type = type(of: i.element.1)
+                switch type {
+                case is Int.Type, is Int?.Type:
                     idnumber = String(describing: i.element.1 as! Int)
-                case is String:
+                case is String.Type, is String?.Type:
                     idnumber = "'\(String(describing: i.element.1 as! String))'"
                 default:
                     break
@@ -1149,10 +1152,11 @@ extension PostgresStORM {
         for i in thedata.enumerated() {
             
             if i.element.0 == idcolumn {
-                switch i.element.1 {
-                case is Int:
+                let type = type(of: i.element.1)
+                switch type {
+                case is Int.Type, is Int?.Type:
                     idnumber = String(describing: i.element.1 as! Int)
-                case is String:
+                case is String.Type, is String?.Type:
                     idnumber = "'\(String(describing: i.element.1 as! String))'"
                 default:
                     break
@@ -1183,6 +1187,99 @@ extension PostgresStORM {
 
     }
 
+    private func insertWithCustomTypes() throws -> [StORMRow] {
+        
+        // get the variables with their values in the dictionary
+        let thedata = asData()
+        
+        // get the key (id)
+        let (idcolumn, _) = firstAsKey()
+        
+        // remove the id key
+        var keys = [String]()
+        var vals = [String]()
+        for i in thedata {
+            
+            if (String(describing: i.1) != "nil") {
+                let c = type(of: i.1)
+                switch c {
+                case is String.Type, is String?.Type:
+                    let app = "'\((i.1 as! String).sanitized)'"
+                    keys.append(i.0)
+                    vals.append(app)
+                case is CCXGeographyPoint.Type:
+                    if let point = i.1 as? CCXGeographyPoint, point.latitude != 0, point.longitude != 0 {
+                        let gisstring = "ST_SetSRID(ST_MakePoint(\(point.longitude),\(point.latitude)),4326)"
+                        keys.append(i.0)
+                        vals.append(gisstring)
+                    } else { continue }
+                case is Int.Type, is Double.Type, is Float.Type, is Bool.Type:
+                    let value = String(describing: i.1)
+                    keys.append(i.0)
+                    vals.append(value)
+                    break
+                // OPTIONAL VALUES:
+                case is Int?.Type:
+                    // Make sure the according type is casted to our string describing wont include the optional part:
+                    let value = String(describing: i.1 as! Int)
+                    keys.append(i.0)
+                    vals.append(value)
+                    break
+                case is Float?.Type:
+                    let value = String(describing: i.1 as! Float)
+                    keys.append(i.0)
+                    vals.append(value)
+                    break
+                case is Bool?.Type:
+                    let value = String(describing: i.1 as! Bool)
+                    keys.append(i.0)
+                    vals.append(value)
+                case is Double?.Type:
+                    let value = String(describing: i.1 as! Double)
+                    keys.append(i.0)
+                    vals.append(value)
+                    break
+                    // We will default here.  We will need to wrap other types here in the case switch.
+                    //                case is String?.Type:
+                    //                    // Its a string, lets cast it
+                    //                    let stringValue = "'\(i.1 as! String)'"
+                    //                    keys.append(i.0)
+                //                    vals.append(stringValue)
+                case is CCXGeographyPoint?.Type:
+                    let geographypoint = i.1 as! CCXGeographyPoint
+                    let gisstring = "ST_SetSRID(ST_MakePoint(\(geographypoint.longitude),\(geographypoint.latitude)),4326)"
+                    keys.append(i.0)
+                    vals.append(gisstring)
+                default:
+                    print("[CCXStORMExtensions] [updateWithGIS] [\(CCXServiceClass.sharedInstance.getNow().dateString)]  WARNING: Need to add the following type to update/add/saveWithCustomType: \(c)")
+                    continue
+                }
+            }
+        }
+        
+        var substString = [String]()
+        for i in 1..<vals.count {
+            substString.append("$\(i)")
+        }
+        
+        let colsjoined = "\"" + keys.joined(separator: "\",\"") + "\""
+        
+        let str = "INSERT INTO \(self.table()) (\(colsjoined.lowercased())) VALUES(\(vals.joined(separator: ","))) RETURNING \"\(idcolumn.lowercased())\""
+        
+        print(str)
+        
+        do {
+            //            let response = try sql(str, params: [])
+            //            let response = try exec(str, params: vals)
+            //            return parseRows(response)[0].data[idcolumn.lowercased()]!
+            return try self.execRows(str, params: [])
+            
+        } catch {
+            LogFile.error("Error: \(error)", logFile: "./StORMlog.txt")
+            self.error = StORMError.error("\(error)")
+            throw error
+        }
+    }
     
     /**
      Adds a new record with GIS coordinates in a geography type field and other field values.
@@ -1203,20 +1300,29 @@ extension PostgresStORM {
             
             // first lets see if the field is 'created' or 'createdby'
             if (i.0 == "created") {
+                let now = CCXServiceClass.sharedInstance.getNow()
                 keys.append(i.0)
-                vals.append(String(describing: CCXServiceClass.sharedInstance.getNow()))
+                vals.append(String(describing: now))
+                switch self {
+                case is CodeTransaction:
+                    (self as! CodeTransaction).created = now
+                case is CodeTransactionHistory:
+                    (self as! CodeTransactionHistory).created = now
+                default:
+                    print("[CCXExtensions INFO] updateWithCustomType  TYPE \(self) NOT IMPLEMENTED to update model.")
+                }
             } else if (i.0 == "createdby") {
                 let theUser = user ?? CCXDefaultUserValues.user_server
                 keys.append(i.0)
                 vals.append("'\(theUser)'")
-//                switch self {
-//                case is CodeTransaction:
-//                    (self as! CodeTransaction).createdby = theUser
-//                case is CodeTransactionHistory:
-//                    (self as! CodeTransactionHistory).createdby = theUser
-//                default:
-//                    print("[CCXExtensions INFO] updateWithCustomType  TYPE \(self) NOT IMPLEMENTED to add model.")
-//                }
+                switch self {
+                case is CodeTransaction:
+                    (self as! CodeTransaction).createdby = theUser
+                case is CodeTransactionHistory:
+                    (self as! CodeTransactionHistory).createdby = theUser
+                default:
+                    print("[CCXExtensions INFO] updateWithCustomType  TYPE \(self) NOT IMPLEMENTED to update model.")
+                }
             } else if (i.0 != idcolumn) && (String(describing: i.1) != "nil") {
                 
                 let c = type(of: i.1)
