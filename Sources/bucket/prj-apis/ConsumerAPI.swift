@@ -360,9 +360,11 @@ struct ConsumerAPI {
                 // 1. Audit the record
                 // 2. Update the available amount on the record
                 // 3. Update the cashed out timestamp (and user) - all timestamps should be the same - that is the glue that holds the records together
-                // 4. Save to the cashout table
-                // 5. Update the user total (decrement by the cashout amount)
-                // 6. Send the wonderful cashout message for a successful completion.
+                // 4. Add the total cashout amount to all records
+                // 5. Add the cashout note to the records - this should be where they cashout to - it is displayed in history
+                // 6. Save to the cashout table
+                // 7. Update the user total (decrement by the cashout amount)
+                // 8. Send the wonderful cashout message for a successful completion.
                 
                 
             }
