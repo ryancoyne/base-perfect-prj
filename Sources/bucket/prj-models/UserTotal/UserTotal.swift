@@ -10,7 +10,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class AccountTotal: PostgresStORM {
+public class UserTotal: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -21,11 +21,12 @@ public class AccountTotal: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var user_id : String? = nil
+    var user_id    : String? = nil
+    var country_id : Int? = nil
     var balance    : Double? = nil
     
     //MARK: Table name
-    override public func table() -> String { return "account_total" }
+    override public func table() -> String { return "user_account_total" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -58,20 +59,24 @@ public class AccountTotal: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.accountTotalDic.userId {
+        if let data = this.data.userTotalDic.userId {
            user_id  = data
         }
-        
-        if let data = this.data.accountTotalDic.balance {
+
+        if let data = this.data.userTotalDic.countryId {
+            country_id  = data
+        }
+
+        if let data = this.data.userTotalDic.balance {
             balance = data
         }
         
     }
     
-    func rows() -> [Address] {
-        var rows = [Address]()
+    func rows() -> [UserTotal] {
+        var rows = [UserTotal]()
         for i in 0..<self.results.rows.count {
-            let row = Address()
+            let row = UserTotal()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -88,7 +93,12 @@ public class AccountTotal: PostgresStORM {
                 if (value as? String).isNotNil {
                     self.user_id = (value as! String)
                 }
-                
+
+            case "country_id":
+                if (value as? Int).isNotNil {
+                    self.country_id = (value as! Int)
+                }
+
             case "balance":
                 if (value as? Double).isNotNil {
                     self.balance = (value as! Double)
@@ -134,18 +144,22 @@ public class AccountTotal: PostgresStORM {
         }
         
         if self.user_id.isNotNil {
-            dictionary.accountTotalDic.userId = self.user_id
+            dictionary.userTotalDic.userId = self.user_id
         }
-        
+
+        if self.country_id.isNotNil {
+            dictionary.userTotalDic.countryId = self.country_id
+        }
+
         if self.balance.isNotNil {
-            dictionary.accountTotalDic.balance = self.balance
+            dictionary.userTotalDic.balance = self.balance
         }
         
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: AccountTotal)-> Bool {
+    func compare(targetItem: UserTotal)-> Bool {
         
         var diff = true
         

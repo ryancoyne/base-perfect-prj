@@ -6,9 +6,9 @@
 //
 
 extension Dictionary where Key == String, Value == Any {
-    var accountTotalDic : AccountTotalDictionary {
+    var userTotalDic : UserTotalDictionary {
         get {
-            var bc = AccountTotalDictionary()
+            var bc = UserTotalDictionary()
             bc.dic = self
             return bc
         }
@@ -19,7 +19,7 @@ extension Dictionary where Key == String, Value == Any {
 }
 
 //MARK: Badge-Key Dictionary Variable Values
-struct AccountTotalDictionary {
+struct UserTotalDictionary {
     fileprivate var dic : [String:Any]!
     /// This variable key is "id". Set nil to remove from the dictionary.
     var id : Int? {
@@ -44,6 +44,18 @@ struct AccountTotalDictionary {
                 self.dic["user_id"] = newValue!
             } else {
                 self.dic.removeValue(forKey: "user_id")
+            }
+        }
+    }
+    var countryId : Int? {
+        get {
+            return self.dic["country_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["country_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "country_id")
             }
         }
     }

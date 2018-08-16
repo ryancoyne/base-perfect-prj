@@ -8,15 +8,15 @@
 import Foundation
 import PostgresStORM
 
-final class AccountTotalTable {
+final class UserTotalTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
     
-    static let sharedInstance = AccountTotalTable()
-    let tbl = AccountTotal()
+    static let sharedInstance = UserTotalTable()
+    let tbl = UserTotal()
     
     let tablelevel = 1.00
     
@@ -101,6 +101,7 @@ final class AccountTotalTable {
         
         // table specific fields
         createsql.append("user_id text COLLATE pg_catalog.default, ")
+        createsql.append("country_id int default 0, ")
         createsql.append("balance numeric(10,5) NOT NULL DEFAULT 0, ")
         
         // ending fields

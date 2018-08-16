@@ -42,7 +42,42 @@ struct ConsumerAPI {
                 guard let customerCode = request.customerCode, !customerCode.isEmpty else { return response.invalidCode }
                 
                 // Awesome.  We have the customer code, and a user.  Now, we need to find the transaction and mark it as redeemed, and add the value to the ledger table!
+                let ct = CodeTransaction()
+                let rsp = try? ct.sqlRows("SELECT * FROM code_transaction_view_delete_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
                 
+                if let test = rsp?.first, test.data.id.isNil {
+                    response.invalidCustomerCode
+                    return
+                } else if (rsp?.first?.data.codeTransactionDic.redeemed)! > 0 {
+                    // the record was already redeemed
+                    response.invalidCustomerCodeAlreadyRedeemed
+                    return
+                }
+                
+                var retCodeSub:[Any] = []
+                
+                // lets redeem the code now
+                let redeemed = Int(Date().timeIntervalSince1970)
+                let redeemedby = request.session?.userid
+                try? ct.find(["id" : rsp?.first?.data.id!])
+                ct.redeemed   = redeemed
+                ct.redeemedby = redeemedby
+                if let _ = try? ct.saveWithCustomType(redeemedby) {
+                    // this means it was saved - audit and archive
+                    AuditFunctions().addCustomerCodeAuditRecord(ct)
+                    
+                    // update the users record
+                    UserBalanceFunctions().adjustUserBalance(redeemedby!, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
+                    
+                    // prepare the return
+//HERE
+                    
+                    // now archive the record
+                    ct.archiveRecord()
+                }
+                
+                
+                // if there is an answer, then the code is valid - get the record
                 
             }
         }
@@ -257,6 +292,16 @@ fileprivate extension HTTPResponse {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such group code found"])
             .setHeader(.contentType, value: "application/json")
             .completed(status: .notAcceptable)
+    }
+    var invalidCustomerCode : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such code found"])
+            .setHeader(.contentType, value: "application/json")
+            .completed(status: .custom(code: 406, message: "The customer code was not found"))
+    }
+    var invalidCustomerCodeAlreadyRedeemed : Void {
+        return try! self.setBody(json: ["errorCode":"CodeRedeemed", "message": "Code was already redeemed"])
+            .setHeader(.contentType, value: "application/json")
+            .completed(status: .custom(code: 410, message: "The customer code has been used already"))
     }
 
 }
