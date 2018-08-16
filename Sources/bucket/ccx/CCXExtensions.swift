@@ -1303,10 +1303,26 @@ extension PostgresStORM {
                 let now = CCXServiceClass.sharedInstance.getNow()
                 keys.append(i.0)
                 vals.append(String(describing: now))
+                switch self {
+                case is CodeTransaction:
+                    (self as! CodeTransaction).created = now
+                case is CodeTransactionHistory:
+                    (self as! CodeTransactionHistory).created = now
+                default:
+                    print("[CCXExtensions INFO] updateWithCustomType  TYPE \(self) NOT IMPLEMENTED to update model.")
+                }
             } else if (i.0 == "createdby") {
                 let theUser = user ?? CCXDefaultUserValues.user_server
                 keys.append(i.0)
                 vals.append("'\(theUser)'")
+                switch self {
+                case is CodeTransaction:
+                    (self as! CodeTransaction).createdby = theUser
+                case is CodeTransactionHistory:
+                    (self as! CodeTransactionHistory).createdby = theUser
+                default:
+                    print("[CCXExtensions INFO] updateWithCustomType  TYPE \(self) NOT IMPLEMENTED to update model.")
+                }
             } else if (i.0 != idcolumn) && (String(describing: i.1) != "nil") {
                 
                 let c = type(of: i.1)
