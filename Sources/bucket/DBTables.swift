@@ -230,6 +230,8 @@ final class PRJDBTables {
         LedgerAccountTypeTable.sharedInstance.create()
         LedgerTypeTable.sharedInstance.create()
         
+        AccountTotalTable.sharedInstance.create()
+        
         // make sure the tables exist.... if not - then create it
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
         if thereturn.postgis && thereturn.postgis_topo {
