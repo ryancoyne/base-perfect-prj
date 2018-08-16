@@ -42,6 +42,8 @@ public class CodeTransaction: PostgresStORM {
     var redeemedby : String? = nil
     var cashedout : Int? = nil
     var cashedoutby : String? = nil
+    var cashedout_total : Double? = nil
+    var cashedout_note : String? = nil
 
     //MARK: Table name
     override public func table() -> String { return "code_transaction" }
@@ -84,7 +86,14 @@ public class CodeTransaction: PostgresStORM {
         if let data = this.data.codeTransactionDic.cashedout {
             cashedout = data
         }
-        
+
+        if let data = this.data.codeTransactionDic.cashedoutNote {
+            cashedout_note = data
+        }
+        if let data = this.data.codeTransactionDic.cashedoutTotal.doubleValue {
+            cashedout_total = data
+        }
+
         if let data = this.data.codeTransactionHistoryDic.archived.intValue {
             archived = data
         }
@@ -255,6 +264,15 @@ public class CodeTransaction: PostgresStORM {
                 if (value as? Int).isNotNil {
                     self.cashedout = (value as! Int)
                 }
+                
+            case "cashedout_note":
+                if (value as? String).isNotNil {
+                    self.cashedout_note = (value as! String)
+                }
+            case "cashedout_total":
+                if (value as? Double).isNotNil {
+                    self.cashedout_total = (value as! Double)
+                }
 
             case "archivedby":
                 if (value as? String).isNotNil {
@@ -320,6 +338,14 @@ public class CodeTransaction: PostgresStORM {
         
         if self.cashedoutby.isNotNil {
             dictionary.codeTransactionDic.cashedoutBy = self.cashedoutby
+        }
+        
+        if self.cashedout_note.isNotNil {
+            dictionary.codeTransactionDic.cashedoutNote = self.cashedout_note
+        }
+        
+        if self.cashedout_total.isNotNil {
+            dictionary.codeTransactionDic.cashedoutTotal = self.cashedout_total
         }
         
         if self.country_id.isNotNil {
@@ -471,7 +497,15 @@ public class CodeTransaction: PostgresStORM {
         if diff == true, self.cashedoutby != targetItem.cashedoutby {
             diff = false
         }
+
+        if diff == true, self.cashedout_note != targetItem.cashedout_note {
+            diff = false
+        }
         
+        if diff == true, self.cashedout_total != targetItem.cashedout_total {
+            diff = false
+        }
+
         return diff
         
     }

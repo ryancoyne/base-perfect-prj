@@ -42,6 +42,8 @@ public class CodeTransactionHistory: PostgresStORM {
     var redeemedby : String? = nil
     var cashedout : Int? = nil
     var cashedoutby : String? = nil
+    var cashedout_total : Double? = nil
+    var cashedout_note : String? = nil
 
     //MARK: Table name
     override public func table() -> String { return "code_transaction_history" }
@@ -84,6 +86,14 @@ public class CodeTransactionHistory: PostgresStORM {
         if let data = this.data.codeTransactionHistoryDic.cashedout {
             cashedout = data
         }
+        
+        if let data = this.data.codeTransactionHistoryDic.cashedoutNote {
+            cashedout_note = data
+        }
+        if let data = this.data.codeTransactionHistoryDic.cashedoutTotal.doubleValue {
+            cashedout_total = data
+        }
+
 
         if let data = this.data.codeTransactionHistoryDic.archived.intValue {
             archived = data
@@ -260,7 +270,16 @@ public class CodeTransactionHistory: PostgresStORM {
                 if (value as? Int).isNotNil {
                     self.cashedout = (value as! Int)
                 }
-                
+               
+            case "cashedout_note":
+                if (value as? String).isNotNil {
+                    self.cashedout_note = (value as! String)
+                }
+            case "cashedout_total":
+                if (value as? Double).isNotNil {
+                    self.cashedout_total = (value as! Double)
+                }
+
             case "archivedby":
                 if (value as? String).isNotNil {
                     self.archivedby = (value as! String)
@@ -476,6 +495,14 @@ public class CodeTransactionHistory: PostgresStORM {
         }
         
         if diff == true, self.cashedoutby != targetItem.cashedoutby {
+            diff = false
+        }
+
+        if diff == true, self.cashedout_note != targetItem.cashedout_note {
+            diff = false
+        }
+        
+        if diff == true, self.cashedout_total != targetItem.cashedout_total {
             diff = false
         }
 

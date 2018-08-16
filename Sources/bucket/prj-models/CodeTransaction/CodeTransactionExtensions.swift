@@ -109,13 +109,39 @@ struct CodeTransactionDictionary {
     }
     var cashedoutBy : String? {
         get {
-            return self.dic["cashedby"].stringValue
+            return self.dic["cashedoutby"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["cashedby"] = newValue!
+                self.dic["cashedoutby"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "cashedby")
+                self.dic.removeValue(forKey: "cashedoutby")
+            }
+        }
+    }
+
+    var cashedoutTotal : Double? {
+        get {
+            return self.dic["cashedout_total"].doubleValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["cashedout_total"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "cashedout_total")
+            }
+        }
+    }
+
+    var cashedoutNote : String? {
+        get {
+            return self.dic["cashedout_note"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["cashedout_note"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "cashedout_note")
             }
         }
     }

@@ -119,6 +119,8 @@ final class CodeTransactionHistoryTable {
         createsql.append("archivedby text COLLATE pg_catalog.default, ")
         createsql.append("cashedout int NOT NULL DEFAULT 0, ")
         createsql.append("cashedoutby text COLLATE pg_catalog.default, ")
+        createsql.append("cashedout_total numeric(10,5) NOT NULL DEFAULT 0, ")
+        createsql.append("cashedout_note text COLLATE pg_catalog.default, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
