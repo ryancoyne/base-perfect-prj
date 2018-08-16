@@ -26,7 +26,7 @@ struct ConsumerAPI {
                 ["method":"get",    "uri":"/api/v1/history", "handler":transactionHistory],
                 ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
                 ["method":"get",    "uri":"/api/v1/cashout/types/{countryCode}", "handler":cashoutTypes],
-                ["method":"get",    "uri":"/api/v1/cashout/options/{groupId}", "handler":cashoutOptions],
+                ["method":"get",    "uri":"/api/v1/cashout/{groupId}/options", "handler":cashoutOptions],
                 ["method":"post",    "uri":"/api/v1/cashout/{optionId}", "handler":cashout]
             ]
         }
