@@ -514,7 +514,7 @@ public class CodeTransaction: PostgresStORM {
         // now save the record
         do {
             // save the archive record
-            try cth.saveWithCustomType()
+            try cth.saveWithCustomType(nil, true)
             
             // now hard delete the original record
             try self.delete(self.id!)

@@ -1067,11 +1067,11 @@ extension PostgresStORM {
      - Returns: An Any type.  For a new inser, we will return the id
      */
     @discardableResult
-    func saveWithCustomType(_ user: String? = nil) throws -> [StORMRow] {
+    func saveWithCustomType(_ user: String? = nil, _ forceAdd:Bool = false) throws -> [StORMRow] {
         
         // act accordingly if this is an add or an update
         do {
-            if keyIsEmpty() {
+            if keyIsEmpty() || forceAdd {
                 return try addWithCustomTypes(user)
             } else {
                 return try updateWithCustomType(user)
@@ -1209,14 +1209,14 @@ extension PostgresStORM {
                 let theUser = user ?? CCXDefaultUserValues.user_server
                 keys.append(i.0)
                 vals.append("'\(theUser)'")
-                switch self {
-                case is CodeTransaction:
-                    (self as! CodeTransaction).modifiedby = theUser
-                case is CodeTransactionHistory:
-                    (self as! CodeTransactionHistory).modifiedby = theUser
-                default:
-                    print("[CCXExtensions ERROR] updateWithCustomType  TYPE NOT IMPLEMENTED to update model.")
-                }
+//                switch self {
+//                case is CodeTransaction:
+//                    (self as! CodeTransaction).createdby = theUser
+//                case is CodeTransactionHistory:
+//                    (self as! CodeTransactionHistory).createdby = theUser
+//                default:
+//                    print("[CCXExtensions INFO] updateWithCustomType  TYPE \(self) NOT IMPLEMENTED to add model.")
+//                }
             } else if (i.0 != idcolumn) && (String(describing: i.1) != "nil") {
                 
                 let c = type(of: i.1)
@@ -1342,7 +1342,7 @@ extension PostgresStORM {
                 case is CodeTransactionHistory:
                     (self as! CodeTransactionHistory).modified = now
                 default:
-                    print("[CCXExtensions ERROR] updateWithCustomType  TYPE NOT IMPLEMENTED to update model.")
+                    print("[CCXExtensions INFO] updateWithCustomType  TYPE \(self) NOT IMPLEMENTED to update model.")
                 }
             } else if (i.element.0 == "modifiedby") {
                 let theUser = user ?? CCXDefaultUserValues.user_server
@@ -1353,7 +1353,7 @@ extension PostgresStORM {
                 case is CodeTransactionHistory:
                     (self as! CodeTransactionHistory).modifiedby = theUser
                 default:
-                    print("[CCXExtensions ERROR] updateWithCustomType  TYPE NOT IMPLEMENTED to update model.")
+                    print("[CCXExtensions INFO] updateWithCustomType  TYPE \(self) NOT IMPLEMENTED to update model.")
                 }
             } else if (i.element.0 != idcolumn) && value != "nil" {
                 
