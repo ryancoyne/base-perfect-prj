@@ -1198,8 +1198,7 @@ extension PostgresStORM {
         var vals = [String]()
         for i in thedata {
             
-            // first lets see if the field is 'created' or 'createdby'
-            if (i.0 != idcolumn) && (String(describing: i.1) != "nil") {
+            if (String(describing: i.1) != "nil") {
                 let c = type(of: i.1)
                 switch c {
                 case is String.Type, is String?.Type:
