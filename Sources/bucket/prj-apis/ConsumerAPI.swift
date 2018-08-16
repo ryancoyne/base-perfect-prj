@@ -39,7 +39,32 @@ struct ConsumerAPI {
                 // Check if the user is logged in:
                 guard !Account.userBouce(request, response) else { return }
                 
-                // Okay we are finding the transaction history
+                guard let countryid = request.countryId, countryid > 0 else { response.invalidCountryCode; return }
+                
+                let pagination = request.getOffsetLimit()
+                
+                let userId = request.session!.userid
+                
+                // Okay we are finding the transaction history - it is all in the code_transaction_history table
+                var sql = "SELECT cth.*, r.name FROM code_transaction_history AS cth "
+                sql.append("WHERE cth.redeemedby = '\(userId)' ")
+                sql.append("AND cth.country_id = \(countryid) ")
+                sql.append("AND cth.deleted = 0 ")
+                sql.append("LEFT JOIN retailer AS r ")
+                sql.append("ON cth.retailer_id = r.id ")
+                sql.append("ORDER BY redeemed DESC ")
+                
+                if pagination.limitNumber > 0 {
+                    sql.append("LIMIT \(pagination.limitNumber) ")
+                }
+                
+                if pagination.offsetNumber > 0 {
+                    sql.append("OFFSET \(pagination.offsetNumber) ")
+                }
+                
+                // this will give us all of the records - including the cashed out records
+                
+                
                 
                 
             }
@@ -285,7 +310,59 @@ struct ConsumerAPI {
                 // Check if the user is logged in:
                 guard !Account.userBouce(request, response) else { return }
 
+                let userId = request.session?.userid
+                
                 // Okay we are finding the specific type, and grabbing the fields we need:
+                
+                var amount_to_cashout:Double = 50.0
+                
+                // there are a couple of things we need to do.  First -- we need to loop thru the records - from oldest to newest (based on created code dates)
+                var sql = "SELECT id, amount, amount_available, customer_code, redeemedby "
+                sql.append("FROM code_transaction_history_view_deleted_no ")
+                sql.append("WHERE redeemedby = \(userId!) ")
+                sql.append("AND amount_available > 0 ")
+                sql.append("ORDER BY created DESC")
+                let cth = CodeTransactionHistory()
+                let cth_rec = try? cth.sqlRows(sql, params: [])
+                
+                // we will determine the records to use their entire amount and the records to use portions
+                
+                var included:[Int] = []
+                var lastone = 0
+                var lastoneamount:Double = 0.0
+                var totalcount:Double = 0.0
+                
+                // calculate wiich records we will use for the cashout amount.
+                if cth_rec.isNotNil {
+                    for i in cth_rec! {
+                        
+                        if let tam = i.data["amount_available"].doubleValue {
+                            if (totalcount + tam) <= amount_to_cashout {
+                                totalcount += tam
+                                included.append(i.data["id"].intValue!)
+                            } else if totalcount < amount_to_cashout {
+                                lastoneamount = amount_to_cashout - totalcount
+                                lastone = i.data["id"].intValue!
+                            }
+                        }
+                    }
+                }
+                
+                // now we have the list of records to include and the final partial record
+                if totalcount < amount_to_cashout {
+                    // they do not have enough to cashout - something happened wrong here.
+                    
+                    // RETURN AN ERROR
+                    
+                }
+                
+                // the steps we need to take here now:
+                // 1. Audit the record
+                // 2. Update the available amount on the record
+                // 3. Update the cashed out timestamp (and user) - all timestamps should be the same - that is the glue that holds the records together
+                // 4. Save to the cashout table
+                // 5. Update the user total (decrement by the cashout amount)
+                // 6. Send the wonderful cashout message for a successful completion.
                 
                 
             }
@@ -335,8 +412,8 @@ fileprivate extension HTTPRequest {
     var countryCode : String? {
         return self.urlVariables["countryCode"]
     }
-    var countryId : String? {
-        return self.urlVariables["countryId"]
+    var countryId : Int? {
+        return self.urlVariables["countryId"].intValue
     }
     var groupId : String? {
         return self.urlVariables["groupId"]
