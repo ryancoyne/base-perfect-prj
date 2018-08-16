@@ -54,7 +54,7 @@ struct ConsumerAPI {
                     return
                 }
                 
-                var retCodeSub:[Any] = []
+                var retCode:[String:Any] = [:]
                 
                 // lets redeem the code now
                 let redeemed = Int(Date().timeIntervalSince1970)
@@ -63,6 +63,7 @@ struct ConsumerAPI {
                 ct.redeemed   = redeemed
                 ct.redeemedby = redeemedby
                 if let _ = try? ct.saveWithCustomType(redeemedby) {
+                    
                     // this means it was saved - audit and archive
                     AuditFunctions().addCustomerCodeAuditRecord(ct)
                     
@@ -70,14 +71,30 @@ struct ConsumerAPI {
                     UserBalanceFunctions().adjustUserBalance(redeemedby!, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
                     
                     // prepare the return
-//HERE
+                    retCode["amount"] = ct.amount!
+
+                    let wallet = UserBalanceFunctions().getConsumerBalances(redeemedby!)
+                    if wallet.count > 0 {
+                        retCode["buckets"] = wallet
+                    }
                     
                     // now archive the record
                     ct.archiveRecord()
+                    
                 }
                 
-                
-                // if there is an answer, then the code is valid - get the record
+                //return the correct codes
+                if retCode.count > 0 {
+                    try? response.setBody(json: retCode)
+                    response.completed(status: .ok)
+                    return
+                    
+                } else {
+                    // there was a problem....
+                    response.completed(status: .custom(code: 500, message: "There was a problem pulling the data from the tables."))
+                    return
+                }
+            
                 
             }
         }

@@ -26,7 +26,7 @@ public class UserTotal: PostgresStORM {
     var balance    : Double? = nil
     
     //MARK: Table name
-    override public func table() -> String { return "user_account_total" }
+    override public func table() -> String { return "user_total" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {

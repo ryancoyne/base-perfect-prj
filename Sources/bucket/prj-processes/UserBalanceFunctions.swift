@@ -12,6 +12,35 @@ import PerfectLib
 
 public class UserBalanceFunctions {
 
+    func getConsumerBalances(_ userid:String)->[Any] {
+        
+        var retArray:[Any] = []
+        
+        var thesql = "SELECT ut.*, cc.id AS country_id, cc.code_alpha_2 AS countryCode "
+        thesql.append("FROM user_total AS ut ")
+        thesql.append("LEFT OUTER JOIN country AS cc ")
+        thesql.append("ON ut.country_id = cc.id ")
+        thesql.append("WHERE ut.user_id = $1")
+        
+        let w = UserTotal()
+        let resset = try? w.sqlRows(thesql, params: [userid])
+        
+        if resset.isNotNil {
+            for i in resset! {
+                var wallet:[String:Any] = [:]
+                
+                wallet["id"]     = i.data["id"]
+                wallet["amount"] = i.data["balance"]
+                wallet["country_id"] = i.data["country_id"]
+                wallet["countryCode"] = i.data["countryCode"]
+                retArray.append(wallet)
+            }
+        }
+        
+        
+        return retArray
+    }
+    
     func getCurrentBalance(_ userid:String, countryid:Int) -> Double {
         
         var total:Double = 0.0
