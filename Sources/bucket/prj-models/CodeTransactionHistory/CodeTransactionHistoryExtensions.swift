@@ -35,19 +35,6 @@ struct CodeTransactionHistoryDictionary {
         }
     }
 
-    var codeTransactionId : Int? {
-        get {
-            return self.dic["code_transaction_id"].intValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["code_transaction_id"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "code_transaction_id")
-            }
-        }
-    }
-
     var countryId : Int? {
         get {
             return self.dic["country_id"].intValue
@@ -228,6 +215,18 @@ struct CodeTransactionHistoryDictionary {
                 self.dic["amount"] = newValue!
             } else {
                 self.dic.removeValue(forKey: "amount")
+            }
+        }
+    }
+    var amountAvailable : Double? {
+        get {
+            return self.dic["amount_available"].doubleValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["amount_available"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "amount_available")
             }
         }
     }

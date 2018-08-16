@@ -21,6 +21,9 @@ public class CodeTransaction: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
+    var archived    : Int?    = nil
+    var archivedby  : String? = nil
+
     var retailer_id     : Int? = nil
     var country_id     : Int? = nil
     var customer_code     : String? = nil
@@ -82,6 +85,14 @@ public class CodeTransaction: PostgresStORM {
             cashedout = data
         }
         
+        if let data = this.data.codeTransactionHistoryDic.archived.intValue {
+            archived = data
+        }
+        
+        if let data = this.data.codeTransactionHistoryDic.archivedBy {
+            archivedby = data
+        }
+
         if let data = this.data.codeTransactionDic.countryId {
             country_id = data
         }
@@ -235,7 +246,7 @@ public class CodeTransaction: PostgresStORM {
                     self.disputed = (value as! Int)
                 }
 
-            case "cashedout_by":
+            case "cashedoutby":
                 if (value as? String).isNotNil {
                     self.cashedoutby = (value as! String)
                 }
@@ -243,6 +254,16 @@ public class CodeTransaction: PostgresStORM {
             case "cashedout":
                 if (value as? Int).isNotNil {
                     self.cashedout = (value as! Int)
+                }
+
+            case "archivedby":
+                if (value as? String).isNotNil {
+                    self.archivedby = (value as! String)
+                }
+                
+            case "archived":
+                if (value as? Int).isNotNil {
+                    self.archived = (value as! Int)
                 }
 
             default:
@@ -285,6 +306,14 @@ public class CodeTransaction: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
+        if self.archived.isNotNil {
+            dictionary.codeTransactionHistoryDic.archived = self.archived
+        }
+        
+        if self.archivedby.isNotNil {
+            dictionary.codeTransactionHistoryDic.archivedBy = self.archivedby
+        }
+
         if self.cashedout.isNotNil {
             dictionary.codeTransactionDic.cashedout = self.cashedout
         }
@@ -480,7 +509,7 @@ public class CodeTransaction: PostgresStORM {
         }
         
         // and finally set the original code transaction id
-        cth.code_transaction_id = self.id
+        cth.id = self.id
         
         // now save the record
         do {

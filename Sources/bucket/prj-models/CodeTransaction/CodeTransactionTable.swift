@@ -133,6 +133,8 @@ final class CodeTransactionTable {
         createsql.append("disputedby text COLLATE pg_catalog.default, ")
         createsql.append("redeemed int NOT NULL DEFAULT 0, ")
         createsql.append("redeemedby text COLLATE pg_catalog.default, ")
+        createsql.append("archived int NOT NULL DEFAULT 0, ")
+        createsql.append("archivedby text COLLATE pg_catalog.default, ")
         createsql.append("cashedout int NOT NULL DEFAULT 0, ")
         createsql.append("cashedoutby text COLLATE pg_catalog.default, ")
 

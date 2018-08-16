@@ -24,7 +24,6 @@ public class CodeTransactionHistory: PostgresStORM {
     var archived    : Int?    = nil
     var archivedby  : String? = nil
 
-    var code_transaction_id   : Int? = nil
     var retailer_id           : Int? = nil
     var country_id            : Int? = nil
     var customer_code         : String? = nil
@@ -34,6 +33,7 @@ public class CodeTransactionHistory: PostgresStORM {
     var client_transaction_id : String? = nil
     var batch_id              : String? = nil
     var amount                : Double? = nil
+    var amount_available      : Double? = nil
     var total_amount          : Double? = nil
     
     var disputed : Int? = nil
@@ -93,11 +93,6 @@ public class CodeTransactionHistory: PostgresStORM {
             archivedby = data
         }
 
-        
-        if let data = this.data.codeTransactionHistoryDic.codeTransactionId {
-            code_transaction_id = data
-        }
-
         if let data = this.data.codeTransactionHistoryDic.countryId {
             country_id = data
         }
@@ -149,7 +144,11 @@ public class CodeTransactionHistory: PostgresStORM {
         if let data = this.data.codeTransactionHistoryDic.amount {
             amount = data
         }
-        
+
+        if let data = this.data.codeTransactionHistoryDic.amountAvailable {
+            amount_available = data
+        }
+
         if let data = this.data.codeTransactionHistoryDic.totalAmount {
             total_amount = data
         }
@@ -172,9 +171,9 @@ public class CodeTransactionHistory: PostgresStORM {
             
             switch key.lowercased() {
 
-            case "code_transaction_id":
+            case "id":
                 if (value as? Int).isNotNil {
-                    self.code_transaction_id = (value as! Int)
+                    self.id = (value as! Int)
                 }
 
             case "country_id":
@@ -201,7 +200,12 @@ public class CodeTransactionHistory: PostgresStORM {
                 if (value as? Double).isNotNil {
                     self.amount = (value as! Double)
                 }
-                
+
+            case "amount_available":
+                if (value as? Double).isNotNil {
+                    self.amount_available = (value as! Double)
+                }
+
             case "total_amount":
                 if (value as? Double).isNotNil {
                     self.total_amount = (value as! Double)
@@ -247,7 +251,7 @@ public class CodeTransactionHistory: PostgresStORM {
                     self.disputed = (value as! Int)
                 }
 
-            case "cashedout_by":
+            case "cashedoutby":
                 if (value as? String).isNotNil {
                     self.cashedoutby = (value as! String)
                 }
@@ -255,6 +259,16 @@ public class CodeTransactionHistory: PostgresStORM {
             case "cashedout":
                 if (value as? Int).isNotNil {
                     self.cashedout = (value as! Int)
+                }
+                
+            case "archivedby":
+                if (value as? String).isNotNil {
+                    self.archivedby = (value as! String)
+                }
+                
+            case "archived":
+                if (value as? Int).isNotNil {
+                    self.archived = (value as! Int)
                 }
 
             default:
@@ -313,10 +327,6 @@ public class CodeTransactionHistory: PostgresStORM {
             dictionary.codeTransactionHistoryDic.archivedBy = self.archivedby
         }
         
-        if self.code_transaction_id.isNotNil {
-            dictionary.codeTransactionHistoryDic.codeTransactionId = self.code_transaction_id
-        }
-
         if self.country_id.isNotNil {
             dictionary.codeTransactionHistoryDic.countryId = self.country_id
         }
@@ -364,7 +374,11 @@ public class CodeTransactionHistory: PostgresStORM {
         if self.amount.isNotNil {
             dictionary.codeTransactionDic.amount = self.amount
         }
-        
+
+        if self.amount_available.isNotNil {
+            dictionary.codeTransactionDic.amountAvailable = self.amount_available
+        }
+
         if self.total_amount.isNotNil {
             dictionary.codeTransactionDic.totalAmount = self.total_amount
         }
@@ -376,10 +390,6 @@ public class CodeTransactionHistory: PostgresStORM {
     func compare(targetItem: CodeTransactionHistory)-> Bool {
         
         var diff = true
-
-        if diff == true, self.code_transaction_id != targetItem.code_transaction_id {
-            diff = false
-        }
 
         if diff == true, self.retailer_id != targetItem.retailer_id {
             diff = false
@@ -408,7 +418,11 @@ public class CodeTransactionHistory: PostgresStORM {
         if diff == true, self.amount != targetItem.amount {
             diff = false
         }
-        
+
+        if diff == true, self.amount_available != targetItem.amount_available {
+            diff = false
+        }
+
         if diff == true, self.total_amount != targetItem.total_amount {
             diff = false
         }

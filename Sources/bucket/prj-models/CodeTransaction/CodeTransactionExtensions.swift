@@ -120,6 +120,31 @@ struct CodeTransactionDictionary {
         }
     }
 
+    var archived : Int? {
+        get {
+            return self.dic["archived"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["archived"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "archived")
+            }
+        }
+    }
+    var archivedBy : String? {
+        get {
+            return self.dic["archivedby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["archivedby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "archivedby")
+            }
+        }
+    }
+
     var redeemed : Int? {
         get {
             return self.dic["redeemed"].intValue
