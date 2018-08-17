@@ -70,6 +70,8 @@ struct ConsumerAPI {
                 
                 guard let countryid = request.countryId, countryid > 0 else { response.invalidCountryCode; return }
                 
+                let transType = request.transactionType?.capitalize() ?? "ALL"
+                
                 let pagination = request.getOffsetLimit()
                 
                 let userId = request.session!.userid
@@ -79,6 +81,17 @@ struct ConsumerAPI {
                 sql.append("WHERE cth.redeemedby = '\(userId)' ")
                 sql.append("AND cth.country_id = \(countryid) ")
                 sql.append("AND cth.deleted = 0 ")
+                
+                switch transType {
+                case "SCAN":
+                    sql.append("AND (cth.customer_code = '' OR cth.customer_code IS NULL) ")
+                case "CASHOUT":
+                    sql.append("AND cth.customer_code <> '' ")
+                default:
+                    // do nothing
+                    break
+                }
+                
                 sql.append("LEFT JOIN retailer AS r ")
                 sql.append("ON cth.retailer_id = r.id ")
                 sql.append("ORDER BY redeemed DESC ")
@@ -91,10 +104,45 @@ struct ConsumerAPI {
                     sql.append("OFFSET \(pagination.offsetNumber) ")
                 }
                 
-                // this will give us all of the records - including the cashed out records
+                var substuff:[Any] = []
                 
+                let cth = CodeTransactionHistory()
                 
+                let res = try? cth.sqlRows(sql, params: [])
+                if res.isNotNil {
+
+                    // lets setup the return
+                    // note - if the batch ID is not present, the code has not been redeemed.  If the batch ID is there the code has been completed.
+
+                    for i in res! {
+                        var tmp:[String:Any] = [:]
+                        tmp["amount"] = i.data["cth.amount"]
+                        if i.data["cth.batch_id"].isNotNil {
+                            tmp["status"] = "completed"
+                        } else {
+                            tmp["status"] = "pending"
+                        }
+                        
+                        if let thetime = i.data["cth.cashedout"].intValue {
+                            tmp["type"] = "cashout"
+                            tmp["description"] = i.data["cth.cashedout_note"]
+                            tmp["amount"] = i.data["cth.cashedout_total"]
+                            tmp["created"] = thetime.dateString
+                        } else {
+                            tmp["type"] = "scan"
+                            if let thetime = i.data["cth.redeemed"].intValue {
+                                tmp["created"] = thetime.dateString
+                            }
+                        }
+                        
+                        substuff.append(tmp)
+                    }
+                }
+
+                let mainReturn:[String:Any] = ["transactions":substuff]
                 
+                try? response.setBody(json: mainReturn)
+                response.completed(status: .ok)
                 
             }
         }
@@ -391,7 +439,7 @@ struct ConsumerAPI {
                 // 3. Update the cashed out timestamp (and user) - all timestamps should be the same - that is the glue that holds the records together
                 // 4. Add the total cashout amount to all records
                 // 5. Add the cashout note to the records - this should be where they cashout to - it is displayed in history
-                // 6. Save to the cashout table
+                // 6. Save a new record to the history for a cashout record - without the coupon code.  This acts as the record for cashout for the API return.
                 // 7. Update the user total (decrement by the cashout amount)
                 // 8. Send the wonderful cashout message for a successful completion.
                 
@@ -451,6 +499,9 @@ fileprivate extension HTTPRequest {
     }
     var optionId : Int? {
         return self.urlVariables["optionId"].intValue
+    }
+    var transactionType : String? {
+        return self.urlVariables["transactionType"]
     }
     func getOffsetLimit() -> (offsetNumber:Int, limitNumber:Int) {
         
