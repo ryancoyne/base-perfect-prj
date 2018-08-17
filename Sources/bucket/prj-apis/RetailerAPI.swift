@@ -249,7 +249,7 @@ struct RetailerAPI {
                         try? add.find(["id":String(terminal.address_id!)])
                         
                         let transaction = CodeTransaction()
-                        transaction.created = Int(Date().timeIntervalSince1970)
+                        transaction.created = CCXServiceClass.sharedInstance.getNow()
                         transaction.amount = json?["amount"].doubleValue
                         transaction.amount_available = json?["amount"].doubleValue
                         transaction.total_amount = json?["totalTransactionAmount"].doubleValue

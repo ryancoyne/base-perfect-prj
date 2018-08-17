@@ -25,7 +25,7 @@ final class SampleData {
     func addUserData() {
         let tbl = Account()
         
-        let createdtime = Int(Date().timeIntervalSince1970)
+        let createdtime = CCXServiceClass.sharedInstance.getNow()
         
         var checkuser = "SELECT id FROM account WHERE id = 'AUTO_CREATED_USER'; "
         var tr = try? tbl.sqlRows(checkuser, params: [])
@@ -81,7 +81,7 @@ final class SampleData {
 
         let tbl = Retailer()
         
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
         
         var sqlstatement = "INSERT INTO \(tbl.table()) "
         
@@ -155,7 +155,7 @@ final class SampleData {
         
         let tbl = Account()
         
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
 
         var userid = UUID().uuidString
         var checkuser = "INSERT INTO account "

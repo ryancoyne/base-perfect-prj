@@ -100,7 +100,7 @@ struct ConsumerAPI {
                 var retCode:[String:Any] = [:]
                 
                 // lets redeem the code now
-                let redeemed = Int(Date().timeIntervalSince1970)
+                let redeemed = CCXServiceClass.sharedInstance.getNow()
                 let redeemedby = request.session!.userid
                 try? ct.get(rsp!.first!.data.id!)
                 ct.redeemed   = redeemed
