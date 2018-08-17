@@ -698,8 +698,12 @@ struct UserAPI {
                         if theTry.isNotNil && !account.id.isEmpty {
                             account.passvalidation = secureToken
                         }
+                        
+                        if account.id.isEmpty { try? response.setBody(json: ["message":"You are not registered on Bucket."])
+                            .setHeader(.contentType, value: "application/json")
+                            .completed(status: .forbidden) }
                     
-                        if !account.id.isEmpty, (try? account.save()).isNotNil {
+                        if (try? account.save()).isNotNil {
                             
                             // Lets send out the email to reset the password:
                             let h = "<p>To reset your password for your account, please <a href=\"\(baseURL)/verifyAccount/forgotpassword/\(account.passvalidation)\">click here</a></p>"
@@ -714,7 +718,6 @@ struct UserAPI {
                             try? response.setBody(json: ["error":"Unknown error"])
                                 .setHeader(.contentType, value: "application/json")
                                 .completed(status: .internalServerError)
-                            
                         }
                         
                     } else {
