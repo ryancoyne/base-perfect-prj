@@ -149,7 +149,7 @@ struct ConsumerAPI {
                 // Check if the user is logged in:
                 guard !Account.userBouce(request, response) else { return }
 
-                guard let groupId = request.groupId.intValue, groupId == 0 else { return response.invalidGroupCode }
+                guard let groupId = request.groupId, groupId != 0 else { return response.invalidGroupCode }
 
                 var sqlstatement = "SELECT * FROM cashout_option_view_deleted_no WHERE group_id = $1 ORDER BY display_order ASC"
                 
@@ -222,7 +222,7 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-//                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBouce(request, response) else { return }
 
                 // Here we need to get all the modes, and get all the fields
                 guard let countryCode = request.countryCode else { return response.invalidCountryCode }
@@ -417,11 +417,11 @@ fileprivate extension HTTPRequest {
     var countryId : Int? {
         return self.urlVariables["countryId"].intValue
     }
-    var groupId : String? {
-        return self.urlVariables["groupId"]
+    var groupId : Int? {
+        return self.urlVariables["groupId"].intValue
     }
-    var optionId : String? {
-        return self.urlVariables["optionId"]
+    var optionId : Int? {
+        return self.urlVariables["optionId"].intValue
     }
     func getOffsetLimit() -> (offsetNumber:Int, limitNumber:Int) {
         

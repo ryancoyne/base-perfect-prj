@@ -65,6 +65,8 @@ extension Optional {
             return Int(self as! Float)
         case is Int, is Int?:
             return self as? Int
+        case is String, is String?:
+            return Int(self as! String)
         default:
             return nil
         }
