@@ -55,7 +55,7 @@ final class CCXDBTables {
     var useradminsql : String {
         get {
             
-            let create_time = Int(Date().timeIntervalSince1970)
+            let create_time = CCXServiceClass.sharedInstance.getNow()
             
             var u1 = "INSERT INTO account (id,username,email,source,usertype,detail) VALUES("
             u1.append("'\(CCXSystemData.admin)',")
@@ -73,7 +73,7 @@ final class CCXDBTables {
     var usersql : String {
         get {
             
-            let create_time = Int(Date().timeIntervalSince1970)
+            let create_time = CCXServiceClass.sharedInstance.getNow()
             
             var u1 = "INSERT INTO account (id,username,email,source,usertype,detail) VALUES("
             u1.append("'\(CCXDefaultUserValues.user_server)',")

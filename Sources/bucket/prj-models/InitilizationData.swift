@@ -25,7 +25,7 @@ final class InitializeData {
     func addLedgerAccountTypes() {
         let tbl = LedgerAccountType()
         
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
 
         var checkuser = "INSERT INTO \(tbl.table()) "
         checkuser.append("(created, createdby,account_group,title,description) ")
@@ -42,7 +42,7 @@ final class InitializeData {
     func addLedgerTypes() {
         let tbl = LedgerType()
         
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
         
         var checkuser = "INSERT INTO \(tbl.table()) "
         checkuser.append("(created, createdby,title,description) ")
@@ -58,7 +58,7 @@ final class InitializeData {
         
         let tbl = LedgerAccount()
         
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
         
         var checkuser = "INSERT INTO \(tbl.table()) "
         checkuser.append("(created, createdby,ledger_account_type_id,title,description) ")
@@ -72,7 +72,7 @@ final class InitializeData {
     func addPOS() {
         let tbl = POS()
 
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
         
         var checkuser = "INSERT INTO \(tbl.table()) "
         checkuser.append("(created, createdby, name,model) ")
@@ -90,7 +90,7 @@ final class InitializeData {
         
         let tbl = ContactType()
         
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
         
         var checkuser = "INSERT INTO \(tbl.table()) "
         checkuser.append("(created, createdby, name,description) ")
@@ -116,7 +116,7 @@ final class InitializeData {
         
         let tbl = CashoutGroup()
 
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
 
         var checkuser = "INSERT INTO \(tbl.table()) "
         checkuser.append("(created, createdby, group_name,description, country_id, picture_url, display_order) ")
@@ -136,7 +136,7 @@ final class InitializeData {
 
     func addCashoutOption() {
 
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
         
         let usa = Country()
         try? usa.find(["code_alpha_2":"US"])
@@ -344,7 +344,7 @@ final class InitializeData {
         
         let tbl = Form()
         
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
         
         var checkuser = "INSERT INTO \(tbl.table()) "
         checkuser.append("(created, createdby, name, title) ")
@@ -363,7 +363,7 @@ final class InitializeData {
 
         let tbl = FormFieldType()
         
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
         
         var checkuser = "INSERT INTO \(tbl.table()) "
         checkuser.append("(created, createdby, name) ")
@@ -384,7 +384,7 @@ final class InitializeData {
 
         let tbl = FormField()
         
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
         
         var checkuser = "INSERT INTO \(tbl.table()) "
         checkuser.append("(created, createdby, name, type_id, length, is_required, needs_confirmation) ")
@@ -402,7 +402,7 @@ final class InitializeData {
 
         let tbl = FormFields()
         
-        let created_time = Int(Date().timeIntervalSince1970)
+        let created_time = CCXServiceClass.sharedInstance.getNow()
         
         var checkuser = "INSERT INTO \(tbl.table()) "
         checkuser.append("(created, createdby, form_id, field_id, display_order) ")
@@ -428,7 +428,7 @@ final class InitializeData {
     func addCountryCodes() {
         let tbl = Country()
         
-        let create_time = Int(Date().timeIntervalSince1970)
+        let create_time = CCXServiceClass.sharedInstance.getNow()
 
         var insertstatement = "INSERT INTO \(tbl.table())"
         insertstatement.append(" (name,code_numeric,code_alpha_2,code_alpha_3,created,createdby) ")
