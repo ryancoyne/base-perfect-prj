@@ -46,10 +46,8 @@ struct ConsumerAPI {
                 if let countryId = request.countryId {
                     guard countryId != 0 else { response.invalidCountryCode; return }
                     let amount = UserBalanceFunctions().getCurrentBalance(request.session!.userid, countryid: countryId)
-                    if amount > 0 {
-                        try? response.setBody(json: ["amount": amount])
-                                .completed(status: .ok)
-                    } else { return response.zeroBalance(countryId) }
+                    try? response.setBody(json: ["amount": amount])
+                        .completed(status: .ok)
                 } else {
                     let buckets = UserBalanceFunctions().getConsumerBalances(request.session!.userid)
                     try? response.setBody(json: ["buckets":buckets])
@@ -290,10 +288,10 @@ struct ConsumerAPI {
                         // put it together..
                         var s:[String:Any] = [:]
                         if let _ = i.data.id { s["id"] = i.data.id! }
-                        if let _ = i.data.cashoutGroupDic.group_name { s["name"] = i.data.cashoutGroupDic.group_name! }
-                        if let _ = i.data.cashoutGroupDic.description { s["description"] = i.data.cashoutGroupDic.description! }
-                        if let _ = i.data.cashoutGroupDic.country_id { s["country_id"] = i.data.cashoutGroupDic.country_id! }
-                        if let _ = i.data["option_count"] { s["option_count"] = i.data["option_count"]! }
+                        if let name = i.data.cashoutGroupDic.group_name { s["name"] = name }
+                        if let desc = i.data.cashoutGroupDic.description { s["description"] = desc }
+                        if let countryId = i.data.cashoutGroupDic.country_id { s["countryId"] = countryId }
+                        if let optionCount = i.data["option_count"] { s["optionCount"] = optionCount }
 
                         if let image = i.data.cashoutGroupDic.picture_url, image.length > 1 {
 
@@ -411,11 +409,6 @@ fileprivate extension HTTPResponse {
     }
     var invalidCountryCode : Void {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such country code found"])
-            .setHeader(.contentType, value: "application/json")
-            .completed(status: .notAcceptable)
-    }
-    func zeroBalance(_ countryId : Int) {
-        return try! self.setBody(json: ["errorCode":"ZeroBalance", "message": "You have a zero balance for countryId \(countryId)"])
             .setHeader(.contentType, value: "application/json")
             .completed(status: .notAcceptable)
     }
