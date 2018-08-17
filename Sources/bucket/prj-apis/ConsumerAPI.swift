@@ -23,12 +23,43 @@ struct ConsumerAPI {
     struct json {
         static var routes : [[String:Any]] {
             return [
+                // BALANCE ENDPOINT:
+                ["method":"get",    "uri":"/api/v1/balance", "handler":balance],
+                ["method":"get",    "uri":"/api/v1/balance/{countryId}", "handler":balance],
+                // TRANSACTION ENDPOINTS:
                 ["method":"get",    "uri":"/api/v1/history", "handler":transactionHistory],
                 ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
+                // CASHOUT ENDPOINTS:
                 ["method":"get",    "uri":"/api/v1/cashout/types/{countryCode}", "handler":cashoutTypes],
                 ["method":"get",    "uri":"/api/v1/cashout/{groupId}/options", "handler":cashoutOptions],
                 ["method":"post",    "uri":"/api/v1/cashout/{optionId}", "handler":cashout]
             ]
+        }
+        //MARK: - Balance Function:
+        public static func balance(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Check the user:
+                guard !Account.userBouce(request, response) else { return }
+                
+                if let countryId = request.countryId {
+                    guard countryId != 0 else { response.invalidCountryCode; return }
+                    let amount = UserBalanceFunctions().getCurrentBalance(request.session!.userid, countryid: countryId)
+                    if amount > 0 {
+                        try? response.setBody(json: ["amount": amount])
+                                .completed(status: .ok)
+                    } else { return response.zeroBalance(countryId) }
+                } else {
+                    let buckets = UserBalanceFunctions().getConsumerBalances(request.session!.userid)
+                    try? response.setBody(json: ["buckets":buckets])
+                        .completed(status: .ok)
+                }
+                // Okay, we have a user id.  Lets get their balance and return the JSON:
+                
+                
+                
+            }
         }
         
         //MARK: - Transaction History
@@ -128,7 +159,7 @@ struct ConsumerAPI {
                 
                 //return the correct codes
                 if retCode.count > 0 {
-                    try? response.setBody(json: retCode)
+                    _=try? response.setBody(json: retCode)
                     response.completed(status: .ok)
                     return
                     
@@ -380,6 +411,11 @@ fileprivate extension HTTPResponse {
     }
     var invalidCountryCode : Void {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such country code found"])
+            .setHeader(.contentType, value: "application/json")
+            .completed(status: .notAcceptable)
+    }
+    func zeroBalance(_ countryId : Int) {
+        return try! self.setBody(json: ["errorCode":"ZeroBalance", "message": "You have a zero balance for countryId \(countryId)"])
             .setHeader(.contentType, value: "application/json")
             .completed(status: .notAcceptable)
     }
