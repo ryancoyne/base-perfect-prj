@@ -10,6 +10,14 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
+struct CodeTransactionCodes {
+    static let completed                = "completed" // the code has been complete
+    static let cashout_pending          = "cashout pending" // external services to be contacted
+    static let merchant_pending         = "merchant pending" // external services to be contacted
+    static let partial_cashout_pending  = "partial cashout pending" // partial amount cashed out
+    static let partial_cashout_complete = "partial cashout complete" // partial amount cashed out
+}
+
 public class CodeTransaction: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
