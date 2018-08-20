@@ -35,6 +35,7 @@ public class CodeTransaction: PostgresStORM {
     var amount : Double? = nil
     var amount_available : Double? = nil
     var total_amount : Double? = nil
+    var status : String? = nil
 
     var disputed : Int? = nil
     var disputedby : String? = nil
@@ -161,7 +162,11 @@ public class CodeTransaction: PostgresStORM {
         if let data = this.data.codeTransactionDic.totalAmount.doubleValue {
             total_amount = data
         }
-        
+
+        if let data = this.data.codeTransactionDic.status.stringValue {
+            status = data
+        }
+
     }
     
     func rows() -> [CodeTransaction] {
@@ -235,6 +240,11 @@ public class CodeTransaction: PostgresStORM {
                     self.batch_id = (value as! String)
                 }
                 
+            case "status":
+                if (value as? String).isNotNil {
+                    self.status = (value as! String)
+                }
+
             case "redeemedby":
                 if (value as? String).isNotNil {
                     self.redeemedby = (value as! String)
@@ -375,7 +385,11 @@ public class CodeTransaction: PostgresStORM {
         if self.batch_id.isNotNil {
             dictionary.codeTransactionDic.batchId = self.batch_id
         }
-        
+
+        if self.status.isNotNil {
+            dictionary.codeTransactionDic.status = self.status
+        }
+
         if self.client_location.isNotNil {
             dictionary.codeTransactionDic.clientLocation = self.client_location
         }
@@ -486,6 +500,10 @@ public class CodeTransaction: PostgresStORM {
             diff = false
         }
         
+        if diff == true, self.status != targetItem.status {
+            diff = false
+        }
+
         if diff == true, self.terminal_id != targetItem.terminal_id {
             diff = false
         }

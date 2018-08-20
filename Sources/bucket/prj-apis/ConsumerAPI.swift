@@ -86,17 +86,23 @@ struct ConsumerAPI {
                 
                 switch transType {
                 case "SCAN":
-                    sql.append("AND (cth.customer_code = '' OR cth.customer_code IS NULL) ")
-                case "CASHOUT":
                     sql.append("AND cth.customer_code <> '' ")
+                    break
+                case "CASHOUT":
+                    sql.append("AND (cth.customer_code = '' OR cth.customer_code IS NULL) ")
+                    break
                 default:
-                    // do nothing
+                    // this is both scan and cashout - so do not include the cashout detail records
+                    sql.append("AND (cth.cashedout > 0 AND (cth.customer_code = '' OR cth.customer_code IS NULL)) ")
                     break
                 }
-                
-                sql.append("LEFT JOIN retailer AS r ")
-                sql.append("ON cth.retailer_id = r.id ")
-                sql.append("ORDER BY redeemed DESC ")
+
+                // we do not need the retailer for cashouts - there will be no retailer for that type.
+                if transType != "CASHOUT" {
+                    sql.append("LEFT JOIN retailer AS r ")
+                    sql.append("ON cth.retailer_id = r.id ")
+                    sql.append("ORDER BY redeemed DESC ")
+                }
                 
                 if pagination.limitNumber > 0 {
                     sql.append("LIMIT \(pagination.limitNumber) ")
