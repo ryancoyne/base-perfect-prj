@@ -900,7 +900,7 @@ struct UserAPI {
                             }
                             //                        acc.usertype = .standard
                             acc.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
-                            acc.passvalidation.removeAll()
+                            acc.passreset.removeAll()
                             do {
                                 try acc.save()
                                 request.session?.userid = acc.id
