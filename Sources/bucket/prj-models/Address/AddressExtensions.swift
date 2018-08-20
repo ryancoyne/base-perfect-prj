@@ -143,6 +143,19 @@ struct AddressDictionary {
             }
         }
     }
+    var ach_transfer_minimum : Double? {
+        get {
+            return self.dic["ach_transfer_minimum"].doubleValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["ach_transfer_minimum"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "ach_transfer_minimum")
+            }
+        }
+    }
+
 }
 
 

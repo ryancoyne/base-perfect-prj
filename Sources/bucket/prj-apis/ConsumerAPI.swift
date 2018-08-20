@@ -27,7 +27,7 @@ struct ConsumerAPI {
                 ["method":"get",    "uri":"/api/v1/balance", "handler":balance],
                 ["method":"get",    "uri":"/api/v1/balance/{countryId}", "handler":balance],
                 // TRANSACTION ENDPOINTS:
-                ["method":"get",    "uri":"/api/v1/history", "handler":transactionHistory],
+                ["method":"get",    "uri":"/api/v1/history/{countryId}", "handler":transactionHistory],
                 ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
                 // CASHOUT ENDPOINTS:
                 ["method":"get",    "uri":"/api/v1/cashout/types/{countryCode}", "handler":cashoutTypes],
@@ -80,6 +80,13 @@ struct ConsumerAPI {
                 
                 // Okay we are finding the transaction history - it is all in the code_transaction_history table
                 var sql = "SELECT cth.*, r.name FROM code_transaction_history AS cth "
+
+                // we do not need the retailer for cashouts - there will be no retailer for that type.
+                if transType != "CASHOUT" {
+                    sql.append("LEFT JOIN retailer AS r ")
+                    sql.append("ON cth.retailer_id = r.id ")
+                }
+
                 sql.append("WHERE cth.redeemedby = '\(userId)' ")
                 sql.append("AND cth.country_id = \(countryid) ")
                 sql.append("AND cth.deleted = 0 ")
@@ -93,16 +100,11 @@ struct ConsumerAPI {
                     break
                 default:
                     // this is both scan and cashout - so do not include the cashout detail records
-                    sql.append("AND (cth.cashedout > 0 AND (cth.customer_code = '' OR cth.customer_code IS NULL)) ")
+                    sql.append("OR (cth.cashedout > 0 AND (cth.customer_code = '' OR cth.customer_code IS NULL)) ")
                     break
                 }
 
-                // we do not need the retailer for cashouts - there will be no retailer for that type.
-                if transType != "CASHOUT" {
-                    sql.append("LEFT JOIN retailer AS r ")
-                    sql.append("ON cth.retailer_id = r.id ")
-                    sql.append("ORDER BY redeemed DESC ")
-                }
+                sql.append("ORDER BY redeemed DESC ")
                 
                 if pagination.limitNumber > 0 {
                     sql.append("LIMIT \(pagination.limitNumber) ")
@@ -111,6 +113,8 @@ struct ConsumerAPI {
                 if pagination.offsetNumber > 0 {
                     sql.append("OFFSET \(pagination.offsetNumber) ")
                 }
+                
+                print(sql)
                 
                 var substuff:[Any] = []
                 
@@ -124,21 +128,17 @@ struct ConsumerAPI {
 
                     for i in res! {
                         var tmp:[String:Any] = [:]
-                        tmp["amount"] = i.data["cth.amount"]
-                        if i.data["cth.batch_id"].isNotNil {
-                            tmp["status"] = "completed"
-                        } else {
-                            tmp["status"] = "pending"
-                        }
+                        tmp["amount"] = i.data["amount"].doubleValue
+                        tmp["status"] = i.data["status"]
                         
-                        if let thetime = i.data["cth.cashedout"].intValue {
+                        if let thetime = i.data["cashedout"].intValue, thetime > 0 {
                             tmp["type"] = "cashout"
-                            tmp["description"] = i.data["cth.cashedout_note"]
-                            tmp["amount"] = i.data["cth.cashedout_total"]
+                            tmp["description"] = i.data["cashedout_note"]
+                            tmp["amount"] = i.data["cashedout_total"]
                             tmp["created"] = thetime.dateString
                         } else {
                             tmp["type"] = "scan"
-                            if let thetime = i.data["cth.redeemed"].intValue {
+                            if let thetime = i.data["redeemed"].intValue {
                                 tmp["created"] = thetime.dateString
                             }
                         }
@@ -185,12 +185,14 @@ struct ConsumerAPI {
                 var retCode:[String:Any] = [:]
                 
                 // lets redeem the code now
-                let redeemed = CCXServiceClass.sharedInstance.getNow()
-                let redeemedby = request.session!.userid
+                let redeemed        = CCXServiceClass.sharedInstance.getNow()
+                let redeemedby      = request.session!.userid
                 try? ct.get(rsp!.first!.data.id!)
-                ct.redeemed   = redeemed
-                ct.redeemedby = redeemedby
-                if let _ = try? ct.saveWithCustomType(redeemedby) {
+                
+                ct.redeemed         = redeemed
+                ct.redeemedby       = redeemedby
+                ct.status           = CodeTransactionCodes.merchant_pending
+                if let _            = try? ct.saveWithCustomType(redeemedby) {
                     
                     // this means it was saved - audit and archive
                     AuditFunctions().addCustomerCodeAuditRecord(ct)
@@ -401,12 +403,12 @@ struct ConsumerAPI {
                 
                 var amount_to_cashout:Double = 50.0
                 
-                // there are a couple of things we need to do.  First -- we need to loop thru the records - from oldest to newest (based on created code dates)
+                // there are a couple of things we need to do.  First -- we need to loop thru the records - from oldest to newest (based on redeemed code dates)
                 var sql = "SELECT id, amount, amount_available, customer_code, redeemedby "
                 sql.append("FROM code_transaction_history_view_deleted_no ")
                 sql.append("WHERE redeemedby = \(userId!) ")
                 sql.append("AND amount_available > 0 ")
-                sql.append("ORDER BY created DESC")
+                sql.append("ORDER BY redeemed DESC")
                 let cth = CodeTransactionHistory()
                 let cth_rec = try? cth.sqlRows(sql, params: [])
                 

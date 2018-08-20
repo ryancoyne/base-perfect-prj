@@ -95,4 +95,16 @@ struct RetailerDictionary {
             }
         }
     }
+    var ach_transfer_minimum_default : Double? {
+        get {
+            return self.dic["ach_transfer_minimum_default"].doubleValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["ach_transfer_minimum_default"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "ach_transfer_minimum_default")
+            }
+        }
+    }
 }
