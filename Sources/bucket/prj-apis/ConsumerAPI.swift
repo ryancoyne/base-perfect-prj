@@ -79,12 +79,15 @@ struct ConsumerAPI {
                 let userId = request.session!.userid
                 
                 // Okay we are finding the transaction history - it is all in the code_transaction_history table
-                var sql = "SELECT cth.*, r.name FROM code_transaction_history AS cth "
+                var sql = "SELECT cth.* "
 
                 // we do not need the retailer for cashouts - there will be no retailer for that type.
                 if transType != "CASHOUT" {
+                    sql.append(", r.name FROM code_transaction_history AS cth ")
                     sql.append("LEFT JOIN retailer AS r ")
                     sql.append("ON cth.retailer_id = r.id ")
+                } else {
+                    sql.append("FROM code_transaction_history AS cth ")
                 }
 
                 sql.append("WHERE cth.redeemedby = '\(userId)' ")
