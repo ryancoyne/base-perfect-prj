@@ -272,6 +272,9 @@ struct ConsumerAPI {
                         optdict["name"] = i.data.cashoutOptionsDic.name
                         optdict["description"] = i.data.shortdescription
                         optdict["website"] = i.data.cashoutOptionsDic.website
+                        if let value = i.data.cashoutOptionsDic.maximum, value > 0 {
+                            optdict["maximumAmount"] = value
+                        }
 
                         if let image = i.data.cashoutOptionsDic.pictureURL, image.length > 1 {
                             
@@ -419,7 +422,36 @@ struct ConsumerAPI {
                 
                 // Okay we are finding the specific type, and grabbing the fields we need:
                 
-                var amount_to_cashout:Double = 50.0
+                var theoption = 0
+                if let cooption = request.optionId.intValue, cooption > 0 {
+                    theoption = cooption
+                } else {
+                    // option not sent in
+                    return response.invalidOptionCode
+                }
+                
+                // lets get the minimum amount permitted
+                let sqloption = "SELECT minimum, maximum FROM cashout_option_view_deleted_no WHERE id = \(theoption)"
+                let coop = CashoutOption()
+                let resopt = try? coop.sqlRows(sqloption, params: [])
+                
+                var min_cashout = 0.0
+                var max_cashout = 0.0
+
+                if resopt.isNotNil, let i = resopt?.first! {
+
+                    min_cashout = i.data["minimum"].doubleValue!
+                    max_cashout = i.data["maximum"].doubleValue!
+
+                }
+                
+                // get the cashout amount
+                let amount_to_cashout = request.cashoutAmount ?? 0
+                
+                // make sure they are cashing out the correct amount
+                if min_cashout > amount_to_cashout {
+                    // RETURN AN ERROR:not requesting the minimum
+                }
                 
                 // there are a couple of things we need to do.  First -- we need to loop thru the records - from oldest to newest (based on redeemed code dates)
                 var sql = "SELECT id, amount, amount_available, customer_code, redeemedby "
@@ -459,6 +491,45 @@ struct ConsumerAPI {
                     
                     // RETURN AN ERROR
                     
+                }
+                
+                // process the records
+                var thein = ""
+                for i in included {
+                    thein.append("\(i),")
+                }
+                // add the last one
+                if lastone > 0 {
+                    thein.append("\(lastone)")
+                } else {
+                    // get rid of the last comma
+                    thein.removeLast()
+                }
+                
+                // get the records together for us to process:
+                let rec_sql = "SELECT * FROM code_transaction_history_view_deleted_no WHERE id IN(\(thein))"
+                
+                let cth_now = CodeTransactionHistory()
+                let resul = try? cth_now.sqlRows(rec_sql, params: [])
+                if resul.isNotNil {
+                    for i in resul! {
+                        let working_cth = CodeTransactionHistory()
+                        working_cth.fromDictionary(sourceDictionary: i.data)
+                        
+                        // Write the audit record
+                        
+                        // update the available amount
+                        if working_cth.id != lastone {
+                            working_cth.amount_available = 0.0
+                        } else {
+                            working_cth.amount_available = working_cth.amount! - lastoneamount
+                        }
+                        
+                        
+                        
+                        // we are complete - lets save and move on
+                        let _ = try? working_cth.saveWithCustomType()
+                    }
                 }
                 
                 // the steps we need to take here now:
@@ -537,6 +608,11 @@ fileprivate extension HTTPRequest {
         return self.queryParams.first(where: { (param) -> Bool in
             return param.0 == "transactionType"
         })?.1
+    }
+    var cashoutAmount : Double? {
+        return (self.queryParams.first(where: { (param) -> Bool in
+            return param.0 == "amount"
+        })?.1).doubleValue
     }
     func getOffsetLimit() -> (offsetNumber:Int, limitNumber:Int) {
         
