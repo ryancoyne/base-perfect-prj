@@ -30,7 +30,7 @@ struct ConsumerAPI {
                 ["method":"get",    "uri":"/api/v1/history/{countryId}", "handler":transactionHistory],
                 ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
                 // CASHOUT ENDPOINTS:
-                ["method":"get",    "uri":"/api/v1/cashout/types/{countryCode}", "handler":cashoutTypes],
+                ["method":"get",    "uri":"/api/v1/cashout/{countryCode}/groups", "handler":cashoutTypes],
                 ["method":"get",    "uri":"/api/v1/cashout/{groupId}/options", "handler":cashoutOptions],
                 ["method":"post",    "uri":"/api/v1/cashout/{optionId}", "handler":cashout]
             ]
@@ -238,8 +238,10 @@ struct ConsumerAPI {
 
                 guard let groupId = request.groupId, groupId != 0 else { return response.invalidGroupCode }
 
-                var sqlstatement = "SELECT * FROM cashout_option_view_deleted_no WHERE group_id = $1 ORDER BY display_order ASC"
-                
+                var sqlstatement = "SELECT * FROM cashout_option_view_deleted_no AS coo "
+                sqlstatement.append("WHERE group_id = $1 ")
+                sqlstatement.append("ORDER BY display_order ASC ")
+
                 let qp = request.getOffsetLimit()
                 if qp.limitNumber > 0 {
                     sqlstatement.append(" LIMIT \(qp.limitNumber) ")
@@ -287,8 +289,13 @@ struct ConsumerAPI {
                             
                             // add the images to the return
                             optdict["image"] = imgdict
+                            
                         }
                         
+                        // pull in the form fields and add them
+                        let fields = SupportFunctions.sharedInstance.getFormFields(i.data.cashoutOptionsDic.formId!)
+                        optdict["fields"] = fields
+
                         retJSONSub.append(optdict)
 
                     }
@@ -336,8 +343,16 @@ struct ConsumerAPI {
                 
                 // now lets get the types for this country
                 let cg = CashoutGroup()
-//                let res = try? cg.sqlRows("SELECT * FROM cashout_group WHERE country_id = $1 ORDER BY display_order ASC ", params: ["\(SupportFunctions.sharedInstance.getCountryId(countryCode))"])
-                let res = try? cg.sqlRows(countsql, params: ["\(SupportFunctions.sharedInstance.getCountryId(countryCode))"])
+                
+                // you may pass n either the number or the country code
+                var codes = ""
+                if countryCode.isNumeric() {
+                    codes = countryCode
+                } else {
+                    codes = String(SupportFunctions.sharedInstance.getCountryId(countryCode))
+                }
+        
+                let res = try? cg.sqlRows(countsql, params: [codes])
 
                 if res.isNotNil {
                     // creating the return JSON with results
