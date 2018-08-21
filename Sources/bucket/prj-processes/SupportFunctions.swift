@@ -47,8 +47,11 @@ final class SupportFunctions {
     func getFormFields(_ form_id:Int )->[Any] {
         
         let form_fields = FormFields()
-        var sql = "SELECT ffs.field_id, ffs.display_order, ff.* FROM form_fields AS ffs "
+        var sql = "SELECT ffs.field_id, ffs.display_order, ff.*, fft.name AS form_field_type_name FROM form_fields AS ffs "
         sql.append("LEFT JOIN form_field AS ff ON ffs.field_id = ff.id ")
+        
+        sql.append("LEFT JOIN form_field_type AS fft ON ff.type_id = fft.id ")
+        
         sql.append("WHERE ffs.form_id = $1 ")
         sql.append("ORDER BY ffs.display_order ASC ")
         let res = try? form_fields.sqlRows(sql, params: ["\(form_id)"])
@@ -64,6 +67,7 @@ final class SupportFunctions {
                 tmp["isReq"] = i.data["is_required"]
                 tmp["confirmValue"] = i.data["needs_confirmation"]
                 tmp["displayOrder"] = i.data["display_order"]
+                tmp["fieldType"] = i.data["form_field_type_name"]
                 returnDataArray.append(tmp)
             }
         }

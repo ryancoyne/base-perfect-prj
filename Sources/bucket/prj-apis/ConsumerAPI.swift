@@ -241,10 +241,6 @@ struct ConsumerAPI {
                 var sqlstatement = "SELECT * FROM cashout_option_view_deleted_no AS coo "
                 sqlstatement.append("WHERE group_id = $1 ")
                 sqlstatement.append("ORDER BY display_order ASC ")
-//                sqlstatement.append("LEFT JOIN ")
-//                sqlstatement.append("")
-//                sqlstatement.append("")
-//                sqlstatement.append("")
 
                 let qp = request.getOffsetLimit()
                 if qp.limitNumber > 0 {
