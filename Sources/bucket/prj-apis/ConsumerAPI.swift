@@ -72,7 +72,7 @@ struct ConsumerAPI {
                 
                 guard let countryid = request.countryId, countryid > 0 else { response.invalidCountryCode; return }
                 
-                let transType = request.transactionType?.capitalize() ?? "ALL"
+                let transType = request.transactionType?.uppercased() ?? "ALL"
                 
                 let pagination = request.getOffsetLimit()
                 
@@ -516,7 +516,9 @@ fileprivate extension HTTPRequest {
         return self.urlVariables["optionId"].intValue
     }
     var transactionType : String? {
-        return self.urlVariables["transactionType"]
+        return self.queryParams.first(where: { (param) -> Bool in
+            return param.0 == "transactionType"
+        })?.1
     }
     func getOffsetLimit() -> (offsetNumber:Int, limitNumber:Int) {
         
