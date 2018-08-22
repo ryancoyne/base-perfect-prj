@@ -421,7 +421,6 @@ struct ConsumerAPI {
                 let userId = request.session?.userid
                 
                 // Okay we are finding the specific type, and grabbing the fields we need:
-                
                 var theoption = 0
                 if let cooption = request.optionId.intValue, cooption > 0 {
                     theoption = cooption
@@ -431,22 +430,33 @@ struct ConsumerAPI {
                 }
                 
                 // lets get the minimum amount permitted
-                let sqloption = "SELECT minimum, maximum FROM cashout_option_view_deleted_no WHERE id = \(theoption)"
+                let sqloption = "SELECT minimum, maximum, name, group_id FROM cashout_option_view_deleted_no WHERE id = \(theoption)"
                 let coop = CashoutOption()
                 let resopt = try? coop.sqlRows(sqloption, params: [])
                 
-                var min_cashout = 0.0
-                var max_cashout = 0.0
+                var min_cashout  = 0.0
+                var max_cashout  = 0.0
+                var name_cashout = ""
+                var group_id     = 0
 
                 if resopt.isNotNil, let i = resopt?.first! {
-
-                    min_cashout = i.data["minimum"].doubleValue!
-                    max_cashout = i.data["maximum"].doubleValue!
-
+                    min_cashout  = i.data["minimum"].doubleValue!
+                    max_cashout  = i.data["maximum"].doubleValue!
+                    name_cashout = i.data["name"].stringValue!
+                    group_id     = i.data["group_id"].intValue!
+                }
+                
+                
+                var country_id = 0
+                let sqlgroup = "SELECT country_id FROM cashout_group_view_deleted_no WHERE id = \(group_id)"
+                let cg = CashoutGroup()
+                let resultcg = try? cg.sqlRows(sqlgroup, params: [])
+                if resultcg.isNotNil {
+                    country_id = resultcg!.first!.data["country_id"].intValue!
                 }
                 
                 // get the cashout amount
-                let amount_to_cashout = request.cashoutAmount ?? 0
+                let amount_to_cashout = request.cashoutAmount!
                 
                 // make sure they are cashing out the correct amount
                 if min_cashout > amount_to_cashout {
@@ -456,9 +466,10 @@ struct ConsumerAPI {
                 // there are a couple of things we need to do.  First -- we need to loop thru the records - from oldest to newest (based on redeemed code dates)
                 var sql = "SELECT id, amount, amount_available, customer_code, redeemedby "
                 sql.append("FROM code_transaction_history_view_deleted_no ")
-                sql.append("WHERE redeemedby = \(userId!) ")
+                sql.append("WHERE redeemedby = '\(userId!)' ")
                 sql.append("AND amount_available > 0 ")
-                sql.append("ORDER BY redeemed DESC")
+                sql.append("AND country_id = \(country_id) ")
+                sql.append("ORDER BY redeemed ASC")
                 let cth = CodeTransactionHistory()
                 let cth_rec = try? cth.sqlRows(sql, params: [])
                 
@@ -468,7 +479,7 @@ struct ConsumerAPI {
                 var lastone = 0
                 var lastoneamount:Double = 0.0
                 var totalcount:Double = 0.0
-                
+
                 // calculate wiich records we will use for the cashout amount.
                 if cth_rec.isNotNil {
                     for i in cth_rec! {
@@ -509,6 +520,7 @@ struct ConsumerAPI {
                 // get the records together for us to process:
                 let rec_sql = "SELECT * FROM code_transaction_history_view_deleted_no WHERE id IN(\(thein))"
                 
+                let cth_cashedout = CCXServiceClass.sharedInstance.getNow()
                 let cth_now = CodeTransactionHistory()
                 let resul = try? cth_now.sqlRows(rec_sql, params: [])
                 if resul.isNotNil {
@@ -521,15 +533,41 @@ struct ConsumerAPI {
                         // update the available amount
                         if working_cth.id != lastone {
                             working_cth.amount_available = 0.0
+                            working_cth.cashedout_total  = working_cth.amount
                         } else {
                             working_cth.amount_available = working_cth.amount! - lastoneamount
+                            working_cth.cashedout_total  = lastoneamount
                         }
                         
-                        
+                        working_cth.cashedout      = cth_cashedout
+                        working_cth.cashedoutby    = userId!
+                        working_cth.cashedout_note = "CASHOUT: \(name_cashout)"
                         
                         // we are complete - lets save and move on
                         let _ = try? working_cth.saveWithCustomType()
                     }
+                    
+                    // add the cashout record to the history record
+                    let newrec = CodeTransactionHistory()
+                    newrec.amount = 0.0
+                    newrec.amount_available = 0.0
+                    newrec.archived = cth_cashedout
+                    newrec.archivedby = userId!
+                    newrec.cashedout = cth_cashedout
+                    newrec.cashedout_note = name_cashout
+                    newrec.cashedout_total = amount_to_cashout
+                    newrec.cashedoutby = userId!
+                    newrec.country_id = country_id
+                    newrec.redeemed = cth_cashedout
+                    newrec.redeemedby = userId!
+                    newrec.status = CodeTransactionCodes.cashout_pending
+                    
+                    let _ = try? newrec.saveWithCustomType()
+                    
+                    // this is where we show success
+                    let _ = try? response.setBody(json: ["amount":amount_to_cashout,"country_id":country_id])
+                    response.completed(status: .ok)
+                    return
                 }
                 
                 // the steps we need to take here now:
@@ -610,9 +648,10 @@ fileprivate extension HTTPRequest {
         })?.1
     }
     var cashoutAmount : Double? {
-        return (self.queryParams.first(where: { (param) -> Bool in
-            return param.0 == "amount"
-        })?.1).doubleValue
+        if let value = try? self.postBodyJSON()?["amount"].doubleValue, value.isNotNil {
+            return value!
+        }
+        return 0.0
     }
     func getOffsetLimit() -> (offsetNumber:Int, limitNumber:Int) {
         

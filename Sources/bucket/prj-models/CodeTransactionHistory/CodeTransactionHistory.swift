@@ -212,8 +212,8 @@ public class CodeTransactionHistory: PostgresStORM {
                 }
                 
             case "amount":
-                if (value as? Double).isNotNil {
-                    self.amount = (value as! Double)
+                if let dbV = (value as Any?).doubleValue {
+                    self.amount = dbV
                 }
 
             case "amount_available":
@@ -222,8 +222,8 @@ public class CodeTransactionHistory: PostgresStORM {
                 }
 
             case "total_amount":
-                if (value as? Double).isNotNil {
-                    self.total_amount = (value as! Double)
+                if let dbV = (value as Any?).doubleValue {
+                    self.total_amount = dbV
                 }
                 
             case "customer_code":
@@ -318,6 +318,16 @@ public class CodeTransactionHistory: PostgresStORM {
             case "created":
                 if (value as? Int).isNotNil {
                     self.created = (value as! Int)
+                }
+
+            case "deletedby":
+                if (value as? String).isNotNil {
+                    self.deletedby = (value as! String)
+                }
+                
+            case "deleted":
+                if (value as? Int).isNotNil {
+                    self.deleted = (value as! Int)
                 }
 
             default:
