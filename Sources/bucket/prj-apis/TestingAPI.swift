@@ -77,8 +77,7 @@ struct TestingAPI {
                 } else {
                     countryId = String(SupportFunctions.sharedInstance.getCountryId(countryCode))
                     if countryId == "0" {
-                        try? response.setBody(json: ["error":"CountryCode \(countryCode) does not exist."]).completed(status: .custom(code: 451, message: "Invalid Country Code"))
-                        return
+                        return response.invalidCountryCode
                     }
                 }
 
@@ -130,7 +129,7 @@ struct TestingAPI {
                     
                     // return the no terminal for that country error
                     // error must return an error code for the response and get out of this flow
-                    try? response.setBody(json: ["error":"There are no terminals in country id \(countryId)"]).completed(status: .custom(code: 450, message: "No Terminals in Country \(countryId)"))
+                    try? response.setBody(json: ["error":"There are no terminals in country id \(countryId)"]).completed(status: .custom(code: 451, message: "No Terminals in Country \(countryId)"))
                     return
                     
                 }
