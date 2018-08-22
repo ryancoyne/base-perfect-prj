@@ -59,7 +59,7 @@ struct TestingAPI {
                 
                 // make sure we are NOT in production
                 if EnvironmentVariables.sharedInstance.Server!.rawValue == "PROD" {
-                    let _ = try? response.setBody(json: " { \"error\": \"This function is not on\" } ")
+                    let _ = try? response.setBody(json: ["error":"This function is not on."])
                     return response.completed(status: .internalServerError)
                 }
                 
@@ -76,6 +76,10 @@ struct TestingAPI {
                     countryId = countryCode
                 } else {
                     countryId = String(SupportFunctions.sharedInstance.getCountryId(countryCode))
+                    if countryId == "0" {
+                        try? response.setBody(json: ["error":"CountryCode \(countryCode) does not exist."]).completed(status: .custom(code: 451, message: "Invalid Country Code"))
+                        return
+                    }
                 }
 
                 
@@ -106,16 +110,19 @@ struct TestingAPI {
                 if addy_ret.isNotNil {
                     // grab the address id to look up in the terminal file
                     // set the add_id
+                    add_id = addy_ret?.first?.data["id"].intValue ?? 0
                 } else {
                     // error that there is no terminal for that country code
                     // error must return an error code for the response and get out of this flow
+                    try? response.setBody(json: ["error":"There are no retailers in country id \(countryId)"]).completed(status: .custom(code: 450, message: "No Retailers in Country \(countryId)"))
+                    return
                 }
                 
                 // look for a terminal
                 var ret_id = 0
                 var term_serial = ""
                 let term = Terminal()
-                let _ = try? term.find(["address_id": add_id])
+                let _ = try? term.find(["address_id": "\(add_id)"])
                 if let t = term.rows().first {
                     ret_id = t.retailer_id!
                     term_serial = t.serial_number!
@@ -123,6 +130,8 @@ struct TestingAPI {
                     
                     // return the no terminal for that country error
                     // error must return an error code for the response and get out of this flow
+                    try? response.setBody(json: ["error":"There are no terminals in country id \(countryId)"]).completed(status: .custom(code: 450, message: "No Terminals in Country \(countryId)"))
+                    return
                     
                 }
 
@@ -177,7 +186,7 @@ struct TestingAPI {
             
                 // SECTION 4: Claim the customer codes we just added (to make sure the process is working correctly)
                 
-                let reup_sql = "SELECT * FROM code_transaction WHERE client_location LIKE ('TESTING_%') "
+                let reup_sql = "SELECT * FROM code_transaction WHERE client_location LIKE ('TESTING_%') AND country_id = \(countryId)"
                 let reup_ct = CodeTransaction()
                 let reup_res = try? reup_ct.sqlRows(reup_sql, params: [])
                 
@@ -187,7 +196,7 @@ struct TestingAPI {
                         // redeem the transactions
                         
                         let ct = CodeTransaction()
-                        let rsp = try? ct.sqlRows("SELECT * FROM code_transaction_view_deleted_no WHERE customer_code = $1", params: ["\(i.data["customer_code"]!)"])
+                        let rsp = try? ct.sqlRows("SELECT * FROM code_transaction_view_deleted_no WHERE customer_code = $1 AND country_id = $2 ", params: ["\(i.data["customer_code"]!)", countryId])
                         
                         if rsp?.first.isNil == false {
                             var retCode:[String:Any] = [:]
@@ -223,6 +232,8 @@ struct TestingAPI {
                         }
                     }
                 }
+                _=try? response.setBody(json: ["message": "Added transactions and redeemed them to your account!"])
+                return response.completed(status: .ok)
             }
         }
     }
