@@ -114,7 +114,7 @@ extension Int {
         
         guard upperLimit > 0 else { return nil }
         #if os(Linux)
-        self.init(random() % upperLimit)
+        self.init(Int.random % upperLimit)
         #else
         self.init(arc4random_uniform(UInt32(upperLimit)))
         #endif
