@@ -350,7 +350,7 @@ struct ConsumerAPI {
                 // now lets get the types for this country
                 let cg = CashoutGroup()
                 
-                // you may pass n either the number or the country code
+                // you may pass in either the number or the country code
                 var codes = ""
                 if countryCode.isNumeric() {
                     codes = countryCode

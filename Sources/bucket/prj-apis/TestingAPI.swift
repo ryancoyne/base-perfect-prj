@@ -66,19 +66,30 @@ struct TestingAPI {
                 guard !Account.userBouce(request, response) else { return }
             
                 // get the country code
-                let countryId = 236
+                // Here we need to get all the modes, and get all the fields
+                guard let countryCode = request.countryCode else { return response.invalidCountryCode }
+
+                // they may send in either the code number of the alpha for the code
+                
+                var countryId = ""
+                if countryCode.isNumeric() {
+                    countryId = countryCode
+                } else {
+                    countryId = String(SupportFunctions.sharedInstance.getCountryId(countryCode))
+                }
+
                 
                 let user = request.session!.userid
             
                 // SECTION 1: Delete all the existing test records for the user and the country
                 
                 // Delete the testing codes not in the history
-                let sql = "DELETE FROM code_transaction WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId)"
+                let sql = "DELETE FROM code_transaction WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
                 let current_codes = CodeTransaction()
                 let _ = try? current_codes.sqlRows(sql, params: [])
             
                 // Delete the testing codes in the history
-                let sql2 = "DELETE FROM code_transaction_history WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId)"
+                let sql2 = "DELETE FROM code_transaction_history WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
                 let current_codes2 = CodeTransactionHistory()
                 let _ = try? current_codes2.sqlRows(sql2, params: [])
             
@@ -89,7 +100,7 @@ struct TestingAPI {
                 
                 // look for a retailer in the country we are using
                 var add_id = 0
-                let sql_add = "SELECT id from address WHERE retailer_id > 0 AND country_id = \(countryId)"
+                let sql_add = "SELECT id from address WHERE retailer_id > 0 AND country_id = \(countryId.intValue!)"
                 let addy = Address()
                 let addy_ret = try? addy.sqlRows(sql_add, params: [])
                 if addy_ret.isNotNil {
@@ -214,5 +225,27 @@ struct TestingAPI {
                 }
             }
         }
+    }
+}
+
+fileprivate extension HTTPRequest {
+    var countryCode : String? {
+        return self.urlVariables["countryCode"]
+    }
+    var countryId : Int? {
+        return self.urlVariables["countryId"].intValue
+    }
+}
+
+fileprivate extension HTTPResponse {
+    var invalidCode : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such code found"])
+            .setHeader(.contentType, value: "application/json")
+            .completed(status: .notAcceptable)
+    }
+    var invalidCountryCode : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such country code found"])
+            .setHeader(.contentType, value: "application/json")
+            .completed(status: .notAcceptable)
     }
 }
