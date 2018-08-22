@@ -562,7 +562,12 @@ struct ConsumerAPI {
                     newrec.redeemedby = userId!
                     newrec.status = CodeTransactionCodes.cashout_pending
                     
-                    let _ = try? newrec.saveWithCustomType()
+                    let _ = try? newrec.saveWithCustomType(userId!, copyOver: false)
+                    
+                    // add the cashout record
+                    
+                    
+                    
                     
                     // this is where we show success
                     let _ = try? response.setBody(json: ["amount":amount_to_cashout,"country_id":country_id])

@@ -69,7 +69,7 @@ struct TestingAPI {
             let sql2 = "DELETE FROM code_transaction_history WHERE client_location LIKE('TESTING_\(user)_%')"
             let current_codes2 = CodeTransactionHistory()
             let _ = try? current_codes2.sqlRows(sql2, params: [])
-            
+                        
             // look for a terminal
             let term = Terminal()
             let _ = try? term.findAll()
