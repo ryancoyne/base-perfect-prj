@@ -1744,7 +1744,12 @@ extension Int {
 extension Account {
     
     static func userBouce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {
-        guard request.session?.userid.isEmpty == false else { response.notLoggedIn(); return true }
+        // Here we want to check the csrf & the authorization.
+        guard let csrf = request.session?.data["csrf"].stringValue, let sendCsrf = request.header(.custom(name: "X-CSRF-Token")) else {
+            response.notLoggedIn()
+            return true
+        }
+        guard request.session?.userid.isEmpty == false && csrf == sendCsrf else {  response.notLoggedIn(); return true  }
         return false
     }
     
