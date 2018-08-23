@@ -352,8 +352,8 @@ func filters() -> [[String: Any]] {
 var confData: [String:[[String:Any]]] = [
     "servers": [
         [
-            "name":EnvironmentVariables.sharedInstance.URL_DOMAIN!,
-            "port":EnvironmentVariables.sharedInstance.URL_PORT!,
+            "name":EnvironmentVariables.sharedInstance.LISTENING_URL_DOMAIN!,
+            "port":EnvironmentVariables.sharedInstance.LISTENING_URL_PORT!,
             // "address":serverIP,
             "routes":routes,
             "filters":filters()
