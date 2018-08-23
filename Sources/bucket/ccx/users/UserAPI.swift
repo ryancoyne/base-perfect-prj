@@ -690,23 +690,26 @@ struct UserAPI {
                         if theTry.isNotNil && !account.id.isEmpty {
                             account.passreset = AccessToken.generate()
                         }
+                        
+                        if account.id.isEmpty { try? response.setBody(json: ["message":"You are not registered on Bucket."])
+                            .setHeader(.contentType, value: "application/json")
+                            .completed(status: .forbidden) }
                     
-                        if !account.id.isEmpty, (try? account.save()).isNotNil {
+                        if (try? account.save()).isNotNil {
                             
                             // Lets send out the email to reset the password:
                             let h = "<p>To reset your password for your account, please <a href=\"\(baseURL)/verifyAccount/forgotpassword/\(account.passreset)\">click here</a></p>"
                             
-                            Utility.sendMail(name: account.username, address: email, subject: "Password reset!", html: h, text: "")
                             try? response.setBody(json: ["message":"Please check your email to update your forgotten password."])
                                 .setHeader(.contentType, value: "application/json")
                                 .completed(status: .ok)
+                            Utility.sendMail(name: account.username, address: email, subject: "Password reset!", html: h, text: "")
                             
                         } else {
                             // Failed to save the passvalidation.
                             try? response.setBody(json: ["error":"Unknown error"])
                                 .setHeader(.contentType, value: "application/json")
                                 .completed(status: .internalServerError)
-                            
                         }
                         
                     } else {

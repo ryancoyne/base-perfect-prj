@@ -31,7 +31,7 @@ public class UserBalanceFunctions {
                 
                 wallet["id"]     = i.data["id"]
                 wallet["amount"] = i.data["balance"].doubleValue
-                wallet["country_id"] = i.data["country_id"]
+                wallet["countryId"] = i.data["country_id"]
                 wallet["countryCode"] = i.data["countryCode"]
                 retArray.append(wallet)
             }
