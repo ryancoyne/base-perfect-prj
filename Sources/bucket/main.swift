@@ -16,7 +16,21 @@
 //  SELECT * FROM pg_extension WHERE extname LIKE '%gis%';
 //
 
-// Messaging:  https://github.com/flightonary/Moscapsule (iOS side)
+// When installing on the cloud service:
+// 1. Ubuntu 16.04 server
+// 2. Postgresql database
+// 3. PostGIS package
+// Then....
+// a. Create the database:  CREATE DATABASE bucket;
+// b. Create the user: CREATE USER bucket WITH ENCRYPTED PASSWORD 'xHClEyTLxMV888QU';
+// c. Grant permission to the user: GRANT ALL PRIVILEGES ON DATABASE bucket TO bucket;
+// d. Add PostGIS: (command line as postgres user): psql -d bucket -c "CREATE EXTENSION postgis;"
+// e. Add PostGIS Topo: (command line as postgres user): psql -d bucket -c "CREATE EXTENSION postgis_topology;"
+// Then....
+// i. Upload the program to the server
+// ii. Copy the config/main.json file and adjust the settings
+//
+// Now you are ready to start the bucket service!
 
 import PerfectLib
 import PerfectHTTP
