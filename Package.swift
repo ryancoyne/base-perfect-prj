@@ -1,8 +1,8 @@
 // Generated automatically by Perfect Assistant
-// Date: 2018-08-23 12:55:02 +0000
+// Date: 2018-08-23 14:39:18 +0000
 import PackageDescription
 let package = Package(
-	name: "bucket_server",
+	name: "bucket",
 	targets: [],
 	dependencies: [
 		.Package(url: "https://github.com/PerfectlySoft/Perfect-HTTPServer.git", versions: Version(3,0,0)..<Version(3,9223372036854775807,9223372036854775807)),
