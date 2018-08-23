@@ -18,6 +18,47 @@ import PerfectSession
 /// This Retailer structure supports all the normal endpoints for a user based login application.
 struct ConsumerAPI {
     
+    //MARK: - Web Routes:
+    struct web {
+        // POST request for login
+        static var routes : [[String:Any]] {
+            return [
+                ["method":"post", "uri":"/login", "handler":login],
+//                ["method":"get", "uri":"/login", "handler":loginPage],
+            ]
+        }
+        public static func login(data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                var template = "views/msg" // where it goes to after
+                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
+                var context: [String : Any] = ["title": "Bucket Technologies", "subtitle":"Goodbye coins, Hello Change"]
+                context["csrfToken"] = request.session?.data["csrf"] as? String ?? ""
+                
+                if let email = request.param(name: "email").stringValue, !email.isEmpty,
+                    let password = request.param(name: "password").stringValue, !password.isEmpty {
+                    do {
+                        let account = try Account.loginWithEmail(email, password)
+                        request.session?.userid = account.id
+                        context["msg_title"] = "Login Successful."
+                        context["msg_body"] = ""
+                        response.redirect(path: "/")
+                    } catch {
+                        context["msg_title"] = "Login Error."
+                        context["msg_body"] = "Email or password incorrect"
+                        template = "views/login"
+                    }
+                } else {
+                    context["msg_title"] = "Login Error."
+                    context["msg_body"] = "Email or password not supplied"
+                    template = "views/login"
+                }
+                response.render(template: template, context: context)
+                response.completed()
+            }
+        }
+    }
+    
     //MARK: - JSON Routes
     /// This json structure supports all the JSON endpoints that you can use in the application.
     struct json {

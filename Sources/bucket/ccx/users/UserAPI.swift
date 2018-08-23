@@ -739,7 +739,6 @@ struct UserAPI {
                     ["method":"post", "uri":"/forgotpasswordCompletion", "handler": forgotpasswordCompletion],
                     ["method":"get", "uri":"/verifyAccount/{passvalidation}", "handler": registerVerify],
                     ["method":"post", "uri":"/registrationCompletion", "handler": registerCompletion],
-                    ["method":"post", "uri":"/login", "handler":LocalAuthWebHandlers.login],
                     ["method":"get", "uri":"/logout", "handler":LocalAuthWebHandlers.logout],
                     ["method":"get", "uri":"/users", "handler":Handlers.userList],
                     ["method":"get", "uri":"/users/create", "handler":Handlers.userMod],
@@ -927,7 +926,6 @@ struct UserAPI {
                 }
             }
         }
-        
     }
     
     //MARK: Update current location to the user
