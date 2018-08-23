@@ -92,7 +92,7 @@ final class SampleData {
         sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','M&R Corner Market', TRUE, 'BCKT-3') ")
 
         print("Adding retailers: \(sqlstatement)")
-        try? tbl.sqlRows(sqlstatement, params: [])
+        let _ = try? tbl.sqlRows(sqlstatement, params: [])
         
         // add the addresses for the office locations
         let usa = Country()

@@ -55,6 +55,9 @@ final class EnvironmentVariables {
         self.URL_PORT     = env_variables["URL_PORT"].intValue
         self.URL_DOMAIN   = env_variables["URL_DOMAIN"].stringValue
 
+        self.LISTENING_URL_PORT     = env_variables["LISTENING_URL_PORT"].intValue
+        self.LISTENING_URL_DOMAIN   = env_variables["LISTENING_URL_DOMAIN"].stringValue
+
         self.API_DOMAIN       = env_variables["API_DOMAIN"].stringValue
         self.API_URL_PORT     = env_variables["API_URL_PORT"].intValue
         self.API_URL_PROTOCOL = env_variables["API_URL_PROTOCOL"].stringValue
@@ -200,16 +203,22 @@ final class EnvironmentVariables {
                 self.URL_PROTOCOL = value
             }
             
-//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "url.URL_DOMAIN") as? String {
             if let value = JSONConfigEnhanced.shared.json(forKey: "url")?["URL_DOMAIN"] as? String {
                 self.URL_DOMAIN = value
             }
             
-//            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "url.URL_PORT") as? Int {
             if let value = JSONConfigEnhanced.shared.json(forKey: "url")?["URL_PORT"] as? Int {
                 self.URL_PORT = value
             }
             
+            if let value = JSONConfigEnhanced.shared.json(forKey: "url")?["LISTENING_URL_DOMAIN"] as? String {
+                self.LISTENING_URL_DOMAIN = value
+            }
+            
+            if let value = JSONConfigEnhanced.shared.json(forKey: "url")?["LISTENING_URL_PORT"] as? Int {
+                self.LISTENING_URL_PORT = value
+            }
+
 //            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "api.API_DOMAIN") as? String {
             if let value = JSONConfigEnhanced.shared.json(forKey: "api")?["API_DOMAIN"] as? String {
                 self.API_DOMAIN = value
@@ -609,6 +618,34 @@ final class EnvironmentVariables {
         }
     }
     
+    private var _LISTENING_URL_PORT: Int?
+    public var LISTENING_URL_PORT: Int? {
+        get {
+            return _LISTENING_URL_PORT
+        }
+        set {
+            if newValue != nil {
+                _LISTENING_URL_PORT = newValue!
+            } else {
+                _LISTENING_URL_PORT = nil
+            }
+        }
+    }
+    
+    private var _LISTENING_URL_DOMAIN: String?
+    public var LISTENING_URL_DOMAIN: String? {
+        get {
+            return _LISTENING_URL_DOMAIN
+        }
+        set {
+            if newValue != nil {
+                _LISTENING_URL_DOMAIN = newValue!
+            } else {
+                _LISTENING_URL_DOMAIN = nil
+            }
+        }
+    }
+
     private var _API_DOMAIN: String?
     public var API_DOMAIN: String? {
         get {

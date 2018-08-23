@@ -155,7 +155,10 @@ struct TestingAPI {
                     
                         var bucket_amount = drand48()
                         bucket_amount = Double(round(bucket_amount * 100) / 100)
-                        let total_trans = arc4random_uniform(10)
+                        
+                        //let total_trans = arc4random_uniform(10)
+                        let total_trans = Double.random
+                        
                         let total_trans_dbl = Double(round(Double(total_trans) * 100) / 100)
                     
                         let transaction = CodeTransaction()
