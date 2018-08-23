@@ -26,6 +26,7 @@ public class Retailer: PostgresStORM {
     var is_suspended     : Bool? = nil
     var is_verified     : Bool? = nil
     var send_settlement_confirmation     : Bool? = nil
+    var ach_transfer_minimum_default : Double? = nil
     
     //MARK: Table name
     override public func table() -> String { return "retailer" }
@@ -81,6 +82,11 @@ public class Retailer: PostgresStORM {
             send_settlement_confirmation = data
         }
         
+        if let data = this.data.retailerDic.ach_transfer_minimum_default {
+            ach_transfer_minimum_default = data
+        }
+        
+        
     }
     
     func rows() -> [Retailer] {
@@ -117,6 +123,11 @@ public class Retailer: PostgresStORM {
             case "is_approved":
                 if (value as? Bool).isNotNil {
                     self.is_verified = (value as! Bool)
+                }
+
+            case "ach_transfer_minimum_default":
+                if (value as? Decimal).isNotNil {
+                    self.ach_transfer_minimum_default = (value as! Double)
                 }
                 
             default:
@@ -176,6 +187,10 @@ public class Retailer: PostgresStORM {
             dictionary.retailerDic.isVerified = self.is_verified
         }
         
+        if self.ach_transfer_minimum_default.isNotNil {
+            dictionary.retailerDic.ach_transfer_minimum_default = self.ach_transfer_minimum_default
+        }
+        
         return dictionary
     }
     
@@ -203,7 +218,11 @@ public class Retailer: PostgresStORM {
         if diff == true, self.send_settlement_confirmation != targetItem.send_settlement_confirmation {
             diff = false
         }
-        
+
+        if diff == true, self.ach_transfer_minimum_default != targetItem.ach_transfer_minimum_default {
+            diff = false
+        }
+
         return diff
         
     }
@@ -212,13 +231,16 @@ public class Retailer: PostgresStORM {
     func createCustomerCode(_ data: [String:Any])->(success:Bool, message:String) {
         
         // lets make sure the correct parameters were passed in..
-        guard let customerCode = String(randomWithLength: 12, allowedCharactersType: .alphaNumeric)?.uppercased() else { /* Send an error back indicating a server error? */ return (false, "Error creating customer code") }
+        
+        var customerCode = self.createCustomerCodeRaw()
+        
         // Make sure a transaction does not exist with this customer code already:
         let trans = CodeTransaction()
         try? trans.find(["customer_code": customerCode])
         
         if trans.id.isNotNil {
-            guard let customerCode = String(randomWithLength: 12, allowedCharactersType: .alphaNumeric)?.uppercased() else { /* Send an error back indicating a server error? */ return (false, "Error creating customer code") }
+            
+            customerCode = self.createCustomerCodeRaw()
             
             return (true, customerCode)
             
@@ -226,5 +248,33 @@ public class Retailer: PostgresStORM {
             
             return (true, customerCode)
         }
+    }
+    
+    fileprivate func createCustomerCodeRaw () -> String {
+        
+        var returnCC = ""
+        
+        let customerCode64 = ([UInt8](randomCount: 128).encode(.base64))
+        let customerCode = String(validatingUTF8: customerCode64!)
+//        print("Customer Code Created: \(String(describing: customerCode))")
+        
+        if customerCode.isNil {
+            return ""
+        }
+        
+        for i in customerCode!.unicodeScalars {
+            
+            if i.isAlphaNum() {
+                returnCC.append(i.escaped(asASCII: true))
+                
+                // we want this as a length of 12 alphanumeric characters
+                if returnCC.length > 12 {
+//                    print("  This is the final CC: \(returnCC)")
+                    return returnCC
+                }
+            }
+            
+        }
+        return returnCC
     }
 }

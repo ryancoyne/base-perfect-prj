@@ -141,6 +141,24 @@ struct InstallationsV1Controller {
                                 
                             }
                             
+                        } else {
+                            // The installation
+                            // setup the return
+                            if let installationId = inst.id {
+                                try? response.setBody(json: ["errorCode":"InstallationId", "message":"The installation id '\(installationId)' does not exist."])
+                                    .setHeader(.contentType, value: "application/json")
+                                    .completed(status: .ok)
+                                
+                                return
+                            } else {
+                                
+                                try? response.setBody(json: ["error":"Unknown Error"])
+                                    .setHeader(.contentType, value: "application/json")
+                                    .completed(status: .internalServerError)
+                                
+                                return
+                            }
+                            
                         }
                         
                         // setup the return

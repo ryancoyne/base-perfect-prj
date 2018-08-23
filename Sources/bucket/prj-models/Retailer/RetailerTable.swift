@@ -105,7 +105,8 @@ final class RetailerTable {
         createsql.append("is_suspended bool NOT NULL DEFAULT false, ")
         createsql.append("is_verified bool NOT NULL DEFAULT false, ")
         createsql.append("send_settlement_confirmation bool NOT NULL DEFAULT true, ")
-    
+        createsql.append("ach_transfer_minimum_default numeric(10,5) DEFAULT 0.0, ")
+
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
         createsql.append("); ")

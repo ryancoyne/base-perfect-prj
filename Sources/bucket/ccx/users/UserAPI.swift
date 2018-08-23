@@ -685,18 +685,10 @@ struct UserAPI {
                     
                     if let email = json["email"].stringValue {
                         
-                        // generate the random (with safety net incase there is an issue)
-                        let random = [UInt8](randomCount: 16)
-                        var secureToken = "basetoken\(random)"
-                        if let base64 = random.encode(.base64),
-                            let sectok = String(validatingUTF8: base64) {
-                            secureToken = sectok
-                        }
-                        
                         let account = Account()
                         let theTry:()? = try? account.find(["email":email.lowercased()])
                         if theTry.isNotNil && !account.id.isEmpty {
-                            account.passvalidation = secureToken
+                            account.passreset = AccessToken.generate()
                         }
                         
                         if account.id.isEmpty { try? response.setBody(json: ["message":"You are not registered on Bucket."])
@@ -706,7 +698,7 @@ struct UserAPI {
                         if (try? account.save()).isNotNil {
                             
                             // Lets send out the email to reset the password:
-                            let h = "<p>To reset your password for your account, please <a href=\"\(baseURL)/verifyAccount/forgotpassword/\(account.passvalidation)\">click here</a></p>"
+                            let h = "<p>To reset your password for your account, please <a href=\"\(baseURL)/verifyAccount/forgotpassword/\(account.passreset)\">click here</a></p>"
                             
                             try? response.setBody(json: ["message":"Please check your email to update your forgotten password."])
                                 .setHeader(.contentType, value: "application/json")
@@ -746,11 +738,10 @@ struct UserAPI {
     /// This json structure supports all the web endpoints that support the application, including forgot password, completion of registration.
     struct web {
         static var routes : [[String:Any]] {
-            return [["method":"get", "uri":"/verifyAccount/forgotpassword/{passvalidation}", "handler": forgotpassVerify],
+            return [["method":"get", "uri":"/verifyAccount/forgotpassword/{passreset}", "handler": forgotpassVerify],
                     ["method":"post", "uri":"/forgotpasswordCompletion", "handler": forgotpasswordCompletion],
                     ["method":"get", "uri":"/verifyAccount/{passvalidation}", "handler": registerVerify],
                     ["method":"post", "uri":"/registrationCompletion", "handler": registerCompletion],
-                    ["method":"post", "uri":"/login", "handler":LocalAuthWebHandlers.login],
                     ["method":"get", "uri":"/logout", "handler":LocalAuthWebHandlers.logout],
                     ["method":"get", "uri":"/users", "handler":Handlers.userList],
                     ["method":"get", "uri":"/users/create", "handler":Handlers.userMod],
@@ -861,9 +852,9 @@ struct UserAPI {
                 
                 var context: [String : Any] = appExtras(request)
                 
-                if let v = request.urlVariables["passvalidation"], !(v as String).isEmpty {
+                if let v = request.urlVariables["passreset"], !(v as String).isEmpty {
                     
-                    let acc = Account(validation: v)
+                    let acc = Account(reset: v)
                     
                     if acc.id.isEmpty {
                         context["msg_title"] = "Account Validation Error."
@@ -871,7 +862,7 @@ struct UserAPI {
                         response.render(template: "views/msg", context: context)
                         return
                     } else {
-                        context["passvalidation"] = v
+                        context["passreset"] = v
                         context["csrfToken"] = t
                         response.render(template: "views/forgotpasswordComplete", context: context)
                     }
@@ -891,9 +882,9 @@ struct UserAPI {
             
                 var context: [String : Any] = appExtras(request)
                 
-                if let v = request.param(name: "passvalidation"), !(v as String).isEmpty {
+                if let v = request.param(name: "passreset"), !(v as String).isEmpty {
                     
-                    let acc = Account(validation: v)
+                    let acc = Account(reset: v)
                     
                     if acc.id.isEmpty {
                         context["msg_title"] = "Account Validation Error."
@@ -911,7 +902,7 @@ struct UserAPI {
                             }
                             //                        acc.usertype = .standard
                             acc.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
-                            acc.passvalidation.removeAll()
+                            acc.passreset.removeAll()
                             do {
                                 try acc.save()
                                 request.session?.userid = acc.id
@@ -938,7 +929,6 @@ struct UserAPI {
                 }
             }
         }
-        
     }
     
     //MARK: Update current location to the user

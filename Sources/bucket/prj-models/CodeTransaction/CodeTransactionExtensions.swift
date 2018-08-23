@@ -219,6 +219,18 @@ struct CodeTransactionDictionary {
             }
         }
     }
+    var status : String? {
+        get {
+            return self.dic["status"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["status"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "status")
+            }
+        }
+    }
     var terminalId : Int? {
         get {
             return self.dic["terminal_id"].intValue

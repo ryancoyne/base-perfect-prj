@@ -30,6 +30,7 @@ public class Address: PostgresStORM {
     var address1 : String? = nil
     var address2 : String? = nil
     var address3 : String? = nil
+    var ach_transfer_minimum: Double? = nil
     
     //MARK: Table name
     override public func table() -> String { return "address" }
@@ -101,6 +102,11 @@ public class Address: PostgresStORM {
             postal_code = data
         }
         
+        if let data = this.data.addressDic.ach_transfer_minimum {
+            ach_transfer_minimum = data
+        }
+        
+        
     }
     
     func rows() -> [Address] {
@@ -162,6 +168,11 @@ public class Address: PostgresStORM {
             case "state":
                 if (value as? String).isNotNil {
                     self.state = (value as! String)
+                }
+
+            case "ach_transfer_minimum":
+                if (value as? Double).isNotNil {
+                    self.ach_transfer_minimum = (value as! Double)
                 }
                 
             default:
@@ -240,6 +251,10 @@ public class Address: PostgresStORM {
         if self.postal_code.isNotNil {
             dictionary.addressDic.postalCode = self.postal_code
         }
+
+        if self.ach_transfer_minimum.isNotNil {
+            dictionary.addressDic.ach_transfer_minimum = self.ach_transfer_minimum
+        }
         
         return dictionary
     }
@@ -284,7 +299,11 @@ public class Address: PostgresStORM {
         if diff == true, self.address1 != targetItem.address1 {
             diff = false
         }
-        
+
+        if diff == true, self.ach_transfer_minimum != targetItem.ach_transfer_minimum {
+            diff = false
+        }
+
         return diff
         
     }

@@ -35,6 +35,7 @@ public class CodeTransactionHistory: PostgresStORM {
     var amount                : Double? = nil
     var amount_available      : Double? = nil
     var total_amount          : Double? = nil
+    var status : String? = nil
     
     var disputed : Int? = nil
     var disputedby : String? = nil
@@ -163,6 +164,10 @@ public class CodeTransactionHistory: PostgresStORM {
             total_amount = data
         }
         
+        if let data = this.data.codeTransactionDic.status.stringValue {
+            status = data
+        }
+        
     }
     
     func rows() -> [CodeTransactionHistory] {
@@ -207,8 +212,8 @@ public class CodeTransactionHistory: PostgresStORM {
                 }
                 
             case "amount":
-                if (value as? Double).isNotNil {
-                    self.amount = (value as! Double)
+                if let dbV = (value as Any?).doubleValue {
+                    self.amount = dbV
                 }
 
             case "amount_available":
@@ -217,8 +222,8 @@ public class CodeTransactionHistory: PostgresStORM {
                 }
 
             case "total_amount":
-                if (value as? Double).isNotNil {
-                    self.total_amount = (value as! Double)
+                if let dbV = (value as Any?).doubleValue {
+                    self.total_amount = dbV
                 }
                 
             case "customer_code":
@@ -240,7 +245,12 @@ public class CodeTransactionHistory: PostgresStORM {
                 if (value as? String).isNotNil {
                     self.batch_id = (value as! String)
                 }
-                
+
+            case "status":
+                if (value as? String).isNotNil {
+                    self.status = (value as! String)
+                }
+
             case "redeemedby":
                 if (value as? String).isNotNil {
                     self.redeemedby = (value as! String)
@@ -308,6 +318,16 @@ public class CodeTransactionHistory: PostgresStORM {
             case "created":
                 if (value as? Int).isNotNil {
                     self.created = (value as! Int)
+                }
+
+            case "deletedby":
+                if (value as? String).isNotNil {
+                    self.deletedby = (value as! String)
+                }
+                
+            case "deleted":
+                if (value as? Int).isNotNil {
+                    self.deleted = (value as! Int)
                 }
 
             default:
@@ -397,7 +417,11 @@ public class CodeTransactionHistory: PostgresStORM {
         if self.batch_id.isNotNil {
             dictionary.codeTransactionHistoryDic.batchId = self.batch_id
         }
-        
+
+        if self.status.isNotNil {
+            dictionary.codeTransactionHistoryDic.status = self.status
+        }
+
         if self.client_location.isNotNil {
             dictionary.codeTransactionHistoryDic.clientLocation = self.client_location
         }
@@ -485,7 +509,11 @@ public class CodeTransactionHistory: PostgresStORM {
         if diff == true, self.batch_id != targetItem.batch_id {
             diff = false
         }
-        
+
+        if diff == true, self.status != targetItem.status {
+            diff = false
+        }
+
         if diff == true, self.terminal_id != targetItem.terminal_id {
             diff = false
         }
