@@ -150,7 +150,7 @@ final class InitializeData {
         let uscg = try? usa_cg.sqlRows("SELECT * FROM cashout_group WHERE country_id = \(usa.id!) ORDER BY display_order DESC ", params: [])
         for i in uscg! {
             switch i.data.cashoutGroupDic.group_name {
-            case "Prepaid Card":
+            case "Prepaid Card"?:
                 // card 1
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'Visa',")
@@ -168,7 +168,7 @@ final class InitializeData {
                 ussql.append("'https://www.mastercard.us/etc/designs/mccom/en-us/jcr:content/global/logo.img.png/1472151229727.png', ")
                 ussql.append("50.00,0),")
                 break
-            case "Gift Card":
+            case "Gift Card"?:
                 // card 1
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'Amazon',")
@@ -219,7 +219,7 @@ final class InitializeData {
                 ussql.append("50.00,0),")
 
                 break
-            case "Donate":
+            case "Donate"?:
                 // card 1
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'Heifer International',")
@@ -270,7 +270,7 @@ final class InitializeData {
                 ussql.append("50.00,0),")
 
                 break
-            case "Bucket Coin":
+            case "Bucket Coin"?:
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'Bucket Coin',")
                 ussql.append("'https://buckettechnologies.com',")

@@ -1,5 +1,5 @@
 // Generated automatically by Perfect Assistant
-// Date: 2018-08-22 20:40:26 +0000
+// Date: 2018-08-23 12:55:02 +0000
 import PackageDescription
 let package = Package(
 	name: "bucket_server",
