@@ -410,8 +410,7 @@ struct RetailerAPI {
                         let _ = try? transaction.saveWithCustomType(CCXDefaultUserValues.user_server)
                         
                         // and now - lets save the transaction in the Audit table
-                        let af = AuditFunctions()
-                        af.addCustomerCodeAuditRecord(transaction)
+                        AuditFunctions().addCustomerCodeAuditRecord(transaction)
                         
                         // if we are here then everything went well
                         try? response.setBody(json: json!)
@@ -434,7 +433,108 @@ struct RetailerAPI {
                 
             }
         }
+
         
+        //MARK: - Create Transaction
+        public static func deleteTransaction(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard !Retailer.retailerTerminalBounce(request, response) else { return }
+                
+                do {
+                    
+                    // we are using the json variable to return the code too.
+                    var json = try request.postBodyJSON()
+                    
+                    // get the code
+                    if json.isNotNil, let ccode = json!["customer_code"].stringValue {
+
+                        // lets see if the code has not been redeemed yet :)
+                        let thecode = CodeTransaction()
+                        let _ = try? thecode.find(["customer_code":ccode])
+                        if let code_to_delete = thecode.rows().first?.id {
+                            let _ = try? thecode.get(code_to_delete)
+                            
+                            // make sure we got it
+                            if thecode.id.isNil {
+                                // there was a problem getting the actual code record
+                                // return the response error
+                                let _ = try? response.setBody(json: ["error":"The code is not on record in the to be redeemed status."])
+                                response.completed(status: .custom(code: 450, message: "Code Not On Record For UnRedeemed"))
+                                return
+                            }
+                            
+                            // see if the code is deleted
+                            if thecode.deleted! > 0 {
+                                // return the response error
+                                let _ = try? response.setBody(json: ["error":"The code eas already deleted."])
+                                response.completed(status: .custom(code: 451, message: "Code Already Deleted"))
+                                return
+
+                            }
+                            
+                            // lets delete the code
+                            thecode.deleted = CCXServiceClass.sharedInstance.getNow()
+                            
+                            // see if a user is logged in
+                            if let user = request.session?.userid, !user.isEmpty {
+                                thecode.deletedby = user
+                            } else {
+                                thecode.deletedby = CCXDefaultUserValues.user_server
+                            }
+                            
+                            let _ = try? thecode.saveWithCustomType(thecode.deletedby, copyOver: false)
+                            
+                            // audit the delete
+                            AuditFunctions().deleteCustomerCodeAuditRecord(thecode)
+                            
+                            // all OK - returned at the bottom
+                            
+                        } else {
+                            // see if the code was redeemed
+                            let was_it_redeemed = CodeTransactionHistory()
+                            let _ = try? was_it_redeemed.find(["customer_code":ccode])
+                            let checkme = was_it_redeemed.rows().first
+                            if checkme.isNotNil, checkme!.id.isNotNil, checkme!.id! > 0 {
+                                // there is a record - it was already redeemed
+                                let _ = try? response.setBody(json: ["error":"The code was redeemed already.  Contact support."])
+                                response.completed(status: .custom(code: 452, message: "Code Redeemed Already"))
+                                return
+                            }
+
+                            // this should not occcur
+                            let _ = try? response.setBody(json: ["error":"The code is not on file."])
+                            response.completed(status: .custom(code: 453, message: "Code Not On File"))
+                            return
+
+                        }
+                        
+                        
+                        // if we are here then everything went well
+                        let _ = try? response.setBody(json: ["code_delete":"OK"])
+                            .completed(status: .ok)
+                            return
+                    }
+                    
+                    // the only way it would hit here is if the Do fails
+                    let _ = try? response.setBody(json: ["Unknown":"Although you are OK - the request could not be fulfilled."])
+                        .completed(status: .ok)
+                    return
+                    
+                } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
+                    return response.invalidRequest(invalidJSONString)
+                    
+                } catch {
+                    // Not sure what error could be thrown here, but the only one we throw right now is if the JSON is unparceable.
+                    
+                }
+                
+            }
+        }
+        
+
         //MARK: - Delete Terminal
         static func terminalDelete(data: [String:Any]) throws -> RequestHandler {
             return {
