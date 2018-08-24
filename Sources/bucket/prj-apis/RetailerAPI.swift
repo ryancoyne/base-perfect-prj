@@ -447,7 +447,7 @@ struct RetailerAPI {
                 do {
                     
                     // get the code from the url path
-                    if let ccode = request. {
+                    if let ccode = request.customerCode {
 
                         // make sure this retailer has issued this code
                         // if not, return an erro saying that they did not issue a code - invalid code
@@ -606,6 +606,9 @@ fileprivate extension HTTPRequest {
     }
     var intervalId : String? {
         return self.urlVariables["intervalId"]
+    }
+    var customerCode : String? {
+        return self.urlVariables["customerCode"]
     }
     var retailerSecret : String? {
         return self.header(.custom(name: "x-functions-key"))

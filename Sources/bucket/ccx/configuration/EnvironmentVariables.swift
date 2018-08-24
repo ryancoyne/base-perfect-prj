@@ -79,13 +79,13 @@ final class EnvironmentVariables {
         self.CheckOnStart_Server2 = env_variables["SERVER_2_ON_START"].boolValue
         
         let public_url = env_variables["SERVER_PUBLIC_URL"].stringValue
-        if !public_url.isEmptyOrNil {
-            
-            self.PublicServerApiURL = URL(string: public_url!)
-            
-        } else {
-            self.PublicServerApiURL = nil
-        }
+//        if !public_url.isEmptyOrNil {
+//
+//            self.PublicServerApiURL = URL(string: public_url!)
+//
+//        } else {
+//            self.PublicServerApiURL = nil
+//        }
 
     }
     
@@ -287,13 +287,6 @@ final class EnvironmentVariables {
                 self.CheckOnStart_Server2 = value
             }
 
-            if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["SERVER_PUBLIC_URL"] as? String {
-
-                let testurl = URL(string: value)
-                self.PublicServerApiURL = URL(string: value)
-                
-            }
-            
             if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["IMAGE_BASE_URL"] as? String {
                 self.ImageBaseURL = value
             }

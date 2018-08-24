@@ -55,7 +55,7 @@ struct ConsumerAPI {
                     find.passreset = AccessToken.generate()
                     
                     if (try? find.save()).isNotNil {
-                        let h = "<p>To reset your password for your account, please <a href=\"\(baseURL)/verifyAccount/forgotpassword/\(find.passreset)\">click here</a></p>"
+                        let h = "<p>To reset your password for your account, please <a href=\"\(AuthenticationVariables.baseURL)/verifyAccount/forgotpassword/\(find.passreset)\">click here</a></p>"
                         
                         response.render(template: "views/forgotpassword", context: ["msg_body":"We sent a confirmation email to \(email).","msg_title":"Success!"])
                         response.completed()

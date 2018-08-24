@@ -713,7 +713,7 @@ struct UserAPI {
                         if (try? account.save()).isNotNil {
                             
                             // Lets send out the email to reset the password:
-                            let h = "<p>To reset your password for your account, please <a href=\"\(baseURL)/verifyAccount/forgotpassword/\(account.passreset)\">click here</a></p>"
+                            let h = "<p>To reset your password for your account, please <a href=\"\(AuthenticationVariables.baseURL)/verifyAccount/forgotpassword/\(account.passreset)\">click here</a></p>"
                             
                             try? response.setBody(json: ["message":"Please check your email to update your forgotten password."])
                                 .setHeader(.contentType, value: "application/json")
