@@ -21,6 +21,7 @@ public class CashoutGroup: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
+    var display       : Bool? = nil
     var group_name    : String? = nil
     var description   : String? = nil
     var picture_url   : String? = nil
@@ -81,6 +82,10 @@ public class CashoutGroup: PostgresStORM {
             picture_url = data
         }
 
+        if let data = this.data.cashoutGroupDic.display {
+            display = data
+        }
+
     }
     
     func rows() -> [CashoutGroup] {
@@ -123,7 +128,12 @@ public class CashoutGroup: PostgresStORM {
                 if (value as? String).isNotNil {
                     self.picture_url = (value as! String)
                 }
-                
+
+            case "display":
+                if (value as? Bool).isNotNil {
+                    self.display = (value as! Bool)
+                }
+
             default:
                 print("This should not occur")
             }
@@ -183,7 +193,11 @@ public class CashoutGroup: PostgresStORM {
         if self.description.isNotNil {
             dictionary.cashoutGroupDic.picture_url = self.picture_url
         }
-        
+
+        if self.display.isNotNil {
+            dictionary.cashoutGroupDic.display = self.display
+        }
+
         return dictionary
     }
     
@@ -209,6 +223,10 @@ public class CashoutGroup: PostgresStORM {
         }
         
         if diff == true, self.picture_url != targetItem.picture_url {
+            diff = false
+        }
+
+        if diff == true, self.display != targetItem.display {
             diff = false
         }
 

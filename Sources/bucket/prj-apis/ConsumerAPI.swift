@@ -422,6 +422,7 @@ struct ConsumerAPI {
                 countsql.append("JOIN cashout_option AS coo ")
                 countsql.append("ON cog.id = coo.group_id ")
                 countsql.append("WHERE cog.country_id = $1 ")
+                countsql.append("AND cog.display = true ")
                 countsql.append("AND cog.deleted = 0 ")
                 countsql.append("AND coo.deleted = 0 ")
                 countsql.append("GROUP BY cog.id ")

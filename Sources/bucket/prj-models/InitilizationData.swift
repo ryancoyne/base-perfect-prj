@@ -119,15 +119,15 @@ final class InitializeData {
         let created_time = CCXServiceClass.sharedInstance.getNow()
 
         var checkuser = "INSERT INTO \(tbl.table()) "
-        checkuser.append("(created, createdby, group_name,description, country_id, picture_url, display_order) ")
+        checkuser.append("(created, createdby, group_name,description, country_id, picture_url, display_order, display) ")
         checkuser.append(" VALUES ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', \(usa.id!),'', 1), ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.', \(usa.id!),'',2), ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.', \(usa.id!),'',3), ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),'',4),")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','TopUp','', \(singapore.id!),'',1),")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),'',2), ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','', \(singapore.id!),'',3)")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', \(usa.id!),'', 1, true), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.', \(usa.id!),'',2, true), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.', \(usa.id!),'',3, true), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),'',4, true),")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','TopUp','', \(singapore.id!),'',1, true),")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),'',2, true), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','', \(singapore.id!),'',3, true)")
 
         print("Adding cashout groups: \(checkuser)")
         _ = try? tbl.sqlRows(checkuser, params: [])

@@ -100,4 +100,17 @@ struct CashoutGroupDictionary {
         }
     }
 
+    var display : Bool? {
+        get {
+            return self.dic["display"].boolValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["display"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "display")
+            }
+        }
+    }
+
 }
