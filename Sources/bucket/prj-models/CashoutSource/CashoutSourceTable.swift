@@ -8,15 +8,15 @@
 import Foundation
 import PostgresStORM
 
-final class CashoutOptionTable {
+final class CashoutSourceTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
     
-    static let sharedInstance = CashoutOptionTable()
-    let tbl = CashoutOption()
+    static let sharedInstance = CashoutSourceTable()
+    let tbl = CashoutSource()
     
     let tablelevel = 1.00
     
@@ -100,18 +100,11 @@ final class CashoutOptionTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
-        createsql.append("cashout_source_id int NOT NULL DEFAULT 0, ")
-        createsql.append("group_id int NOT NULL DEFAULT 0, ")
-        createsql.append("maximum numeric(10,5) NOT NULL DEFAULT 0, ")
-        createsql.append("minimum numeric(10,5) NOT NULL DEFAULT 0, ")
-        createsql.append("form_id int NOT NULL DEFAULT 0, ")
         createsql.append("name text COLLATE pg_catalog.default, ")
-        createsql.append("pictureURL text COLLATE pg_catalog.default, ")
+        createsql.append("source_id text COLLATE pg_catalog.default, ")
         createsql.append("website text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
         createsql.append("long_description text COLLATE pg_catalog.default, ")
-        createsql.append("display_order int NOT NULL DEFAULT 0, ")
-        createsql.append("display bool NOT NULL DEFAULT false, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

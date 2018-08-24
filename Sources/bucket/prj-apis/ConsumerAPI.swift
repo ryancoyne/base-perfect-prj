@@ -332,6 +332,7 @@ struct ConsumerAPI {
 
                 var sqlstatement = "SELECT * FROM cashout_option_view_deleted_no AS coo "
                 sqlstatement.append("WHERE group_id = $1 ")
+                sqlstatement.append("AND display = true ")
                 sqlstatement.append("ORDER BY display_order ASC ")
 
                 let qp = request.getOffsetLimit()
@@ -421,6 +422,7 @@ struct ConsumerAPI {
                 countsql.append("JOIN cashout_option AS coo ")
                 countsql.append("ON cog.id = coo.group_id ")
                 countsql.append("WHERE cog.country_id = $1 ")
+                countsql.append("AND cog.display = true ")
                 countsql.append("AND cog.deleted = 0 ")
                 countsql.append("AND coo.deleted = 0 ")
                 countsql.append("GROUP BY cog.id ")

@@ -1,5 +1,5 @@
 //
-//  CashoutGroup.swift
+//  CashoutOption.swift
 //  bucket
 //
 //  Created by Ryan Coyne on 8/9/18.
@@ -10,7 +10,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class CashoutGroup: PostgresStORM {
+public class CashoutSource: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -21,15 +21,14 @@ public class CashoutGroup: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var display       : Bool? = nil
-    var group_name    : String? = nil
-    var description   : String? = nil
-    var picture_url   : String? = nil
-    var display_order : Int? = nil
-    var country_id    : Int? = nil
+    var name             : String? = nil
+    var website          : String? = nil
+    var description      : String? = nil
+    var long_description : String? = nil
+    var source_id        : String? = nil
     
     //MARK: Table name
-    override public func table() -> String { return "cashout_group" }
+    override public func table() -> String { return "cashout_source" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -62,36 +61,32 @@ public class CashoutGroup: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.cashoutGroupDic.country_id {
-            country_id = data
-        }
-        
-        if let data = this.data.cashoutGroupDic.description {
+        if let data = this.data.shortdescription {
             description = data
         }
-
-        if let data = this.data.cashoutGroupDic.display_order {
-            display_order = data
+        
+        if let data = this.data.cashoutSourceDic.longDescription {
+            long_description = data
         }
-
-        if let data = this.data.cashoutGroupDic.group_name {
-            group_name = data
+        
+        if let data = this.data.cashoutSourceDic.sourceId {
+            source_id = data
         }
-
-        if let data = this.data.cashoutGroupDic.picture_url {
-            picture_url = data
+        
+        if let data = this.data.cashoutSourceDic.name {
+            name = data
         }
-
-        if let data = this.data.cashoutGroupDic.display {
-            display = data
+        
+        if let data = this.data.cashoutSourceDic.website {
+            website = data
         }
 
     }
     
-    func rows() -> [CashoutGroup] {
-        var rows = [CashoutGroup]()
+    func rows() -> [CashoutSource] {
+        var rows = [CashoutSource]()
         for i in 0..<self.results.rows.count {
-            let row = CashoutGroup()
+            let row = CashoutSource()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -104,9 +99,9 @@ public class CashoutGroup: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "country_id":
-                if (value as? Int).isNotNil {
-                    self.country_id = (value as! Int)
+            case "name":
+                if (value as? String).isNotNil {
+                    self.name = (value as! String)
                 }
                 
             case "description":
@@ -114,26 +109,21 @@ public class CashoutGroup: PostgresStORM {
                     self.description = (value as! String)
                 }
                 
-            case "display_order":
-                if (value as? Int).isNotNil {
-                    self.display_order = (value as! Int)
+            case "long_description":
+                if (value as? String).isNotNil {
+                    self.long_description = (value as! String)
                 }
                 
-            case "group_name":
+            case "website":
                 if (value as? String).isNotNil {
-                    self.group_name = (value as! String)
+                    self.website = (value as! String)
+                }
+
+            case "source_id":
+                if (value as? String).isNotNil {
+                    self.source_id = (value as! String)
                 }
                 
-            case "picture_url":
-                if (value as? String).isNotNil {
-                    self.picture_url = (value as! String)
-                }
-
-            case "display":
-                if (value as? Bool).isNotNil {
-                    self.display = (value as! Bool)
-                }
-
             default:
                 print("This should not occur")
             }
@@ -174,59 +164,51 @@ public class CashoutGroup: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
-        if self.country_id.isNotNil {
-            dictionary.cashoutGroupDic.country_id = self.country_id
+        if self.name.isNotNil {
+            dictionary.cashoutSourceDic.name = self.name
         }
-
-        if self.group_name.isNotNil {
-            dictionary.cashoutGroupDic.group_name = self.group_name
+        
+        if self.website.isNotNil {
+            dictionary.cashoutSourceDic.website = self.website
         }
-
-        if self.display_order.isNotNil {
-            dictionary.cashoutGroupDic.display_order = self.display_order
-        }
-
+        
         if self.description.isNotNil {
-            dictionary.cashoutGroupDic.description = self.description
+            dictionary.shortdescription = self.description
         }
-
-        if self.description.isNotNil {
-            dictionary.cashoutGroupDic.picture_url = self.picture_url
+        
+        if self.long_description.isNotNil {
+            dictionary.cashoutSourceDic.longDescription = self.long_description
         }
-
-        if self.display.isNotNil {
-            dictionary.cashoutGroupDic.display = self.display
+        
+        if self.source_id.isNotNil {
+            dictionary.cashoutSourceDic.sourceId = self.source_id
         }
 
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: CashoutGroup)-> Bool {
+    func compare(targetItem: CashoutSource)-> Bool {
         
         var diff = true
         
-        if diff == true, self.country_id != targetItem.country_id {
+        if diff == true, self.source_id != targetItem.source_id {
+            diff = false
+        }
+        
+        if diff == true, self.name != targetItem.name {
             diff = false
         }
         
         if diff == true, self.description != targetItem.description {
             diff = false
         }
-
-        if diff == true, self.group_name != targetItem.group_name {
-            diff = false
-        }
-
-        if diff == true, self.display_order != targetItem.display_order {
+        
+        if diff == true, self.long_description != targetItem.long_description {
             diff = false
         }
         
-        if diff == true, self.picture_url != targetItem.picture_url {
-            diff = false
-        }
-
-        if diff == true, self.display != targetItem.display {
+        if diff == true, self.website != targetItem.website {
             diff = false
         }
 

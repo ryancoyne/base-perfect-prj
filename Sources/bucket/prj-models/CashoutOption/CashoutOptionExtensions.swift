@@ -35,6 +35,18 @@ struct CashoutOptionsDictionary {
         }
     }
     
+    var cashoutSourceId : Int? {
+        get {
+            return self.dic["cashout_source_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["cashout_source_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "cashout_source_id")
+            }
+        }
+    }
     var groupId : Int? {
         get {
             return self.dic["group_id"].intValue
@@ -143,5 +155,18 @@ struct CashoutOptionsDictionary {
             }
         }
     }
+    var display : Bool? {
+        get {
+            return self.dic["display"].boolValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["display"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "display")
+            }
+        }
+    }
+
 }
 

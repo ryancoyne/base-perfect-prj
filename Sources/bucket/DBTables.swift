@@ -243,8 +243,10 @@ final class PRJDBTables {
             // add the default data
             self.insertDefaultData()
 
-            // finally - lets add sample data - controlled by the condif table entry for sampledata (0 = no, 1 = yes)
-            self.insertSampleData()
+            // finally - lets add sample data - controlled by the config and the server environment table entry for sampledata (0 = no, 1 = yes)
+            if EnvironmentVariables.sharedInstance.Server != ServerEnvironment.production {
+                self.insertSampleData()
+            }
 
         } else {
             // postgis support not on
