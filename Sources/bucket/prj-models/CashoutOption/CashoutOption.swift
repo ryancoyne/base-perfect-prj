@@ -21,18 +21,19 @@ public class CashoutOption: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var display          : Bool? = nil
-    var group_id         : Int? = nil
-    var form_id          : Int? = nil
-    var display_order    : Int? = nil
-    var name             : String? = nil
-    var website          : String? = nil
-    var description      : String? = nil
-    var long_description : String? = nil
-    var pictureURL       : String? = nil
-    var minimum          : Double? = nil
-    var maximum          : Double? = nil
-    
+    var cashout_source_id : Int? = nil
+    var group_id          : Int? = nil
+    var form_id           : Int? = nil
+    var display_order     : Int? = nil
+    var name              : String? = nil
+    var website           : String? = nil
+    var description       : String? = nil
+    var long_description  : String? = nil
+    var pictureURL        : String? = nil
+    var minimum           : Double? = nil
+    var maximum           : Double? = nil
+    var display           : Bool? = nil
+
     //MARK: Table name
     override public func table() -> String { return "cashout_option" }
     
@@ -66,7 +67,11 @@ public class CashoutOption: PostgresStORM {
         if let data = this.data.deletedBy {
             deletedby = data
         }
-        
+
+        if let data = this.data.cashoutOptionsDic.cashoutSourceId {
+            cashout_source_id = data
+        }
+
         if let data = this.data.cashoutOptionsDic.formId {
             form_id = data
         }
@@ -128,7 +133,12 @@ public class CashoutOption: PostgresStORM {
         for (key, value) in sourceDictionary {
             
             switch key.lowercased() {
-                
+
+            case "cashout_source_id":
+                if (value as? Int).isNotNil {
+                    self.cashout_source_id = (value as! Int)
+                }
+
             case "form_id":
                 if (value as? Int).isNotNil {
                     self.form_id = (value as! Int)
@@ -268,6 +278,10 @@ public class CashoutOption: PostgresStORM {
             dictionary.cashoutOptionsDic.display = self.display
         }
 
+        if self.cashout_source_id.isNotNil {
+            dictionary.cashoutOptionsDic.cashoutSourceId = self.cashout_source_id
+        }
+
         return dictionary
     }
     
@@ -275,6 +289,10 @@ public class CashoutOption: PostgresStORM {
     func compare(targetItem: CashoutOption)-> Bool {
         
         var diff = true
+        
+        if diff == true, self.cashout_source_id != targetItem.cashout_source_id {
+            diff = false
+        }
         
         if diff == true, self.group_id != targetItem.group_id {
             diff = false
