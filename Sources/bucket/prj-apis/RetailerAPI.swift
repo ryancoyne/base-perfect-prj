@@ -540,7 +540,7 @@ fileprivate extension HTTPResponse {
         return try! self
             .setBody(json: ["errorCode":"NoTerminalId", "message":"You must send in a 'terminalId' key with the serial number of the device as the value."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .unauthorized)
+            .completed(status: .forbidden)
     }
     var noLocationTerminal : Void {
         return try! self
@@ -552,7 +552,7 @@ fileprivate extension HTTPResponse {
         return try! self
             .setBody(json: ["errorCode":"ServerEnvironmentError", "message":"There is a current configuration issue with the system.  Please Contact Bucket's Tech Team."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .unauthorized)
+            .completed(status: .internalServerError)
     }
     var invalidCustomerCode : Void {
         let _ = try? self.setBody(json: ["errorCode":"InvalidCode", "message":"Please check your customer code."])
