@@ -450,29 +450,20 @@ struct RetailerAPI {
                 // lets see if the code has not been redeemed yet :)
                 let thecode = CodeTransaction()
                 let _ = try? thecode.find(["customer_code":code])
-                if let code_to_delete = thecode.rows().first?.id {
-                    let _ = try? thecode.get(code_to_delete)
-                    
-                    // make sure we got it
-                    if thecode.id.isNil {
-                        // there was a problem getting the actual code record
-                        // return the response error
-                        let _ = try? response.setBody(json: ["error":"The code is not on record in the to be redeemed status."])
-                        response.completed(status: .custom(code: 450, message: "Code Not On Record For UnRedeemed"))
-                        return
-                    }
+                // Check if we have a returning object:
+                if thecode.id.isNotNil {
                     
                     // Make sure the retailers match:
                     // Return a general error with a different status code that we will know that the retailers are not matching.
                     // We will tell them to go to Bucket for support.  If they report an error of code 454, we know there is an issue with the retailers matching.
                     let retailer = Retailer()
                     try? retailer.find(["retailer_code": request.retailerId!])
-                    guard thecode.retailer_id == retailer.id else { _ = try? response.setBody(json: ["error":"There is an issue with this transaction.  Please contact Bucket Support."])
+                    guard thecode.retailer_id == retailer.id else { _ = try? response.setBody(json: ["errorCode":"UnexpectedIssue","message":"There is an issue with this transaction.  Please contact Bucket Support."])
                         response.completed(status: .custom(code: 454, message: "Contact Support"))
                         return }
                     
                     // see if the code is deleted
-                    guard thecode.deleted! == 0 else { _ = try? response.setBody(json: ["error":"The code was already deleted."])
+                    guard thecode.deleted! == 0 else { _ = try? response.setBody(json: ["errorCode":"CodeDeleted","message":"The code was already deleted."])
                         response.completed(status: .custom(code: 451, message: "Code Already Deleted"))
                         return }
                     
@@ -480,7 +471,7 @@ struct RetailerAPI {
                     thecode.deleted = CCXServiceClass.sharedInstance.getNow()
                     
                     let terminal = request.terminal!
-                    thecode.deleted_reason = "Terminal ID \(terminal.serial_number!) deleted this transaction at \(thecode.deleted!.dateString) GMT"
+                    thecode.deleted_reason = "Terminal \(terminal.serial_number!) deleted this transaction at \(thecode.deleted!.dateString) GMT"
                     
                     // see if a user is logged in
                     if let user = request.session?.userid, !user.isEmpty {
@@ -499,29 +490,20 @@ struct RetailerAPI {
                     response.completed(status: .ok)
                     
                 } else {
-                    // see if the code was redeemed
-                    let was_it_redeemed = CodeTransactionHistory()
-                    let _ = try? was_it_redeemed.find(["customer_code":code])
-                    let checkme = was_it_redeemed.rows().first
-                    if checkme.isNotNil, checkme!.id.isNotNil, checkme!.id! > 0 {
-                        // there is a record - it was already redeemed
-                        let _ = try? response.setBody(json: ["error":"The code was redeemed already.  Contact support."])
+                    
+                    // We did not... if it is in the history table, then it is already redeemed...
+                    let theCode = CodeTransactionHistory()
+                    try? theCode.find(["customer_code":code])
+                    
+                    if theCode.id.isNotNil {
+                        let _ = try? response.setBody(json: ["errorCode":"CodeRedeemed","message":"The code was redeemed already.  Please Contact Bucket Support."])
                         response.completed(status: .custom(code: 452, message: "Code Redeemed Already"))
                         return
                     }
                     
-                    // this should not occcur
-                    let _ = try? response.setBody(json: ["error":"The code is not on file."])
-                    response.completed(status: .custom(code: 453, message: "Code Not On File"))
+                    response.invalidCustomerCode
                     return
-                    
                 }
-                
-                
-                // if we are here then everything went well
-                let _ = try? response.setBody(json: ["code_delete":"OK"])
-                    .completed(status: .ok)
-                return
                 
             }
         }
@@ -573,10 +555,8 @@ fileprivate extension HTTPResponse {
             .completed(status: .unauthorized)
     }
     var invalidCustomerCode : Void {
-        return try! self
-            .setBody(json: ["errorCode":"InvalidCustomerCode", "message":"Please check your customer code."])
-            .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .unauthorized)
+        let _ = try? self.setBody(json: ["errorCode":"The code is not on record in the to be redeemed status."])
+        return self.completed(status: .custom(code: 450, message: "Code Not On Record For UnRedeemed"))
     }
     func alreadyRegistered(_ serialNumber: String) -> Void {
         return try! self
