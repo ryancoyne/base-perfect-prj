@@ -46,7 +46,6 @@
         "HTTP_DOCUMENT_ROOT": "./webroot",
         "SERVER_1_ON_START" :false,
         "SERVER_2_ON_START" :false,
-        "SERVER_PUBLIC_URL" : "http://localhost:9000/",
         "IMAGE_BASE_URL"    : "http://pictures.com"
 
     },

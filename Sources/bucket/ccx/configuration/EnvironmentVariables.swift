@@ -81,10 +81,10 @@ final class EnvironmentVariables {
         let public_url = env_variables["SERVER_PUBLIC_URL"].stringValue
         if !public_url.isEmptyOrNil {
             
-            self.PublicServerURL = URL(string: public_url!)
+            self.PublicServerApiURL = URL(string: public_url!)
             
         } else {
-            self.PublicServerURL = nil
+            self.PublicServerApiURL = nil
         }
 
     }
@@ -290,7 +290,7 @@ final class EnvironmentVariables {
             if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["SERVER_PUBLIC_URL"] as? String {
 
                 let testurl = URL(string: value)
-                self.PublicServerURL = URL(string: value)
+                self.PublicServerApiURL = URL(string: value)
                 
             }
             
@@ -904,18 +904,38 @@ final class EnvironmentVariables {
         }
     }
 
-    private var _PublicServerURL: URL?
-    public var PublicServerURL: URL? {
+    private var _PublicServerApiURL: URL?
+    public var PublicServerApiURL: URL? {
         get {
-            return _PublicServerURL
-        }
-        set {
-            if newValue != nil {
-                _PublicServerURL = newValue!
-            } else {
-                _PublicServerURL = nil
+            if _PublicServerApiURL.isNil {
+                if EnvironmentVariables.sharedInstance.API_URL_PORT != 80 || EnvironmentVariables.sharedInstance.API_URL_PORT != 443 {
+                
+                    var burl = EnvironmentVariables.sharedInstance.API_URL_PROTOCOL!
+                    burl.append("://")
+                    burl.append(EnvironmentVariables.sharedInstance.API_DOMAIN!)
+                    burl.append(":")
+                    burl.append("\(EnvironmentVariables.sharedInstance.API_URL_PORT!)")
+                    burl.append("/")
+                    _PublicServerApiURL                         = URL(string: burl)
+                
+                } else {
+                    var burl = EnvironmentVariables.sharedInstance.API_URL_PROTOCOL!
+                    burl.append("://")
+                    burl.append(EnvironmentVariables.sharedInstance.API_DOMAIN!)
+                    burl.append("/")
+                    _PublicServerApiURL                         = URL(string: burl)
+                }
             }
+            
+            return _PublicServerApiURL
         }
+//        set {
+//            if newValue != nil {
+//                _PublicServerApiURL = newValue!
+//            } else {
+//                _PublicServerApiURL = nil
+//            }
+//        }
     }
 
     private var _ImageBaseURL: String?

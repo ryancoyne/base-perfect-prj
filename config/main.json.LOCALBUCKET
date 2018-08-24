@@ -43,7 +43,7 @@
         "SERVER_ENVIRONMENT": "DEV",
         "SESSION_NAME"      : "bucket",
         "HTTP_DOCUMENT_ROOT": "./webroot",
-        "SERVER_PUBLIC_URL" : "http://localhost:9000/"
+        "IMAGE_BASE_URL" : "http://localhost:9000/"
 
     }
 }

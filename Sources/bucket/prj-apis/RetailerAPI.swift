@@ -26,9 +26,10 @@ struct RetailerAPI {
             return [
                 ["method":"get",    "uri":"/api/v1/closeInterval/{intervalId}", "handler":closeInterval],
                 ["method":"get",    "uri":"/api/v1/closeInterval", "handler":closeInterval],
-                ["method":"post",    "uri":"/api/v1/registerterminal", "handler":registerTerminal],
-                ["method":"post",    "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],
-                ["method":"post",    "uri":"/api/v1/transaction", "handler":createTransaction]
+                ["method":"post",   "uri":"/api/v1/registerterminal", "handler":registerTerminal],
+                ["method":"post",   "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],
+                ["method":"post",   "uri":"/api/v1/transaction", "handler":createTransaction],
+                ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction],
             ]
         }
         //MARK: - Close Interval Function
@@ -375,7 +376,7 @@ struct RetailerAPI {
                         json!["customerCode"] = ccode.message
                         
                         var qrCodeURL = ""
-                        qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerURL?.absoluteString ?? "")
+                        qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerApiURL?.absoluteString ?? "")
                         qrCodeURL.append("/redeem/")
                         qrCodeURL.append(ccode.message)
                         json!["qrCodeContent"] = qrCodeURL
@@ -435,7 +436,7 @@ struct RetailerAPI {
         }
 
         
-        //MARK: - Create Transaction
+        //MARK: - Delete Transaction
         public static func deleteTransaction(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
@@ -445,12 +446,14 @@ struct RetailerAPI {
                 
                 do {
                     
-                    // we are using the json variable to return the code too.
-                    var json = try request.postBodyJSON()
-                    
-                    // get the code
-                    if json.isNotNil, let ccode = json!["customer_code"].stringValue {
+                    // get the code from the url path
+                    if let ccode = request. {
 
+                        // make sure this retailer has issued this code
+                        // if not, return an erro saying that they did not issue a code - invalid code
+                        
+                        
+                        
                         // lets see if the code has not been redeemed yet :)
                         let thecode = CodeTransaction()
                         let _ = try? thecode.find(["customer_code":ccode])

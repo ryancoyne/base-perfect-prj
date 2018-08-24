@@ -142,7 +142,7 @@ struct TestingAPI {
                     if ccode.success {
                     
                         var qrCodeURL = ""
-                        qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerURL?.absoluteString ?? "")
+                        qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerApiURL?.absoluteString ?? "")
                         qrCodeURL.append("/redeem/")
                         qrCodeURL.append(ccode.message)
                     

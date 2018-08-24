@@ -43,7 +43,6 @@
         "SERVER_ENVIRONMENT": "DEV",
         "SESSION_NAME"      : "bucket",
         "HTTP_DOCUMENT_ROOT": "./webroot",
-        "SERVER_PUBLIC_URL" : "https://d2f9y2mgb9xsgw.cloudfront.net/api/V1",
         "IMAGE_BASE_URL"    : "http://pictures.com"
     }
 }

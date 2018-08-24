@@ -167,9 +167,8 @@ PostgresConnector.database = EnvironmentVariables.sharedInstance.DB_USERNAME!
 PostgresConnector.username = EnvironmentVariables.sharedInstance.DB_USERNAME!
 PostgresConnector.password = EnvironmentVariables.sharedInstance.DB_PASSWORD!
 
-var baseURL = ""
-
-if EnvironmentVariables.sharedInstance.API_URL_PORT != 80, EnvironmentVariables.sharedInstance.API_URL_PORT != 443 {
+if EnvironmentVariables.sharedInstance.URL_PORT != 80 || EnvironmentVariables.sharedInstance.URL_PORT != 443 {
+    // non standard port
     var burl = EnvironmentVariables.sharedInstance.URL_PROTOCOL!
     burl.append("://")
     burl.append(EnvironmentVariables.sharedInstance.URL_DOMAIN!)
@@ -177,28 +176,34 @@ if EnvironmentVariables.sharedInstance.API_URL_PORT != 80, EnvironmentVariables.
     burl.append("\(EnvironmentVariables.sharedInstance.URL_PORT!)")
     burl.append("/")
     AuthenticationVariables.baseURL =  burl
-
-    burl = EnvironmentVariables.sharedInstance.API_URL_PROTOCOL!
-    burl.append("://")
-    burl.append(EnvironmentVariables.sharedInstance.API_DOMAIN!)
-    burl.append(":")
-    burl.append("\(EnvironmentVariables.sharedInstance.API_URL_PORT!)")
-    burl.append("/")
-    baseURL                         = burl
-    
 } else {
+    // standard ports
     var burl = EnvironmentVariables.sharedInstance.URL_PROTOCOL!
     burl.append("://")
     burl.append(EnvironmentVariables.sharedInstance.URL_DOMAIN!)
     AuthenticationVariables.baseURL = burl
-    
-    burl = EnvironmentVariables.sharedInstance.API_URL_PROTOCOL!
-    burl.append("://")
-    burl.append(EnvironmentVariables.sharedInstance.API_DOMAIN!)
-    burl.append("/")
-    baseURL                         = burl
-    
 }
+
+//var baseApiURL = ""
+
+//if EnvironmentVariables.sharedInstance.API_URL_PORT != 80 || EnvironmentVariables.sharedInstance.API_URL_PORT != 443 {
+//
+//    var burl = EnvironmentVariables.sharedInstance.API_URL_PROTOCOL!
+//    burl.append("://")
+//    burl.append(EnvironmentVariables.sharedInstance.API_DOMAIN!)
+//    burl.append(":")
+//    burl.append("\(EnvironmentVariables.sharedInstance.API_URL_PORT!)")
+//    burl.append("/")
+//    baseApiURL                         = burl
+//
+//} else {
+//    var burl = EnvironmentVariables.sharedInstance.API_URL_PROTOCOL!
+//    burl.append("://")
+//    burl.append(EnvironmentVariables.sharedInstance.API_DOMAIN!)
+//    burl.append("/")
+//    baseApiURL                         = burl
+//
+//}
 
 //MARK: EMAIL CONFIGURATION
 if EnvironmentVariables.sharedInstance.EMAIL_SERVER != nil {
