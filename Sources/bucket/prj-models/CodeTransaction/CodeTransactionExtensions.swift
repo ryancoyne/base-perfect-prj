@@ -59,6 +59,18 @@ struct CodeTransactionDictionary {
             }
         }
     }
+    var deletedReason : String? {
+        get {
+            return self.dic["deleted_reason"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["deleted_reason"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "deleted_reason")
+            }
+        }
+    }
     var customerCodeURL : String? {
         get {
             return self.dic["customer_codeurl"].stringValue

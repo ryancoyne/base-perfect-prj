@@ -27,6 +27,7 @@ public class CodeTransactionHistory: PostgresStORM {
     var retailer_id           : Int? = nil
     var country_id            : Int? = nil
     var customer_code         : String? = nil
+    var deleted_reason     : String? = nil
     var customer_codeurl      : String? = nil
     var terminal_id           : Int? = nil
     var client_location       : String? = nil
@@ -94,8 +95,9 @@ public class CodeTransactionHistory: PostgresStORM {
         if let data = this.data.codeTransactionHistoryDic.cashedoutTotal.doubleValue {
             cashedout_total = data
         }
-
-
+        if let data = this.data.codeTransactionHistoryDic.deletedReason {
+            deleted_reason = data
+        }
         if let data = this.data.codeTransactionHistoryDic.archived.intValue {
             archived = data
         }
@@ -229,6 +231,11 @@ public class CodeTransactionHistory: PostgresStORM {
             case "customer_code":
                 if (value as? String).isNotNil {
                     self.customer_code = (value as! String)
+                }
+                
+            case "deleted_reason":
+                if (value as? String).isNotNil {
+                    self.deleted_reason = (value as! String)
                 }
                 
             case "customer_codeurl":
@@ -382,6 +389,10 @@ public class CodeTransactionHistory: PostgresStORM {
             dictionary.codeTransactionHistoryDic.cashedout = self.cashedout
         }
         
+        if self.deleted_reason.isNotNil {
+            dictionary.codeTransactionHistoryDic.deletedReason = self.deleted_reason
+        }
+        
         if self.archivedby.isNotNil {
             dictionary.codeTransactionHistoryDic.archivedBy = self.archivedby
         }
@@ -459,6 +470,10 @@ public class CodeTransactionHistory: PostgresStORM {
         }
         
         if diff == true, self.client_location != targetItem.client_location {
+            diff = false
+        }
+        
+        if diff == true, self.deleted_reason != targetItem.deleted_reason {
             diff = false
         }
         
