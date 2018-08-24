@@ -71,18 +71,6 @@ struct CashoutSourceDictionary {
             }
         }
     }
-    var longDescription : String? {
-        get {
-            return self.dic["long_description"].stringValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["long_description"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "long_description")
-            }
-        }
-    }
     var description : String? {
         get {
             return self.dic["description"].stringValue
@@ -92,6 +80,70 @@ struct CashoutSourceDictionary {
                 self.dic["description"] = newValue!
             } else {
                 self.dic.removeValue(forKey: "description")
+            }
+        }
+    }
+
+    var countryId : Int? {
+        get {
+            return self.dic["country_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["country_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "country_id")
+            }
+        }
+    }
+
+    var hoursBetweenProcessing : Int? {
+        get {
+            return self.dic["hours_between_processing"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["hours_between_processing"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "hours_between_processing")
+            }
+        }
+    }
+
+    var lastprocessed : Int? {
+        get {
+            return self.dic["lastprocessed"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["lastprocessed"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "country_id")
+            }
+        }
+    }
+
+    var lastprocessedBy : String? {
+        get {
+            return self.dic["lastprocessedby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["lastprocessedby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "lastprocessedby")
+            }
+        }
+    }
+    var lastprocessedNote : String? {
+        get {
+            return self.dic["lastprocessed_note"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["lastprocessed_note"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "lastprocessed_note")
             }
         }
     }
