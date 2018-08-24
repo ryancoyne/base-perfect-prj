@@ -35,6 +35,7 @@ public class CodeTransaction: PostgresStORM {
     var retailer_id     : Int? = nil
     var country_id     : Int? = nil
     var customer_code     : String? = nil
+    var deleted_reason     : String? = nil
     var customer_codeurl     : String? = nil
     var terminal_id : Int? = nil
     var client_location : String? = nil
@@ -92,6 +93,10 @@ public class CodeTransaction: PostgresStORM {
             cashedoutby = data
         }
 
+        if let data = this.data.codeTransactionHistoryDic.deletedReason {
+            deleted_reason = data
+        }
+        
         if let data = this.data.codeTransactionDic.cashedout {
             cashedout = data
         }
@@ -228,6 +233,11 @@ public class CodeTransaction: PostgresStORM {
                     self.customer_code = (value as! String)
                 }
                 
+            case "deleted_reason":
+                if (value as? String).isNotNil {
+                    self.deleted_reason = (value as! String)
+                }
+                
             case "customer_codeurl":
                 if (value as? String).isNotNil {
                     self.customer_codeurl = (value as! String)
@@ -354,6 +364,10 @@ public class CodeTransaction: PostgresStORM {
             dictionary.codeTransactionDic.cashedout = self.cashedout
         }
         
+        if self.deleted_reason.isNotNil {
+            dictionary.codeTransactionHistoryDic.deletedReason = self.deleted_reason
+        }
+        
         if self.cashedoutby.isNotNil {
             dictionary.codeTransactionDic.cashedoutBy = self.cashedoutby
         }
@@ -468,6 +482,10 @@ public class CodeTransaction: PostgresStORM {
             diff = false
         }
         
+        if diff == true, self.deleted_reason != targetItem.deleted_reason {
+            diff = false
+        }
+        
         if diff == true, self.customer_code != targetItem.customer_code {
             diff = false
         }
@@ -557,6 +575,7 @@ public class CodeTransaction: PostgresStORM {
         cth.modifiedby  = self.modifiedby
         cth.deleted     = self.deleted
         cth.deletedby   = self.deletedby
+        cth.deleted_reason = self.deleted_reason
         cth.cashedout   = self.cashedout
         cth.cashedoutby = self.cashedoutby
 
