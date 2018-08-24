@@ -21,12 +21,17 @@ public class CashoutSource: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var name             : String? = nil
-    var website          : String? = nil
-    var description      : String? = nil
-    var long_description : String? = nil
-    var source_id        : String? = nil
+    var name               : String? = nil
+    var website            : String? = nil
+    var description        : String? = nil
+    var source_id          : String? = nil
+    var country_id         : Int?    = nil
     
+    var hours_between_processing : Int?    = nil
+    var lastprocessed            : Int?    = nil
+    var lastprocessedby          : String? = nil
+    var lastprocessed_note       : String? = nil
+
     //MARK: Table name
     override public func table() -> String { return "cashout_source" }
     
@@ -65,10 +70,6 @@ public class CashoutSource: PostgresStORM {
             description = data
         }
         
-        if let data = this.data.cashoutSourceDic.longDescription {
-            long_description = data
-        }
-        
         if let data = this.data.cashoutSourceDic.sourceId {
             source_id = data
         }
@@ -79,6 +80,22 @@ public class CashoutSource: PostgresStORM {
         
         if let data = this.data.cashoutSourceDic.website {
             website = data
+        }
+
+        if let data = this.data.cashoutSourceDic.countryId {
+            country_id = data
+        }
+
+        if let data = this.data.cashoutSourceDic.lastprocessed {
+            lastprocessed = data
+        }
+
+        if let data = this.data.cashoutSourceDic.lastprocessedBy {
+            lastprocessedby = data
+        }
+
+        if let data = this.data.cashoutSourceDic.lastprocessedNote {
+            lastprocessed_note = data
         }
 
     }
@@ -109,11 +126,6 @@ public class CashoutSource: PostgresStORM {
                     self.description = (value as! String)
                 }
                 
-            case "long_description":
-                if (value as? String).isNotNil {
-                    self.long_description = (value as! String)
-                }
-                
             case "website":
                 if (value as? String).isNotNil {
                     self.website = (value as! String)
@@ -123,7 +135,30 @@ public class CashoutSource: PostgresStORM {
                 if (value as? String).isNotNil {
                     self.source_id = (value as! String)
                 }
-                
+
+            case "country_id":
+                if (value as? Int).isNotNil {
+                    self.country_id = (value as! Int)
+                }
+
+            case "hours_between_processing":
+                if (value as? Int).isNotNil {
+                    self.hours_between_processing = (value as! Int)
+                }
+            case "lastprocessed":
+                if (value as? Int).isNotNil {
+                    self.lastprocessed = (value as! Int)
+                }
+
+            case "lastprocessedby":
+                if (value as? String).isNotNil {
+                    self.lastprocessedby = (value as! String)
+                }
+            case "lastprocessed_note":
+                if (value as? String).isNotNil {
+                    self.lastprocessed_note = (value as! String)
+                }
+
             default:
                 print("This should not occur")
             }
@@ -176,12 +211,24 @@ public class CashoutSource: PostgresStORM {
             dictionary.shortdescription = self.description
         }
         
-        if self.long_description.isNotNil {
-            dictionary.cashoutSourceDic.longDescription = self.long_description
-        }
-        
         if self.source_id.isNotNil {
             dictionary.cashoutSourceDic.sourceId = self.source_id
+        }
+
+        if self.country_id.isNotNil {
+            dictionary.cashoutSourceDic.countryId = self.country_id
+        }
+        if self.hours_between_processing.isNotNil {
+            dictionary.cashoutSourceDic.hoursBetweenProcessing = self.hours_between_processing
+        }
+        if self.lastprocessed.isNotNil {
+            dictionary.cashoutSourceDic.lastprocessed = self.lastprocessed
+        }
+        if self.lastprocessedby.isNotNil {
+            dictionary.cashoutSourceDic.lastprocessedBy = self.lastprocessedby
+        }
+        if self.lastprocessed_note.isNotNil {
+            dictionary.cashoutSourceDic.lastprocessedNote = self.lastprocessed_note
         }
 
         return dictionary
@@ -204,11 +251,27 @@ public class CashoutSource: PostgresStORM {
             diff = false
         }
         
-        if diff == true, self.long_description != targetItem.long_description {
+        if diff == true, self.website != targetItem.website {
             diff = false
         }
-        
-        if diff == true, self.website != targetItem.website {
+
+        if diff == true, self.country_id != targetItem.country_id {
+            diff = false
+        }
+
+        if diff == true, self.hours_between_processing != targetItem.hours_between_processing {
+            diff = false
+        }
+
+        if diff == true, self.lastprocessed != targetItem.lastprocessed {
+            diff = false
+        }
+
+        if diff == true, self.lastprocessedby != targetItem.lastprocessedby {
+            diff = false
+        }
+
+        if diff == true, self.lastprocessed_note != targetItem.lastprocessed_note {
             diff = false
         }
 

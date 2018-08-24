@@ -22,6 +22,26 @@ final class SampleData {
 
     static let sharedInstance = SampleData()
     
+    func addCashoutSource() {
+        let tbl = CashoutSource()
+
+        let created_time = CCXServiceClass.sharedInstance.getNow()
+
+        var sqlstatement = "INSERT INTO \(tbl.table()) "
+        
+        sqlstatement.append("(created, createdby, name, description) ")
+        sqlstatement.append(" VALUES ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','OmniCard', 'Closed Loop Cards'), ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Open Loop', 'Open Loop Provider'), ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Donations', 'Donations provider') ")
+        
+        print("Adding cashout sources: \(sqlstatement)")
+        let _ = try? tbl.sqlRows(sqlstatement, params: [])
+
+        
+    }
+    
+    
     func addUserData() {
         let tbl = Account()
         

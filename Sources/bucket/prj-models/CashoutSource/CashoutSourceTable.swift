@@ -104,7 +104,11 @@ final class CashoutSourceTable {
         createsql.append("source_id text COLLATE pg_catalog.default, ")
         createsql.append("website text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
-        createsql.append("long_description text COLLATE pg_catalog.default, ")
+        createsql.append("country_id int NOT NULL DEFAULT 0, ")
+        createsql.append("hours_between_processing int NOT NULL DEFAULT 0, ")
+        createsql.append("lastprocessed int NOT NULL DEFAULT 0, ")
+        createsql.append("lastprocessedby text COLLATE pg_catalog.default, ")
+        createsql.append("lastprocessed_note text COLLATE pg_catalog.default, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

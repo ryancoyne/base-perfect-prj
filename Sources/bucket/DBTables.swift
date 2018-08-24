@@ -207,7 +207,6 @@ final class PRJDBTables {
 
         // Bucket specific tables
         CountryTable.sharedInstance.create()
-//        CurrencyTable.sharedInstance.create()
         POSTable.sharedInstance.create()
         AddressTable.sharedInstance.create()
         TerminalTable.sharedInstance.create()
@@ -218,6 +217,7 @@ final class PRJDBTables {
         FormFieldTable.sharedInstance.create()
         FormFieldsTable.sharedInstance.create()
         FormFieldTypeTable.sharedInstance.create()
+        CashoutSourceTable.sharedInstance.create()
         CashoutGroupTable.sharedInstance.create()
         CashoutOptionTable.sharedInstance.create()
         CompletedFormsTable.sharedInstance.create()
