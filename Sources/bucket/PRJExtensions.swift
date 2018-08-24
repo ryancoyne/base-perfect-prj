@@ -103,6 +103,12 @@ extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .badRequest)
     }
+    var invalidJSONFormat : Void {
+        return try! self
+            .setBody(json: ["errorCode":"InvalidJSON", "message":"Please check the required JSON format for this request."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .badRequest)
+    }
 }
 
 //extension Int {

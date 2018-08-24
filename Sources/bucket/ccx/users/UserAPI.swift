@@ -344,61 +344,75 @@ struct UserAPI {
                             .setHeader(.contentType, value: "application/json")
                             .completed(status: .ok)
                     }
-                    if let json = try? request.postBodyString?.jsonDecode() as? [String:Any] {
-                        if let json = json, json.keys.count == 1, let key = json.first?.key {
-                            switch key {
-                            case "facebook":
-                                
-                                if let theTest = try? facebook.verifyCredentials(json) {
-                                    if theTest.passed {
-                                        // Now we need to either log the user in or create the user, and log them in.
-                                        let account = try! self.createOrLoginUser(theTest.data, key)
-                                        request.session?.userid = account.id
-                                        
-                                        try? response.setBody(json: account.asDictionary)
-                                            .setHeader(.contentType, value: "application/json")
-                                            .completed(status: .ok)
-                                        
-                                    } else {
-                                        // Return an error indicating we failed attempting to use oauth.
-                                        try! response.setBody(json: ["error":"Failed OAuth attempt for \(key)"])
-                                            .setHeader(.contentType, value: "application/json")
-                                            .completed(status: .forbidden)
-                                    }
+                    
+                    do {
+                        
+                        let json = try request.postBodyJSON()!
+                        guard !json.isEmpty else { response.emptyJSONBody; return }
+                    
+                        guard json.keys.count == 1 else { response.invalidJSONFormat; return }
+                        let key = json.keys.first!
+                        
+                        switch key {
+                        case "facebook":
+                            
+                            if let theTest = try? facebook.verifyCredentials(json) {
+                                if theTest.passed {
+                                    // Now we need to either log the user in or create the user, and log them in.
+                                    let account = try! self.createOrLoginUser(theTest.data, key)
+                                    request.session?.userid = account.id
+                                    
+                                    try? response.setBody(json: account.asDictionary)
+                                        .setHeader(.contentType, value: "application/json")
+                                        .completed(status: .ok)
+                                    
+                                } else {
+                                    // Return an error indicating we failed attempting to use oauth.
+                                    try! response.setBody(json: ["error":"Failed OAuth attempt for \(key)"])
+                                        .setHeader(.contentType, value: "application/json")
+                                        .completed(status: .forbidden)
                                 }
-                            case "google":
-                                if let theTest = try? google.verifyCredentials(json) {
-                                    if theTest.passed {
-                                        
-                                        let account = try! self.createOrLoginUser(theTest.data, key)
-                                        request.session?.userid = account.id
-                                        
-                                        try? response.setBody(json: account.asDictionary)
-                                            .setHeader(.contentType, value: "application/json")
-                                            .completed(status: .ok)
-                                    } else {
-                                        try! response.setBody(json: ["error":"Failed OAuth attempt for \(key)"])
-                                            .setHeader(.contentType, value: "application/json")
-                                            .completed(status: .forbidden)
-                                    }
-                                }
-                                //                            case "twitter":
-                                //                                if let theTest = try? twitter.verifyCredentials(json) {
-                                //                                    if theTest.passed {
-                                //
-                                //                                        let account = try! self.createOrLoginUser(theTest.data, key)
-                                //
-                                //                                    } else {
-                                //                                        try! response.setBody(json: ["error":"Failed OAuth attempt for \(key)"])
-                                //                                            .setHeader(.contentType, value: "application/json")
-                                //                                            .completed(status: .forbidden)
-                                //                                    }
-                            //                                }
-                            default:
-                                break
                             }
+                        case "google":
+                            if let theTest = try? google.verifyCredentials(json) {
+                                if theTest.passed {
+                                    
+                                    let account = try! self.createOrLoginUser(theTest.data, key)
+                                    request.session?.userid = account.id
+                                    
+                                    try? response.setBody(json: account.asDictionary)
+                                        .setHeader(.contentType, value: "application/json")
+                                        .completed(status: .ok)
+                                } else {
+                                    try! response.setBody(json: ["error":"Failed OAuth attempt for \(key)"])
+                                        .setHeader(.contentType, value: "application/json")
+                                        .completed(status: .forbidden)
+                                }
+                            }
+                            //                            case "twitter":
+                            //                                if let theTest = try? twitter.verifyCredentials(json) {
+                            //                                    if theTest.passed {
+                            //
+                            //                                        let account = try! self.createOrLoginUser(theTest.data, key)
+                            //
+                            //                                    } else {
+                            //                                        try! response.setBody(json: ["error":"Failed OAuth attempt for \(key)"])
+                            //                                            .setHeader(.contentType, value: "application/json")
+                            //                                            .completed(status: .forbidden)
+                            //                                    }
+                        //                                }
+                        default:
+                            break
                         }
+                        
+                    } catch BucketAPIError.unparceableJSON(let unparceableJSON) {
+                        response.invalidRequest(unparceableJSON)
+                        return
+                    } catch {
+                        try? response.setBody(json: ["error" : "Unknown Error"])
+                            .completed(status: .internalServerError)
                     }
+                
                 }
             }
         }
