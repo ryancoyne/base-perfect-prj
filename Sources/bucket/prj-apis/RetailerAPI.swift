@@ -555,7 +555,7 @@ fileprivate extension HTTPResponse {
             .completed(status: .unauthorized)
     }
     var invalidCustomerCode : Void {
-        let _ = try? self.setBody(json: ["errorCode":"The code is not on record in the to be redeemed status."])
+        let _ = try? self.setBody(json: ["errorCode":"InvalidCustomerCode", "message":"Please check your customer code."])
         return self.completed(status: .custom(code: 450, message: "Code Not On Record For UnRedeemed"))
     }
     func alreadyRegistered(_ serialNumber: String) -> Void {
