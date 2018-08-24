@@ -332,6 +332,7 @@ struct ConsumerAPI {
 
                 var sqlstatement = "SELECT * FROM cashout_option_view_deleted_no AS coo "
                 sqlstatement.append("WHERE group_id = $1 ")
+                sqlstatement.append("AND display = true ")
                 sqlstatement.append("ORDER BY display_order ASC ")
 
                 let qp = request.getOffsetLimit()

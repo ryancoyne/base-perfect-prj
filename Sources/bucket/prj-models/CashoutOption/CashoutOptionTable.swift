@@ -110,6 +110,7 @@ final class CashoutOptionTable {
         createsql.append("description text COLLATE pg_catalog.default, ")
         createsql.append("long_description text COLLATE pg_catalog.default, ")
         createsql.append("display_order int NOT NULL DEFAULT 0, ")
+        createsql.append("display bool NOT NULL DEFAULT false, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

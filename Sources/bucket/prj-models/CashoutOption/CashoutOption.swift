@@ -21,16 +21,17 @@ public class CashoutOption: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var group_id     : Int? = nil
-    var form_id     : Int? = nil
-    var display_order     : Int? = nil
-    var name     : String? = nil
-    var website     : String? = nil
-    var description : String? = nil
+    var display          : Bool? = nil
+    var group_id         : Int? = nil
+    var form_id          : Int? = nil
+    var display_order    : Int? = nil
+    var name             : String? = nil
+    var website          : String? = nil
+    var description      : String? = nil
     var long_description : String? = nil
-    var pictureURL : String? = nil
-    var minimum : Double? = nil
-    var maximum : Double? = nil
+    var pictureURL       : String? = nil
+    var minimum          : Double? = nil
+    var maximum          : Double? = nil
     
     //MARK: Table name
     override public func table() -> String { return "cashout_option" }
@@ -105,7 +106,11 @@ public class CashoutOption: PostgresStORM {
         if let data = this.data.cashoutOptionsDic.website {
             website = data
         }
-        
+
+        if let data = this.data.cashoutOptionsDic.display {
+            display = data
+        }
+
     }
     
     func rows() -> [CashoutOption] {
@@ -173,7 +178,12 @@ public class CashoutOption: PostgresStORM {
                 if (value as? String).isNotNil {
                     self.website = (value as! String)
                 }
-                
+
+            case "display":
+                if (value as? Bool).isNotNil {
+                    self.display = (value as! Bool)
+                }
+
             default:
                 print("This should not occur")
             }
@@ -253,7 +263,11 @@ public class CashoutOption: PostgresStORM {
         if self.minimum.isNotNil {
             dictionary.cashoutOptionsDic.minimum = self.minimum
         }
-        
+
+        if self.display.isNotNil {
+            dictionary.cashoutOptionsDic.display = self.display
+        }
+
         return dictionary
     }
     
@@ -301,7 +315,11 @@ public class CashoutOption: PostgresStORM {
         if diff == true, self.website != targetItem.website {
             diff = false
         }
-        
+
+        if diff == true, self.display != targetItem.display {
+            diff = false
+        }
+
         return diff
         
     }
