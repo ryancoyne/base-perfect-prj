@@ -36,6 +36,7 @@ public class CodeTransaction: PostgresStORM {
     var country_id     : Int? = nil
     var customer_code     : String? = nil
     var deleted_reason     : String? = nil
+    var disputed_reason     : String? = nil
     var customer_codeurl     : String? = nil
     var terminal_id : Int? = nil
     var client_location : String? = nil
@@ -95,6 +96,10 @@ public class CodeTransaction: PostgresStORM {
 
         if let data = this.data.codeTransactionHistoryDic.deletedReason {
             deleted_reason = data
+        }
+        
+        if let data = this.data.codeTransactionHistoryDic.disputedReason {
+            disputed_reason = data
         }
         
         if let data = this.data.codeTransactionDic.cashedout {
@@ -238,6 +243,11 @@ public class CodeTransaction: PostgresStORM {
                     self.deleted_reason = (value as! String)
                 }
                 
+            case "disputed_reason":
+                if (value as? String).isNotNil {
+                    self.disputed_reason = (value as! String)
+                }
+                
             case "customer_codeurl":
                 if (value as? String).isNotNil {
                     self.customer_codeurl = (value as! String)
@@ -359,6 +369,10 @@ public class CodeTransaction: PostgresStORM {
         if self.archivedby.isNotNil {
             dictionary.codeTransactionHistoryDic.archivedBy = self.archivedby
         }
+        
+        if self.disputed_reason.isNotNil {
+            dictionary.codeTransactionDic.disputedReason = self.disputed_reason
+        }
 
         if self.cashedout.isNotNil {
             dictionary.codeTransactionDic.cashedout = self.cashedout
@@ -474,6 +488,10 @@ public class CodeTransaction: PostgresStORM {
             diff = false
         }
         
+        if diff == true, self.disputed_reason != targetItem.disputed_reason {
+            diff = false
+        }
+        
         if diff == true, self.client_transaction_id != targetItem.client_transaction_id {
             diff = false
         }
@@ -575,9 +593,6 @@ public class CodeTransaction: PostgresStORM {
         cth.modifiedby  = self.modifiedby
         cth.deleted     = self.deleted
         cth.deletedby   = self.deletedby
-        cth.deleted_reason = self.deleted_reason
-        cth.cashedout   = self.cashedout
-        cth.cashedoutby = self.cashedoutby
 
         // add the archive audit info
         cth.archived = CCXServiceClass.sharedInstance.getNow()

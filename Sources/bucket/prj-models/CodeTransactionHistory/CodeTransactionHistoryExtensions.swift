@@ -71,6 +71,18 @@ struct CodeTransactionHistoryDictionary {
             }
         }
     }
+    var disputedReason : String? {
+        get {
+            return self.dic["disputed_reason"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["disputed_reason"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "disputed_reason")
+            }
+        }
+    }
     var customerCodeURL : String? {
         get {
             return self.dic["customer_codeurl"].stringValue

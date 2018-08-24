@@ -464,9 +464,11 @@ struct RetailerAPI {
                     
                     // Make sure the retailers match:
                     // Return a general error with a different status code that we will know that the retailers are not matching.
-                    // We will tell them to go to Bucket for support.  If they report an error of code 453, we know there is an issue with the retailers matching.
-                    guard thecode.retailer_id == request.retailerId.intValue else { _ = try? response.setBody(json: ["error":"There is an issue with this transaction.  Please contact Bucket Support."])
-                        response.completed(status: .custom(code: 453, message: "Contact Support"))
+                    // We will tell them to go to Bucket for support.  If they report an error of code 454, we know there is an issue with the retailers matching.
+                    let retailer = Retailer()
+                    try? retailer.find(["retailer_code": request.retailerId!])
+                    guard thecode.retailer_id == retailer.id else { _ = try? response.setBody(json: ["error":"There is an issue with this transaction.  Please contact Bucket Support."])
+                        response.completed(status: .custom(code: 454, message: "Contact Support"))
                         return }
                     
                     // see if the code is deleted
@@ -478,7 +480,7 @@ struct RetailerAPI {
                     thecode.deleted = CCXServiceClass.sharedInstance.getNow()
                     
                     let terminal = request.terminal!
-                    thecode.deleted_reason = "Terminal \(terminal.id!) deleted \(thecode.deleted!.dateString)"
+                    thecode.deleted_reason = "Terminal ID \(terminal.serial_number!) deleted this transaction at \(thecode.deleted!.dateString) GMT"
                     
                     // see if a user is logged in
                     if let user = request.session?.userid, !user.isEmpty {
@@ -493,6 +495,8 @@ struct RetailerAPI {
                     AuditFunctions().deleteCustomerCodeAuditRecord(thecode)
                     
                     // all OK - returned at the bottom
+                    _=try? response.setBody(json: ["result":"Successfully deleted the transaction."])
+                    response.completed(status: .ok)
                     
                 } else {
                     // see if the code was redeemed
@@ -621,7 +625,7 @@ fileprivate extension HTTPRequest {
         // They need to input the x-functions-key as their retailer password.
         guard let password = self.retailerSecret, let terminalId = self.terminalId else { return nil }
         let term = Terminal()
-        try? term.find(["serial_number":terminalId,"terminal_key":password])
+        try? term.find(["serial_number":terminalId,"terminal_key":password.ourPasswordHash!])
         if term.id.isNotNil { return term }
         else { return nil }
     }

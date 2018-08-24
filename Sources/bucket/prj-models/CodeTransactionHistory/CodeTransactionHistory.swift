@@ -28,6 +28,7 @@ public class CodeTransactionHistory: PostgresStORM {
     var country_id            : Int? = nil
     var customer_code         : String? = nil
     var deleted_reason     : String? = nil
+    var disputed_reason     : String? = nil
     var customer_codeurl      : String? = nil
     var terminal_id           : Int? = nil
     var client_location       : String? = nil
@@ -79,6 +80,10 @@ public class CodeTransactionHistory: PostgresStORM {
         
         if let data = this.data.deletedBy {
             deletedby = data
+        }
+        
+        if let data = this.data.codeTransactionHistoryDic.disputedReason {
+            disputed_reason = data
         }
 
         if let data = this.data.codeTransactionHistoryDic.cashedoutBy {
@@ -238,6 +243,11 @@ public class CodeTransactionHistory: PostgresStORM {
                     self.deleted_reason = (value as! String)
                 }
                 
+            case "disputed_reason":
+                if (value as? String).isNotNil {
+                    self.disputed_reason = (value as! String)
+                }
+                
             case "customer_codeurl":
                 if (value as? String).isNotNil {
                     self.customer_codeurl = (value as! String)
@@ -381,6 +391,10 @@ public class CodeTransactionHistory: PostgresStORM {
             dictionary.codeTransactionHistoryDic.archived = self.archived
         }
         
+        if self.disputed_reason.isNotNil {
+            dictionary.codeTransactionDic.disputedReason = self.disputed_reason
+        }
+        
         if self.cashedoutby.isNotNil {
             dictionary.codeTransactionHistoryDic.cashedoutBy = self.cashedoutby
         }
@@ -470,6 +484,10 @@ public class CodeTransactionHistory: PostgresStORM {
         }
         
         if diff == true, self.client_location != targetItem.client_location {
+            diff = false
+        }
+        
+        if diff == true, self.disputed_reason != targetItem.disputed_reason {
             diff = false
         }
         
