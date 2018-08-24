@@ -617,8 +617,6 @@ struct ConsumerAPI {
                         let working_cth = CodeTransactionHistory()
                         working_cth.fromDictionary(sourceDictionary: i.data)
                         
-                        // Write the audit record
-                        
                         // update the available amount
                         if working_cth.id != lastone {
                             working_cth.amount_available = 0.0
@@ -634,6 +632,10 @@ struct ConsumerAPI {
                         
                         // we are complete - lets save and move on
                         let _ = try? working_cth.saveWithCustomType()
+                        
+                        // Write the audit record
+                        AuditFunctions().cashoutCustomerCodeAuditRecord(working_cth)
+
                     }
                     
                     // add the cashout record to the history record

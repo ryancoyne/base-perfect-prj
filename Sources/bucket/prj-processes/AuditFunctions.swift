@@ -13,6 +13,37 @@ import PerfectLib
 
 public class AuditFunctions {
 
+    func cashoutCustomerCodeAuditRecord(_ record: Any) {
+        
+        // get the audit record type
+        let art = LedgerType()
+        //        art.find(["":])
+        
+        switch record {
+        case is CodeTransaction:
+            
+            let ct = record as! CodeTransaction
+            
+            let ar = Ledger()
+            ar.code_country_id = ct.country_id
+            ar.customer_code = ct.customer_code
+            
+            break
+            
+        case is CodeTransactionHistory:
+            
+            let ct = record as! CodeTransactionHistory
+            
+            let ar = Ledger()
+            
+            break
+            
+        default:
+            // do nothing  the correct classes were not passed in
+            break
+        }
+    }
+        
     func addCustomerCodeAuditRecord(_ record: Any) {
         
         // get the audit record type
