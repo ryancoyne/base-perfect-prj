@@ -402,7 +402,8 @@ struct UserAPI {
                             //                                    }
                         //                                }
                         default:
-                            break
+                            response.invalidJSONFormat
+                            return
                         }
                         
                     } catch BucketAPIError.unparceableJSON(let unparceableJSON) {
