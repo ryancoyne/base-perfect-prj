@@ -232,6 +232,9 @@ final class PRJDBTables {
         
         UserTotalTable.sharedInstance.create()
         
+        BatchHeaderTable.sharedInstance.create()
+        BatchDetailTable.sharedInstance.create()
+        
         // make sure the tables exist.... if not - then create it
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
         if thereturn.postgis && thereturn.postgis_topo {
