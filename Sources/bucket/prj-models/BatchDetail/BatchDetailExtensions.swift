@@ -35,82 +35,42 @@ struct BatchDetailDictionary {
         }
     }
     
-    var description : String? {
+    var batch_header_id : Int? {
         get {
-            return self.dic["description"].stringValue
+            return self.dic["batch_header_id"].intValue
         }
         set {
             if newValue != nil {
-                self.dic["description"] = newValue!
+                self.dic["batch_header_id"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "description")
+                self.dic.removeValue(forKey: "batch_header_id")
             }
         }
     }
     
-    var group_name : String? {
+    var batch_group : Int? {
         get {
-            return self.dic["group_name"].stringValue
+            return self.dic["batch_group"].intValue
         }
         set {
             if newValue != nil {
-                self.dic["group_name"] = newValue!
+                self.dic["batch_group"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "group_name")
+                self.dic.removeValue(forKey: "batch_group")
             }
         }
     }
 
-    var display_order : Int? {
+    var batch_order : Int? {
         get {
-            return self.dic["display_order"].intValue
+            return self.dic["batch_order"].intValue
         }
         set {
             if newValue != nil {
-                self.dic["display_order"] = newValue!
+                self.dic["batch_order"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "display_order")
+                self.dic.removeValue(forKey: "batch_order")
             }
         }
     }
-
-    var country_id : Int? {
-        get {
-            return self.dic["country_id"].intValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["country_id"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "country_id")
-            }
-        }
-    }
-
-    var picture_url : String? {
-        get {
-            return self.dic["picture_url"].stringValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["picture_url"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "picture_url")
-            }
-        }
-    }
-
-    var display : Bool? {
-        get {
-            return self.dic["display"].boolValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["display"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "display")
-            }
-        }
-    }
-
 }

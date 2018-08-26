@@ -21,13 +21,10 @@ public class BatchDetail: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var display       : Bool? = nil
-    var group_name    : String? = nil
-    var description   : String? = nil
-    var picture_url   : String? = nil
-    var display_order : Int? = nil
-    var country_id    : Int? = nil
-    
+    var batch_header_id : Int? = nil
+    var batch_group     : Int? = nil
+    var batch_order     : Int? = nil
+
     //MARK: Table name
     override public func table() -> String { return "batch_detail" }
     
@@ -62,36 +59,24 @@ public class BatchDetail: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.batchDetailDic.country_id {
-            country_id = data
+        if let data = this.data.batchDetailDic.batch_header_id {
+            batch_header_id = data
         }
         
-        if let data = this.data.batchDetailDic.description {
-            description = data
+        if let data = this.data.batchDetailDic.batch_group {
+            batch_group = data
         }
 
-        if let data = this.data.batchDetailDic.display_order {
-            display_order = data
-        }
-
-        if let data = this.data.batchDetailDic.group_name {
-            group_name = data
-        }
-
-        if let data = this.data.batchDetailDic.picture_url {
-            picture_url = data
-        }
-
-        if let data = this.data.batchDetailDic.display {
-            display = data
+        if let data = this.data.batchDetailDic.batch_order {
+            batch_order = data
         }
 
     }
     
-    func rows() -> [CashoutGroup] {
-        var rows = [CashoutGroup]()
+    func rows() -> [BatchDetail] {
+        var rows = [BatchDetail]()
         for i in 0..<self.results.rows.count {
-            let row = CashoutGroup()
+            let row = BatchDetail()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -104,34 +89,19 @@ public class BatchDetail: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "country_id":
+            case "batch_header_id":
                 if (value as? Int).isNotNil {
-                    self.country_id = (value as! Int)
+                    self.batch_header_id = (value as! Int)
                 }
                 
-            case "description":
-                if (value as? String).isNotNil {
-                    self.description = (value as! String)
-                }
-                
-            case "display_order":
+            case "batch_group":
                 if (value as? Int).isNotNil {
-                    self.display_order = (value as! Int)
-                }
-                
-            case "group_name":
-                if (value as? String).isNotNil {
-                    self.group_name = (value as! String)
-                }
-                
-            case "picture_url":
-                if (value as? String).isNotNil {
-                    self.picture_url = (value as! String)
+                    self.batch_header_id = (value as! Int)
                 }
 
-            case "display":
-                if (value as? Bool).isNotNil {
-                    self.display = (value as! Bool)
+            case "batch_order":
+                if (value as? Int).isNotNil {
+                    self.batch_order = (value as! Int)
                 }
 
             default:
@@ -174,28 +144,16 @@ public class BatchDetail: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
-        if self.country_id.isNotNil {
-            dictionary.batchDetailDic.country_id = self.country_id
+        if self.batch_header_id.isNotNil {
+            dictionary.batchDetailDic.batch_header_id = self.batch_header_id
         }
 
-        if self.group_name.isNotNil {
-            dictionary.batchDetailDic.group_name = self.group_name
+        if self.batch_group.isNotNil {
+            dictionary.batchDetailDic.batch_group = self.batch_group
         }
 
-        if self.display_order.isNotNil {
-            dictionary.batchDetailDic.display_order = self.display_order
-        }
-
-        if self.description.isNotNil {
-            dictionary.batchDetailDic.description = self.description
-        }
-
-        if self.description.isNotNil {
-            dictionary.batchDetailDic.picture_url = self.picture_url
-        }
-
-        if self.display.isNotNil {
-            dictionary.batchDetailDic.display = self.display
+        if self.batch_order.isNotNil {
+            dictionary.batchDetailDic.batch_order = self.batch_order
         }
 
         return dictionary
@@ -206,27 +164,15 @@ public class BatchDetail: PostgresStORM {
         
         var diff = true
         
-        if diff == true, self.country_id != targetItem.country_id {
+        if diff == true, self.batch_header_id != targetItem.batch_header_id {
             diff = false
         }
         
-        if diff == true, self.description != targetItem.description {
+        if diff == true, self.batch_group != targetItem.batch_group {
             diff = false
         }
 
-        if diff == true, self.group_name != targetItem.group_name {
-            diff = false
-        }
-
-        if diff == true, self.display_order != targetItem.display_order {
-            diff = false
-        }
-        
-        if diff == true, self.picture_url != targetItem.picture_url {
-            diff = false
-        }
-
-        if diff == true, self.display != targetItem.display {
+        if diff == true, self.batch_order != targetItem.batch_order {
             diff = false
         }
 
