@@ -21,12 +21,9 @@ public class BatchHeader: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var display       : Bool? = nil
-    var group_name    : String? = nil
-    var description   : String? = nil
-    var picture_url   : String? = nil
-    var display_order : Int? = nil
-    var country_id    : Int? = nil
+    var batch_identifier : String? = nil
+    var country_id       : Int? = nil
+    var description      : String? = nil
     
     //MARK: Table name
     override public func table() -> String { return "batch_header" }
@@ -66,32 +63,20 @@ public class BatchHeader: PostgresStORM {
             country_id = data
         }
         
+        if let data = this.data.batchHeaderDic.batch_identifier {
+            batch_identifier = data
+        }
+
         if let data = this.data.batchHeaderDic.description {
             description = data
         }
 
-        if let data = this.data.batchHeaderDic.display_order {
-            display_order = data
-        }
-
-        if let data = this.data.batchHeaderDic.group_name {
-            group_name = data
-        }
-
-        if let data = this.data.batchHeaderDic.picture_url {
-            picture_url = data
-        }
-
-        if let data = this.data.batchHeaderDic.display {
-            display = data
-        }
-
     }
     
-    func rows() -> [CashoutGroup] {
-        var rows = [CashoutGroup]()
+    func rows() -> [BatchHeader] {
+        var rows = [BatchHeader]()
         for i in 0..<self.results.rows.count {
-            let row = CashoutGroup()
+            let row = BatchHeader()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -114,26 +99,11 @@ public class BatchHeader: PostgresStORM {
                     self.description = (value as! String)
                 }
                 
-            case "display_order":
-                if (value as? Int).isNotNil {
-                    self.display_order = (value as! Int)
+            case "batch_identifier":
+                if (value as? String).isNotNil {
+                    self.batch_identifier = (value as! String)
                 }
                 
-            case "group_name":
-                if (value as? String).isNotNil {
-                    self.group_name = (value as! String)
-                }
-                
-            case "picture_url":
-                if (value as? String).isNotNil {
-                    self.picture_url = (value as! String)
-                }
-
-            case "display":
-                if (value as? Bool).isNotNil {
-                    self.display = (value as! Bool)
-                }
-
             default:
                 print("This should not occur")
             }
@@ -178,31 +148,19 @@ public class BatchHeader: PostgresStORM {
             dictionary.batchHeaderDic.country_id = self.country_id
         }
 
-        if self.group_name.isNotNil {
-            dictionary.batchHeaderDic.group_name = self.group_name
-        }
-
-        if self.display_order.isNotNil {
-            dictionary.batchHeaderDic.display_order = self.display_order
-        }
-
         if self.description.isNotNil {
             dictionary.batchHeaderDic.description = self.description
         }
 
-        if self.description.isNotNil {
-            dictionary.batchHeaderDic.picture_url = self.picture_url
-        }
-
-        if self.display.isNotNil {
-            dictionary.batchHeaderDic.display = self.display
+        if self.batch_identifier.isNotNil {
+            dictionary.batchHeaderDic.batch_identifier = self.batch_identifier
         }
 
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: CashoutGroup)-> Bool {
+    func compare(targetItem: BatchHeader)-> Bool {
         
         var diff = true
         
@@ -214,19 +172,7 @@ public class BatchHeader: PostgresStORM {
             diff = false
         }
 
-        if diff == true, self.group_name != targetItem.group_name {
-            diff = false
-        }
-
-        if diff == true, self.display_order != targetItem.display_order {
-            diff = false
-        }
-        
-        if diff == true, self.picture_url != targetItem.picture_url {
-            diff = false
-        }
-
-        if diff == true, self.display != targetItem.display {
+        if diff == true, self.batch_identifier != targetItem.batch_identifier {
             diff = false
         }
 

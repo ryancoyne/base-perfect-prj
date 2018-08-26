@@ -48,28 +48,15 @@ struct BatchHeaderDictionary {
         }
     }
     
-    var group_name : String? {
+    var batch_identifier : String? {
         get {
-            return self.dic["group_name"].stringValue
+            return self.dic["batch_identifier"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["group_name"] = newValue!
+                self.dic["batch_identifier"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "group_name")
-            }
-        }
-    }
-
-    var display_order : Int? {
-        get {
-            return self.dic["display_order"].intValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["display_order"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "display_order")
+                self.dic.removeValue(forKey: "batch_identifier")
             }
         }
     }
@@ -86,31 +73,4 @@ struct BatchHeaderDictionary {
             }
         }
     }
-
-    var picture_url : String? {
-        get {
-            return self.dic["picture_url"].stringValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["picture_url"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "picture_url")
-            }
-        }
-    }
-
-    var display : Bool? {
-        get {
-            return self.dic["display"].boolValue
-        }
-        set {
-            if newValue != nil {
-                self.dic["display"] = newValue!
-            } else {
-                self.dic.removeValue(forKey: "display")
-            }
-        }
-    }
-
 }
