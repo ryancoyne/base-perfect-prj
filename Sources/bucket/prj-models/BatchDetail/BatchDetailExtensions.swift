@@ -48,9 +48,9 @@ struct BatchDetailDictionary {
         }
     }
     
-    var batch_group : Int? {
+    var batch_group : String? {
         get {
-            return self.dic["batch_group"].intValue
+            return self.dic["batch_group"].stringValue
         }
         set {
             if newValue != nil {

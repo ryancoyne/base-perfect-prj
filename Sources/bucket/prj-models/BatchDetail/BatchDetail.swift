@@ -22,7 +22,7 @@ public class BatchDetail: PostgresStORM {
     var deletedby  : String? = nil
     
     var batch_header_id : Int? = nil
-    var batch_group     : Int? = nil
+    var batch_group     : String? = nil
     var batch_order     : Int? = nil
 
     //MARK: Table name
@@ -95,8 +95,8 @@ public class BatchDetail: PostgresStORM {
                 }
                 
             case "batch_group":
-                if (value as? Int).isNotNil {
-                    self.batch_header_id = (value as! Int)
+                if (value as? String).isNotNil {
+                    self.batch_group = (value as! String)
                 }
 
             case "batch_order":
