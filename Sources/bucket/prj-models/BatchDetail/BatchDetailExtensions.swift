@@ -73,4 +73,18 @@ struct BatchDetailDictionary {
             }
         }
     }
+    
+    var detail_line : String? {
+        get {
+            return self.dic["detail_line"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["detail_line"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "detail_line")
+            }
+        }
+    }
+
 }

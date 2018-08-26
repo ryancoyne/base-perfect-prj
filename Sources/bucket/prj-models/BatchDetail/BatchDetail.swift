@@ -25,6 +25,8 @@ public class BatchDetail: PostgresStORM {
     var batch_group     : String? = nil
     var batch_order     : Int? = nil
 
+    var detail_line     : String? = nil
+
     //MARK: Table name
     override public func table() -> String { return "batch_detail" }
     
@@ -71,6 +73,10 @@ public class BatchDetail: PostgresStORM {
             batch_order = data
         }
 
+        if let data = this.data.batchDetailDic.detail_line {
+            detail_line = data
+        }
+
     }
     
     func rows() -> [BatchDetail] {
@@ -102,6 +108,11 @@ public class BatchDetail: PostgresStORM {
             case "batch_order":
                 if (value as? Int).isNotNil {
                     self.batch_order = (value as! Int)
+                }
+
+            case "detail_line":
+                if (value as? String).isNotNil {
+                    self.detail_line = (value as! String)
                 }
 
             default:
@@ -156,6 +167,10 @@ public class BatchDetail: PostgresStORM {
             dictionary.batchDetailDic.batch_order = self.batch_order
         }
 
+        if self.detail_line.isNotNil {
+            dictionary.batchDetailDic.detail_line = self.detail_line
+        }
+
         return dictionary
     }
     
@@ -173,6 +188,10 @@ public class BatchDetail: PostgresStORM {
         }
 
         if diff == true, self.batch_order != targetItem.batch_order {
+            diff = false
+        }
+
+        if diff == true, self.detail_line != targetItem.detail_line {
             diff = false
         }
 
