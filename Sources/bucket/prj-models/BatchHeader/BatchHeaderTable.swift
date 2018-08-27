@@ -23,9 +23,13 @@ final class BatchHeaderTable {
     //MARK:-
     //MARK: badges table
     func create() {
+
+        let config = Config()
+
+        // make sure the schema is there
+        let _ = try? config.sqlRows(PRJDBTables.sharedInstance.addSchema("\(PRJDBTableDefaults.database_schema_processing)"), params: [])
         
         // make sure the table level is correct
-        let config = Config()
         var thesql = "SELECT val, name FROM config WHERE name = $1"
         var tr = try! config.sqlRows(thesql, params: ["table_\(tbl.table())"])
         if tr.count > 0 {
@@ -36,7 +40,7 @@ final class BatchHeaderTable {
             }
         } else {
             
-            let sequencesql = CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table())
+            let sequencesql = CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table(), PRJDBTableDefaults.database_schema_processing)
             
             // create the sequence
             let _ = try? tbl.sqlRows(sequencesql, params: [])
@@ -44,12 +48,12 @@ final class BatchHeaderTable {
             let _ = try! tbl.sqlRows(self.table(), params: [])
             
             // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('table_\(tbl.table())','1.00')"
+            thesql = "INSERT INTO config(name,val) VALUES('\(PRJDBTableDefaults.database_schema_processing).table_\(tbl.table())','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
-        tr = try! config.sqlRows(thesql, params: ["view_\(tbl.table())_deleted_yes"])
+        tr = try! config.sqlRows(thesql, params: ["\(PRJDBTableDefaults.database_schema_processing).view_\(tbl.table())_deleted_yes"])
         if tr.count > 0 {
             let testval = Double(tr[0].data["val"] as! String)
             if testval != tablelevel {
@@ -58,14 +62,14 @@ final class BatchHeaderTable {
             }
         } else {
             // add the deleted views
-            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsYes(tbl.table()), params: [])
+            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsYes(tbl.table(), PRJDBTableDefaults.database_schema_processing), params: [])
             // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('view_\(tbl.table())_deleted_yes','1.00')"
+            thesql = "INSERT INTO config(name,val) VALUES('\(PRJDBTableDefaults.database_schema_processing).view_\(tbl.table())_deleted_yes','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
-        tr = try! config.sqlRows(thesql, params: ["view_\(tbl.table())_deleted_no"])
+        tr = try! config.sqlRows(thesql, params: ["\(PRJDBTableDefaults.database_schema_processing).view_\(tbl.table())_deleted_no"])
         if tr.count > 0 {
             let testval = Double(tr[0].data["val"] as! String)
             if testval != tablelevel {
@@ -73,9 +77,9 @@ final class BatchHeaderTable {
                 self.update(currentlevel: testval!)
             }
         } else {
-            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsNo(tbl.table()), params: [])
+            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsNo(tbl.table(), PRJDBTableDefaults.database_schema_processing), params: [])
             // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('view_\(tbl.table())_deleted_no','1.00')"
+            thesql = "INSERT INTO config(name,val) VALUES('\(PRJDBTableDefaults.database_schema_processing).view_\(tbl.table())_deleted_no','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
         }
         
@@ -84,18 +88,18 @@ final class BatchHeaderTable {
     private func update(currentlevel: Double) {
         
         // PERFORM THE UPDATE ACCORFING TO REQUIREMENTS
-        print("UPDATE \(tbl.table().capitalized).  Current Level \(currentlevel), Required Level: \(tablelevel)")
+        print("UPDATE \(PRJDBTableDefaults.database_schema_processing).\(tbl.table().capitalized).  Current Level \(currentlevel), Required Level: \(tablelevel)")
         
     }
     
     private func table()-> String {
         
         var createsql = "CREATE TABLE IF NOT EXISTS "
-        createsql.append("public.\(tbl.table()) ")
+        createsql.append("\(PRJDBTableDefaults.database_schema_processing).\(tbl.table()) ")
         
         // common
         createsql.append("( ")
-        createsql.append("id integer NOT NULL DEFAULT nextval('\(tbl.table())_id_seq'::regclass), ")
+        createsql.append("id integer NOT NULL DEFAULT nextval('\(PRJDBTableDefaults.database_schema_processing).\(tbl.table())_id_seq'::regclass), ")
         
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         

@@ -283,25 +283,25 @@ final class CCXDBTables {
         return createsql
     }
     
-    public func addDeletedViewsYes(_ tablename: String)-> String {
+    public func addDeletedViewsYes(_ tablename: String, _ schema:String? = "public")-> String {
         
-        var deleteviewsql = "CREATE VIEW public.\(tablename)_view_deleted_yes AS "
-        deleteviewsql.append("SELECT * FROM \(tablename) WHERE deleted > 0; ")
+        var deleteviewsql = "CREATE VIEW \(schema!).\(tablename)_view_deleted_yes AS "
+        deleteviewsql.append("SELECT * FROM \(schema!).\(tablename) WHERE deleted > 0; ")
 
         return deleteviewsql
     }
     
-    public func addDeletedViewsNo(_ tablename: String)-> String {
+    public func addDeletedViewsNo(_ tablename: String, _ schema:String? = "public")-> String {
         
-        var deleteviewsql = "CREATE VIEW public.\(tablename)_view_deleted_no AS "
-        deleteviewsql.append("SELECT * FROM \(tablename) WHERE deleted = 0; ")
+        var deleteviewsql = "CREATE VIEW \(schema!).\(tablename)_view_deleted_no AS "
+        deleteviewsql.append("SELECT * FROM \(schema!).\(tablename) WHERE deleted = 0; ")
         
         return deleteviewsql
     }
     
-    public func addSequenceSQL(tablename: String)-> String {
+    public func addSequenceSQL(tablename: String, _ schema:String? = "public")-> String {
     
-        var addsequence = "CREATE SEQUENCE public.\(tablename)_id_seq "
+        var addsequence = "CREATE SEQUENCE \(schema!).\(tablename)_id_seq "
         addsequence.append("INCREMENT 1 ")
         addsequence.append("START 1 ")
         addsequence.append("MINVALUE 1 ")

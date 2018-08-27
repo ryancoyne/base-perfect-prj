@@ -68,6 +68,8 @@ struct PRJDBTableDefaults {
 //    static let sampledata  = "0"
     static let defaultdata = "1"
 //    static let defaultdata = "0"
+    static let database_user = "bucket"
+    static let database_schema_processing = "processing"
 }
 
 struct PRJSampleData {
@@ -130,6 +132,15 @@ final class PRJDBTables {
         
     }
 
+    //MARK:-
+    //MARK: Add schema
+    public func addSchema(_ schemaName: String, _ userName: String? = PRJDBTableDefaults.database_user) -> String {
+        
+        let sql = "CREATE SCHEMA IF NOT EXISTS \(schemaName) AUTHORIZATION \(userName!)"
+        
+        return sql
+        
+    }
     
     //MARK:-
     //MARK: Core DB Table Views
@@ -240,7 +251,6 @@ final class PRJDBTables {
         if thereturn.postgis && thereturn.postgis_topo {
             // create the postgis tables here
 
-            
             
             
             // add the default data
