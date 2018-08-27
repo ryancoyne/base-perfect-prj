@@ -72,6 +72,13 @@ struct PRJDBTableDefaults {
     static let database_schema_processing = "processing"
 }
 
+//MARK: -
+//MARK: List of valid countries - all countries supported are here.
+struct PRJCountries {
+    // NOTE: Add new countries here
+    static let list = ["US","SG"]
+}
+
 struct PRJSampleData {
     static let admin = "DFD117EA-8878-4335-8F26-05B2F0BE843F"
 }
@@ -136,7 +143,7 @@ final class PRJDBTables {
     //MARK: Add schema
     public func addSchema(_ schemaName: String, _ userName: String? = PRJDBTableDefaults.database_user) -> String {
         
-        let sql = "CREATE SCHEMA IF NOT EXISTS \(schemaName) AUTHORIZATION \(userName!)"
+        let sql = "CREATE SCHEMA IF NOT EXISTS \(schemaName.lowercased()) AUTHORIZATION \(userName!)"
         
         return sql
         
