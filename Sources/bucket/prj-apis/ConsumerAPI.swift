@@ -168,9 +168,6 @@ struct ConsumerAPI {
                 let userId = request.session!.userid
                 
                 let schema = Country.getSchema(countryid)
-//                let country = Country()
-//                let _ = try? country.get(countryid)
-//                let schema = country.code_alpha_2?.lowercased() ?? "public"
                 
                 // Okay we are finding the transaction history - it is all in the code_transaction_history table
                 var sql = "SELECT cth.* "
@@ -347,12 +344,10 @@ struct ConsumerAPI {
                 guard let countryId = request.countryId, countryId != 0 else { return response.invalidCountryCode }
 
                 // get the correct country
-                let country =  Country()
-                let _ = try? country.get(id: countryId)
+                let schema = Country.getSchema(countryId)
                 
-                if country.code_alpha_2.isNil { return response.invalidCountryCode }
                 
-                var sqlstatement = "SELECT * FROM \(country.code_alpha_2!.lowercased()).cashout_option_view_deleted_no AS coo "
+                var sqlstatement = "SELECT * FROM \(schema).cashout_option_view_deleted_no AS coo "
                 sqlstatement.append("WHERE group_id = $1 ")
                 sqlstatement.append("AND display = true ")
                 sqlstatement.append("ORDER BY display_order ASC ")
@@ -440,12 +435,7 @@ struct ConsumerAPI {
                 guard let countryCode = request.countryCode else { return response.invalidCountryCode }
 
                 // get the country for the code
-                let country = Country()
-                let _ = try? country.get(id: countryCode)
-                
-                if country.code_alpha_2.isEmptyOrNil { return response.invalidCountryCode }
-                
-                let schema = country.code_alpha_2!.lowercased()
+                let schema = Country.getSchema(countryCode)
                 
                 var countsql = "SELECT cog.*, COUNT(coo.id) AS option_count "
                 countsql.append("FROM \(schema).cashout_group AS cog ")
@@ -550,11 +540,7 @@ struct ConsumerAPI {
                 
                 // get the country code
                 guard let countryId = request.countryId, countryId != 0 else { return response.invalidCountryCode }
-                let country = Country()
-                let _ = try? country.get(countryId)
-                if country.code_alpha_2.isEmptyOrNil { return response.invalidCountryCode }
-                
-                let schema = country.code_alpha_2!.lowercased()
+                let schema = Country.getSchema(countryId)
 
                 // lets get the minimum amount permitted
                 let sqloption = "SELECT minimum, maximum, name, group_id FROM \(schema).cashout_option_view_deleted_no WHERE id = \(theoption)"
