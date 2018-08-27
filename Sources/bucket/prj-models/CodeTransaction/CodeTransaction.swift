@@ -607,8 +607,17 @@ public class CodeTransaction: PostgresStORM {
         
         // now save the record
         do {
+            
+            var schema = ""
+            
+            // determine the schema (country)
+            let schemaRow = try? cth.sqlRows("SELECT code_alpha_2 FROM public.country WHERE id = $1", params: ["\(cth.country_id!)"])
+            if let r = schemaRow?.first {
+                schema = r.data["code_alpha_2"].stringValue!
+            }
+                
             // save the archive record
-            try cth.saveWithCustomType(copyOver: true)
+            try cth.saveWithCustomType(copyOver: true, schema)
             
             // now hard delete the original record
             try self.delete(self.id!)

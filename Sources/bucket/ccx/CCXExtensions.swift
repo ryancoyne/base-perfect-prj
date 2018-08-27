@@ -1069,12 +1069,14 @@ extension PostgresStORM {
      - Returns: An Any type.  For a new inser, we will return the id
      */
     @discardableResult
-    func saveWithCustomType(_ user: String? = nil, copyOver : Bool = false) throws -> [StORMRow] {
+    func saveWithCustomType(_ user: String? = nil, copyOver : Bool = false,_ schemaIn:String? = "public") throws -> [StORMRow] {
+        
+        let schema = schemaIn!.lowercased()
         
         // act accordingly if this is an add or an update
         do {
             if copyOver {
-                return try insertWithCustomTypes()
+                return try insertWithCustomTypes(schema)
             } else if keyIsEmpty() {
                 return try addWithCustomTypes(user)
             } else {
@@ -1189,7 +1191,9 @@ extension PostgresStORM {
 
     }
 
-    private func insertWithCustomTypes() throws -> [StORMRow] {
+    private func insertWithCustomTypes(_ schemaIn:String? = "public") throws -> [StORMRow] {
+        
+        let schema = schemaIn!.lowercased()
         
         // get the variables with their values in the dictionary
         let thedata = asData()
@@ -1266,7 +1270,7 @@ extension PostgresStORM {
         
         let colsjoined = "\"" + keys.joined(separator: "\",\"") + "\""
         
-        let str = "INSERT INTO \(self.table()) (\(colsjoined.lowercased())) VALUES(\(vals.joined(separator: ","))) RETURNING \"\(idcolumn.lowercased())\""
+        let str = "INSERT INTO \(schema).\(self.table()) (\(colsjoined.lowercased())) VALUES(\(vals.joined(separator: ","))) RETURNING \"\(idcolumn.lowercased())\""
         
         print(str)
         
@@ -1287,7 +1291,9 @@ extension PostgresStORM {
      Adds a new record with GIS coordinates in a geography type field and other field values.
      - Returns: An Any type.  For a new inser, we will return the id
      */
-    private func addWithCustomTypes(_ user: String? = nil) throws -> [StORMRow] {
+    private func addWithCustomTypes(_ user: String? = nil, schemaIn:String? = "public") throws -> [StORMRow] {
+        
+        let schema = schemaIn!.lowercased()
         
         // get the variables with their values in the dictionary
         let thedata = asData()
@@ -1390,7 +1396,7 @@ extension PostgresStORM {
         
         let colsjoined = "\"" + keys.joined(separator: "\",\"") + "\""
         
-        let str = "INSERT INTO \(self.table()) (\(colsjoined.lowercased())) VALUES(\(vals.joined(separator: ","))) RETURNING \"\(idcolumn.lowercased())\""
+        let str = "INSERT INTO \(schema).\(self.table()) (\(colsjoined.lowercased())) VALUES(\(vals.joined(separator: ","))) RETURNING \"\(idcolumn.lowercased())\""
         
         print(str)
         
@@ -1411,7 +1417,9 @@ extension PostgresStORM {
      Updates a record with GIS coordinates in a geography type field and other field values.
      - Returns: An Any type.  For a new inser, we will return the id
      */
-    private func updateWithCustomType(_ user: String? = nil) throws -> [StORMRow] {
+    private func updateWithCustomType(_ user: String? = nil, schemaIn:String? = "public") throws -> [StORMRow] {
+        
+        let schema = schemaIn!.lowercased()
         
         // get the variables with their values in the dictionary
         let thedata = self.asData()
@@ -1523,7 +1531,7 @@ extension PostgresStORM {
         }
         
         // build the sql
-        let str = "UPDATE \(self.table()) SET \(set) WHERE \"\(idcolumn.lowercased())\" = \(idnumber)"
+        let str = "UPDATE \(schema).\(self.table()) SET \(set) WHERE \"\(idcolumn.lowercased())\" = \(idnumber)"
         
         do {
             //            let response = try sql(str, params: [])
@@ -1545,10 +1553,12 @@ extension PostgresStORM {
      - parameter latitude: The latitude of the reference point for the search
      - Returns: An array of StORMRow objects with the resulting dataset
      */
-    private func updateLocationGIS(record_id: Int, locationField: String, longitude: Double, latitude: Double) throws -> [StORMRow] {
+    private func updateLocationGIS(record_id: Int, locationField: String, longitude: Double, latitude: Double, schemaIn:String? = "public") throws -> [StORMRow] {
+        
+        let schema = schemaIn!.lowercased()
         
         let parms: [String] = [String(record_id), String(longitude), String(latitude)]
-        var sqlstatement = "UPDATE \(self.table()) "
+        var sqlstatement = "UPDATE \(schema).\(self.table()) "
         sqlstatement.append("SET \(locationField) = ")
         sqlstatement.append("ST_SetSRID(ST_MakePoint($2, $3), 4326) ")
         sqlstatement.append("WHERE id = $1")
@@ -1607,7 +1617,9 @@ extension PostgresStORM {
      - parameter fields: An array of the names of the fields you would like returned in addition to the longitude and latitude fields
      - Returns: An array of StORMRow objects with the resulting dataset
      */
-    func getLocationGIS(longitude: Double, latitude: Double, locationField: String, fields: [String], distance: Double) throws -> [StORMRow] {
+    func getLocationGIS(longitude: Double, latitude: Double, locationField: String, fields: [String], distance: Double, schemaIn:String? = "public") throws -> [StORMRow] {
+        
+        let schema = schemaIn!.lowercased()
         
         var sqlstatement = "SELECT "
         
@@ -1621,7 +1633,7 @@ extension PostgresStORM {
         sqlstatement.append("ST_Y(\(locationField)::geometry) as latitude ")
         
         // completing the SQL
-        sqlstatement.append("FROM \(self.table()) ")
+        sqlstatement.append("FROM \(schema).\(self.table()) ")
         
         // add the localization to the statement
         sqlstatement.append("WHERE ST_DWithin(\(locationField), ST_SetSRID(ST_Point($1, $2), 4326), $3)")

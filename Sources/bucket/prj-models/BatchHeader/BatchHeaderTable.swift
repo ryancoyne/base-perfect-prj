@@ -49,7 +49,7 @@ final class BatchHeaderTable {
             
             // new one - set the default 1.00
             thesql = "INSERT INTO config(name,val) VALUES('\(PRJDBTableDefaults.database_schema_processing).table_\(tbl.table())','1.00')"
-            let _ = try! config.sqlRows(thesql, params: [])
+            let _ = try? config.sqlRows(thesql, params: [])
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
