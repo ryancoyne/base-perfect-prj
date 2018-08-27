@@ -245,6 +245,14 @@ public class Retailer: PostgresStORM {
             return (true, customerCode)
             
         } else {
+
+            // check the code history to make sure it was not redeemed.
+            let ctrs = CodeTransactionRedeemSummary()
+            let _ = try? ctrs.find([("customer_code",customerCode)])
+            if let r = ctrs.rows().first, r.created! > 0 {
+                return (false, "Code exists and was redeemed")
+            }
+            
             
             return (true, customerCode)
         }
