@@ -314,10 +314,12 @@ final class InitializeData {
         print("Adding cashout options: \(checkuser)")
         _ = try? tbl.sqlRows(checkuser, params: [])
 
+        checkuser.removeAll()
+        ussql.removeAll()
         
         schema = singapore.code_alpha_2!.lowercased()
 
-        let sgcg = try? usa_cg.sqlRows("SELECT * \(schema).FROM cashout_group WHERE country_id = \(singapore.id!) ORDER BY display_order DESC ", params: [])
+        let sgcg = try? usa_cg.sqlRows("SELECT * FROM \(schema).cashout_group WHERE country_id = \(singapore.id!) ORDER BY display_order DESC ", params: [])
         for i in sgcg! {
             switch i.data.cashoutGroupDic.group_name {
             case "TopUp":
