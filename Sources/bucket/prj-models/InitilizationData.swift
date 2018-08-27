@@ -118,20 +118,32 @@ final class InitializeData {
 
         let created_time = CCXServiceClass.sharedInstance.getNow()
 
-        var checkuser = "INSERT INTO \(tbl.table()) "
+        var schema = usa.code_alpha_2!.lowercased()
+        
+        var checkuser = "INSERT INTO \(schema).\(tbl.table()) "
         checkuser.append("(created, createdby, group_name,description, country_id, picture_url, display_order, display) ")
         checkuser.append(" VALUES ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', \(usa.id!),'', 1, true), ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.', \(usa.id!),'',2, true), ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.', \(usa.id!),'',3, true), ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),'',4, true),")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),'',4, true)")
+
+        print("Adding cashout groups for \(schema): \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
+
+        schema = singapore.code_alpha_2!.lowercased()
+        
+        checkuser = "INSERT INTO \(schema).\(tbl.table()) "
+        checkuser.append("(created, createdby, group_name,description, country_id, picture_url, display_order, display) ")
+        checkuser.append(" VALUES ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','TopUp','', \(singapore.id!),'',1, true),")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),'',2, true), ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','', \(singapore.id!),'',3, true)")
 
-        print("Adding cashout groups: \(checkuser)")
+        print("Adding cashout groups for \(schema): \(checkuser)")
         _ = try? tbl.sqlRows(checkuser, params: [])
-        
+
+
     }
 
     func addCashoutOption() {
@@ -146,8 +158,10 @@ final class InitializeData {
 
         let usa_cg = CashoutGroup()
         
+        var schema = usa.code_alpha_2!.lowercased()
+        
         var ussql = ""
-        let uscg = try? usa_cg.sqlRows("SELECT * FROM cashout_group WHERE country_id = \(usa.id!) ORDER BY display_order DESC ", params: [])
+        let uscg = try? usa_cg.sqlRows("SELECT * FROM \(schema).cashout_group WHERE country_id = \(usa.id!) ORDER BY display_order DESC ", params: [])
         for i in uscg! {
             switch i.data.cashoutGroupDic.group_name {
             case "Prepaid Card"?:
@@ -284,8 +298,26 @@ final class InitializeData {
 
             }
         }
+
+        // remove the last comma from the groups
+        ussql.removeLast()
         
-        let sgcg = try? usa_cg.sqlRows("SELECT * FROM cashout_group WHERE country_id = \(singapore.id!) ORDER BY display_order DESC ", params: [])
+        let tbl = CashoutOption()
+        
+        var checkuser = "INSERT INTO \(schema).\(tbl.table()) "
+        checkuser.append("(created, createdby, group_id, form_id, display_order, ")
+        checkuser.append("name, website, description, long_description, pictureurl, ")
+        checkuser.append("minimum, maximum, display) ")
+        checkuser.append(" VALUES ")
+        checkuser.append(ussql)
+        
+        print("Adding cashout options: \(checkuser)")
+        _ = try? tbl.sqlRows(checkuser, params: [])
+
+        
+        schema = singapore.code_alpha_2!.lowercased()
+
+        let sgcg = try? usa_cg.sqlRows("SELECT * \(schema).FROM cashout_group WHERE country_id = \(singapore.id!) ORDER BY display_order DESC ", params: [])
         for i in sgcg! {
             switch i.data.cashoutGroupDic.group_name {
             case "TopUp":
@@ -326,9 +358,7 @@ final class InitializeData {
         // remove the last comma from the groups
         ussql.removeLast()
         
-        let tbl = CashoutOption()
-        
-        var checkuser = "INSERT INTO \(tbl.table()) "
+        checkuser = "INSERT INTO \(schema).\(tbl.table()) "
         checkuser.append("(created, createdby, group_id, form_id, display_order, ")
         checkuser.append("name, website, description, long_description, pictureurl, ")
         checkuser.append("minimum, maximum, display) ")
@@ -346,7 +376,7 @@ final class InitializeData {
         
         let created_time = CCXServiceClass.sharedInstance.getNow()
         
-        var checkuser = "INSERT INTO \(tbl.table()) "
+        var checkuser = "INSERT INTO us.\(tbl.table()) "
         checkuser.append("(created, createdby, name, title) ")
         checkuser.append(" VALUES ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','BUX Coin', 'BUX'), ")
@@ -365,7 +395,7 @@ final class InitializeData {
         
         let created_time = CCXServiceClass.sharedInstance.getNow()
         
-        var checkuser = "INSERT INTO \(tbl.table()) "
+        var checkuser = "INSERT INTO us.\(tbl.table()) "
         checkuser.append("(created, createdby, name) ")
         checkuser.append(" VALUES ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Checkbox'), ")
@@ -386,7 +416,7 @@ final class InitializeData {
         
         let created_time = CCXServiceClass.sharedInstance.getNow()
         
-        var checkuser = "INSERT INTO \(tbl.table()) "
+        var checkuser = "INSERT INTO us.\(tbl.table()) "
         checkuser.append("(created, createdby, name, type_id, length, is_required, needs_confirmation) ")
         checkuser.append(" VALUES ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Full Name', 2, 25, TRUE, FALSE), ")
@@ -404,7 +434,7 @@ final class InitializeData {
         
         let created_time = CCXServiceClass.sharedInstance.getNow()
         
-        var checkuser = "INSERT INTO \(tbl.table()) "
+        var checkuser = "INSERT INTO us.\(tbl.table()) "
         checkuser.append("(created, createdby, form_id, field_id, display_order) ")
         checkuser.append(" VALUES ")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', 1, 1, 1), ")
@@ -430,7 +460,7 @@ final class InitializeData {
         
         let create_time = CCXServiceClass.sharedInstance.getNow()
 
-        var insertstatement = "INSERT INTO \(tbl.table())"
+        var insertstatement = "INSERT INTO public.\(tbl.table())"
         insertstatement.append(" (name,code_numeric,code_alpha_2,code_alpha_3,created,createdby) ")
         insertstatement.append(" VALUES ")
         insertstatement.append("('Afghanistan','4','AF','AFG',\(create_time),'\(CCXDefaultUserValues.user_server)'),")

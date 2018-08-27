@@ -27,7 +27,7 @@ final class SampleData {
 
         let created_time = CCXServiceClass.sharedInstance.getNow()
 
-        var sqlstatement = "INSERT INTO \(tbl.table()) "
+        var sqlstatement = "INSERT INTO us.\(tbl.table()) "
         
         sqlstatement.append("(created, createdby, name, description) ")
         sqlstatement.append(" VALUES ")
@@ -47,11 +47,11 @@ final class SampleData {
         
         let createdtime = CCXServiceClass.sharedInstance.getNow()
         
-        var checkuser = "SELECT id FROM account WHERE id = 'AUTO_CREATED_USER'; "
+        var checkuser = "SELECT id FROM public.account WHERE id = 'AUTO_CREATED_USER'; "
         var tr = try? tbl.sqlRows(checkuser, params: [])
         if let thecount = tr?.count, thecount == 0 {
             // it does not exist - add it
-            checkuser = "INSERT INTO account "
+            checkuser = "INSERT INTO public.account "
             checkuser.append("(id,username,email,usertype, source, detail) VALUES(" )
             checkuser.append("'AUTO_CREATED_USER',")
             checkuser.append("'AUTO_CREATED_USER',")
@@ -63,11 +63,11 @@ final class SampleData {
             _ = try? tbl.sqlRows(checkuser, params: [])
         }
         
-        checkuser = "SELECT id FROM account WHERE id = 'AUTO_MODIFIED_USER'; "
+        checkuser = "SELECT id FROM public.account WHERE id = 'AUTO_MODIFIED_USER'; "
         tr = try? tbl.sqlRows(checkuser, params: [])
         if let thecount = tr?.count, thecount == 0 {
             // it does not exist - add it
-            checkuser = "INSERT INTO account "
+            checkuser = "INSERT INTO public.account "
             checkuser.append("(id,username,email,usertype, source, detail) VALUES(" )
             checkuser.append("'AUTO_MODIFIED_USER',")
             checkuser.append("'AUTO_MODIFIED_USER',")
@@ -79,11 +79,11 @@ final class SampleData {
             _ = try? tbl.sqlRows(checkuser, params: [])
         }
 
-        checkuser = "SELECT id FROM account WHERE id = 'AUTO_DELETED_USER'; "
+        checkuser = "SELECT id FROM public.account WHERE id = 'AUTO_DELETED_USER'; "
         tr = try? tbl.sqlRows(checkuser, params: [])
         if let thecount = tr?.count, thecount == 0 {
             // it does not exist - add it
-            checkuser = "INSERT INTO account "
+            checkuser = "INSERT INTO public.account "
             checkuser.append("(id,username,email,usertype,source, detail) VALUES(" )
             checkuser.append("'AUTO_DELETED_USER',")
             checkuser.append("'AUTO_DELETED_USER',")
@@ -103,7 +103,7 @@ final class SampleData {
         
         let created_time = CCXServiceClass.sharedInstance.getNow()
         
-        var sqlstatement = "INSERT INTO \(tbl.table()) "
+        var sqlstatement = "INSERT INTO us.\(tbl.table()) "
         
         sqlstatement.append("(created, createdby, name, is_verified, retailer_code) ")
         sqlstatement.append(" VALUES ")
@@ -121,7 +121,18 @@ final class SampleData {
         let singapore = Country()
         try? singapore.find(["code_alpha_2":"SG"])
 
-        let retrows = try? tbl.sqlRows("SELECT * FROM retailer", params: [])
+        sqlstatement = "INSERT INTO \(singapore.code_alpha_2!.lowercased()).\(tbl.table()) "
+        
+        sqlstatement.append("(created, createdby, name, is_verified, retailer_code) ")
+        sqlstatement.append(" VALUES ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Bucket Coffee Shop', TRUE, 'BCKT-1'), ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Ryans Bike Shop', TRUE, 'BCKT-2'), ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','M&R Corner Market', TRUE, 'BCKT-3') ")
+        
+        print("Adding retailers: \(sqlstatement)")
+        let _ = try? tbl.sqlRows(sqlstatement, params: [])
+
+        var retrows = try? tbl.sqlRows("SELECT * FROM us.retailer", params: [])
         var ctr = 0
         for i in retrows! {
             
@@ -147,14 +158,14 @@ final class SampleData {
                 a.postal_code = "20009"
                 let _ = try? a.saveWithCustomType()
 
-            case 2:
-                a.retailer_id = i.data.id
-                a.address1 = "4 Everton Park"
-                a.address2 = "#01-40"
-                a.country_id = singapore.id
-                a.state = "Singapore"
-                a.postal_code = "080004"
-                let _ = try? a.saveWithCustomType()
+//            case 2:
+//                a.retailer_id = i.data.id
+//                a.address1 = "4 Everton Park"
+//                a.address2 = "#01-40"
+//                a.country_id = singapore.id
+//                a.state = "Singapore"
+//                a.postal_code = "080004"
+//                let _ = try? a.saveWithCustomType()
 
             default:
                 a.retailer_id = i.data.id
@@ -169,6 +180,58 @@ final class SampleData {
             
             ctr += 1
         }
+        
+        
+        
+        retrows = try? tbl.sqlRows("SELECT * FROM \(singapore.code_alpha_2!.lowercased()).retailer", params: [])
+        ctr = 0
+        for i in retrows! {
+            
+            let a = Address()
+            
+            switch ctr {
+                
+            case 0:
+                a.retailer_id = i.data.id
+                a.address1 = "2 Everton Park"
+                a.address2 = "#01-40"
+                a.country_id = singapore.id
+                a.state = "Singapore"
+                a.postal_code = "080004"
+                let _ = try? a.saveWithCustomType()
+
+            case 1:
+                a.retailer_id = i.data.id
+                a.address1 = "4 Everton Park"
+                a.address2 = "#01-40"
+                a.country_id = singapore.id
+                a.state = "Singapore"
+                a.postal_code = "080004"
+                let _ = try? a.saveWithCustomType()
+
+            case 2:
+                a.retailer_id = i.data.id
+                a.address1 = "8 Everton Park"
+                a.address2 = "#01-40"
+                a.country_id = singapore.id
+                a.state = "Singapore"
+                a.postal_code = "080004"
+                let _ = try? a.saveWithCustomType()
+                
+            default:
+                a.retailer_id = i.data.id
+                a.address1 = "100 Everton Park"
+                a.address2 = "#01-40"
+                a.country_id = singapore.id
+                a.state = "Singapore"
+                a.postal_code = "080004"
+                let _ = try? a.saveWithCustomType()
+
+            }
+            
+            ctr += 1
+        }
+
     }
     
     func addRetailerUsers() {
@@ -178,7 +241,7 @@ final class SampleData {
         let created_time = CCXServiceClass.sharedInstance.getNow()
 
         var userid = UUID().uuidString
-        var checkuser = "INSERT INTO account "
+        var checkuser = "INSERT INTO public.account "
         checkuser.append("(id,username,email,usertype,source, detail) ")
         checkuser.append(" VALUES ")
         checkuser.append(" ('\(userid)','bucketme1','bucket1@buckettechnologies.com','standard','local','{\"created\":\(created_time)}')")
@@ -190,14 +253,19 @@ final class SampleData {
         var retailerid = 1
 
         // add the retailer user
-        checkuser = "INSERT INTO retailer_contacts "
+        checkuser = "INSERT INTO us.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'The Bucket','bucket1@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
         var results = try? tbl.sqlRows(checkuser, params: [])
 
+        checkuser = "INSERT INTO sg.retailer_contacts "
+        checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
+        checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'The Bucket','bucket1@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
+        results = try? tbl.sqlRows(checkuser, params: [])
+
         // new one
         userid = UUID().uuidString
-        checkuser = "INSERT INTO account "
+        checkuser = "INSERT INTO public.account "
         checkuser.append("(id,username,email,usertype,source, detail) ")
         checkuser.append(" VALUES ")
         checkuser.append(" ('\(userid)','bucketme2','bucket2@buckettechnologies.com','standard','local','{\"created\":\(created_time)}')")
@@ -209,14 +277,20 @@ final class SampleData {
         retailerid = 2
 
         // add the retailer user
-        checkuser = "INSERT INTO retailer_contacts "
+        checkuser = "INSERT INTO us.retailer_contacts "
+        checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
+        checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'Ryan Coyne','bucket2@buckettechnologies.com','4102026292', \(retailerid)) RETURNING id ")
+        results = try? tbl.sqlRows(checkuser, params: [])
+
+        // add the retailer user
+        checkuser = "INSERT INTO sg.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'Ryan Coyne','bucket2@buckettechnologies.com','4102026292', \(retailerid)) RETURNING id ")
         results = try? tbl.sqlRows(checkuser, params: [])
 
         // new one
         userid = UUID().uuidString
-        checkuser = "INSERT INTO account "
+        checkuser = "INSERT INTO public.account "
         checkuser.append("(id,username,email,usertype,source, detail) ")
         checkuser.append(" VALUES ")
         checkuser.append(" ('\(userid)','bucketme3','bucket3@buckettechnologies.com','standard','local','{\"created\":\(created_time)}')")
@@ -228,11 +302,19 @@ final class SampleData {
         retailerid = 3
 
         // add the retailer user
-        checkuser = "INSERT INTO retailer_contacts "
+        checkuser = "INSERT INTO us.retailer_contacts "
+        checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
+        checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'Mike Silvers','bucket3@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
+        results = try? tbl.sqlRows(checkuser, params: [])
+        
+        // add the retailer user
+        checkuser = "INSERT INTO sg.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'Mike Silvers','bucket3@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
         results = try? tbl.sqlRows(checkuser, params: [])
 
+
+        
     }
     
 
