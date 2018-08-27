@@ -21,75 +21,76 @@ final class CodeTransactionHistoryTable {
     let tablelevel = 1.00
     
     //MARK:-
-    //MARK: code transaction history table
+    //MARK: Code Transaction History table
     func create() {
         
         for i in PRJCountries.list  {
-            createCountries((i.uppercased()))
+            createCodeTransactionHistory((i.uppercased()))
         }
     }
-    
-    private func createCountries(_ countryIn: String) {
+
+    //MARK:-
+    //MARK: code transaction history table
+    private func createCodeTransactionHistory(_ schemaIn: String? = "public") {
         
-        let country = countryIn.lowercased()
+        let schema = schemaIn!.lowercased()
         
         let config = Config()
 
         // make sure the schema is there
-        let _ = try? config.sqlRows(PRJDBTables.sharedInstance.addSchema("\(country)"), params: [])
-
+        let _ = try? config.sqlRows(PRJDBTables.sharedInstance.addSchema("\(schema)"), params: [])
         
         // make sure the table level is correct
         var thesql = "SELECT val, name FROM config WHERE name = $1"
-        var tr = try! config.sqlRows(thesql, params: ["\(country).table_\(tbl.table())"])
+        var tr = try! config.sqlRows(thesql, params: ["\(schema).table_\(tbl.table())"])
         if tr.count > 0 {
             let testval = Double(tr[0].data["val"] as! String)
             if testval != tablelevel {
                 // update to the new installation
-                self.update(currentlevel: testval!)
+                self.update(currentlevel: testval!, schema)
             }
         } else {
             
-            let sequencesql = CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table(), country)
+            let sequencesql = CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table(), schema)
             
             // create the sequence
             let _ = try? tbl.sqlRows(sequencesql, params: [])
             
-            let _ = try! tbl.sqlRows(self.table(country), params: [])
+            let _ = try! tbl.sqlRows(self.table(schema), params: [])
             
             // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('\(country).table_\(tbl.table())','1.00')"
+            thesql = "INSERT INTO config(name,val) VALUES('\(schema).table_\(tbl.table())','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
-        tr = try! config.sqlRows(thesql, params: ["\(country).view_\(tbl.table())_deleted_yes"])
+        tr = try! config.sqlRows(thesql, params: ["\(schema).view_\(tbl.table())_deleted_yes"])
         if tr.count > 0 {
             let testval = Double(tr[0].data["val"] as! String)
             if testval != tablelevel {
                 // update to the new installation
-                self.update(currentlevel: testval!, country)
+                self.update(currentlevel: testval!, schema)
             }
         } else {
             // add the deleted views
-            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsYes(tbl.table(), country), params: [])
+            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsYes(tbl.table(), schema), params: [])
             // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('\(country).view_\(tbl.table())_deleted_yes','1.00')"
+            thesql = "INSERT INTO config(name,val) VALUES('\(schema).view_\(tbl.table())_deleted_yes','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
-        tr = try! config.sqlRows(thesql, params: ["\(country).view_\(tbl.table())_deleted_no"])
+        tr = try! config.sqlRows(thesql, params: ["\(schema).view_\(tbl.table())_deleted_no"])
         if tr.count > 0 {
             let testval = Double(tr[0].data["val"] as! String)
             if testval != tablelevel {
                 // update to the new installation
-                self.update(currentlevel: testval!, country)
+                self.update(currentlevel: testval!, schema)
             }
         } else {
-            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsNo(tbl.table(), country), params: [])
+            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsNo(tbl.table(), schema), params: [])
             // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('\(country).view_\(tbl.table())_deleted_no','1.00')"
+            thesql = "INSERT INTO config(name,val) VALUES('\(schema).view_\(tbl.table())_deleted_no','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
         }
         
@@ -97,10 +98,10 @@ final class CodeTransactionHistoryTable {
     
     private func update(currentlevel: Double,_ schemaIn:String? = "public") {
         
-        let schema = schemaIn?.lowercased()
+        let schema = schemaIn!.lowercased()
         
         // PERFORM THE UPDATE ACCORFING TO REQUIREMENTS
-        print("UPDATE \(schema!).\(tbl.table().capitalized).  Current Level \(currentlevel), Required Level: \(tablelevel)")
+        print("UPDATE \(schema).\(tbl.table().capitalized).  Current Level \(currentlevel), Required Level: \(tablelevel)")
         
     }
     

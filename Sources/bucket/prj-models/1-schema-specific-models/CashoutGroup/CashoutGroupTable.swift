@@ -8,46 +8,46 @@
 import Foundation
 import PostgresStORM
 
-final class BatchHeaderTable {
+final class CashoutGroupTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
     
-    static let sharedInstance = BatchHeaderTable()
-    let tbl = BatchHeader()
+    static let sharedInstance = CashoutGroupTable()
+    let tbl = CashoutGroup()
     
     let tablelevel = 1.00
     
     //MARK:-
-    //MARK: batch header table
+    //MARK: Cashout Group table
     func create() {
         
         for i in PRJCountries.list  {
-            createBatchHeader((i.uppercased()))
+            createCashoutGroup((i.uppercased()))
         }
     }
 
     //MARK:-
-    //MARK: header table
-    func createBatchHeader(_ schemaIn: String? = "public") {
-
-        let schema = schemaIn!
+    //MARK: cashout group table
+    private func createCashoutGroup(_ schemaIn:String? = "public") {
         
+        let schema = schemaIn!.lowercased()
+        
+        // make sure the table level is correct
         let config = Config()
-
+        
         // make sure the schema is there
         let _ = try? config.sqlRows(PRJDBTables.sharedInstance.addSchema("\(schema)"), params: [])
         
-        // make sure the table level is correct
         var thesql = "SELECT val, name FROM config WHERE name = $1"
         var tr = try! config.sqlRows(thesql, params: ["\(schema).table_\(tbl.table())"])
         if tr.count > 0 {
             let testval = Double(tr[0].data["val"] as! String)
             if testval != tablelevel {
                 // update to the new installation
-                self.update(currentlevel: testval!)
+                self.update(currentlevel: testval!, schema)
             }
         } else {
             
@@ -59,8 +59,8 @@ final class BatchHeaderTable {
             let _ = try! tbl.sqlRows(self.table(schema), params: [])
             
             // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('\(schema).table_\(tbl.table())','1.00')"
-            let _ = try? config.sqlRows(thesql, params: [])
+            thesql = "INSERT INTO config(name,val) VALUES(\(schema).'table_\(tbl.table())','1.00')"
+            let _ = try! config.sqlRows(thesql, params: [])
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
@@ -69,7 +69,7 @@ final class BatchHeaderTable {
             let testval = Double(tr[0].data["val"] as! String)
             if testval != tablelevel {
                 // update to the new installation
-                self.update(currentlevel: testval!)
+                self.update(currentlevel: testval!, schema)
             }
         } else {
             // add the deleted views
@@ -97,9 +97,9 @@ final class BatchHeaderTable {
     }
     
     private func update(currentlevel: Double, _ schemaIn:String? = "public") {
-
-        let schema = schemaIn!
-
+        
+        let schema = schemaIn!.lowercased()
+        
         // PERFORM THE UPDATE ACCORFING TO REQUIREMENTS
         print("UPDATE \(schema).\(tbl.table().capitalized).  Current Level \(currentlevel), Required Level: \(tablelevel)")
         
@@ -107,7 +107,7 @@ final class BatchHeaderTable {
     
     private func table(_ schemaIn:String? = "public")-> String {
         
-        let schema = schemaIn!
+        let schema = schemaIn!.lowercased()
         
         var createsql = "CREATE TABLE IF NOT EXISTS "
         createsql.append("\(schema).\(tbl.table()) ")
@@ -119,8 +119,11 @@ final class BatchHeaderTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
-        createsql.append("batch_identifier text COLLATE pg_catalog.default, ")
+        createsql.append("group_name text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
+        createsql.append("picture_url text COLLATE pg_catalog.default, ")
+        createsql.append("display_order int default 0, ")
+        createsql.append("display boolean default false, ")
         createsql.append("country_id int default 0, ")
 
         // ending fields

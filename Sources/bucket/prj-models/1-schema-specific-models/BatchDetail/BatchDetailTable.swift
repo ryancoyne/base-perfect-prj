@@ -31,9 +31,9 @@ final class BatchDetailTable {
 
     //MARK:-
     //MARK: batch detail by schema table
-    func createBatchDetail(_ schemaIn:String? = "public") {
+    private func createBatchDetail(_ schemaIn:String? = "public") {
 
-        let schema = schemaIn!
+        let schema = schemaIn!.lowercased()
 
         let config = Config()
 
@@ -47,7 +47,7 @@ final class BatchDetailTable {
             let testval = Double(tr[0].data["val"] as! String)
             if testval != tablelevel {
                 // update to the new installation
-                self.update(currentlevel: testval!)
+                self.update(currentlevel: testval!, schema)
             }
         } else {
             
@@ -69,7 +69,7 @@ final class BatchDetailTable {
             let testval = Double(tr[0].data["val"] as! String)
             if testval != tablelevel {
                 // update to the new installation
-                self.update(currentlevel: testval!)
+                self.update(currentlevel: testval!, schema)
             }
         } else {
             // add the deleted views
@@ -98,7 +98,7 @@ final class BatchDetailTable {
     
     private func update(currentlevel: Double, _ schemaIn:String? = "public") {
         
-        let schema = schemaIn!
+        let schema = schemaIn!.lowercased()
         
         // PERFORM THE UPDATE ACCORFING TO REQUIREMENTS
         print("UPDATE \(schema).\(tbl.table().capitalized).  Current Level \(currentlevel), Required Level: \(tablelevel)")
@@ -107,7 +107,7 @@ final class BatchDetailTable {
     
     private func table(_ schemaIn:String? = "public")-> String {
 
-        let schema = schemaIn!
+        let schema = schemaIn!.lowercased()
 
         var createsql = "CREATE TABLE IF NOT EXISTS "
         createsql.append("\(schema).\(tbl.table()) ")
