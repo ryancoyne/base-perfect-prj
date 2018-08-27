@@ -59,7 +59,7 @@ final class CashoutGroupTable {
             let _ = try! tbl.sqlRows(self.table(schema), params: [])
             
             // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES(\(schema).'table_\(tbl.table())','1.00')"
+            thesql = "INSERT INTO config(name,val) VALUES('\(schema).table_\(tbl.table())','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
         }
         

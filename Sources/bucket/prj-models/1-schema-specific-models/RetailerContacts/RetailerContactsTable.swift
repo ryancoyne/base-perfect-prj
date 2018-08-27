@@ -110,7 +110,7 @@ final class RetailerContactsTable {
         let schema = schemaIn!.lowercased()
         
         var createsql = "CREATE TABLE IF NOT EXISTS "
-        createsql.append("public.\(tbl.table()) ")
+        createsql.append("\(schema).\(tbl.table()) ")
         
         // common
         createsql.append("( ")
