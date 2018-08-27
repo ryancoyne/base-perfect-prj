@@ -169,7 +169,7 @@ struct ConsumerAPI {
                 
                 let country = Country()
                 let _ = try? country.get(countryid)
-                let schema = country.code_alpha_2 ?? "public"
+                let schema = country.code_alpha_2?.lowercased() ?? "public"
                 
                 // Okay we are finding the transaction history - it is all in the code_transaction_history table
                 var sql = "SELECT cth.* "
@@ -177,7 +177,7 @@ struct ConsumerAPI {
                 // we do not need the retailer for cashouts - there will be no retailer for that type.
                 if transType != "CASHOUT" {
                     sql.append(", r.name FROM \(schema).code_transaction_history AS cth ")
-                    sql.append("LEFT JOIN retailer AS r ")
+                    sql.append("LEFT JOIN \(schema).retailer AS r ")
                     sql.append("ON cth.retailer_id = r.id ")
                 } else {
                     sql.append("FROM \(schema).code_transaction_history AS cth ")
@@ -245,13 +245,12 @@ struct ConsumerAPI {
 
                 let mainReturn:[String:Any] = ["transactions":substuff]
                 
-                try? response.setBody(json: mainReturn)
+                let _ = try? response.setBody(json: mainReturn)
                 response.completed(status: .ok)
                 
             }
         }
 
-        
         //MARK: - Redeem The Transaction:
         public static func redeemCode(_ data: [String:Any]) throws -> RequestHandler {
             return {
@@ -344,7 +343,15 @@ struct ConsumerAPI {
 
                 guard let groupId = request.groupId, groupId != 0 else { return response.invalidGroupCode }
 
-                var sqlstatement = "SELECT * FROM cashout_option_view_deleted_no AS coo "
+                guard let countryId = request.countryId, countryId != 0 else { return response.invalidCountryCode }
+
+                // get the correct country
+                let country =  Country()
+                let _ = try? country.get(id: countryId)
+                
+                if country.code_alpha_2.isNil { return response.invalidCountryCode }
+                
+                var sqlstatement = "SELECT * FROM \(country.code_alpha_2!.lowercased()).cashout_option_view_deleted_no AS coo "
                 sqlstatement.append("WHERE group_id = $1 ")
                 sqlstatement.append("AND display = true ")
                 sqlstatement.append("ORDER BY display_order ASC ")
@@ -414,7 +421,7 @@ struct ConsumerAPI {
                     
                 }
                 
-                try? response.setBody(json: retJSON)
+                let _ = try? response.setBody(json: retJSON)
                 response.completed(status: .ok)
 
             }
@@ -431,9 +438,17 @@ struct ConsumerAPI {
                 // Here we need to get all the modes, and get all the fields
                 guard let countryCode = request.countryCode else { return response.invalidCountryCode }
 
+                // get the country for the code
+                let country = Country()
+                let _ = try? country.get(id: countryCode)
+                
+                if country.code_alpha_2.isEmptyOrNil { return response.invalidCountryCode }
+                
+                let schema = country.code_alpha_2!.lowercased()
+                
                 var countsql = "SELECT cog.*, COUNT(coo.id) AS option_count "
-                countsql.append("FROM cashout_group AS cog ")
-                countsql.append("JOIN cashout_option AS coo ")
+                countsql.append("FROM \(schema).cashout_group AS cog ")
+                countsql.append("JOIN \(schema).cashout_option AS coo ")
                 countsql.append("ON cog.id = coo.group_id ")
                 countsql.append("WHERE cog.country_id = $1 ")
                 countsql.append("AND cog.display = true ")
@@ -449,8 +464,6 @@ struct ConsumerAPI {
                 if qp.offsetNumber > 0 {
                     countsql.append(" OFFSET \(qp.offsetNumber) ")
                 }
-                
-//                print(countsql)
                 
                 // now lets get the types for this country
                 let cg = CashoutGroup()
@@ -504,7 +517,7 @@ struct ConsumerAPI {
                     
                     let retJSON:[String:Any] = ["groups":retJSONSub]
                     
-                    try? response.setBody(json: retJSON)
+                    let _ = try? response.setBody(json: retJSON)
                     response.completed(status: .ok)
                 } else {
                     // error that none were found
@@ -534,8 +547,16 @@ struct ConsumerAPI {
                     return response.invalidOptionCode
                 }
                 
+                // get the country code
+                guard let countryId = request.countryId, countryId != 0 else { return response.invalidCountryCode }
+                let country = Country()
+                let _ = try? country.get(countryId)
+                if country.code_alpha_2.isEmptyOrNil { return response.invalidCountryCode }
+                
+                let schema = country.code_alpha_2!.lowercased()
+
                 // lets get the minimum amount permitted
-                let sqloption = "SELECT minimum, maximum, name, group_id FROM cashout_option_view_deleted_no WHERE id = \(theoption)"
+                let sqloption = "SELECT minimum, maximum, name, group_id FROM \(schema).cashout_option_view_deleted_no WHERE id = \(theoption)"
                 let coop = CashoutOption()
                 let resopt = try? coop.sqlRows(sqloption, params: [])
                 
@@ -552,13 +573,13 @@ struct ConsumerAPI {
                 }
                 
                 
-                var country_id = 0
-                let sqlgroup = "SELECT country_id FROM cashout_group_view_deleted_no WHERE id = \(group_id)"
-                let cg = CashoutGroup()
-                let resultcg = try? cg.sqlRows(sqlgroup, params: [])
-                if resultcg.isNotNil {
-                    country_id = resultcg!.first!.data["country_id"].intValue!
-                }
+//                var country_id = 0
+//                let sqlgroup = "SELECT country_id FROM cashout_group_view_deleted_no WHERE id = \(group_id)"
+//                let cg = CashoutGroup()
+//                let resultcg = try? cg.sqlRows(sqlgroup, params: [])
+//                if resultcg.isNotNil {
+//                    country_id = resultcg!.first!.data["country_id"].intValue!
+//                }
                 
                 // get the cashout amount
                 let amount_to_cashout = request.cashoutAmount!
@@ -570,10 +591,10 @@ struct ConsumerAPI {
                 
                 // there are a couple of things we need to do.  First -- we need to loop thru the records - from oldest to newest (based on redeemed code dates)
                 var sql = "SELECT id, amount, amount_available, customer_code, redeemedby "
-                sql.append("FROM code_transaction_history_view_deleted_no ")
+                sql.append("FROM \(schema).code_transaction_history_view_deleted_no ")
                 sql.append("WHERE redeemedby = '\(userId!)' ")
                 sql.append("AND amount_available > 0 ")
-                sql.append("AND country_id = \(country_id) ")
+//                sql.append("AND country_id = \(country_id) ")
                 sql.append("ORDER BY redeemed ASC")
                 let cth = CodeTransactionHistory()
                 let cth_rec = try? cth.sqlRows(sql, params: [])
@@ -623,7 +644,7 @@ struct ConsumerAPI {
                 }
                 
                 // get the records together for us to process:
-                let rec_sql = "SELECT * FROM code_transaction_history_view_deleted_no WHERE id IN(\(thein))"
+                let rec_sql = "SELECT * FROM \(schema).code_transaction_history_view_deleted_no WHERE id IN(\(thein))"
                 
                 let cth_cashedout = CCXServiceClass.sharedInstance.getNow()
                 let cth_now = CodeTransactionHistory()
@@ -664,12 +685,12 @@ struct ConsumerAPI {
                     newrec.cashedout_note = name_cashout
                     newrec.cashedout_total = amount_to_cashout
                     newrec.cashedoutby = userId!
-                    newrec.country_id = country_id
+                    newrec.country_id = countryId
                     newrec.redeemed = cth_cashedout
                     newrec.redeemedby = userId!
                     newrec.status = CodeTransactionCodes.cashout_pending
                     
-                    let _ = try? newrec.saveWithCustomType(userId!, copyOver: false)
+                    let _ = try? newrec.saveWithCustomType(userId!, copyOver: false, schema)
                     
                     // add the cashout record
                     
@@ -677,7 +698,7 @@ struct ConsumerAPI {
                     
                     
                     // this is where we show success
-                    let _ = try? response.setBody(json: ["amount":amount_to_cashout,"country_id":country_id])
+                    let _ = try? response.setBody(json: ["amount":amount_to_cashout,"country_id":countryId])
                     response.completed(status: .ok)
                     return
                 }

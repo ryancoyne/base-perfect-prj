@@ -613,7 +613,7 @@ public class CodeTransaction: PostgresStORM {
             // determine the schema (country)
             let schemaRow = try? cth.sqlRows("SELECT code_alpha_2 FROM public.country WHERE id = $1", params: ["\(cth.country_id!)"])
             if let r = schemaRow?.first {
-                schema = r.data["code_alpha_2"].stringValue!
+                schema = (r.data["code_alpha_2"].stringValue!).lowercased()
             }
                 
             // save the archive record
