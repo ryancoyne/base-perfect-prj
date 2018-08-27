@@ -147,7 +147,7 @@ struct UserAPI {
                     let err = Account.register(username.lowercased(), email, .provisional, baseURL: AuthenticationVariables.baseURL)
                     
                     if err != .noError {
-                        try? response.setBody(json: ["errorCode":"EmailError", "message":"The email attempting to be registered already exists."])
+                        try? response.setBody(json: ["errorCode":"RegistrationIssue", "message":"The email attempting to be registered already exists."])
                             .completed(status: .custom(code: 409, message: "Email Exists"))
                         return
                     } else {
