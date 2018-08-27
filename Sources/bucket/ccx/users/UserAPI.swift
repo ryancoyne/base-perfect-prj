@@ -76,8 +76,10 @@ struct UserAPI {
         public static func login(_ data : [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                if let s = request.session?.userid, !s.isEmpty {
-                    response.alreadyAuthenticated
+                
+                // If they are already logged in, just send back their information:
+                if let s = request.session, !s.userid.isEmpty, s.data["csrf"].stringValue == request.header(.custom(name: "X-CSRF-Token")) {
+                    response.alreadyAuthenticated(request)
                     return
                 }
                 
@@ -132,8 +134,6 @@ struct UserAPI {
         public static func register(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                
-                guard request.session?.userid.isEmpty == true else { return response.alreadyLoggedIn }
                 
                 do {
                     
@@ -337,8 +337,8 @@ struct UserAPI {
             public static func login(data: [String:Any]) throws -> RequestHandler {
                 return {
                     request, response in
-                    if let s = request.session?.userid, !s.isEmpty {
-                        response.alreadyAuthenticated
+                    if let s = request.session, !s.userid.isEmpty, s.data["csrf"].stringValue == request.header(.custom(name: "X-CSRF-Token")) {
+                        response.alreadyAuthenticated(request)
                         return
                     }
                     
@@ -1307,7 +1307,13 @@ extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .forbidden)
     }
+    func alreadyAuthenticated(_ request : HTTPRequest) {
+        let account = Account()
+        try? account.get(request.session!.userid)
+        return try! self.setBody(json: account.asDictionary).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .ok)
+    }
     var alreadyAuthenticated : Void {
+        
         return try! self.setBody(json: ["errorCode":"AlreadyAuthenticated","message":"You are already logged in."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .ok)
