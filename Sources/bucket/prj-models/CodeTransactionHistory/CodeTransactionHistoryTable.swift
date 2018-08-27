@@ -21,7 +21,7 @@ final class CodeTransactionHistoryTable {
     let tablelevel = 1.00
     
     //MARK:-
-    //MARK: badges table
+    //MARK: code transaction history table
     func create() {
         
         for i in PRJCountries.list  {

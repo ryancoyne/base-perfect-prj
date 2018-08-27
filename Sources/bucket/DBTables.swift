@@ -242,6 +242,7 @@ final class PRJDBTables {
         
         CodeTransactionTable.sharedInstance.create()
         CodeTransactionHistoryTable.sharedInstance.create()
+        CodeTransactionRedeemSummaryTable.sharedInstance.create()
         
         LedgerTable.sharedInstance.create()
         LedgerAccountTable.sharedInstance.create()
