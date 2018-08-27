@@ -43,8 +43,11 @@ struct TestingAPI {
                 
                 // SET TESTING STUFF HERE:
 
-                
-                
+                print("test1: \(Country.getSchema("1"))")
+                print("test2: \(Country.getSchema(1))")
+                print("test3: \(Country.getSchema("Us"))")
+                print("test1: \(Country.getSchema("-"))")
+
                 // END SET TESTING STUFF
 
                 response.setBody(string: "Completed testing.")

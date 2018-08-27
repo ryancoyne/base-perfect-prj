@@ -26,10 +26,10 @@ struct RetailerAPI {
             return [
                 ["method":"get",    "uri":"/api/v1/closeInterval/{intervalId}", "handler":closeInterval],
                 ["method":"get",    "uri":"/api/v1/closeInterval", "handler":closeInterval],
-                ["method":"post",   "uri":"/api/v1/registerterminal", "handler":registerTerminal],
-                ["method":"post",   "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],
-                ["method":"post",   "uri":"/api/v1/transaction", "handler":createTransaction],
-                ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction],
+                ["method":"post",   "uri":"/api/v1/registerterminal/{countryId}", "handler":registerTerminal],
+                ["method":"post",   "uri":"/api/v1/transaction/{countryId}/{retailerId}", "handler":createTransaction],
+                ["method":"post",   "uri":"/api/v1/transaction/{countryId}", "handler":createTransaction],
+                ["method":"delete", "uri":"/api/v1/transaction/{countryId}/{customerCode}", "handler":deleteTransaction],
             ]
         }
         //MARK: - Close Interval Function
@@ -71,7 +71,10 @@ struct RetailerAPI {
                     guard let retailerIntegerId = Retailer.retailerBounce(request, response) else { return }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
+                    guard let countryId = request.countryId else { return response.invalidCountryCode }
                 
+                    let schema = Country.getSchema(countryId)
+                    
                     switch server {
                     // Production & Staging are acting the same.
                     case .production, .staging:
@@ -79,7 +82,12 @@ struct RetailerAPI {
                         
                         // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
                         let terminal = Terminal()
-                        try terminal.find(["serial_number": serialNumber])
+                        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(serialNumber) "
+                        let trm = try? terminal.sqlRows(sql, params: [])
+                        if let t = trm?.first {
+                            terminal.fromDictionary(sourceDictionary: t.data)
+                        }
+                        
                         
                         // Check and make sure the terminal is approved or not:
                         if terminal.id.isNil {
@@ -565,6 +573,12 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .conflict)
     }
+    var invalidCountryCode : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such country code found"])
+            .setHeader(.contentType, value: "application/json")
+            .completed(status: .notAcceptable)
+    }
+
 }
 
 fileprivate extension Moment {
@@ -600,7 +614,10 @@ fileprivate extension HTTPRequest {
             return theTry!
         }
     }
-    
+    var countryId : Int? {
+        return self.urlVariables["countryId"].intValue
+    }
+
     var terminal : Terminal? {
         // Lets see if we have a terminal from the input data:
         // They need to input the x-functions-key as their retailer password.
@@ -624,6 +641,8 @@ extension Retailer {
     
     @discardableResult
     public static func retailerBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> Int? {
+        
+        
         
         //Make sure we have the retailer Id and retailer secret:
         guard let retailerId = request.retailerId else {

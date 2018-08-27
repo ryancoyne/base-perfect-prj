@@ -167,9 +167,10 @@ struct ConsumerAPI {
                 
                 let userId = request.session!.userid
                 
-                let country = Country()
-                let _ = try? country.get(countryid)
-                let schema = country.code_alpha_2?.lowercased() ?? "public"
+                let schema = Country.getSchema(countryid)
+//                let country = Country()
+//                let _ = try? country.get(countryid)
+//                let schema = country.code_alpha_2?.lowercased() ?? "public"
                 
                 // Okay we are finding the transaction history - it is all in the code_transaction_history table
                 var sql = "SELECT cth.* "

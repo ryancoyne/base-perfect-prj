@@ -217,4 +217,38 @@ public class Country: PostgresStORM {
         return diff
         
     }
+    
+    public static func getSchema(_ countryId:Any)->String {
+        
+        // public is the default
+        var schema = "public"
+        var cid = 0
+        
+        if countryId is String {
+            if !(countryId as! String).isNumeric(), (countryId as! String).isAlpha()  {
+                if (countryId as! String).length == 2 {
+                    return (countryId as! String).lowercased()
+                }
+            } else if (countryId as! String).isNumeric() {
+                cid = (countryId as! String).intValue!
+            }
+            
+        }
+        
+        if countryId is Int {
+            cid = countryId as! Int
+        }
+
+        if cid > 0 {
+            let c = Country()
+            let _ = try? c.get(cid)
+            if let cc = c.code_alpha_2 {
+                schema = cc.lowercased()
+            }
+        }
+
+        return schema
+        
+    }
+    
 }
