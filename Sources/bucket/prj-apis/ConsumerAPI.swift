@@ -167,16 +167,20 @@ struct ConsumerAPI {
                 
                 let userId = request.session!.userid
                 
+                let country = Country()
+                let _ = try? country.get(countryid)
+                let schema = country.code_alpha_2 ?? "public"
+                
                 // Okay we are finding the transaction history - it is all in the code_transaction_history table
                 var sql = "SELECT cth.* "
 
                 // we do not need the retailer for cashouts - there will be no retailer for that type.
                 if transType != "CASHOUT" {
-                    sql.append(", r.name FROM code_transaction_history AS cth ")
+                    sql.append(", r.name FROM \(schema).code_transaction_history AS cth ")
                     sql.append("LEFT JOIN retailer AS r ")
                     sql.append("ON cth.retailer_id = r.id ")
                 } else {
-                    sql.append("FROM code_transaction_history AS cth ")
+                    sql.append("FROM \(schema).code_transaction_history AS cth ")
                 }
 
                 sql.append("WHERE cth.redeemedby = '\(userId)' ")
@@ -261,12 +265,14 @@ struct ConsumerAPI {
                 
                 // Awesome.  We have the customer code, and a user.  Now, we need to find the transaction and mark it as redeemed, and add the value to the ledger table!
                 let ct = CodeTransaction()
-                let rsp = try? ct.sqlRows("SELECT * FROM code_transaction_view_deleted_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
+                let rsp = try? ct.sqlRows("SELECT * FROM public.code_transaction_view_deleted_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
                 
                 if rsp?.first.isNil == true {
-                    // if we did not find it, check histry to see if we have already redeemed it
-                    let rsp2 = try? ct.sqlRows("SELECT * FROM code_transaction_history_view_deleted_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
-                    if let t = rsp2?.first?.data, t.codeTransactionHistoryDic.redeemed! > 0 {
+                    // if we did not find it, check histry to see if we have already redeemed it (we are using the summary table in the public schema
+                    // to avoid performance costly functions looking thru schemas
+                    let strs = CodeTransactionRedeemSummary()
+                    let rsp2 = try? strs.sqlRows("SELECT * FROM public.code_transaction_redeem_summary WHERE customer_code = $1", params: ["\(request.customerCode!)"])
+                    if let t = rsp2?.first?.data, (t["created"] as! Int) > 0 {
                         response.invalidCustomerCodeAlreadyRedeemed
                     } else {
                         response.invalidCustomerCode
@@ -285,6 +291,14 @@ struct ConsumerAPI {
                 ct.redeemedby       = redeemedby
                 ct.status           = CodeTransactionCodes.merchant_pending
                 if let _            = try? ct.saveWithCustomType(redeemedby) {
+                    
+                    // save the redeem record to the public schema for the code redeem summary
+                    let rd = CodeTransactionRedeemSummary()
+                    rd.country_id    = ct.country_id!
+                    rd.customer_code = ct.customer_code!
+                    rd.created       = ct.redeemed!
+                    rd.createdby     = ct.redeemedby!
+                    let _ = try? rd.saveWithCustomType()
                     
                     // this means it was saved - audit and archive
                     AuditFunctions().addCustomerCodeAuditRecord(ct)
