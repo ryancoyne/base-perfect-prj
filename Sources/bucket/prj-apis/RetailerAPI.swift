@@ -364,7 +364,12 @@ struct RetailerAPI {
                     var json = try request.postBodyJSON()
                     
                     // get the code
-                    let ccode = Retailer().createCustomerCode(json!)
+                    var ccode = Retailer().createCustomerCode(json!)
+                    
+                    // loop until we get a customer code that is unique
+                    while !ccode.success {
+                        ccode = Retailer().createCustomerCode(json!)
+                    }
                     
                     // put together the return dictionary
                     if ccode.success {
