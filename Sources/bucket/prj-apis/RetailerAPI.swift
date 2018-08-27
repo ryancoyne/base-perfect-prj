@@ -100,9 +100,8 @@ struct RetailerAPI {
                                 
                             } catch {
                                 // Return some caught error:
-                                try? response.setBody(json: ["error":error.localizedDescription])
-                                    .setHeader(.contentType, value: "application/json; charset=UTF-8")
-                                    .completed(status: .internalServerError)
+                                response.caughtError(error)
+                                return
                             }
                             
                         } else {
@@ -167,9 +166,8 @@ struct RetailerAPI {
                                 
                             } catch {
                                 // Return some caught error:
-                                try? response.setBody(json: ["error":error.localizedDescription])
-                                    .setHeader(.contentType, value: "application/json; charset=UTF-8")
-                                    .completed(status: .internalServerError)
+                                response.caughtError(error)
+                                return
                             }
                             
                         } else if terminal.retailer_id.isNotNil && terminal.is_approved {
@@ -205,9 +203,8 @@ struct RetailerAPI {
                 } catch {
                     // Not sure what error could be thrown here, but the only one we throw right now is if the JSON is unparceable.
                     // Return some caught error:
-                    try? response.setBody(json: ["error":error.localizedDescription])
-                        .setHeader(.contentType, value: "application/json; charset=UTF-8")
-                        .completed(status: .internalServerError)
+                    response.caughtError(error)
+                    return
                 }
             }
         }
@@ -347,9 +344,8 @@ struct RetailerAPI {
                 } catch {
                     // Not sure what error could be thrown here, but the only one we throw right now is if the JSON is unparceable.
                     // Return some caught error:
-                    try? response.setBody(json: ["error":error.localizedDescription])
-                        .setHeader(.contentType, value: "application/json; charset=UTF-8")
-                        .completed(status: .internalServerError)
+                    response.caughtError(error)
+                    return
                 }
             }
         }

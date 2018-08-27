@@ -951,11 +951,8 @@ extension Double {
 }
 
 extension HTTPResponse {
-    func notLoggedIn(_ message : String?=nil) {
-        var returnD = ["errorCode" : "Unauthorized"]
-        if message != nil {
-            returnD["message"] = message
-        }
+    func notLoggedIn() {
+        let returnD = ["errorCode" : "Unauthorized", "message":"Please log in."]
         try! self.setBody(json: returnD)
                      .completed(status: .unauthorized)
     }

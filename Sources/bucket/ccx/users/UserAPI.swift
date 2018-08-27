@@ -77,9 +77,8 @@ struct UserAPI {
             return {
                 request, response in
                 if let s = request.session?.userid, !s.isEmpty {
-                    try? response.setBody(json: ["error" : "You are already logged in."])
-                        .setHeader(.contentType, value: "application/json")
-                        .completed(status: .ok)
+                    response.alreadyAuthenticated
+                    return
                 }
                 
                 do {
@@ -96,9 +95,9 @@ struct UserAPI {
                             
                         } else {
                             // Failed on login
-                            try? response.setBody(json: ["error":"Please check your username and password."])
-                                .setHeader(.contentType, value: "application/json")
-                                .completed(status: .forbidden)
+                            response.invalidCredentials
+                            return
+                            
                         }
                     } else if let email = json["email"].stringValue, let password = json["password"].stringValue {
                         // Okay they are attempting an email/password login:
@@ -113,21 +112,19 @@ struct UserAPI {
                             
                         } else {
                             // Failed on login
-                            try? response.setBody(json: ["error":"Please check your email and password."])
-                                .setHeader(.contentType, value: "application/json")
-                                .completed(status: .forbidden)
+                            response.invalidCredentials
+                            return
                         }
                     } else {
-                        try? response.setBody(json: ["error":"Please send in 'email' || 'username' along with 'password'.'"])
-                            .setHeader(.contentType, value: "application/json")
+                        try? response.setBody(json: ["errorCode":"RequiredJSON","message":"Please send in 'email' || 'username' along with 'password'.'"])
+                            .setHeader(.contentType, value: "application/json; charset=UTF-8")
                             .completed(status: .forbidden)
                     }
                 } catch BucketAPIError.unparceableJSON(let jsonString) {
                     return response.invalidRequest(jsonString)
                 } catch {
-                    try? response.setBody(json: ["error":error.localizedDescription])
-                        .setHeader(.contentType, value: "application/json")
-                        .completed(status: .internalServerError)
+                    response.caughtError(error)
+                    return
                 }
             }
         }
@@ -144,13 +141,14 @@ struct UserAPI {
                     guard !json.isEmpty else { return response.emptyJSONBody }
                     
                     // Okay we have json!
-                    guard let email = json["email"].stringValue else { return try! response.setBody(json: ["error":"You need to send at least an email to register."]).completed(status: .badRequest) }
+                    guard let email = json["email"].stringValue else { return try! response.setBody(json: ["errorCode":"RequiredJSON","message":"You need to send at least an email to register."]).completed(status: .badRequest) }
                     let username = json["username"].stringValue ?? ""
                     
                     let err = Account.register(username.lowercased(), email, .provisional, baseURL: AuthenticationVariables.baseURL)
                     
                     if err != .noError {
-                        LocalAuthHandlers.error(request, response, error: "Registration Error: \(err)", code: .badRequest)
+                        try? response.setBody(json: ["errorCode":"EmailError", "message":"The email attempting to be registered already exists."])
+                            .completed(status: .custom(code: 409, message: "Email Exists"))
                         return
                     } else {
                         
@@ -162,7 +160,7 @@ struct UserAPI {
                         let userret:[String:Any] = UserAPI.UserSuccessfullyCreated(thenewuser)
                         
                         var retDict:[String:Any] = [:]
-                        retDict["message"] = "Check your email for an email from us. It contains instructions to complete your signup!"
+                        retDict["message"] = "Check your email for a verification email.  It contains instructions to complete your signup!"
                         
                         // add in the return values for the user connections
                         for (key,value) in userret {
@@ -340,9 +338,8 @@ struct UserAPI {
                 return {
                     request, response in
                     if let s = request.session?.userid, !s.isEmpty {
-                        try? response.setBody(json: ["error" : "You are already logged in."])
-                            .setHeader(.contentType, value: "application/json")
-                            .completed(status: .ok)
+                        response.alreadyAuthenticated
+                        return
                     }
                     
                     do {
@@ -692,7 +689,7 @@ struct UserAPI {
                             account.passreset = AccessToken.generate()
                         }
                         
-                        if account.id.isEmpty { try? response.setBody(json: ["message":"You are not registered on Bucket."])
+                        if account.id.isEmpty { try? response.setBody(json: ["errorCode":"EmailDNE","message":"You are not registered on Bucket."])
                             .setHeader(.contentType, value: "application/json")
                             .completed(status: .forbidden) }
                     
@@ -727,9 +724,8 @@ struct UserAPI {
                 } catch {
                     // Not sure what error could be thrown here, but the only one we throw right now is if the JSON is unparceable.
                     // Return some caught error:
-                    try? response.setBody(json: ["error":error.localizedDescription])
-                        .setHeader(.contentType, value: "application/json; charset=UTF-8")
-                        .completed(status: .internalServerError)
+                    response.caughtError(error)
+                    return
                 }
             }
         }
@@ -1305,5 +1301,15 @@ extension HTTPResponse {
         return try! self.setBody(json: ["errorCode":"InvalidToken","message":"Invalid Token"])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .forbidden)
+    }
+    var invalidCredentials : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCredentials","message":"Please check your username and password."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .forbidden)
+    }
+    var alreadyAuthenticated : Void {
+        return try! self.setBody(json: ["errorCode":"AlreadyAuthenticated","message":"You are already logged in."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .ok)
     }
 }
