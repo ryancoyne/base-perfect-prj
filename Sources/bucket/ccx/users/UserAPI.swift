@@ -76,10 +76,11 @@ struct UserAPI {
         public static func login(_ data : [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                if let s = request.session?.userid, !s.isEmpty {
-                    try? response.setBody(json: ["error" : "You are already logged in."])
-                        .setHeader(.contentType, value: "application/json")
-                        .completed(status: .ok)
+                
+                // If they are already logged in, just send back their information:
+                if let s = request.session, !s.userid.isEmpty, s.data["csrf"].stringValue == request.header(.custom(name: "X-CSRF-Token")) {
+                    response.alreadyAuthenticated(request)
+                    return
                 }
                 
                 do {
@@ -96,9 +97,9 @@ struct UserAPI {
                             
                         } else {
                             // Failed on login
-                            try? response.setBody(json: ["error":"Please check your username and password."])
-                                .setHeader(.contentType, value: "application/json")
-                                .completed(status: .forbidden)
+                            response.invalidCredentials
+                            return
+                            
                         }
                     } else if let email = json["email"].stringValue, let password = json["password"].stringValue {
                         // Okay they are attempting an email/password login:
@@ -113,21 +114,19 @@ struct UserAPI {
                             
                         } else {
                             // Failed on login
-                            try? response.setBody(json: ["error":"Please check your email and password."])
-                                .setHeader(.contentType, value: "application/json")
-                                .completed(status: .forbidden)
+                            response.invalidCredentials
+                            return
                         }
                     } else {
-                        try? response.setBody(json: ["error":"Please send in 'email' || 'username' along with 'password'.'"])
-                            .setHeader(.contentType, value: "application/json")
+                        try? response.setBody(json: ["errorCode":"RequiredJSON","message":"Please send in 'email' || 'username' along with 'password'.'"])
+                            .setHeader(.contentType, value: "application/json; charset=UTF-8")
                             .completed(status: .forbidden)
                     }
                 } catch BucketAPIError.unparceableJSON(let jsonString) {
                     return response.invalidRequest(jsonString)
                 } catch {
-                    try? response.setBody(json: ["error":error.localizedDescription])
-                        .setHeader(.contentType, value: "application/json")
-                        .completed(status: .internalServerError)
+                    response.caughtError(error)
+                    return
                 }
             }
         }
@@ -136,21 +135,20 @@ struct UserAPI {
             return {
                 request, response in
                 
-                guard request.session?.userid.isEmpty == true else { return response.alreadyLoggedIn }
-                
                 do {
                     
                     let json = try request.postBodyJSON()!
                     guard !json.isEmpty else { return response.emptyJSONBody }
                     
                     // Okay we have json!
-                    guard let email = json["email"].stringValue else { return try! response.setBody(json: ["error":"You need to send at least an email to register."]).completed(status: .badRequest) }
+                    guard let email = json["email"].stringValue else { return try! response.setBody(json: ["errorCode":"RequiredJSON","message":"You need to send at least an email to register."]).completed(status: .badRequest) }
                     let username = json["username"].stringValue ?? ""
                     
                     let err = Account.register(username.lowercased(), email, .provisional, baseURL: AuthenticationVariables.baseURL)
                     
                     if err != .noError {
-                        LocalAuthHandlers.error(request, response, error: "Registration Error: \(err)", code: .badRequest)
+                        try? response.setBody(json: ["errorCode":"RegistrationIssue", "message":"The email attempting to be registered already exists."])
+                            .completed(status: .custom(code: 409, message: "Email Exists"))
                         return
                     } else {
                         
@@ -162,7 +160,7 @@ struct UserAPI {
                         let userret:[String:Any] = UserAPI.UserSuccessfullyCreated(thenewuser)
                         
                         var retDict:[String:Any] = [:]
-                        retDict["message"] = "Check your email for an email from us. It contains instructions to complete your signup!"
+                        retDict["message"] = "Check your email for a verification email.  It contains instructions to complete your signup!"
                         
                         // add in the return values for the user connections
                         for (key,value) in userret {
@@ -339,10 +337,9 @@ struct UserAPI {
             public static func login(data: [String:Any]) throws -> RequestHandler {
                 return {
                     request, response in
-                    if let s = request.session?.userid, !s.isEmpty {
-                        try? response.setBody(json: ["error" : "You are already logged in."])
-                            .setHeader(.contentType, value: "application/json")
-                            .completed(status: .ok)
+                    if let s = request.session, !s.userid.isEmpty, s.data["csrf"].stringValue == request.header(.custom(name: "X-CSRF-Token")) {
+                        response.alreadyAuthenticated(request)
+                        return
                     }
                     
                     do {
@@ -368,9 +365,8 @@ struct UserAPI {
                                     
                                 } else {
                                     // Return an error indicating we failed attempting to use oauth.
-                                    try! response.setBody(json: ["error":"Failed OAuth attempt for \(key)"])
-                                        .setHeader(.contentType, value: "application/json")
-                                        .completed(status: .forbidden)
+                                    response.invalidToken
+                                    return
                                 }
                             }
                         case "google":
@@ -384,23 +380,10 @@ struct UserAPI {
                                         .setHeader(.contentType, value: "application/json")
                                         .completed(status: .ok)
                                 } else {
-                                    try! response.setBody(json: ["error":"Failed OAuth attempt for \(key)"])
-                                        .setHeader(.contentType, value: "application/json")
-                                        .completed(status: .forbidden)
+                                    response.invalidToken
+                                    return
                                 }
                             }
-                            //                            case "twitter":
-                            //                                if let theTest = try? twitter.verifyCredentials(json) {
-                            //                                    if theTest.passed {
-                            //
-                            //                                        let account = try! self.createOrLoginUser(theTest.data, key)
-                            //
-                            //                                    } else {
-                            //                                        try! response.setBody(json: ["error":"Failed OAuth attempt for \(key)"])
-                            //                                            .setHeader(.contentType, value: "application/json")
-                            //                                            .completed(status: .forbidden)
-                            //                                    }
-                        //                                }
                         default:
                             response.invalidJSONFormat
                             return
@@ -706,7 +689,7 @@ struct UserAPI {
                             account.passreset = AccessToken.generate()
                         }
                         
-                        if account.id.isEmpty { try? response.setBody(json: ["message":"You are not registered on Bucket."])
+                        if account.id.isEmpty { try? response.setBody(json: ["errorCode":"EmailDNE","message":"You are not registered on Bucket."])
                             .setHeader(.contentType, value: "application/json")
                             .completed(status: .forbidden) }
                     
@@ -741,9 +724,8 @@ struct UserAPI {
                 } catch {
                     // Not sure what error could be thrown here, but the only one we throw right now is if the JSON is unparceable.
                     // Return some caught error:
-                    try? response.setBody(json: ["error":error.localizedDescription])
-                        .setHeader(.contentType, value: "application/json; charset=UTF-8")
-                        .completed(status: .internalServerError)
+                    response.caughtError(error)
+                    return
                 }
             }
         }
@@ -1311,5 +1293,29 @@ extension Account {
         } catch {
             print(error)
         }
+    }
+}
+
+extension HTTPResponse {
+    var invalidToken : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidToken","message":"Invalid Token"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .forbidden)
+    }
+    var invalidCredentials : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCredentials","message":"Please check your username and password."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .forbidden)
+    }
+    func alreadyAuthenticated(_ request : HTTPRequest) {
+        let account = Account()
+        try? account.get(request.session!.userid)
+        return try! self.setBody(json: account.asDictionary).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .ok)
+    }
+    var alreadyAuthenticated : Void {
+        
+        return try! self.setBody(json: ["errorCode":"AlreadyAuthenticated","message":"You are already logged in."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .ok)
     }
 }

@@ -54,7 +54,8 @@ struct CCXStatisticsV1Controller {
                     response.completed(status: .ok)
                 
                 } catch {
-                    response.completed(status: HTTPResponseStatus.custom(code: 500, message: error.localizedDescription))
+                    response.caughtError(error)
+                    return
                 }
             }
         }
