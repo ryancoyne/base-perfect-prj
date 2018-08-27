@@ -368,9 +368,8 @@ struct UserAPI {
                                     
                                 } else {
                                     // Return an error indicating we failed attempting to use oauth.
-                                    try! response.setBody(json: ["error":"Failed OAuth attempt for \(key)"])
-                                        .setHeader(.contentType, value: "application/json")
-                                        .completed(status: .forbidden)
+                                    response.invalidToken
+                                    return
                                 }
                             }
                         case "google":
@@ -384,23 +383,10 @@ struct UserAPI {
                                         .setHeader(.contentType, value: "application/json")
                                         .completed(status: .ok)
                                 } else {
-                                    try! response.setBody(json: ["error":"Failed OAuth attempt for \(key)"])
-                                        .setHeader(.contentType, value: "application/json")
-                                        .completed(status: .forbidden)
+                                    response.invalidToken
+                                    return
                                 }
                             }
-                            //                            case "twitter":
-                            //                                if let theTest = try? twitter.verifyCredentials(json) {
-                            //                                    if theTest.passed {
-                            //
-                            //                                        let account = try! self.createOrLoginUser(theTest.data, key)
-                            //
-                            //                                    } else {
-                            //                                        try! response.setBody(json: ["error":"Failed OAuth attempt for \(key)"])
-                            //                                            .setHeader(.contentType, value: "application/json")
-                            //                                            .completed(status: .forbidden)
-                            //                                    }
-                        //                                }
                         default:
                             response.invalidJSONFormat
                             return
@@ -1311,5 +1297,13 @@ extension Account {
         } catch {
             print(error)
         }
+    }
+}
+
+extension HTTPResponse {
+    var invalidToken : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidToken","message":"Invalid Token"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .forbidden)
     }
 }
