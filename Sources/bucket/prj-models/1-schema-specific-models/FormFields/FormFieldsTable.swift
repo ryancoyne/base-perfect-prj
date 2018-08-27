@@ -107,6 +107,8 @@ final class FormFieldsTable {
     
     private func table(_ schemaIn:String? = "public")-> String {
         
+        let schema = schemaIn!.lowercased()
+        
         var createsql = "CREATE TABLE IF NOT EXISTS "
         createsql.append("\(schema).\(tbl.table()) ")
         
