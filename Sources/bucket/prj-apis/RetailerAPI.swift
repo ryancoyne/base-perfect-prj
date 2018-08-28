@@ -507,7 +507,7 @@ struct RetailerAPI {
                 }
 
                 // We should also check and make sure the retailer is deleting their own transaction:
-                guard let retailerId = request.retailer?.id, thecode.retailer_id == retailerId else { return response.unauthorizedTerminal }
+                guard let retailerId = request.retailer?.id, thecode.retailer_id == retailerId else { return response.incorrectRetailer }
                 
                 // Check if we have a returning object:
                 if thecode.id.isNotNil {
@@ -601,6 +601,12 @@ fileprivate extension HTTPResponse {
     var unauthorizedTerminal : Void {
         return try! self
             .setBody(json: ["errorCode":"InvalidRetailer", "message":"Please Check Retailer Id and Secret Code."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .unauthorized)
+    }
+    var incorrectRetailer : Void {
+        return try! self
+            .setBody(json: ["errorCode":"InvalidRetailer", "message":"You cannot delete another retailer's transaction."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .unauthorized)
     }
