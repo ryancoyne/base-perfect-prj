@@ -108,7 +108,7 @@ final class CodeTransactionTable {
         } else {
             let _ = try! tbl.sqlRows(PRJDBTables.sharedInstance.addCodeTransactionNotRedeemedView(tbl.table(), schema), params: [])
             // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('\(schema)view_\(tbl.table())_not_redeemed','1.00')"
+            thesql = "INSERT INTO config(name,val) VALUES('\(schema).view_\(tbl.table())_not_redeemed','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
         }
 
