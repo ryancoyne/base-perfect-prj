@@ -608,7 +608,7 @@ fileprivate extension HTTPResponse {
         return try! self
             .setBody(json: ["errorCode":"InvalidRetailer", "message":"You cannot delete another retailer's transaction."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .unauthorized)
+            .completed(status: .custom(code: 453, message: "Retailer Conflict"))
     }
     var noTerminalId : Void {
         return try! self
