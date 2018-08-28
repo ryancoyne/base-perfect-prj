@@ -491,9 +491,9 @@ struct RetailerAPI {
                 guard !Retailer.retailerTerminalBounce(request, response) else { return }
                 
                 guard let code = request.customerCode else { response.invalidCustomerCode; return }
-                guard let countryId = request.countryId else { response.invalidCountryCode; return }
+                guard let _ = request.countryId else { response.invalidCountryCode; return }
                 
-                let schema = Country.getSchema(countryId)
+                let schema = Country.getSchema(request)
                 
                 // note that since the unclaimed codes are not in the individual countries (yet), there is only one table in the public schema to deal with
                 // get the code from the url path
@@ -506,6 +506,9 @@ struct RetailerAPI {
                     thecode.to(c)
                 }
 
+                // We should also check and make sure the retailer is deleting their own transaction:
+                guard let retailerId = request.retailer?.id, thecode.retailer_id == retailerId else { return response.unauthorizedTerminal }
+                
                 // Check if we have a returning object:
                 if thecode.id.isNotNil {
 
@@ -666,6 +669,18 @@ fileprivate extension HTTPRequest {
         }
     }
 
+    var retailer : Retailer? {
+        guard let retailerId = retailerId, let countryId = countryId else { return nil }
+        let schema = Country.getSchema(countryId)
+        let retailer = Retailer()
+        let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(retailerId)'"
+        if let res = try? retailer.sqlRows(sql, params: []), let row = res.first {
+            retailer.to(row)
+            return retailer
+        } else {
+            return nil
+        }
+    }
     var terminal : Terminal? {
         // Lets see if we have a terminal from the input data:
         // They need to input the x-functions-key as their retailer password.
