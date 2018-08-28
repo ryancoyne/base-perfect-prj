@@ -670,9 +670,6 @@ fileprivate extension HTTPRequest {
             return theTry!
         }
     }
-    var countryId : Int? {
-        return self.header(.custom(name: "countryId")).intValue ?? nil
-    }
 
     var terminal : Terminal? {
         // Lets see if we have a terminal from the input data:

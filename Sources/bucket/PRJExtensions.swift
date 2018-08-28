@@ -105,6 +105,35 @@ extension HTTPRequest {
             return nil
         }
     }
+    
+    //MARK: - Country will be used across both API's:
+    var countryCode : String? {
+        let countryCode = self.urlVariables["countryCode"]
+        
+        if countryCode.isNil { return nil }
+        // Check if it exists:
+        if Country.idWith(isoNumericCode: countryCode!).isNotNil {
+            return countryCode!
+        } else {
+            return nil
+        }
+    }
+    var countryId : Int? {
+        let sentCountryId = self.header(.custom(name: "countryId")) ?? self.urlVariables["countryId"]
+        // We need to
+        if sentCountryId?.isNumeric() == true {
+            // It is an integer, lets return the integer value:
+            if Country.exists(withId: sentCountryId!) {
+                return sentCountryId.intValue
+            } else {
+                return nil
+            }
+        } else {
+            // It is US, or SG here. We need to go and query for the integer id value:
+            return Country.idWith(isoNumericCode: sentCountryId)
+        }
+    }
+    
 }
 
 extension HTTPResponse {

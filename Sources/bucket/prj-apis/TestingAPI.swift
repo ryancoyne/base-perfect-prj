@@ -248,15 +248,6 @@ struct TestingAPI {
     }
 }
 
-fileprivate extension HTTPRequest {
-    var countryCode : String? {
-        return self.urlVariables["countryCode"]
-    }
-    var countryId : Int? {
-        return self.urlVariables["countryId"].intValue
-    }
-}
-
 fileprivate extension HTTPResponse {
     var invalidCode : Void {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such code found"])
