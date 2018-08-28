@@ -71,6 +71,8 @@ struct TestingAPI {
                 // get the country code
                 // Here we need to get all the modes, and get all the fields
                 guard let countryCode = request.countryCode else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(countryCode)
 
                 // they may send in either the code number of the alpha for the code
                 
@@ -90,12 +92,12 @@ struct TestingAPI {
                 // SECTION 1: Delete all the existing test records for the user and the country
                 
                 // Delete the testing codes not in the history
-                let sql = "DELETE FROM code_transaction WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
+                let sql = "DELETE FROM \(schema).code_transaction WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
                 let current_codes = CodeTransaction()
                 let _ = try? current_codes.sqlRows(sql, params: [])
             
                 // Delete the testing codes in the history
-                let sql2 = "DELETE FROM code_transaction_history WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
+                let sql2 = "DELETE FROM \(schema).code_transaction_history WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
                 let current_codes2 = CodeTransactionHistory()
                 let _ = try? current_codes2.sqlRows(sql2, params: [])
             
@@ -106,7 +108,7 @@ struct TestingAPI {
                 
                 // look for a retailer in the country we are using
                 var add_id = 0
-                let sql_add = "SELECT id from address WHERE retailer_id > 0 AND country_id = \(countryId.intValue!)"
+                let sql_add = "SELECT id from \(schema).address WHERE retailer_id > 0 AND country_id = \(countryId.intValue!)"
                 let addy = Address()
                 let addy_ret = try? addy.sqlRows(sql_add, params: [])
                 if addy_ret.isNotNil {
@@ -124,10 +126,12 @@ struct TestingAPI {
                 var ret_id = 0
                 var term_serial = ""
                 let term = Terminal()
-                let _ = try? term.find(["address_id": "\(add_id)"])
-                if let t = term.rows().first {
-                    ret_id = t.retailer_id!
-                    term_serial = t.serial_number!
+                let sqlt = "SELECT * FROM \(schema).terminal WHERE address_id = \(add_id)"
+                let trm = try? term.sqlRows(sqlt, params: [])
+                if let t = trm?.first {
+                    term.fromDictionary(sourceDictionary: t.data)
+                    ret_id = term.retailer_id!
+                    term_serial = term.serial_number!
                 } else {
                     
                     // return the no terminal for that country error
@@ -180,7 +184,7 @@ struct TestingAPI {
                         }
                         
                         // Save the transaction
-                        let _ = try? transaction.saveWithCustomType(CCXDefaultUserValues.user_server)
+                        let _ = try? transaction.saveWithCustomType(schemaIn: schema, CCXDefaultUserValues.user_server)
                         
                         // and now - lets save the transaction in the Audit table
                         let af = AuditFunctions()
@@ -191,7 +195,7 @@ struct TestingAPI {
             
                 // SECTION 4: Claim the customer codes we just added (to make sure the process is working correctly)
                 
-                let reup_sql = "SELECT * FROM code_transaction WHERE client_location LIKE ('TESTING_%') AND country_id = \(countryId)"
+                let reup_sql = "SELECT * FROM \(schema).code_transaction WHERE client_location LIKE ('TESTING_%') AND country_id = \(countryId)"
                 let reup_ct = CodeTransaction()
                 let reup_res = try? reup_ct.sqlRows(reup_sql, params: [])
                 
@@ -201,7 +205,7 @@ struct TestingAPI {
                         // redeem the transactions
                         
                         let ct = CodeTransaction()
-                        let rsp = try? ct.sqlRows("SELECT * FROM code_transaction_view_deleted_no WHERE customer_code = $1 AND country_id = $2 ", params: ["\(i.data["customer_code"]!)", countryId])
+                        let rsp = try? ct.sqlRows("SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE customer_code = $1 AND country_id = $2 ", params: ["\(i.data["customer_code"]!)", countryId])
                         
                         if rsp?.first.isNil == false {
                             var retCode:[String:Any] = [:]
@@ -214,7 +218,7 @@ struct TestingAPI {
                             ct.redeemed         = redeemed
                             ct.redeemedby       = redeemedby
                             ct.status           = CodeTransactionCodes.merchant_pending
-                            if let _            = try? ct.saveWithCustomType(redeemedby) {
+                            if let _            = try? ct.saveWithCustomType(schemaIn: schema, redeemedby) {
                                 
                                 // this means it was saved - audit and archive
                                 AuditFunctions().addCustomerCodeAuditRecord(ct)

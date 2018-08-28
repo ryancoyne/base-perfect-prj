@@ -407,7 +407,7 @@ struct RetailerAPI {
                     // put together the return dictionary
                     if ccode.success {
                     
-                        json!["customerCode"] = ccode.message
+                        json!["customerCode"] = "\(schema).\(ccode.message)"
                         
                         var qrCodeURL = ""
                         qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerApiURL?.absoluteString ?? "")
@@ -499,7 +499,13 @@ struct RetailerAPI {
                 // get the code from the url path
                 // lets see if the code has not been redeemed yet :)
                 let thecode = CodeTransaction()
-                let _ = try? thecode.find(["customer_code":code])
+                
+                let sql = "SELECT * FROM \(schema).code_transaction WHERE customer_code = \(code) "
+                let cde = try? thecode.sqlRows(sql, params: [])
+                if cde.isNotNil, let c = cde!.first {
+                    thecode.fromDictionary(sourceDictionary: c.data)
+                }
+
                 // Check if we have a returning object:
                 if thecode.id.isNotNil {
 

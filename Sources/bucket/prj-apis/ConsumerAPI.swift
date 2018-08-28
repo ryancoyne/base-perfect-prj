@@ -266,15 +266,19 @@ struct ConsumerAPI {
                 // Okay, the user is logged in and we have their id!  Lets see if we have the customer code!
                 guard let customerCode = request.customerCode, !customerCode.isEmpty else { return response.invalidCode }
                 
+                // grab the schema from the code
+                let index = customerCode.index(of: ".")!
+                let schema = customerCode[...index].lowercased()
+                
                 // Awesome.  We have the customer code, and a user.  Now, we need to find the transaction and mark it as redeemed, and add the value to the ledger table!
                 let ct = CodeTransaction()
-                let rsp = try? ct.sqlRows("SELECT * FROM public.code_transaction_view_deleted_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
+                let rsp = try? ct.sqlRows("SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
                 
                 if rsp?.first.isNil == true {
                     // if we did not find it, check histry to see if we have already redeemed it (we are using the summary table in the public schema
                     // to avoid performance costly functions looking thru schemas
-                    let strs = CodeTransactionRedeemSummary()
-                    let rsp2 = try? strs.sqlRows("SELECT * FROM public.code_transaction_redeem_summary WHERE customer_code = $1", params: ["\(request.customerCode!)"])
+                    let strs = CodeTransactionHistory()
+                    let rsp2 = try? strs.sqlRows("SELECT * FROM \(schema).code_transaction_history WHERE customer_code = $1", params: ["\(request.customerCode!)"])
                     if let t = rsp2?.first?.data, (t["created"] as! Int) > 0 {
                         response.invalidCustomerCodeAlreadyRedeemed
                     } else {
@@ -293,15 +297,7 @@ struct ConsumerAPI {
                 ct.redeemed         = redeemed
                 ct.redeemedby       = redeemedby
                 ct.status           = CodeTransactionCodes.merchant_pending
-                if let _            = try? ct.saveWithCustomType(redeemedby) {
-                    
-                    // save the redeem record to the public schema for the code redeem summary
-                    let rd = CodeTransactionRedeemSummary()
-                    rd.country_id    = ct.country_id!
-                    rd.customer_code = ct.customer_code!
-                    rd.created       = ct.redeemed!
-                    rd.createdby     = ct.redeemedby!
-                    let _ = try? rd.saveWithCustomType()
+                if let _            = try? ct.saveWithCustomType(schemaIn: schema, redeemedby) {
                     
                     // this means it was saved - audit and archive
                     AuditFunctions().addCustomerCodeAuditRecord(ct)
@@ -667,7 +663,7 @@ struct ConsumerAPI {
                         working_cth.cashedout_note = "CASHOUT: \(name_cashout)"
                         
                         // we are complete - lets save and move on
-                        let _ = try? working_cth.saveWithCustomType()
+                        let _ = try? working_cth.saveWithCustomType(schemaIn: schema)
                         
                         // Write the audit record
                         AuditFunctions().cashoutCustomerCodeAuditRecord(working_cth)
