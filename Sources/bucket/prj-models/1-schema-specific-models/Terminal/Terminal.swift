@@ -255,7 +255,7 @@ public class Terminal: PostgresStORM {
 
         let terminal = Terminal()
         
-        let sql = "SELECT * FROM \(schema).terminal WHERE retailer_id = \(retailerId) AND serial_number = \(terminalSerial) AND terminal_key = \(terminalSecret)"
+        let sql = "SELECT * FROM \(schema).terminal WHERE retailer_id = '\(retailerId)' AND serial_number = '\(terminalSerial)' AND terminal_key = '\(terminalSecret)'"
         let trm = try? terminal.sqlRows(sql, params: [])
         
         if trm.isNil, let term = trm!.first {

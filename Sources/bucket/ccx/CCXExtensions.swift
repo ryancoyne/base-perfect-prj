@@ -1074,11 +1074,11 @@ extension PostgresStORM {
         // act accordingly if this is an add or an update
         do {
             if copyOver {
-                return try insertWithCustomTypes(schema)
+                return try insertWithCustomTypes(schemaIn: schema)
             } else if keyIsEmpty() {
-                return try addWithCustomTypes(user)
+                return try addWithCustomTypes(schemaIn: schema, user)
             } else {
-                return try updateWithCustomType(user)
+                return try updateWithCustomType(schemaIn: schema,user)
             }
         } catch {
             LogFile.error("Error: \(error)", logFile: "./StORMlog.txt")
@@ -1193,7 +1193,7 @@ extension PostgresStORM {
 
     }
 
-    private func insertWithCustomTypes(_ schemaIn:String? = "public") throws -> [StORMRow] {
+    private func insertWithCustomTypes(schemaIn:String? = "public", _ user: String? = nil) throws -> [StORMRow] {
         
         let schema = schemaIn!.lowercased()
         
