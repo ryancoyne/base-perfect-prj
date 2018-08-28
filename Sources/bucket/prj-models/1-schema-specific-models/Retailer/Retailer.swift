@@ -104,7 +104,7 @@ public class Retailer: PostgresStORM {
         for (key, value) in sourceDictionary {
             
             switch key.lowercased() {
-                
+            
             case "name":
                 if (value as? String).isNotNil {
                     self.name = (value as! String)
