@@ -116,7 +116,7 @@ struct ConsumerAPI {
             return [
                 // BALANCE ENDPOINT:
                 ["method":"get",    "uri":"/api/v1/balance", "handler":balance],
-                ["method":"get",    "uri":"/api/v1/balance/{countryId}", "handler":balance],
+                ["method":"get",    "uri":"/api/v1/balance/{countryId}", "handler":balanceWithCountry],
                 // TRANSACTION ENDPOINTS:
                 ["method":"get",    "uri":"/api/v1/history/{countryId}", "handler":transactionHistory],
                 ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
@@ -134,17 +134,26 @@ struct ConsumerAPI {
                 // Check the user:
                 guard !Account.userBouce(request, response) else { return }
                 
-                if let countryId = request.countryId {
-                    
-                    guard countryId != 0 else { response.invalidCountryCode; return }
-                    let amount = UserBalanceFunctions().getCurrentBalance(request.session!.userid, countryid: countryId)
-                    try? response.setBody(json: ["amount": amount])
-                        .completed(status: .ok)
-                } else {
-                    let buckets = UserBalanceFunctions().getConsumerBalances(request.session!.userid)
-                    try? response.setBody(json: ["buckets":buckets])
-                        .completed(status: .ok)
-                }
+                let buckets = UserBalanceFunctions().getConsumerBalances(request.session!.userid)
+                try? response.setBody(json: ["buckets":buckets])
+                    .completed(status: .ok)
+                
+            }
+        }
+        //MARK: - Balance Function (With Country):
+        public static func balanceWithCountry(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Check the user:
+                guard !Account.userBouce(request, response) else { return }
+                guard let countryId = request.countryId else { return response.invalidCountryCode }
+                
+                let amount =
+                    UserBalanceFunctions().getCurrentBalance(request.session!.userid, countryid: countryId)
+                try? response.setBody(json: ["amount":amount])
+                    .completed(status: .ok)
+                
             }
         }
         
