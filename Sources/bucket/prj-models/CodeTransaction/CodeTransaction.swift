@@ -617,7 +617,7 @@ public class CodeTransaction: PostgresStORM {
             }
                 
             // save the archive record
-            try cth.saveWithCustomType(copyOver: true, schema)
+            try cth.saveWithCustomType(schemaIn: schema, copyOver: true)
             
             // now hard delete the original record
             try self.delete(self.id!)

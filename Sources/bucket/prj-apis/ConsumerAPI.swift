@@ -673,7 +673,7 @@ struct ConsumerAPI {
                     newrec.redeemedby = userId!
                     newrec.status = CodeTransactionCodes.cashout_pending
                     
-                    let _ = try? newrec.saveWithCustomType(userId!, copyOver: false, schema)
+                    let _ = try? newrec.saveWithCustomType(schemaIn: schema, userId!, copyOver: false)
                     
                     // add the cashout record
                     

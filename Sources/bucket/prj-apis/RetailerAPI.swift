@@ -317,8 +317,12 @@ struct RetailerAPI {
                         
                         // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
                         let terminal = Terminal()
-                        try terminal.find(["serial_number": serialNumber])
-                        
+                        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(serialNumber) "
+                        let trmn = try? terminal.sqlRows(sql, params: [])
+                        if trmn.isNotNil, let c = trmn!.first {
+                            terminal.fromDictionary(sourceDictionary: c.data)
+                        }
+
                         // Check and make sure the terminal is approved or not:
                         if terminal.id.isNil {
                             // The terminal does not exist for this retailer.  Lets create the terminal & password and send it back to the client:
@@ -357,7 +361,7 @@ struct RetailerAPI {
                             guard retailerIntegerId == terminal.retailer_id else { /* Send back an error indicating this device is on another account */  return response.alreadyRegistered(serialNumber) }
                             
                             // If they are who they say they are, we will go and unregister the terminal:
-                            try? terminal.softDeleteWithCustomType()
+                            let _  = try? terminal.softDeleteWithCustomType(schema)
                             
                         }
                         
@@ -422,7 +426,7 @@ struct RetailerAPI {
                         let terminal = Terminal()
                         sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(request.terminalId!) "
                         let trmn = try? terminal.sqlRows(sql, params: [])
-                        if trmn.isNotNil, let c = rtlr!.first {
+                        if trmn.isNotNil, let c = trmn!.first {
                             terminal.fromDictionary(sourceDictionary: c.data)
                         }
                         
@@ -450,7 +454,7 @@ struct RetailerAPI {
                         }
                         
                         // Save the transaction
-                        let _ = try? transaction.saveWithCustomType(CCXDefaultUserValues.user_server, schema)
+                        let _ = try? transaction.saveWithCustomType(schemaIn: schema, CCXDefaultUserValues.user_server)
                         
                         // and now - lets save the transaction in the Audit table
                         AuditFunctions().addCustomerCodeAuditRecord(transaction)

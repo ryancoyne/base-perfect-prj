@@ -1067,7 +1067,7 @@ extension PostgresStORM {
      - Returns: An Any type.  For a new inser, we will return the id
      */
     @discardableResult
-    func saveWithCustomType(_ user: String? = nil, copyOver : Bool = false,_ schemaIn:String? = "public") throws -> [StORMRow] {
+    func saveWithCustomType(schemaIn:String? = "public", _ user: String? = nil, copyOver : Bool = false) throws -> [StORMRow] {
         
         let schema = schemaIn!.lowercased()
         
@@ -1091,8 +1091,10 @@ extension PostgresStORM {
      - Returns: An Any type.  For a new inser, we will return the id
      */
     @discardableResult
-    func softDeleteWithCustomType(_ user: String? = nil) throws -> [StORMRow] {
+    func softDeleteWithCustomType(schemaIn:String? = "public",_ user: String? = nil) throws -> [StORMRow] {
 
+        let schema = schemaIn!.lowercased()
+        
         // get the key (id)
         let (idcolumn, _) = firstAsKey()
 
@@ -1123,7 +1125,7 @@ extension PostgresStORM {
         }
         
         // build the sql
-        var str = "UPDATE \(self.table()) "
+        var str = "UPDATE \(schema).\(self.table()) "
         str.append("SET \"deleted\"  = \(String(describing: CCXServiceClass.sharedInstance.getNow())), \"deletedby\"  = '\(deleteuser)', ")
         str.append("    \"modified\" = \(String(describing: CCXServiceClass.sharedInstance.getNow())), \"modifiedby\" = '\(deleteuser)' ")
         str.append("WHERE \"\(idcolumn.lowercased())\" = \(idnumber)")
@@ -1142,7 +1144,9 @@ extension PostgresStORM {
      - Returns: An Any type.  For a new inser, we will return the id
      */
     @discardableResult
-    func softUnDeleteWithCustomType(_ user: String? = nil) throws -> [StORMRow] {
+    func softUnDeleteWithCustomType(schemaIn:String? = "public", _ user: String? = nil) throws -> [StORMRow] {
+        
+        let schema = schemaIn!.lowercased()
         
         // get the key (id)
         let (idcolumn, _) = firstAsKey()
@@ -1174,7 +1178,7 @@ extension PostgresStORM {
         }
         
         // build the sql
-        var str = "UPDATE \(self.table()) "
+        var str = "UPDATE \(schema).\(self.table()) "
         str.append("SET \"deleted\"  = 0, \"deletedby\" = NULL, ")
         str.append("    \"modified\" = \(String(describing: CCXServiceClass.sharedInstance.getNow())), \"modifiedby\" = '\(deleteuser)' ")
         str.append("WHERE \"\(idcolumn.lowercased())\" = \(idnumber)")
@@ -1289,7 +1293,7 @@ extension PostgresStORM {
      Adds a new record with GIS coordinates in a geography type field and other field values.
      - Returns: An Any type.  For a new inser, we will return the id
      */
-    private func addWithCustomTypes(_ user: String? = nil, schemaIn:String? = "public") throws -> [StORMRow] {
+    private func addWithCustomTypes(schemaIn:String? = "public", _ user: String? = nil) throws -> [StORMRow] {
         
         let schema = schemaIn!.lowercased()
         
@@ -1415,7 +1419,7 @@ extension PostgresStORM {
      Updates a record with GIS coordinates in a geography type field and other field values.
      - Returns: An Any type.  For a new inser, we will return the id
      */
-    private func updateWithCustomType(_ user: String? = nil, schemaIn:String? = "public") throws -> [StORMRow] {
+    private func updateWithCustomType(schemaIn:String? = "public", _ user: String? = nil) throws -> [StORMRow] {
         
         let schema = schemaIn!.lowercased()
         
@@ -1551,7 +1555,7 @@ extension PostgresStORM {
      - parameter latitude: The latitude of the reference point for the search
      - Returns: An array of StORMRow objects with the resulting dataset
      */
-    private func updateLocationGIS(record_id: Int, locationField: String, longitude: Double, latitude: Double, schemaIn:String? = "public") throws -> [StORMRow] {
+    private func updateLocationGIS(schemaIn:String? = "public", record_id: Int, locationField: String, longitude: Double, latitude: Double) throws -> [StORMRow] {
         
         let schema = schemaIn!.lowercased()
         
@@ -1576,7 +1580,9 @@ extension PostgresStORM {
      - parameter distance: The comparison distance in miles
      - Returns: An array of StORMRow objects with the resulting dataset
      */
-    func getLocationGISsql(sql: String, locationField: String, longitude: Double, latitude: Double, distance: Double) throws -> [StORMRow] {
+    func getLocationGISsql(schemaIn:String? = "public", sql: String, locationField: String, longitude: Double, latitude: Double, distance: Double) throws -> [StORMRow] {
+        
+        let schema = schemaIn!.lowercased()
         
         var sqlstatement = sql
         //        var gisfields = " "
@@ -1615,7 +1621,7 @@ extension PostgresStORM {
      - parameter fields: An array of the names of the fields you would like returned in addition to the longitude and latitude fields
      - Returns: An array of StORMRow objects with the resulting dataset
      */
-    func getLocationGIS(longitude: Double, latitude: Double, locationField: String, fields: [String], distance: Double, schemaIn:String? = "public") throws -> [StORMRow] {
+    func getLocationGIS(schemaIn:String? = "public", longitude: Double, latitude: Double, locationField: String, fields: [String], distance: Double) throws -> [StORMRow] {
         
         let schema = schemaIn!.lowercased()
         
