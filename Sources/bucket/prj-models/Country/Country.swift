@@ -218,11 +218,32 @@ public class Country: PostgresStORM {
         
     }
     
+    public static func getSchema(_ request : HTTPRequest) -> String {
+        
+        let countryId = request.header(.custom(name: "countryId")).stringValue ?? request.urlVariables["countryId"].stringValue
+        
+        var schema = "public"
+        // If the string is
+        if countryId?.isNumeric() == true {
+            // We need to go and query for the schema.
+            let c = Country()
+            let _ = try? c.get(countryId!)
+            if let cc = c.code_alpha_2 {
+                schema = cc.lowercased()
+            }
+        } else if countryId?.isAlpha() == true, countryId?.length == 2 {
+            schema = countryId!.lowercased()
+        }
+        
+        return schema
+    }
+    
     public static func getSchema(_ countryId:Any)->String {
         
         // public is the default
         var schema = "public"
         var cid = 0
+        
         
         if countryId is String {
             if !(countryId as! String).isNumeric(), (countryId as! String).isAlpha()  {

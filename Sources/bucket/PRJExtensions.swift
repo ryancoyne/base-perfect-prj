@@ -74,6 +74,16 @@ extension String {
     }
 }
 
+extension Country {
+    static public func idWith(isoNumericCode: String?) -> Int? {
+        if isoNumericCode.isNil { return nil }
+        // Okay lets see:
+        let country = Country()
+        try? country.find(["code_alpha_2":isoNumericCode!.uppercased()])
+        return country.id
+    }
+}
+
 enum BucketAPIError: Error {
     case unparceableJSON(String)
 }

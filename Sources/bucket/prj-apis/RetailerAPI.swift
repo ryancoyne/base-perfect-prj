@@ -73,7 +73,7 @@ struct RetailerAPI {
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
                     guard let countryId = request.countryId else { return response.invalidCountryCode }
                 
-                    let schema = Country.getSchema(countryId)
+                    let schema = Country.getSchema(request)
                     
                     switch server {
                     // Production & Staging are acting the same.
@@ -249,7 +249,7 @@ struct RetailerAPI {
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
                     guard let countryId = request.countryId else { return response.invalidCountryCode }
                     
-                    let schema = Country.getSchema(countryId)
+                    let schema = Country.getSchema(request)
 
                     
                     switch server {
@@ -385,7 +385,7 @@ struct RetailerAPI {
                 
                 guard let countryId = request.countryId else { return response.invalidCountryCode }
                 
-                let schema = Country.getSchema(countryId)
+                let schema = Country.getSchema(request)
 
                 do {
 
@@ -691,7 +691,7 @@ extension Retailer {
         guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return true }
         guard let countryId = request.countryId else {  response.invalidCountryCode; return true }
         
-        let schema = Country.getSchema(countryId)
+        let schema = Country.getSchema(request)
         
         // Get our secret code formatted properly to check what we have in the DB:
         let passwordToCheck = retailerSecret.ourPasswordHash!

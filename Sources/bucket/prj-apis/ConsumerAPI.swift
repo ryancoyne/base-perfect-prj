@@ -135,6 +135,7 @@ struct ConsumerAPI {
                 guard !Account.userBouce(request, response) else { return }
                 
                 if let countryId = request.countryId {
+                    
                     guard countryId != 0 else { response.invalidCountryCode; return }
                     let amount = UserBalanceFunctions().getCurrentBalance(request.session!.userid, countryid: countryId)
                     try? response.setBody(json: ["amount": amount])
@@ -163,7 +164,7 @@ struct ConsumerAPI {
                 
                 let userId = request.session!.userid
                 
-                let schema = Country.getSchema(countryid)
+                let schema = Country.getSchema(request)
                 
                 // Okay we are finding the transaction history - it is all in the code_transaction_history table
                 var sql = "SELECT cth.* "
@@ -340,8 +341,7 @@ struct ConsumerAPI {
                 guard let countryId = request.countryId, countryId != 0 else { return response.invalidCountryCode }
 
                 // get the correct country
-                let schema = Country.getSchema(countryId)
-                
+                let schema = Country.getSchema(request)
                 
                 var sqlstatement = "SELECT * FROM \(schema).cashout_option_view_deleted_no AS coo "
                 sqlstatement.append("WHERE group_id = $1 ")
@@ -536,7 +536,7 @@ struct ConsumerAPI {
                 
                 // get the country code
                 guard let countryId = request.countryId, countryId != 0 else { return response.invalidCountryCode }
-                let schema = Country.getSchema(countryId)
+                let schema = Country.getSchema(request)
 
                 // lets get the minimum amount permitted
                 let sqloption = "SELECT minimum, maximum, name, group_id FROM \(schema).cashout_option_view_deleted_no WHERE id = \(theoption)"
@@ -745,7 +745,15 @@ fileprivate extension HTTPRequest {
         return self.urlVariables["countryCode"]
     }
     var countryId : Int? {
-        return self.urlVariables["countryId"].intValue
+        let sentCountryId = self.header(.custom(name: "countryId")) ?? self.urlVariables["countryId"]
+        // We need to
+        if sentCountryId?.isNumeric() == true {
+            // It is an integer, lets return the integer value:
+            return sentCountryId.intValue
+        } else {
+            // It is US, or SG here. We need to go and query for the integer id value:
+            return Country.idWith(isoNumericCode: sentCountryId)
+        }
     }
     var groupId : Int? {
         return self.urlVariables["groupId"].intValue
