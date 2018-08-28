@@ -151,10 +151,12 @@ final class PRJDBTables {
     
     //MARK:-
     //MARK: Core DB Table Views
-    public func addCodeTransactionNotRedeemedView(_ tablename: String)-> String {
+    public func addCodeTransactionNotRedeemedView(_ tablename: String, _ schemaIn:String? = "public")-> String {
     
-        var viewsql = "CREATE VIEW public.\(tablename)_view_not_redeemed AS "
-        viewsql.append("SELECT * FROM \(tablename) WHERE redeemed = 0; ")
+        let schema = schemaIn!.lowercased()
+        
+        var viewsql = "CREATE VIEW \(schema).\(tablename)_view_not_redeemed AS "
+        viewsql.append("SELECT * FROM \(schema).\(tablename) WHERE redeemed = 0; ")
         
         return viewsql
     
@@ -242,7 +244,6 @@ final class PRJDBTables {
         
         CodeTransactionTable.sharedInstance.create()
         CodeTransactionHistoryTable.sharedInstance.create()
-        CodeTransactionRedeemSummaryTable.sharedInstance.create()
         
         LedgerTable.sharedInstance.create()
         LedgerAccountTable.sharedInstance.create()
