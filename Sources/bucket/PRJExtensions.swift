@@ -108,7 +108,7 @@ extension HTTPRequest {
     
     //MARK: - Country will be used across both API's:
     var countryCode : String? {
-        let countryCode = self.urlVariables["countryCode"]
+        let countryCode = self.urlVariables["countryCode"]?.uppercased()
         
         if countryCode.isNil { return nil }
         // Check if it exists:
@@ -130,7 +130,7 @@ extension HTTPRequest {
             }
         } else {
             // It is US, or SG here. We need to go and query for the integer id value:
-            return Country.idWith(isoNumericCode: sentCountryId)
+            return Country.idWith(isoNumericCode: sentCountryId?.uppercased())
         }
     }
     
