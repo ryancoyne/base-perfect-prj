@@ -416,6 +416,10 @@ struct ConsumerAPI {
                     
                     retJSON["options"] = retJSONSub
                     
+                } else {
+                    // This is an error with the country id existing, but the schema not being supported.
+                    return response.unsupportedCountry
+                    
                 }
                 
                 let _ = try? response.setBody(json: retJSON)
@@ -736,6 +740,9 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 406, message: "The customer code was not found"))
     }
+    var unsupportedCountry : Void {
+        try! self.setBody(json: ["errorCode": "UnsupportedCountry", "message": "The country id exists, but we currently are not deployed for this country.  Please try again later."]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 411, message: "Unsupported Schema"))
+    }
     var invalidCustomerCodeAlreadyRedeemed : Void {
         return try! self.setBody(json: ["errorCode":"CodeRedeemed", "message": "Code was already redeemed"])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
@@ -757,7 +764,11 @@ fileprivate extension HTTPRequest {
         // We need to
         if sentCountryId?.isNumeric() == true {
             // It is an integer, lets return the integer value:
-            return sentCountryId.intValue
+            if Country.exists(withId: sentCountryId!) {
+                return sentCountryId.intValue
+            } else {
+                return nil
+            }
         } else {
             // It is US, or SG here. We need to go and query for the integer id value:
             return Country.idWith(isoNumericCode: sentCountryId)
