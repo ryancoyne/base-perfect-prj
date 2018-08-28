@@ -71,7 +71,7 @@ struct RetailerAPI {
                     guard let retailerIntegerId = Retailer.retailerBounce(request, response) else { return }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
-                    guard let countryId = request.countryId else { return response.invalidCountryCode }
+                    guard let _ = request.countryId else { return response.invalidCountryCode }
                 
                     let schema = Country.getSchema(request)
                     
@@ -82,7 +82,7 @@ struct RetailerAPI {
                         
                         // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
                         let terminal = Terminal()
-                        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(serialNumber) "
+                        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(serialNumber)' "
                         let trm = try? terminal.sqlRows(sql, params: [])
                         if let t = trm?.first {
                             terminal.to(t)
@@ -93,7 +93,7 @@ struct RetailerAPI {
                         if terminal.id.isNil {
                             // The terminal does not exist for this retailer.  Lets create the terminal & password and send it back to the client:
                             let term = Terminal()
-                            let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(serialNumber) "
+                            let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(serialNumber)' "
                             let trm = try? term.sqlRows(sql, params: [])
                             if let t = trm?.first {
                                 term.to(t)
@@ -149,7 +149,7 @@ struct RetailerAPI {
                         
                         // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
                         let terminal = Terminal()
-                        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(serialNumber) "
+                        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(serialNumber)' "
                         let trm = try? terminal.sqlRows(sql, params: [])
                         if let t = trm?.first {
                             terminal.to(t)
@@ -168,7 +168,7 @@ struct RetailerAPI {
                             
                             // we will take the first address on file for this retailer and add the location here for them
                             let add = Address()
-                            let a_sql = "SELECT * FROM \(schema).address WHERE retailer_id = \(retailerIntegerId)"
+                            let a_sql = "SELECT * FROM \(schema).address WHERE retailer_id = '\(retailerIntegerId)'"
                             let a_res = try? add.sqlRows(a_sql, params: [])
                             if let a = a_res?.first {
                                 add.to(a)
@@ -247,7 +247,7 @@ struct RetailerAPI {
                     guard let retailerIntegerId = Retailer.retailerBounce(request, response) else { return }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
-                    guard let countryId = request.countryId else { return response.invalidCountryCode }
+                    guard let _ = request.countryId else { return response.invalidCountryCode }
                     
                     let schema = Country.getSchema(request)
 
@@ -317,7 +317,7 @@ struct RetailerAPI {
                         
                         // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
                         let terminal = Terminal()
-                        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(serialNumber) "
+                        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(serialNumber)' "
                         let trmn = try? terminal.sqlRows(sql, params: [])
                         if trmn.isNotNil, let c = trmn!.first {
                             terminal.to(c)
@@ -387,7 +387,7 @@ struct RetailerAPI {
                 // We should first bouce the retailer (takes care of all the general retailer errors):
                 guard !Retailer.retailerTerminalBounce(request, response) else { return }
                 
-                guard let countryId = request.countryId else { return response.invalidCountryCode }
+                guard let _ = request.countryId else { return response.invalidCountryCode }
                 
                 let schema = Country.getSchema(request)
 
@@ -397,17 +397,17 @@ struct RetailerAPI {
                     var json = try request.postBodyJSON()
                     
                     // get the code
-                    var ccode = Retailer().createCustomerCode(json!)
+                    var ccode = Retailer().createCustomerCode(schemaId: schema, json!)
                     
                     // loop until we get a customer code that is unique
                     while !ccode.success {
-                        ccode = Retailer().createCustomerCode(json!)
+                        ccode = Retailer().createCustomerCode(schemaId: schema, json!)
                     }
                     
                     // put together the return dictionary
                     if ccode.success {
                     
-                        json!["customerCode"] = "\(schema).\(ccode.message)"
+                        json!["customerCode"] = ccode.message
                         
                         var qrCodeURL = ""
                         qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerApiURL?.absoluteString ?? "")
@@ -417,14 +417,14 @@ struct RetailerAPI {
                         
                         // We need to go and get the integer terminal id:
                         let retailer = Retailer()
-                        var sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(request.retailerId!) "
+                        var sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(request.retailerId!)' "
                         let rtlr = try? retailer.sqlRows(sql, params: [])
                         if rtlr.isNotNil, let c = rtlr!.first {
                             retailer.to(c)
                         }
                         
                         let terminal = Terminal()
-                        sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(request.terminalId!) "
+                        sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(request.terminalId!)' "
                         let trmn = try? terminal.sqlRows(sql, params: [])
                         if trmn.isNotNil, let c = trmn!.first {
                             terminal.to(c)
@@ -462,7 +462,7 @@ struct RetailerAPI {
                         // if we are here then everything went well
                         try? response.setBody(json: json!)
                             .completed(status: .ok)
-
+                        return
                     }
                     
                     // we have to work on the correct error return codes
@@ -500,7 +500,7 @@ struct RetailerAPI {
                 // lets see if the code has not been redeemed yet :)
                 let thecode = CodeTransaction()
                 
-                let sql = "SELECT * FROM \(schema).code_transaction WHERE customer_code = \(code) "
+                let sql = "SELECT * FROM \(schema).code_transaction WHERE customer_code = '\(code)' "
                 let cde = try? thecode.sqlRows(sql, params: [])
                 if cde.isNotNil, let c = cde!.first {
                     thecode.to(c)
@@ -518,7 +518,7 @@ struct RetailerAPI {
                     // Return a general error with a different status code that we will know that the retailers are not matching.
                     // We will tell them to go to Bucket for support.  If they report an error of code 454, we know there is an issue with the retailers matching.
                     let retailer = Retailer()
-                    let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(request.retailerId!) "
+                    let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(request.retailerId!)' "
                     let rtlr = try? retailer.sqlRows(sql, params: [])
                     if rtlr.isNotNil, let c = rtlr!.first {
                         retailer.to(c)
@@ -554,7 +554,7 @@ struct RetailerAPI {
                     
                     // We did not... if it is in the history table, then it is already redeemed...
                     let theCode = CodeTransactionHistory()
-                    let sql = "SELECT * FROM \(schema).code_transaction_history WHERE customer_code = \(code)"
+                    let sql = "SELECT * FROM \(schema).code_transaction_history WHERE customer_code = '\(code)'"
                     let cde = try? theCode.sqlRows(sql, params: [])
                     if cde.isNotNil, let c = cde!.first {
                         theCode.to(c)
@@ -674,7 +674,7 @@ fileprivate extension HTTPRequest {
         let schema = Country.getSchema(countryId)
         
         let term = Terminal()
-        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(terminalId) AND terminal_key = \(password.ourPasswordHash!) "
+        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(terminalId)' AND terminal_key = '\(password.ourPasswordHash!)' "
         let trm = try? term.sqlRows(sql, params: [])
         if trm.isNotNil, let t = trm?.first {
             term.to(t)
@@ -697,7 +697,7 @@ extension Retailer {
         
         // Find the terminal
         let retailer = Retailer()
-        let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(with)"
+        let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(with)'"
         let rtlr = try? retailer.sqlRows(sql, params: [])
         if rtlr.isNotNil, let t = rtlr?.first {
             retailer.to(t)
@@ -746,7 +746,7 @@ extension Retailer {
         let passwordToCheck = retailerSecret.ourPasswordHash!
         
         let terminalQuery = Terminal()
-        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(terminalSerialNumber) AND terminal_key = \(passwordToCheck) "
+        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(terminalSerialNumber)' AND terminal_key = '\(passwordToCheck)' "
         let term = try? terminalQuery.sqlRows(sql, params: [])
         if term.isNotNil, let t = term?.first {
             terminalQuery.to(t)
@@ -769,7 +769,7 @@ extension Retailer {
 
         // Checking the final condition (last condition to minimize the number of queries during error)
         let retailerQuery = Retailer()
-        let sqlr = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(retailerId)"
+        let sqlr = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(retailerId)'"
         let rtl = try? retailerQuery.sqlRows(sqlr, params: [])
         if rtl.isNotNil, let t = rtl?.first {
             retailerQuery.to(t)
