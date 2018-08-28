@@ -247,7 +247,7 @@ struct RetailerAPI {
                     guard let retailerIntegerId = Retailer.retailerBounce(request, response) else { return }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
-                    guard let countryId = request.countryId else { return response.invalidCountryCode }
+                    guard let _ = request.countryId else { return response.invalidCountryCode }
                     
                     let schema = Country.getSchema(request)
 
@@ -387,7 +387,7 @@ struct RetailerAPI {
                 // We should first bouce the retailer (takes care of all the general retailer errors):
                 guard !Retailer.retailerTerminalBounce(request, response) else { return }
                 
-                guard let countryId = request.countryId else { return response.invalidCountryCode }
+                guard let _ = request.countryId else { return response.invalidCountryCode }
                 
                 let schema = Country.getSchema(request)
 
@@ -397,11 +397,11 @@ struct RetailerAPI {
                     var json = try request.postBodyJSON()
                     
                     // get the code
-                    var ccode = Retailer().createCustomerCode(json!)
+                    var ccode = Retailer().createCustomerCode(schemaId: schema, json!)
                     
                     // loop until we get a customer code that is unique
                     while !ccode.success {
-                        ccode = Retailer().createCustomerCode(json!)
+                        ccode = Retailer().createCustomerCode(schemaId: schema, json!)
                     }
                     
                     // put together the return dictionary

@@ -256,13 +256,13 @@ public class Retailer: PostgresStORM {
             let tran = try? ctrs.sqlRows(sql, params: [])
             if let t = tran?.first {
                 ctrs.to(t)
+                
+                if ctrs.created! > 0 {
+                    return (false, "Code exists and was redeemed")
+                }
+
             }
 
-            if ctrs.created! > 0 {
-                return (false, "Code exists and was redeemed")
-            }
-            
-            
             return (true, customerCode)
         }
     }
@@ -289,7 +289,8 @@ public class Retailer: PostgresStORM {
                 // we want this as a length of 12 alphanumeric characters
                 if returnCC.length > 12 {
 //                    print("  This is the final CC: \(returnCC)")
-                    return returnCC
+                    let retCCA = "\(schema).\(returnCC)"
+                    return retCCA
                 }
             }
             
