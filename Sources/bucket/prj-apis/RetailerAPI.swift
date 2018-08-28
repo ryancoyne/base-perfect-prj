@@ -647,9 +647,14 @@ fileprivate extension HTTPRequest {
         let schema = Country.getSchema(countryId)
         
         let term = Terminal()
-        let sql = "SELECT * FROM "
-        try? term.find(["serial_number":terminalId,"terminal_key":password.ourPasswordHash!])
+        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(terminalId) AND terminal_key = \(password.ourPasswordHash!) "
+        let trm = try? term.sqlRows(sql, params: [])
+        if trm.isNotNil, let t = trm?.first {
+            term.fromDictionary(sourceDictionary: t.data)
+        }
+
         if term.id.isNotNil { return term }
+            
         else { return nil }
     }
     
