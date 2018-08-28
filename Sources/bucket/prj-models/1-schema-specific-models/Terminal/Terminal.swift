@@ -250,4 +250,22 @@ public class Terminal: PostgresStORM {
         return diff
         
     }
+    
+    public static func getTerminal(_ schema:Int, _ retailerId:Int, _ terminalSerial:String, _ terminalSecret:String)->Terminal? {
+
+        let terminal = Terminal()
+        
+        let sql = "SELECT * FROM \(schema).terminal WHERE retailer_id = \(retailerId) AND serial_number = \(terminalSerial) AND terminal_key = \(terminalSecret)"
+        let trm = try? terminal.sqlRows(sql, params: [])
+        
+        if trm.isNil, let term = trm!.first {
+            terminal.fromDictionary(sourceDictionary: term.data)
+            if terminal.id.isNotNil { return terminal }
+        }
+        
+        
+        return nil
+        
+    }
+
 }

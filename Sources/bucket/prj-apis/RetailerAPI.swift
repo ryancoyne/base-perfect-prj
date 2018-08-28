@@ -26,10 +26,10 @@ struct RetailerAPI {
             return [
                 ["method":"get",    "uri":"/api/v1/closeInterval/{intervalId}", "handler":closeInterval],
                 ["method":"get",    "uri":"/api/v1/closeInterval", "handler":closeInterval],
-                ["method":"post",   "uri":"/api/v1/registerterminal/{countryId}", "handler":registerTerminal],
-                ["method":"post",   "uri":"/api/v1/transaction/{countryId}/{retailerId}", "handler":createTransaction],
-                ["method":"post",   "uri":"/api/v1/transaction/{countryId}", "handler":createTransaction],
-                ["method":"delete", "uri":"/api/v1/transaction/{countryId}/{customerCode}", "handler":deleteTransaction],
+                ["method":"post",   "uri":"/api/v1/registerterminal", "handler":registerTerminal],
+                ["method":"post",   "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],
+                ["method":"post",   "uri":"/api/v1/transaction", "handler":createTransaction],
+                ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction],
             ]
         }
         //MARK: - Close Interval Function
@@ -93,7 +93,12 @@ struct RetailerAPI {
                         if terminal.id.isNil {
                             // The terminal does not exist for this retailer.  Lets create the terminal & password and send it back to the client:
                             let term = Terminal()
-                            
+                            let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(serialNumber) "
+                            let trm = try? term.sqlRows(sql, params: [])
+                            if let t = trm?.first {
+                                term.fromDictionary(sourceDictionary: t.data)
+                            }
+
                             let apiKey = UUID().uuidString
                             term.serial_number = serialNumber
                             term.retailer_id = retailerIntegerId
@@ -144,7 +149,11 @@ struct RetailerAPI {
                         
                         // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
                         let terminal = Terminal()
-                        try terminal.find(["serial_number": serialNumber])
+                        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(serialNumber) "
+                        let trm = try? terminal.sqlRows(sql, params: [])
+                        if let t = trm?.first {
+                            terminal.fromDictionary(sourceDictionary: t.data)
+                        }
                         
                         // Check and make sure the terminal is approved or not:
                         if terminal.id.isNil {
@@ -159,7 +168,11 @@ struct RetailerAPI {
                             
                             // we will take the first address on file for this retailer and add the location here for them
                             let add = Address()
-                            try? add.find(["retailer_id" : String(retailerIntegerId)])
+                            let a_sql = "SELECT * FROM \(schema).address WHERE retailer_id = \(retailerIntegerId)"
+                            let a_res = try? add.sqlRows(a_sql, params: [])
+                            if let a = a_res?.first {
+                                add.fromDictionary(sourceDictionary: a.data)
+                            }
                             
                             if add.id.isNotNil, add.retailer_id == retailerIntegerId {
                                 term.address_id = add.id
@@ -167,7 +180,7 @@ struct RetailerAPI {
                             
                             do {
                                 
-                                try term.saveWithCustomType()
+                                try term.saveWithCustomType(schema)
                                 try? response.setBody(json: ["isApproved":true, "apiKey":apiKey])
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
@@ -194,7 +207,7 @@ struct RetailerAPI {
                             terminal.terminal_key = thePassword.ourPasswordHash
                             
                             // Save:
-                            try terminal.saveWithCustomType()
+                            try terminal.saveWithCustomType(schema)
                             
                             // Return the response:
                             try? response.setBody(json: responseDictionary)
@@ -234,6 +247,10 @@ struct RetailerAPI {
                     guard let retailerIntegerId = Retailer.retailerBounce(request, response) else { return }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
+                    guard let countryId = request.countryId else { return response.invalidCountryCode }
+                    
+                    let schema = Country.getSchema(countryId)
+
                     
                     switch server {
                     // Production & Staging are acting the same.
@@ -366,6 +383,10 @@ struct RetailerAPI {
                 // We should first bouce the retailer (takes care of all the general retailer errors):
                 guard !Retailer.retailerTerminalBounce(request, response) else { return }
                 
+                guard let countryId = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(countryId)
+
                 do {
 
                     // we are using the json variable to return the code too.
@@ -417,7 +438,7 @@ struct RetailerAPI {
                         }
                         
                         // Save the transaction
-                        let _ = try? transaction.saveWithCustomType(CCXDefaultUserValues.user_server)
+                        let _ = try? transaction.saveWithCustomType(CCXDefaultUserValues.user_server, schema)
                         
                         // and now - lets save the transaction in the Audit table
                         AuditFunctions().addCustomerCodeAuditRecord(transaction)
@@ -615,14 +636,18 @@ fileprivate extension HTTPRequest {
         }
     }
     var countryId : Int? {
-        return self.urlVariables["countryId"].intValue
+        return self.header(.custom(name: "countryId")).intValue ?? nil
     }
 
     var terminal : Terminal? {
         // Lets see if we have a terminal from the input data:
         // They need to input the x-functions-key as their retailer password.
-        guard let password = self.retailerSecret, let terminalId = self.terminalId else { return nil }
+        guard let password = self.retailerSecret, let terminalId = self.terminalId, let countryId = self.countryId else { return nil }
+        
+        let schema = Country.getSchema(countryId)
+        
         let term = Terminal()
+        let sql = "SELECT * FROM "
         try? term.find(["serial_number":terminalId,"terminal_key":password.ourPasswordHash!])
         if term.id.isNotNil { return term }
         else { return nil }
@@ -664,6 +689,9 @@ extension Retailer {
         //Make sure we have the retailer Id and retailer secret:
         guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
         guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return true }
+        guard let countryId = request.countryId else {  response.invalidCountryCode; return true }
+        
+        let schema = Country.getSchema(countryId)
         
         // Get our secret code formatted properly to check what we have in the DB:
         let passwordToCheck = retailerSecret.ourPasswordHash!
