@@ -392,7 +392,7 @@ class Friends: PostgresStORM {
         friend.createdby = session.userid
         friend.user_id = session.userid
         friend.friend_id = id
-        if (try? friend.saveWithCustomType(session.userid)).isNotNil {
+        if (try? friend.saveWithCustomType(schemaIn: "public", session.userid)).isNotNil {
             return FriendStatusReturn.friendsRequestAdded
         } else {
             return FriendStatusReturn.friendsRequestError
@@ -448,7 +448,7 @@ class Friends: PostgresStORM {
                 if let id = result!.first?.data["id"].intValue {
                     friend.id = id
                     friend.rejected = CCXServiceClass.sharedInstance.getNow()
-                    if let yup = try? friend.saveWithCustomType(session.userid), !yup.isEmpty {
+                    if let yup = try? friend.saveWithCustomType(schemaIn: "public",session.userid), !yup.isEmpty {
                         return true
                     } else {
                         return false

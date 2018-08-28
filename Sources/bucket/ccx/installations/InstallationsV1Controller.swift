@@ -95,7 +95,7 @@ struct InstallationsV1Controller {
                         if uid.isEmpty {
                             retrow = try inst.saveWithCustomType()
                         } else {
-                            retrow = try inst.saveWithCustomType(uid)
+                            retrow = try inst.saveWithCustomType(schemaIn: "public",uid)
                         }
                         
                         if retrow.count > 0, let installationid = retrow.first?.data["id"].intValue {
@@ -133,7 +133,7 @@ struct InstallationsV1Controller {
                                     
                                     // now lets try to save this notification
                                     if therewerechanges {
-                                        try notif.saveWithCustomType(uid)
+                                        try notif.saveWithCustomType(schemaIn: "public",uid)
                                     }
                                 } catch {
                                     //TODO:  Maybe log something here indicating an issue with saving to notifications table?

@@ -147,7 +147,7 @@ final class SampleData {
                 a.city = "Washington"
                 a.state = "DC"
                 a.postal_code = "20009"
-                let _ = try? a.saveWithCustomType()
+                let _ = try? a.saveWithCustomType(schemaIn: "us")
                 
             case 1:
                 a.retailer_id = i.data.id
@@ -156,7 +156,7 @@ final class SampleData {
                 a.city = "Washington"
                 a.state = "DC"
                 a.postal_code = "20009"
-                let _ = try? a.saveWithCustomType()
+                let _ = try? a.saveWithCustomType(schemaIn: "us")
 
 //            case 2:
 //                a.retailer_id = i.data.id
@@ -174,7 +174,7 @@ final class SampleData {
                 a.city = "Washington"
                 a.state = "DC"
                 a.postal_code = "20009"
-                let _ = try? a.saveWithCustomType()
+                let _ = try? a.saveWithCustomType(schemaIn: "us")
                 
             }
             
@@ -198,7 +198,7 @@ final class SampleData {
                 a.country_id = singapore.id
                 a.state = "Singapore"
                 a.postal_code = "080004"
-                let _ = try? a.saveWithCustomType()
+                let _ = try? a.saveWithCustomType(schemaIn: singapore.code_alpha_2!.lowercased())
 
             case 1:
                 a.retailer_id = i.data.id
@@ -207,7 +207,7 @@ final class SampleData {
                 a.country_id = singapore.id
                 a.state = "Singapore"
                 a.postal_code = "080004"
-                let _ = try? a.saveWithCustomType()
+                let _ = try? a.saveWithCustomType(schemaIn: singapore.code_alpha_2!.lowercased())
 
             case 2:
                 a.retailer_id = i.data.id
@@ -216,7 +216,7 @@ final class SampleData {
                 a.country_id = singapore.id
                 a.state = "Singapore"
                 a.postal_code = "080004"
-                let _ = try? a.saveWithCustomType()
+                let _ = try? a.saveWithCustomType(schemaIn: singapore.code_alpha_2!.lowercased())
                 
             default:
                 a.retailer_id = i.data.id
@@ -225,7 +225,7 @@ final class SampleData {
                 a.country_id = singapore.id
                 a.state = "Singapore"
                 a.postal_code = "080004"
-                let _ = try? a.saveWithCustomType()
+                let _ = try? a.saveWithCustomType(schemaIn: singapore.code_alpha_2!.lowercased())
 
             }
             

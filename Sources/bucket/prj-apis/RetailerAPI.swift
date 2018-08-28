@@ -106,7 +106,7 @@ struct RetailerAPI {
                             
                             do {
                                 
-                                try term.saveWithCustomType()
+                                try term.saveWithCustomType(schemaIn: schema)
                                 try? response.setBody(json: ["isApproved":false, "apiKey":apiKey])
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
@@ -134,7 +134,7 @@ struct RetailerAPI {
                             terminal.terminal_key = thePassword.ourPasswordHash
                             
                             // Save:
-                            try terminal.saveWithCustomType()
+                            try terminal.saveWithCustomType(schemaIn: schema)
                             
                             // Return the response:
                             try? response.setBody(json: responseDictionary)
@@ -180,7 +180,7 @@ struct RetailerAPI {
                             
                             do {
                                 
-                                try term.saveWithCustomType(schema)
+                                try term.saveWithCustomType(schemaIn: schema)
                                 try? response.setBody(json: ["isApproved":true, "apiKey":apiKey])
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
@@ -207,7 +207,7 @@ struct RetailerAPI {
                             terminal.terminal_key = thePassword.ourPasswordHash
                             
                             // Save:
-                            try terminal.saveWithCustomType(schema)
+                            try terminal.saveWithCustomType(schemaIn: schema)
                             
                             // Return the response:
                             try? response.setBody(json: responseDictionary)
@@ -361,7 +361,7 @@ struct RetailerAPI {
                             guard retailerIntegerId == terminal.retailer_id else { /* Send back an error indicating this device is on another account */  return response.alreadyRegistered(serialNumber) }
                             
                             // If they are who they say they are, we will go and unregister the terminal:
-                            let _  = try? terminal.softDeleteWithCustomType(schema)
+                            let _  = try? terminal.softDeleteWithCustomType(schemaIn: schema)
                             
                         }
                         
@@ -541,7 +541,7 @@ struct RetailerAPI {
                         thecode.deletedby = CCXDefaultUserValues.user_server
                     }
                     
-                    let _ = try? thecode.saveWithCustomType(thecode.deletedby, copyOver: false)
+                    let _ = try? thecode.saveWithCustomType(schemaIn: schema,thecode.deletedby, copyOver: false)
                     
                     // audit the delete
                     AuditFunctions().deleteCustomerCodeAuditRecord(thecode)
