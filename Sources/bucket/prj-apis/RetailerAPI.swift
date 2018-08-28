@@ -411,7 +411,7 @@ struct RetailerAPI {
                         
                         var qrCodeURL = ""
                         qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerApiURL?.absoluteString ?? "")
-                        qrCodeURL.append("/redeem/")
+                        qrCodeURL.append("redeem/")
                         qrCodeURL.append(ccode.message)
                         json!["qrCodeContent"] = qrCodeURL
                         

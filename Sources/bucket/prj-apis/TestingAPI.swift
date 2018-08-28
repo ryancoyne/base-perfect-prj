@@ -150,7 +150,7 @@ struct TestingAPI {
                     
                         var qrCodeURL = ""
                         qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerApiURL?.absoluteString ?? "")
-                        qrCodeURL.append("/redeem/")
+                        qrCodeURL.append("redeem/")
                         qrCodeURL.append(ccode.message)
                     
                         let terminal = Terminal()
