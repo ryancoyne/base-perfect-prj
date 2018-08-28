@@ -407,7 +407,7 @@ struct RetailerAPI {
                     // put together the return dictionary
                     if ccode.success {
                     
-                        json!["customerCode"] = "\(schema).\(ccode.message)"
+                        json!["customerCode"] = ccode.message
                         
                         var qrCodeURL = ""
                         qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerApiURL?.absoluteString ?? "")
@@ -462,7 +462,7 @@ struct RetailerAPI {
                         // if we are here then everything went well
                         try? response.setBody(json: json!)
                             .completed(status: .ok)
-
+                        return
                     }
                     
                     // we have to work on the correct error return codes

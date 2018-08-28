@@ -228,28 +228,37 @@ public class Retailer: PostgresStORM {
     }
     
     //MARK: Function to create Customer Codes
-    func createCustomerCode(_ data: [String:Any])->(success:Bool, message:String) {
+    func createCustomerCode(schemaId:String? = "public", _ data: [String:Any])->(success:Bool, message:String) {
+        
+        let schema = schemaId!.lowercased()
         
         // lets make sure the correct parameters were passed in..
         
-        var customerCode = self.createCustomerCodeRaw()
+        let customerCode = self.createCustomerCodeRaw(schema)
         
         // Make sure a transaction does not exist with this customer code already:
         let trans = CodeTransaction()
-        try? trans.find(["customer_code": customerCode])
+        let sql = "SELECT * FROM \(schema).code_transaction WHERE customer_code = '\(customerCode)'"
+        let tran = try? trans.sqlRows(sql, params: [])
+        if let t = tran?.first {
+            trans.to(t)
+        }
         
         if trans.id.isNotNil {
             
-            customerCode = self.createCustomerCodeRaw()
-            
-            return (true, customerCode)
+            return (false, "Code exists and was not redeemed")
             
         } else {
 
             // check the code history to make sure it was not redeemed.
-            let ctrs = CodeTransactionRedeemSummary()
-            let _ = try? ctrs.find([("customer_code",customerCode)])
-            if let r = ctrs.rows().first, r.created! > 0 {
+            let ctrs = CodeTransactionHistory()
+            let sql = "SELECT * FROM \(schema).code_transaction WHERE customer_code = '\(customerCode)'"
+            let tran = try? ctrs.sqlRows(sql, params: [])
+            if let t = tran?.first {
+                ctrs.to(t)
+            }
+
+            if ctrs.created! > 0 {
                 return (false, "Code exists and was redeemed")
             }
             
@@ -258,7 +267,9 @@ public class Retailer: PostgresStORM {
         }
     }
     
-    fileprivate func createCustomerCodeRaw () -> String {
+    fileprivate func createCustomerCodeRaw (_ schemaId:String) -> String {
+        
+        let schema = schemaId.lowercased()
         
         var returnCC = ""
         
@@ -283,6 +294,10 @@ public class Retailer: PostgresStORM {
             }
             
         }
-        return returnCC
+        
+        // add on the schema name
+        let retCC = "\(schema).\(returnCC)"
+        return retCC
+        
     }
 }
