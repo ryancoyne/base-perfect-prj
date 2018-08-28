@@ -410,7 +410,7 @@ struct ConsumerAPI {
                         }
                         
                         // pull in the form fields and add them
-                        let fields = SupportFunctions.sharedInstance.getFormFields(i.data.cashoutOptionsDic.formId!)
+                        let fields = SupportFunctions.sharedInstance.getFormFields(i.data.cashoutOptionsDic.formId!, request: request)
                         optdict["fields"] = fields
 
                         retJSONSub.append(optdict)
@@ -537,181 +537,206 @@ struct ConsumerAPI {
                 
                 // Check if the user is logged in:
                 guard !Account.userBouce(request, response) else { return }
-
-                let userId = request.session?.userid
                 
-                // Okay we are finding the specific type, and grabbing the fields we need:
-                var theoption = 0
-                if let cooption = request.optionId.intValue, cooption > 0 {
-                    theoption = cooption
-                } else {
-                    // option not sent in
-                    return response.invalidOptionCode
-                }
-                
-                // get the country code
-                guard let countryId = request.countryId, countryId != 0 else { return response.invalidCountryCode }
-                let schema = Country.getSchema(request)
-
-                // lets get the minimum amount permitted
-                let sqloption = "SELECT minimum, maximum, name, group_id FROM \(schema).cashout_option_view_deleted_no WHERE id = \(theoption)"
-                let coop = CashoutOption()
-                let resopt = try? coop.sqlRows(sqloption, params: [])
-                
-                var min_cashout  = 0.0
-                var max_cashout  = 0.0
-                var name_cashout = ""
-                var group_id     = 0
-
-                if resopt.isNotNil, let i = resopt?.first! {
-                    min_cashout  = i.data["minimum"].doubleValue!
-                    max_cashout  = i.data["maximum"].doubleValue!
-                    name_cashout = i.data["name"].stringValue!
-                    group_id     = i.data["group_id"].intValue!
-                }
-                
-                
-//                var country_id = 0
-//                let sqlgroup = "SELECT country_id FROM cashout_group_view_deleted_no WHERE id = \(group_id)"
-//                let cg = CashoutGroup()
-//                let resultcg = try? cg.sqlRows(sqlgroup, params: [])
-//                if resultcg.isNotNil {
-//                    country_id = resultcg!.first!.data["country_id"].intValue!
-//                }
-                
-                // get the cashout amount
-                let amount_to_cashout = request.cashoutAmount!
-                
-                // make sure they are cashing out the correct amount
-                if min_cashout > amount_to_cashout {
-                    // RETURN AN ERROR:not requesting the minimum
-                }
-                
-                // there are a couple of things we need to do.  First -- we need to loop thru the records - from oldest to newest (based on redeemed code dates)
-                var sql = "SELECT id, amount, amount_available, customer_code, redeemedby "
-                sql.append("FROM \(schema).code_transaction_history_view_deleted_no ")
-                sql.append("WHERE redeemedby = '\(userId!)' ")
-                sql.append("AND amount_available > 0 ")
-//                sql.append("AND country_id = \(country_id) ")
-                sql.append("ORDER BY redeemed ASC")
-                let cth = CodeTransactionHistory()
-                let cth_rec = try? cth.sqlRows(sql, params: [])
-                
-                // we will determine the records to use their entire amount and the records to use portions
-                
-                var included:[Int] = []
-                var lastone = 0
-                var lastoneamount:Double = 0.0
-                var totalcount:Double = 0.0
-
-                // calculate wiich records we will use for the cashout amount.
-                if cth_rec.isNotNil {
-                    for i in cth_rec! {
+                do {
+                    
+                    let json = try request.postBodyJSON()!
+                    if json.isEmpty { return response.emptyJSONBody }
+                    
+                    let userId = request.session?.userid
+                    
+                    // Okay we are finding the specific type, and grabbing the fields we need:
+                    var theoption = 0
+                    if let cooption = request.optionId.intValue, cooption > 0 {
+                        theoption = cooption
+                    } else {
+                        // option not sent in
+                        return response.invalidOptionCode
+                    }
+                    
+                    // get the country code
+                    guard let countryId = request.countryId, countryId != 0 else { return response.invalidCountryCode }
+                    let schema = Country.getSchema(request)
+                    
+                    // Lets figure out what fields they needed to send:
+                    
+                    
+                    // lets get the minimum amount permitted
+                    let sqloption = "SELECT minimum, maximum, name, group_id FROM \(schema).cashout_option_view_deleted_no WHERE id = \(theoption)"
+                    let coop = CashoutOption()
+                    let resopt = try? coop.sqlRows(sqloption, params: [])
+                    
+                    var min_cashout  = 0.0
+                    var max_cashout  = 0.0
+                    var name_cashout = ""
+                    var group_id     = 0
+                    var form_id = 0
+                    
+                    if resopt.isNotNil, let i = resopt?.first! {
+                        min_cashout  = i.data["minimum"].doubleValue!
+                        max_cashout  = i.data["maximum"].doubleValue!
+                        name_cashout = i.data["name"].stringValue!
+                        group_id     = i.data["group_id"].intValue!
+                        form_id = i.data["form_id"].intValue!
+                    }
+                    
+                    let submittedFields = request.formFields
+                    var requiredFields = SupportFunctions.sharedInstance.getFormFields(form_id, request: request)
+                    for field in requiredFields {
+                        // Go thru all the fields, if they are required, make sure they are in the submitted fields.
                         
-                        if let tam = i.data["amount_available"].doubleValue {
-                            if (totalcount + tam) <= amount_to_cashout {
-                                totalcount += tam
-                                included.append(i.data["id"].intValue!)
-                            } else if totalcount < amount_to_cashout {
-                                lastoneamount = amount_to_cashout - totalcount
-                                lastone = i.data["id"].intValue!
+                        
+                    }
+                    
+                    
+                    
+                    // Now that we have the form id, we can get the form fields, and make sure they are entering these:
+                    
+                    
+                    
+                    //                var country_id = 0
+                    //                let sqlgroup = "SELECT country_id FROM cashout_group_view_deleted_no WHERE id = \(group_id)"
+                    //                let cg = CashoutGroup()
+                    //                let resultcg = try? cg.sqlRows(sqlgroup, params: [])
+                    //                if resultcg.isNotNil {
+                    //                    country_id = resultcg!.first!.data["country_id"].intValue!
+                    //                }
+                    
+                    // get the cashout amount
+                    let amount_to_cashout = request.cashoutAmount!
+                    
+                    // make sure they are cashing out the correct amount
+                    if min_cashout > amount_to_cashout {
+                        return response.invalidCashoutAmount
+                    }
+                    
+                    // there are a couple of things we need to do.  First -- we need to loop thru the records - from oldest to newest (based on redeemed code dates)
+                    var sql = "SELECT id, amount, amount_available, customer_code, redeemedby "
+                    sql.append("FROM \(schema).code_transaction_history_view_deleted_no ")
+                    sql.append("WHERE redeemedby = '\(userId!)' ")
+                    sql.append("AND amount_available > 0 ")
+                    //                sql.append("AND country_id = \(country_id) ")
+                    sql.append("ORDER BY redeemed ASC")
+                    let cth = CodeTransactionHistory()
+                    let cth_rec = try? cth.sqlRows(sql, params: [])
+                    
+                    // we will determine the records to use their entire amount and the records to use portions
+                    
+                    var included:[Int] = []
+                    var lastone = 0
+                    var lastoneamount:Double = 0.0
+                    var totalcount:Double = 0.0
+                    
+                    // calculate wiich records we will use for the cashout amount.
+                    if cth_rec.isNotNil {
+                        for i in cth_rec! {
+                            
+                            if let tam = i.data["amount_available"].doubleValue {
+                                if (totalcount + tam) <= amount_to_cashout {
+                                    totalcount += tam
+                                    included.append(i.data["id"].intValue!)
+                                } else if totalcount < amount_to_cashout {
+                                    lastoneamount = amount_to_cashout - totalcount
+                                    lastone = i.data["id"].intValue!
+                                }
                             }
                         }
                     }
-                }
-                
-                // now we have the list of records to include and the final partial record
-                if totalcount < amount_to_cashout {
-                    // they do not have enough to cashout - something happened wrong here.
                     
-                    // RETURN AN ERROR
-                    
-                }
-                
-                // process the records
-                var thein = ""
-                for i in included {
-                    thein.append("\(i),")
-                }
-                // add the last one
-                if lastone > 0 {
-                    thein.append("\(lastone)")
-                } else {
-                    // get rid of the last comma
-                    thein.removeLast()
-                }
-                
-                // get the records together for us to process:
-                let rec_sql = "SELECT * FROM \(schema).code_transaction_history_view_deleted_no WHERE id IN(\(thein))"
-                
-                let cth_cashedout = CCXServiceClass.sharedInstance.getNow()
-                let cth_now = CodeTransactionHistory()
-                let resul = try? cth_now.sqlRows(rec_sql, params: [])
-                if resul.isNotNil {
-                    for i in resul! {
-                        let working_cth = CodeTransactionHistory()
-                        working_cth.to(i)
-                        
-                        // update the available amount
-                        if working_cth.id != lastone {
-                            working_cth.amount_available = 0.0
-                            working_cth.cashedout_total  = working_cth.amount
-                        } else {
-                            working_cth.amount_available = working_cth.amount! - lastoneamount
-                            working_cth.cashedout_total  = lastoneamount
-                        }
-                        
-                        working_cth.cashedout      = cth_cashedout
-                        working_cth.cashedoutby    = userId!
-                        working_cth.cashedout_note = "CASHOUT: \(name_cashout)"
-                        
-                        // we are complete - lets save and move on
-                        let _ = try? working_cth.saveWithCustomType(schemaIn: schema)
-                        
-                        // Write the audit record
-                        AuditFunctions().cashoutCustomerCodeAuditRecord(working_cth)
-
+                    // now we have the list of records to include and the final partial record
+                    if totalcount < amount_to_cashout {
+                        return response.invalidCashoutBalance
                     }
                     
-                    // add the cashout record to the history record
-                    let newrec = CodeTransactionHistory()
-                    newrec.amount = 0.0
-                    newrec.amount_available = 0.0
-                    newrec.archived = cth_cashedout
-                    newrec.archivedby = userId!
-                    newrec.cashedout = cth_cashedout
-                    newrec.cashedout_note = name_cashout
-                    newrec.cashedout_total = amount_to_cashout
-                    newrec.cashedoutby = userId!
-                    newrec.country_id = countryId
-                    newrec.redeemed = cth_cashedout
-                    newrec.redeemedby = userId!
-                    newrec.status = CodeTransactionCodes.cashout_pending
+                    // process the records
+                    var thein = ""
+                    for i in included {
+                        thein.append("\(i),")
+                    }
+                    // add the last one
+                    if lastone > 0 {
+                        thein.append("\(lastone)")
+                    } else {
+                        // get rid of the last comma
+                        thein.removeLast()
+                    }
                     
-                    let _ = try? newrec.saveWithCustomType(schemaIn: schema, userId!, copyOver: false)
+                    // get the records together for us to process:
+                    let rec_sql = "SELECT * FROM \(schema).code_transaction_history_view_deleted_no WHERE id IN(\(thein))"
                     
-                    // add the cashout record
+                    let cth_cashedout = CCXServiceClass.sharedInstance.getNow()
+                    let cth_now = CodeTransactionHistory()
+                    let resul = try? cth_now.sqlRows(rec_sql, params: [])
+                    if resul.isNotNil {
+                        for i in resul! {
+                            let working_cth = CodeTransactionHistory()
+                            working_cth.to(i)
+                            
+                            // update the available amount
+                            if working_cth.id != lastone {
+                                working_cth.amount_available = 0.0
+                                working_cth.cashedout_total  = working_cth.amount
+                            } else {
+                                working_cth.amount_available = working_cth.amount! - lastoneamount
+                                working_cth.cashedout_total  = lastoneamount
+                            }
+                            
+                            working_cth.cashedout      = cth_cashedout
+                            working_cth.cashedoutby    = userId!
+                            working_cth.cashedout_note = "CASHOUT: \(name_cashout)"
+                            
+                            // we are complete - lets save and move on
+                            let _ = try? working_cth.saveWithCustomType(schemaIn: schema)
+                            
+                            // Write the audit record
+                            AuditFunctions().cashoutCustomerCodeAuditRecord(working_cth)
+                            
+                        }
+                        
+                        // add the cashout record to the history record
+                        let newrec = CodeTransactionHistory()
+                        newrec.amount = 0.0
+                        newrec.amount_available = 0.0
+                        newrec.archived = cth_cashedout
+                        newrec.archivedby = userId!
+                        newrec.cashedout = cth_cashedout
+                        newrec.cashedout_note = name_cashout
+                        newrec.cashedout_total = amount_to_cashout
+                        newrec.cashedoutby = userId!
+                        newrec.country_id = countryId
+                        newrec.redeemed = cth_cashedout
+                        newrec.redeemedby = userId!
+                        newrec.status = CodeTransactionCodes.cashout_pending
+                        
+                        let _ = try? newrec.saveWithCustomType(schemaIn: schema, userId!, copyOver: false)
+                        
+                        // add the cashout record
+                        
+                        
+                        
+                        
+                        // this is where we show success
+                        let _ = try? response.setBody(json: ["amount":amount_to_cashout,"country_id":countryId])
+                        response.completed(status: .ok)
+                        return
+                    }
                     
+                    // the steps we need to take here now:
+                    // 1. Audit the record
+                    // 2. Update the available amount on the record
+                    // 3. Update the cashed out timestamp (and user) - all timestamps should be the same - that is the glue that holds the records together
+                    // 4. Add the total cashout amount to all records
+                    // 5. Add the cashout note to the records - this should be where they cashout to - it is displayed in history
+                    // 6. Save a new record to the history for a cashout record - without the coupon code.  This acts as the record for cashout for the API return.
+                    // 7. Update the user total (decrement by the cashout amount)
+                    // 8. Send the wonderful cashout message for a successful completion.
                     
+                } catch BucketAPIError.unparceableJSON(let string) {
+                    return response.invalidRequest(string)
+                } catch {
                     
-                    
-                    // this is where we show success
-                    let _ = try? response.setBody(json: ["amount":amount_to_cashout,"country_id":countryId])
-                    response.completed(status: .ok)
-                    return
                 }
-                
-                // the steps we need to take here now:
-                // 1. Audit the record
-                // 2. Update the available amount on the record
-                // 3. Update the cashed out timestamp (and user) - all timestamps should be the same - that is the glue that holds the records together
-                // 4. Add the total cashout amount to all records
-                // 5. Add the cashout note to the records - this should be where they cashout to - it is displayed in history
-                // 6. Save a new record to the history for a cashout record - without the coupon code.  This acts as the record for cashout for the API return.
-                // 7. Update the user total (decrement by the cashout amount)
-                // 8. Send the wonderful cashout message for a successful completion.
-                
-                
+
             }
         }
     }
@@ -727,6 +752,16 @@ fileprivate extension HTTPResponse {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such option code found"])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .notAcceptable)
+    }
+    var invalidCashoutAmount : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCashoutAmount", "message": "The amount you are wanting to cashout, is not of the required minimum amount."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 422, message: ""))
+    }
+    var invalidCashoutBalance : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCashoutBalance", "message": "You do not have enough balance to cashout."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 421, message: ""))
     }
     var invalidGroupCode : Void {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such group code found"])
@@ -753,6 +788,9 @@ fileprivate extension HTTPRequest {
     }
     var groupId : Int? {
         return self.urlVariables["groupId"].intValue
+    }
+    var formFields : [String:String]? {
+        return try! self.postBodyJSON()?["formFields"] as? [String:String]
     }
     var optionId : Int? {
         return self.urlVariables["optionId"].intValue

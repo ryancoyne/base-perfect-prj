@@ -7,6 +7,7 @@
 
 import Foundation
 import PostgresStORM
+import PerfectHTTP
 
 final class SupportFunctions {
     
@@ -44,13 +45,14 @@ final class SupportFunctions {
         return 0
     }
     
-    func getFormFields(_ form_id:Int )->[Any] {
+    func getFormFields(_ form_id:Int, request : HTTPRequest)->[Any] {
         
         let form_fields = FormFields()
-        var sql = "SELECT ffs.field_id, ffs.display_order, ff.*, fft.name AS form_field_type_name FROM form_fields AS ffs "
-        sql.append("LEFT JOIN form_field AS ff ON ffs.field_id = ff.id ")
+        let schema = Country.getSchema(request)
+        var sql = "SELECT ffs.field_id, ffs.display_order, ff.*, fft.name AS form_field_type_name FROM \(schema).form_fields AS ffs "
+        sql.append("LEFT JOIN \(schema).form_field AS ff ON ffs.field_id = ff.id ")
         
-        sql.append("LEFT JOIN form_field_type AS fft ON ff.type_id = fft.id ")
+        sql.append("LEFT JOIN \(schema).form_field_type AS fft ON ff.type_id = fft.id ")
         
         sql.append("WHERE ffs.form_id = $1 ")
         sql.append("ORDER BY ffs.display_order ASC ")
