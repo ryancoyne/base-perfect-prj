@@ -85,7 +85,7 @@ struct RetailerAPI {
                         let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(serialNumber) "
                         let trm = try? terminal.sqlRows(sql, params: [])
                         if let t = trm?.first {
-                            terminal.fromDictionary(sourceDictionary: t.data)
+                            terminal.to(t)
                         }
                         
                         
@@ -96,7 +96,7 @@ struct RetailerAPI {
                             let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(serialNumber) "
                             let trm = try? term.sqlRows(sql, params: [])
                             if let t = trm?.first {
-                                term.fromDictionary(sourceDictionary: t.data)
+                                term.to(t)
                             }
 
                             let apiKey = UUID().uuidString
@@ -152,7 +152,7 @@ struct RetailerAPI {
                         let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(serialNumber) "
                         let trm = try? terminal.sqlRows(sql, params: [])
                         if let t = trm?.first {
-                            terminal.fromDictionary(sourceDictionary: t.data)
+                            terminal.to(t)
                         }
                         
                         // Check and make sure the terminal is approved or not:
@@ -171,7 +171,7 @@ struct RetailerAPI {
                             let a_sql = "SELECT * FROM \(schema).address WHERE retailer_id = \(retailerIntegerId)"
                             let a_res = try? add.sqlRows(a_sql, params: [])
                             if let a = a_res?.first {
-                                add.fromDictionary(sourceDictionary: a.data)
+                                add.to(a)
                             }
                             
                             if add.id.isNotNil, add.retailer_id == retailerIntegerId {
@@ -320,7 +320,7 @@ struct RetailerAPI {
                         let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(serialNumber) "
                         let trmn = try? terminal.sqlRows(sql, params: [])
                         if trmn.isNotNil, let c = trmn!.first {
-                            terminal.fromDictionary(sourceDictionary: c.data)
+                            terminal.to(c)
                         }
 
                         // Check and make sure the terminal is approved or not:
@@ -420,14 +420,14 @@ struct RetailerAPI {
                         var sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(request.retailerId!) "
                         let rtlr = try? retailer.sqlRows(sql, params: [])
                         if rtlr.isNotNil, let c = rtlr!.first {
-                            retailer.fromDictionary(sourceDictionary: c.data)
+                            retailer.to(c)
                         }
                         
                         let terminal = Terminal()
                         sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(request.terminalId!) "
                         let trmn = try? terminal.sqlRows(sql, params: [])
                         if trmn.isNotNil, let c = trmn!.first {
-                            terminal.fromDictionary(sourceDictionary: c.data)
+                            terminal.to(c)
                         }
                         
                         // lets get the country id for this transaction
@@ -435,7 +435,7 @@ struct RetailerAPI {
                         sql = "SELECT * FROM \(schema).address WHERE id = \(String(terminal.address_id!)) "
                         let adr = try? terminal.sqlRows(sql, params: [])
                         if adr.isNotNil, let c = adr!.first {
-                            add.fromDictionary(sourceDictionary: c.data)
+                            add.to(c)
                         }
 
                         let transaction = CodeTransaction()
@@ -503,7 +503,7 @@ struct RetailerAPI {
                 let sql = "SELECT * FROM \(schema).code_transaction WHERE customer_code = \(code) "
                 let cde = try? thecode.sqlRows(sql, params: [])
                 if cde.isNotNil, let c = cde!.first {
-                    thecode.fromDictionary(sourceDictionary: c.data)
+                    thecode.to(c)
                 }
 
                 // Check if we have a returning object:
@@ -521,7 +521,7 @@ struct RetailerAPI {
                     let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(request.retailerId!) "
                     let rtlr = try? retailer.sqlRows(sql, params: [])
                     if rtlr.isNotNil, let c = rtlr!.first {
-                        retailer.fromDictionary(sourceDictionary: c.data)
+                        retailer.to(c)
                     }
 
                     guard thecode.retailer_id == retailer.id else { _ = try? response.setBody(json: ["errorCode":"UnexpectedIssue","message":"There is an issue with this transaction.  Please contact Bucket Support."])
@@ -557,7 +557,7 @@ struct RetailerAPI {
                     let sql = "SELECT * FROM \(schema).code_transaction_history WHERE customer_code = \(code)"
                     let cde = try? theCode.sqlRows(sql, params: [])
                     if cde.isNotNil, let c = cde!.first {
-                        theCode.fromDictionary(sourceDictionary: c.data)
+                        theCode.to(c)
                     }
 
                     if theCode.id.isNotNil {
@@ -682,7 +682,7 @@ fileprivate extension HTTPRequest {
         let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(terminalId) AND terminal_key = \(password.ourPasswordHash!) "
         let trm = try? term.sqlRows(sql, params: [])
         if trm.isNotNil, let t = trm?.first {
-            term.fromDictionary(sourceDictionary: t.data)
+            term.to(t)
         }
 
         if term.id.isNotNil { return term }
@@ -705,7 +705,7 @@ extension Retailer {
         let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(with)"
         let rtlr = try? retailer.sqlRows(sql, params: [])
         if rtlr.isNotNil, let t = rtlr?.first {
-            retailer.fromDictionary(sourceDictionary: t.data)
+            retailer.to(t)
         }
 
         return retailer.id.isNotNil
@@ -724,10 +724,10 @@ extension Retailer {
 
         // Find the terminal
         let retailer = Retailer()
-        let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(retailerId)"
+        let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(retailerId)'"
         let rtlr = try? retailer.sqlRows(sql, params: [])
         if rtlr.isNotNil, let t = rtlr?.first {
-            retailer.fromDictionary(sourceDictionary: t.data)
+            retailer.to(t)
         }
 
         // this is where we will check the temrminal ID, retailer and the secret to make sure the terminal is approved.
@@ -754,7 +754,7 @@ extension Retailer {
         let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(terminalSerialNumber) AND terminal_key = \(passwordToCheck) "
         let term = try? terminalQuery.sqlRows(sql, params: [])
         if term.isNotNil, let t = term?.first {
-            terminalQuery.fromDictionary(sourceDictionary: t.data)
+            terminalQuery.to(t)
         }
         
         // Checking three conditions:
@@ -777,7 +777,7 @@ extension Retailer {
         let sqlr = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(retailerId)"
         let rtl = try? retailerQuery.sqlRows(sqlr, params: [])
         if rtl.isNotNil, let t = rtl?.first {
-            retailerQuery.fromDictionary(sourceDictionary: t.data)
+            retailerQuery.to(t)
         }
 
         // now lets look to make sure the serial number is to the current retailer
