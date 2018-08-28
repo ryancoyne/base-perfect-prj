@@ -12,6 +12,7 @@ import PostgresStORM
 import PerfectLogger
 import StORM
 import PerfectLocalAuthentication
+import SwiftMoment
 
 #if os(Linux)
     // this is needed in Linux for DispatchSemaphore
@@ -1743,6 +1744,15 @@ extension String {
     
     
 }
+
+extension Moment {
+    init(epoch: Int) {
+        let timeInt = TimeInterval(exactly: epoch)!
+        let date = Date(timeIntervalSince1970: timeInt)
+        self = moment(date)
+    }
+}
+
 //MARK: Integer Extensions:
 extension Int {
     var dateString : String {
@@ -1752,6 +1762,19 @@ extension Int {
 //MARK: - Account Extensions
 extension Account {
     
+    var lastSeen : Int? {
+        get {
+            return self.detail["last_seen"].intValue
+        }
+        set {
+            if newValue.isNotNil {
+                self.detail["last_seen"] = newValue
+            } else {
+                self.detail.removeValue(forKey: "last_seen")
+            }
+        }
+    }
+    
     static func userBouce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {
         // Here we want to check the csrf & the authorization.
         guard let csrf = request.session?.data["csrf"].stringValue, let sendCsrf = request.header(.custom(name: "X-CSRF-Token")) else {
@@ -1759,6 +1782,27 @@ extension Account {
             return true
         }
         guard request.session?.userid.isEmpty == false && csrf == sendCsrf else {  response.notLoggedIn(); return true  }
+        // Okay they are logged in.  Lets see when the last time, if they have, used any of the API's:
+        let user = Account()
+        try? user.get(request.session!.userid)
+        
+        if let lastSeen = user.lastSeen {
+            
+            let now = moment()
+            let then = Moment(epoch: lastSeen)
+    
+            let dur = now.intervalSince(then)
+        
+            if dur.days > 0.5 {
+                user.lastSeen = CCXServiceClass.sharedInstance.getNow()
+                try? user.save()
+            }
+            
+        } else {
+            user.lastSeen = CCXServiceClass.sharedInstance.getNow()
+            try? user.save()
+        }
+        
         return false
     }
     
