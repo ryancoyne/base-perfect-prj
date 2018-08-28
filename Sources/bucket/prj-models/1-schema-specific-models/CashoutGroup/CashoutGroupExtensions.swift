@@ -99,6 +99,32 @@ struct CashoutGroupDictionary {
             }
         }
     }
+    
+    var iconURL : String? {
+        get {
+            return self.dic["icon_url"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["icon_url"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "icon_url")
+            }
+        }
+    }
+    
+    var optionLayout : String? {
+        get {
+            return self.dic["option_layout"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["option_layout"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "option_layout")
+            }
+        }
+    }
 
     var display : Bool? {
         get {

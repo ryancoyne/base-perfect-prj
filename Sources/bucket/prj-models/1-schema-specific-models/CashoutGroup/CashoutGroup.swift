@@ -25,6 +25,8 @@ public class CashoutGroup: PostgresStORM {
     var group_name    : String? = nil
     var description   : String? = nil
     var picture_url   : String? = nil
+    var icon_url : String?=nil
+    var option_layout : String?=nil
     var display_order : Int? = nil
     var country_id    : Int? = nil
     
@@ -60,6 +62,14 @@ public class CashoutGroup: PostgresStORM {
         
         if let data = this.data.deletedBy {
             deletedby = data
+        }
+        
+        if let data = this.data.cashoutGroupDic.optionLayout {
+            option_layout = data
+        }
+        
+        if let data = this.data.cashoutGroupDic.iconURL {
+            icon_url = data
         }
         
         if let data = this.data.cashoutGroupDic.country_id {
@@ -112,6 +122,16 @@ public class CashoutGroup: PostgresStORM {
             case "description":
                 if (value as? String).isNotNil {
                     self.description = (value as! String)
+                }
+                
+            case "icon_url":
+                if (value as? String).isNotNil {
+                    self.icon_url = (value as! String)
+                }
+                
+            case "option_layout":
+                if (value as? String).isNotNil {
+                    self.option_layout = (value as! String)
                 }
                 
             case "display_order":
@@ -174,6 +194,14 @@ public class CashoutGroup: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
+        if self.option_layout.isNotNil {
+            dictionary.cashoutGroupDic.optionLayout = self.option_layout
+        }
+        
+        if self.icon_url.isNotNil {
+            dictionary.cashoutGroupDic.iconURL = self.icon_url
+        }
+        
         if self.country_id.isNotNil {
             dictionary.cashoutGroupDic.country_id = self.country_id
         }
@@ -207,6 +235,14 @@ public class CashoutGroup: PostgresStORM {
         var diff = true
         
         if diff == true, self.country_id != targetItem.country_id {
+            diff = false
+        }
+        
+        if diff == true, self.icon_url != targetItem.icon_url {
+            diff = false
+        }
+        
+        if diff == true, self.option_layout != targetItem.option_layout {
             diff = false
         }
         

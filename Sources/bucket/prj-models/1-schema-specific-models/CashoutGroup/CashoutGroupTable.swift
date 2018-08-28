@@ -122,6 +122,8 @@ final class CashoutGroupTable {
         createsql.append("group_name text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
         createsql.append("picture_url text COLLATE pg_catalog.default, ")
+        createsql.append("icon_url text COLLATE pg_catalog.default, ")
+        createsql.append("option_layout text COLLATE pg_catalog.default, ")
         createsql.append("display_order int default 0, ")
         createsql.append("display boolean default false, ")
         createsql.append("country_id int default 0, ")
