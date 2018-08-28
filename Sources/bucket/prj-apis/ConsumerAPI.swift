@@ -650,7 +650,7 @@ struct ConsumerAPI {
                 if resul.isNotNil {
                     for i in resul! {
                         let working_cth = CodeTransactionHistory()
-                        working_cth.fromDictionary(sourceDictionary: i.data)
+                        working_cth.to(i)
                         
                         // update the available amount
                         if working_cth.id != lastone {

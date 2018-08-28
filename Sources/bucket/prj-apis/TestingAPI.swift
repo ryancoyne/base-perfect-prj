@@ -129,7 +129,7 @@ struct TestingAPI {
                 let sqlt = "SELECT * FROM \(schema).terminal WHERE address_id = \(add_id)"
                 let trm = try? term.sqlRows(sqlt, params: [])
                 if let t = trm?.first {
-                    term.fromDictionary(sourceDictionary: t.data)
+                    term.to(t)
                     ret_id = term.retailer_id!
                     term_serial = term.serial_number!
                 } else {
