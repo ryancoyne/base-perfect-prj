@@ -736,9 +736,9 @@ extension Retailer {
         //Make sure we have the retailer Id and retailer secret:
         guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
         guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return true }
+        guard let _ = request.countryId else { response.invalidCountryCode; return true }
         
         let schema = Country.getSchema(request)
-        if schema.isEmpty { response.invalidCountryCode; return true }
         
         // Get our secret code formatted properly to check what we have in the DB:
         let passwordToCheck = retailerSecret.ourPasswordHash!
