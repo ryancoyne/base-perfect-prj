@@ -524,7 +524,7 @@ struct ConsumerAPI {
                     response.completed(status: .ok)
                 } else {
                     // error that none were found
-                    return response.invalidCountryCode
+                    return response.unsupportedCountry
                 }
                 
                 
@@ -745,7 +745,7 @@ fileprivate extension HTTPResponse {
             .completed(status: .custom(code: 406, message: "The customer code was not found"))
     }
     var unsupportedCountry : Void {
-        try! self.setBody(json: ["errorCode": "UnsupportedCountry", "message": "The country id exists, but we currently are not deployed for this country.  Please try again later."]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 411, message: "Unsupported Schema"))
+        try! self.setBody(json: ["errorCode": "UnsupportedCountry", "message": "The country id exists, but we currently are not deployed for this country.  Please try again later."]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 411, message: "Unsupported Country"))
     }
     var invalidCustomerCodeAlreadyRedeemed : Void {
         return try! self.setBody(json: ["errorCode":"CodeRedeemed", "message": "Code was already redeemed"])
@@ -761,7 +761,15 @@ fileprivate extension HTTPRequest {
         return self.urlVariables["customerCode"]
     }
     var countryCode : String? {
-        return self.urlVariables["countryCode"]
+        let countryCode = self.urlVariables["countryCode"]
+        
+        if countryCode.isNil { return nil }
+        // Check if it exists:
+        if Country.idWith(isoNumericCode: countryCode!).isNotNil {
+            return countryCode!
+        } else {
+            return nil
+        }
     }
     var countryId : Int? {
         let sentCountryId = self.header(.custom(name: "countryId")) ?? self.urlVariables["countryId"]
