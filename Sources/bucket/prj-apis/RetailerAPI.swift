@@ -73,7 +73,7 @@ struct RetailerAPI {
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
                     guard let countryId = request.countryId else { return response.invalidCountryCode }
                 
-                    let schema = Country.getSchema(countryId)
+                    let schema = Country.getSchema(request)
                     
                     switch server {
                     // Production & Staging are acting the same.
@@ -249,7 +249,7 @@ struct RetailerAPI {
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
                     guard let countryId = request.countryId else { return response.invalidCountryCode }
                     
-                    let schema = Country.getSchema(countryId)
+                    let schema = Country.getSchema(request)
 
                     
                     switch server {
@@ -389,7 +389,7 @@ struct RetailerAPI {
                 
                 guard let countryId = request.countryId else { return response.invalidCountryCode }
                 
-                let schema = Country.getSchema(countryId)
+                let schema = Country.getSchema(request)
 
                 do {
 
@@ -740,9 +740,8 @@ extension Retailer {
         //Make sure we have the retailer Id and retailer secret:
         guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
         guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return true }
-        guard let countryId = request.countryId else {  response.invalidCountryCode; return true }
         
-        let schema = Country.getSchema(countryId)
+        let schema = Country.getSchema(request)
         if schema.isEmpty { response.invalidCountryCode; return true }
         
         // Get our secret code formatted properly to check what we have in the DB:
