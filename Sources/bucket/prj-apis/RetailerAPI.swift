@@ -413,15 +413,27 @@ struct RetailerAPI {
                         
                         // We need to go and get the integer terminal id:
                         let retailer = Retailer()
-                        try? retailer.find(["retailer_code":request.retailerId!])
+                        var sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(request.retailerId!) "
+                        let rtlr = try? retailer.sqlRows(sql, params: [])
+                        if rtlr.isNotNil, let c = rtlr!.first {
+                            retailer.fromDictionary(sourceDictionary: c.data)
+                        }
                         
                         let terminal = Terminal()
-                        try? terminal.find(["serial_number":request.terminalId!])
+                        sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(request.terminalId!) "
+                        let trmn = try? terminal.sqlRows(sql, params: [])
+                        if trmn.isNotNil, let c = rtlr!.first {
+                            terminal.fromDictionary(sourceDictionary: c.data)
+                        }
                         
                         // lets get the country id for this transaction
                         let add = Address()
-                        try? add.find(["id":String(terminal.address_id!)])
-                        
+                        sql = "SELECT * FROM \(schema).address WHERE id = \(String(terminal.address_id!)) "
+                        let adr = try? terminal.sqlRows(sql, params: [])
+                        if adr.isNotNil, let c = adr!.first {
+                            add.fromDictionary(sourceDictionary: c.data)
+                        }
+
                         let transaction = CodeTransaction()
                         transaction.created = CCXServiceClass.sharedInstance.getNow()
                         transaction.amount = json?["amount"].doubleValue
@@ -475,26 +487,35 @@ struct RetailerAPI {
                 guard !Retailer.retailerTerminalBounce(request, response) else { return }
                 
                 guard let code = request.customerCode else { response.invalidCustomerCode; return }
+                guard let countryId = request.countryId else { response.invalidCountryCode; return }
                 
+                let schema = Country.getSchema(countryId)
+                
+                // note that since the unclaimed codes are not in the individual countries (yet), there is only one table in the public schema to deal with
                 // get the code from the url path
                 // lets see if the code has not been redeemed yet :)
                 let thecode = CodeTransaction()
                 let _ = try? thecode.find(["customer_code":code])
                 // Check if we have a returning object:
                 if thecode.id.isNotNil {
+
+                    // see if the code is deleted
+                    guard thecode.deleted! == 0 else { _ = try? response.setBody(json: ["errorCode":"CodeDeleted","message":"The code was already deleted."])
+                        response.completed(status: .custom(code: 451, message: "Code Already Deleted"))
+                        return }
                     
                     // Make sure the retailers match:
                     // Return a general error with a different status code that we will know that the retailers are not matching.
                     // We will tell them to go to Bucket for support.  If they report an error of code 454, we know there is an issue with the retailers matching.
                     let retailer = Retailer()
-                    try? retailer.find(["retailer_code": request.retailerId!])
+                    let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(request.retailerId!) "
+                    let rtlr = try? retailer.sqlRows(sql, params: [])
+                    if rtlr.isNotNil, let c = rtlr!.first {
+                        retailer.fromDictionary(sourceDictionary: c.data)
+                    }
+
                     guard thecode.retailer_id == retailer.id else { _ = try? response.setBody(json: ["errorCode":"UnexpectedIssue","message":"There is an issue with this transaction.  Please contact Bucket Support."])
                         response.completed(status: .custom(code: 454, message: "Contact Support"))
-                        return }
-                    
-                    // see if the code is deleted
-                    guard thecode.deleted! == 0 else { _ = try? response.setBody(json: ["errorCode":"CodeDeleted","message":"The code was already deleted."])
-                        response.completed(status: .custom(code: 451, message: "Code Already Deleted"))
                         return }
                     
                     // lets delete the code
@@ -523,8 +544,12 @@ struct RetailerAPI {
                     
                     // We did not... if it is in the history table, then it is already redeemed...
                     let theCode = CodeTransactionHistory()
-                    try? theCode.find(["customer_code":code])
-                    
+                    let sql = "SELECT * FROM \(schema).code_transaction_history WHERE customer_code = \(code)"
+                    let cde = try? theCode.sqlRows(sql, params: [])
+                    if cde.isNotNil, let c = cde!.first {
+                        theCode.fromDictionary(sourceDictionary: c.data)
+                    }
+
                     if theCode.id.isNotNil {
                         let _ = try? response.setBody(json: ["errorCode":"CodeRedeemed","message":"The code was redeemed already.  Please Contact Bucket Support."])
                         response.completed(status: .custom(code: 452, message: "Code Redeemed Already"))
