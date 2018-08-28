@@ -144,10 +144,6 @@ struct ConsumerAPI {
                     try? response.setBody(json: ["buckets":buckets])
                         .completed(status: .ok)
                 }
-                // Okay, we have a user id.  Lets get their balance and return the JSON:
-                
-                
-                
             }
         }
         
@@ -713,28 +709,28 @@ fileprivate extension HTTPResponse {
                                 .completed(status: .notAcceptable)
     }
     var invalidCountryCode : Void {
-        return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such country code found"])
-            .setHeader(.contentType, value: "application/json")
-            .completed(status: .notAcceptable)
+        return try! self.setBody(json: ["errorCode":"InvalidCountryCode", "message": "No such country code found"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 409, message: "Invalid Country"))
     }
     var invalidOptionCode : Void {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such option code found"])
-            .setHeader(.contentType, value: "application/json")
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .notAcceptable)
     }
     var invalidGroupCode : Void {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such group code found"])
-            .setHeader(.contentType, value: "application/json")
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .notAcceptable)
     }
     var invalidCustomerCode : Void {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such code found"])
-            .setHeader(.contentType, value: "application/json")
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 406, message: "The customer code was not found"))
     }
     var invalidCustomerCodeAlreadyRedeemed : Void {
         return try! self.setBody(json: ["errorCode":"CodeRedeemed", "message": "Code was already redeemed"])
-            .setHeader(.contentType, value: "application/json")
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 410, message: "The customer code has been used already"))
     }
 
