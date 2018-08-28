@@ -410,7 +410,7 @@ struct ConsumerAPI {
                         }
                         
                         // pull in the form fields and add them
-                        let fields = SupportFunctions.sharedInstance.getFormFields(i.data.cashoutOptionsDic.formId!, request: request)
+                        let fields = SupportFunctions.sharedInstance.getFormFields(i.data.cashoutOptionsDic.formId!, schema: schema)
                         optdict["fields"] = fields
 
                         retJSONSub.append(optdict)
@@ -562,7 +562,7 @@ struct ConsumerAPI {
                     
                     
                     // lets get the minimum amount permitted
-                    let sqloption = "SELECT minimum, maximum, name, group_id FROM \(schema).cashout_option_view_deleted_no WHERE id = \(theoption)"
+                    let sqloption = "SELECT minimum, maximum, name, group_id, form_id FROM \(schema).cashout_option_view_deleted_no WHERE id = \(theoption)"
                     let coop = CashoutOption()
                     let resopt = try? coop.sqlRows(sqloption, params: [])
                     
@@ -580,15 +580,21 @@ struct ConsumerAPI {
                         form_id = i.data["form_id"].intValue!
                     }
                     
+                    // If no fields are submitted, send back an error.
                     let submittedFields = request.formFields
-                    var requiredFields = SupportFunctions.sharedInstance.getFormFields(form_id, request: request)
-                    for field in requiredFields {
+                    
+                    let formFields = SupportFunctions.sharedInstance.getFormFields(form_id, schema: schema) as?[[String:Any]] ?? []
+                    var unsubmittedFields : [String] = []
+                    for field in formFields {
                         // Go thru all the fields, if they are required, make sure they are in the submitted fields.
-                        
-                        
+                        if field["isReq"].boolValue == true, let key = field["key"].stringValue {
+                            if submittedFields?[key].isNil == true {
+                                unsubmittedFields.append(key)
+                            }
+                        }
                     }
                     
-                    
+                    guard unsubmittedFields.isEmpty else { return response.missingFormFields(unsubmittedFields) }
                     
                     // Now that we have the form id, we can get the form fields, and make sure they are entering these:
                     
@@ -756,12 +762,12 @@ fileprivate extension HTTPResponse {
     var invalidCashoutAmount : Void {
         return try! self.setBody(json: ["errorCode":"InvalidCashoutAmount", "message": "The amount you are wanting to cashout, is not of the required minimum amount."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .custom(code: 422, message: ""))
+            .completed(status: .custom(code: 422, message: "Invalid Cashout Amount"))
     }
     var invalidCashoutBalance : Void {
         return try! self.setBody(json: ["errorCode":"InvalidCashoutBalance", "message": "You do not have enough balance to cashout."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .custom(code: 421, message: ""))
+            .completed(status: .custom(code: 421, message: "Insufficient Balance"))
     }
     var invalidGroupCode : Void {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such group code found"])
@@ -779,6 +785,11 @@ fileprivate extension HTTPResponse {
             .completed(status: .custom(code: 410, message: "The customer code has been used already"))
     }
 
+    func missingFormFields(_ fields : [String]) -> Void {
+        return try! self.setBody(json: ["errorCode":"InvalidFormFields", "message": "Required keys for option: \(fields.joined(separator: ","))"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 410, message: "Missing Form Fields"))
+    }
 }
 
 fileprivate extension HTTPRequest {

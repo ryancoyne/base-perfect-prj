@@ -45,10 +45,9 @@ final class SupportFunctions {
         return 0
     }
     
-    func getFormFields(_ form_id:Int, request : HTTPRequest)->[Any] {
+    func getFormFields(_ form_id:Int, schema : String)->[Any] {
         
         let form_fields = FormFields()
-        let schema = Country.getSchema(request)
         var sql = "SELECT ffs.field_id, ffs.display_order, ff.*, fft.name AS form_field_type_name FROM \(schema).form_fields AS ffs "
         sql.append("LEFT JOIN \(schema).form_field AS ff ON ffs.field_id = ff.id ")
         
