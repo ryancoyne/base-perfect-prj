@@ -571,12 +571,12 @@ fileprivate extension HTTPResponse {
         return try! self
             .setBody(json: ["errorCode":"AlreadyRegistered", "message":"The terminal with the serial number (\(serialNumber)) is registered to another retailer.  Contact Bucket support."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .conflict)
+            .completed(status: .custom(code: 410, message: "Terminal Registered"))
     }
     var invalidCountryCode : Void {
-        return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such country code found"])
+        return try! self.setBody(json: ["errorCode":"InvalidCountryCode", "message": "No such country code found"])
             .setHeader(.contentType, value: "application/json")
-            .completed(status: .notAcceptable)
+            .completed(status: .custom(code: 409, message: "Invalid Country Code"))
     }
 
 }
