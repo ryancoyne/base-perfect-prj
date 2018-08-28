@@ -118,7 +118,7 @@ struct ConsumerAPI {
                 ["method":"get",    "uri":"/api/v1/balance", "handler":balance],
                 ["method":"get",    "uri":"/api/v1/balance/{countryId}", "handler":balanceWithCountry],
                 // TRANSACTION ENDPOINTS:
-                ["method":"get",    "uri":"/api/v1/history/{countryId}", "handler":transactionHistory],
+                ["method":"get",    "uri":"/api/v1/history", "handler":transactionHistory],
                 ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
                 // CASHOUT ENDPOINTS:
                 ["method":"get",    "uri":"/api/v1/cashout/{countryCode}/groups", "handler":cashoutTypes],
@@ -245,6 +245,9 @@ struct ConsumerAPI {
                         
                         substuff.append(tmp)
                     }
+                } else {
+                    // THis is most likely an issue with the schema.  Send back unsupported country:
+                    return response.unsupportedCountry
                 }
 
                 let mainReturn:[String:Any] = ["transactions":substuff]
