@@ -247,16 +247,3 @@ struct TestingAPI {
         }
     }
 }
-
-fileprivate extension HTTPResponse {
-    var invalidCode : Void {
-        return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such code found"])
-            .setHeader(.contentType, value: "application/json")
-            .completed(status: .notAcceptable)
-    }
-    var invalidCountryCode : Void {
-        return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such country code found"])
-            .setHeader(.contentType, value: "application/json")
-            .completed(status: .notAcceptable)
-    }
-}

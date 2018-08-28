@@ -155,6 +155,14 @@ extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .badRequest)
     }
+    var invalidCountryCode : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidCountryCode", "message": "No such country code found"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 409, message: "Invalid Country"))
+    }
+    var unsupportedCountry : Void {
+        try! self.setBody(json: ["errorCode": "UnsupportedCountry", "message": "The country id exists, but we currently are not deployed for this country.  Please try again later."]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 411, message: "Unsupported Country"))
+    }
 }
 
 //extension Int {

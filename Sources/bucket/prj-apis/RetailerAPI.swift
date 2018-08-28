@@ -629,11 +629,6 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 410, message: "Terminal Registered"))
     }
-    var invalidCountryCode : Void {
-        return try! self.setBody(json: ["errorCode":"InvalidCountryCode", "message": "No such country code found"])
-            .setHeader(.contentType, value: "application/json")
-            .completed(status: .custom(code: 409, message: "Invalid Country Code"))
-    }
 
 }
 

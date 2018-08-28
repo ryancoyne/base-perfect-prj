@@ -723,11 +723,6 @@ fileprivate extension HTTPResponse {
                                 .setHeader(.contentType, value: "application/json")
                                 .completed(status: .notAcceptable)
     }
-    var invalidCountryCode : Void {
-        return try! self.setBody(json: ["errorCode":"InvalidCountryCode", "message": "No such country code found"])
-            .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .custom(code: 409, message: "Invalid Country"))
-    }
     var invalidOptionCode : Void {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such option code found"])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
@@ -742,9 +737,6 @@ fileprivate extension HTTPResponse {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such code found"])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 406, message: "The customer code was not found"))
-    }
-    var unsupportedCountry : Void {
-        try! self.setBody(json: ["errorCode": "UnsupportedCountry", "message": "The country id exists, but we currently are not deployed for this country.  Please try again later."]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 411, message: "Unsupported Country"))
     }
     var invalidCustomerCodeAlreadyRedeemed : Void {
         return try! self.setBody(json: ["errorCode":"CodeRedeemed", "message": "Code was already redeemed"])
