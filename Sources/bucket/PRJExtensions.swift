@@ -82,6 +82,13 @@ extension Country {
         try? country.find(["code_alpha_2":isoNumericCode!.uppercased()])
         return country.id
     }
+    static public func exists(withId: String?) -> Bool {
+        if withId.isNil { return false }
+        // Okay lets see:
+        let country = Country()
+        try? country.get(withId!)
+        return country.id.isNotNil
+    }
 }
 
 enum BucketAPIError: Error {
