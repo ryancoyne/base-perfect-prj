@@ -658,24 +658,41 @@ fileprivate extension HTTPRequest {
 
 extension Retailer {
 
-    public static func exists(_ with: String) -> Bool {
+    public static func exists(_ with: String, _ countryId: String) -> Bool {
+        
+        let schema = Country.getSchema(countryId)
+        if schema.isEmpty { return false }
+        
+        // Find the terminal
         let retailer = Retailer()
-        try? retailer.find(["retailer_code":with])
+        let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(with)"
+        let rtlr = try? retailer.sqlRows(sql, params: [])
+        if rtlr.isNotNil, let t = rtlr?.first {
+            retailer.fromDictionary(sourceDictionary: t.data)
+        }
+
         return retailer.id.isNotNil
+        
     }
     
     @discardableResult
     public static func retailerBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> Int? {
         
-        
-        
         //Make sure we have the retailer Id and retailer secret:
-        guard let retailerId = request.retailerId else {
-            response.invalidRetailer; return nil }
+        guard let retailerId = request.retailerId else { response.invalidRetailer; return nil }
+        guard let countryId = request.countryId else {  response.invalidCountryCode; return nil }
         
+        let schema = Country.getSchema(countryId)
+        if schema.isEmpty { response.invalidCountryCode; return nil }
+
         // Find the terminal
         let retailer = Retailer()
-        try? retailer.find(["retailer_code":retailerId])
+        let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(retailerId)"
+        let rtlr = try? retailer.sqlRows(sql, params: [])
+        if rtlr.isNotNil, let t = rtlr?.first {
+            retailer.fromDictionary(sourceDictionary: t.data)
+        }
+
         // this is where we will check the temrminal ID, retailer and the secret to make sure the terminal is approved.
         
         if retailer.id.isNil { response.invalidRetailer; return nil }
@@ -692,12 +709,17 @@ extension Retailer {
         guard let countryId = request.countryId else {  response.invalidCountryCode; return true }
         
         let schema = Country.getSchema(countryId)
+        if schema.isEmpty { response.invalidCountryCode; return true }
         
         // Get our secret code formatted properly to check what we have in the DB:
         let passwordToCheck = retailerSecret.ourPasswordHash!
         
         let terminalQuery = Terminal()
-        try? terminalQuery.find(["serial_number":terminalSerialNumber, "terminal_key":passwordToCheck])
+        let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = \(terminalSerialNumber) AND terminal_key = \(passwordToCheck) "
+        let term = try? terminalQuery.sqlRows(sql, params: [])
+        if term.isNotNil, let t = term?.first {
+            terminalQuery.fromDictionary(sourceDictionary: t.data)
+        }
         
         // Checking three conditions:
         //  1. The terminal is not registered
@@ -716,8 +738,12 @@ extension Retailer {
 
         // Checking the final condition (last condition to minimize the number of queries during error)
         let retailerQuery = Retailer()
-        try? retailerQuery.find(["retailer_code":retailerId])
-        
+        let sqlr = "SELECT * FROM \(schema).retailer WHERE retailer_code = \(retailerId)"
+        let rtl = try? retailerQuery.sqlRows(sqlr, params: [])
+        if rtl.isNotNil, let t = rtl?.first {
+            retailerQuery.fromDictionary(sourceDictionary: t.data)
+        }
+
         // now lets look to make sure the serial number is to the current retailer
         if retailerQuery.id != terminalQuery.retailer_id { response.alreadyRegistered(terminalSerialNumber); return true }
         
