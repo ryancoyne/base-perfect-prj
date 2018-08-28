@@ -422,7 +422,8 @@ struct ConsumerAPI {
                     
                 } else {
                     // This is an error with the country id existing, but the schema not being supported.
-                    try? response.setBody(json: ["errorCode": "UnsupportedCountry", "message": "The country id exists, but we currently are not deployed for this country.  Please try again later."]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 411, message: "Unsupported Schema"))
+                    return response.unsupportedCountry
+                    
                 }
                 
                 let _ = try? response.setBody(json: retJSON)
@@ -742,6 +743,9 @@ fileprivate extension HTTPResponse {
         return try! self.setBody(json: ["errorCode":"InvalidCode", "message": "No such code found"])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 406, message: "The customer code was not found"))
+    }
+    var unsupportedCountry : Void {
+        try! self.setBody(json: ["errorCode": "UnsupportedCountry", "message": "The country id exists, but we currently are not deployed for this country.  Please try again later."]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 411, message: "Unsupported Schema"))
     }
     var invalidCustomerCodeAlreadyRedeemed : Void {
         return try! self.setBody(json: ["errorCode":"CodeRedeemed", "message": "Code was already redeemed"])
