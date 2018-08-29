@@ -129,6 +129,12 @@ final class CompletedFormsHeaderTable {
         
         // table specific fields
         createsql.append("form_id int default 0, ")
+        createsql.append("user_id text COLLATE pg_catalog.default, ")
+        createsql.append("batch_header_id int default 0, ")
+        createsql.append("batch_time int default 0, ")
+        createsql.append("batchby text COLLATE pg_catalog.default, ")
+        createsql.append("last_batchby text COLLATE pg_catalog.default, ")
+        createsql.append("last_batch_time int default 0, ")
         
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

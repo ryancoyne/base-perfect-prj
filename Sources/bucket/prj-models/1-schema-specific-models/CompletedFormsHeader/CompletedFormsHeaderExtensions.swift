@@ -48,18 +48,79 @@ struct CompletedFormsHeaderDictionary {
         }
     }
 
-//    var description : String? {
-//        get {
-//            return self.dic["description"].stringValue
-//        }
-//        set {
-//            if newValue != nil {
-//                self.dic["description"] = newValue!
-//            } else {
-//                self.dic.removeValue(forKey: "description")
-//            }
-//        }
-//    }
+    var userId : String? {
+        get {
+            return self.dic["user_id"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["user_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "user_id")
+            }
+        }
+    }
+    
+    var batchTime : Int? {
+        get {
+            return self.dic["batch_time"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["batch_time"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "batch_time")
+            }
+        }
+    }
+    var batchBy : String? {
+        get {
+            return self.dic["batchby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["batchby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "batchby")
+            }
+        }
+    }
+    var lastBatchTime : Int? {
+        get {
+            return self.dic["last_batch_time"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["last_batch_time"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "last_batch_time")
+            }
+        }
+    }
+    var lastBatchBy : String? {
+        get {
+            return self.dic["last_batchby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["last_batchby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "last_batchby")
+            }
+        }
+    }
+    var batchHeaderId : Int? {
+        get {
+            return self.dic["batch_header_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["batch_header_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "batch_header_id")
+            }
+        }
+    }
 //
 //    var batch_identifier : String? {
 //        get {

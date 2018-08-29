@@ -22,6 +22,12 @@ public class CompletedFormsHeader: PostgresStORM {
     var deletedby  : String? = nil
     
     var form_id : Int? = nil
+    var user_id : String? = nil
+    var batch_header_id : Int? = nil
+    var batch_time : Int? = nil
+    var batchby : String? = nil
+    var last_batch_time : Int? = nil
+    var last_batchby : String? = nil
     
     //MARK: Table name
     override public func table() -> String { return "completed_forms_header" }
@@ -60,6 +66,30 @@ public class CompletedFormsHeader: PostgresStORM {
         if let data = this.data.completedFormsHeaderDic.formId {
             form_id = data
         }
+        
+        if let data = this.data.completedFormsHeaderDic.userId {
+            user_id = data
+        }
+        
+        if let data = this.data.completedFormsHeaderDic.batchBy {
+            batchby = data
+        }
+        
+        if let data = this.data.completedFormsHeaderDic.batchTime {
+            batch_time = data
+        }
+        
+        if let data = this.data.completedFormsHeaderDic.batchHeaderId {
+            batch_header_id = data
+        }
+        
+        if let data = this.data.completedFormsHeaderDic.lastBatchBy {
+            last_batchby = data
+        }
+        
+        if let data = this.data.completedFormsHeaderDic.lastBatchTime {
+            last_batch_time = data
+        }
     
     }
     
@@ -82,6 +112,36 @@ public class CompletedFormsHeader: PostgresStORM {
             case "form_id":
                 if (value as? Int).isNotNil {
                     self.form_id = (value as! Int)
+                }
+                
+            case "user_id":
+                if (value as? String).isNotNil {
+                    self.user_id = (value as! String)
+                }
+                
+            case "batch_header_id":
+                if (value as? Int).isNotNil {
+                    self.batch_header_id = (value as! Int)
+                }
+                
+            case "batch_time":
+                if (value as? Int).isNotNil {
+                    self.batch_time = (value as! Int)
+                }
+                
+            case "batchby":
+                if (value as? String).isNotNil {
+                    self.batchby = (value as! String)
+                }
+                
+            case "last_batch_time":
+                if (value as? Int).isNotNil {
+                    self.last_batch_time = (value as! Int)
+                }
+                
+            case "last_batchby":
+                if (value as? String).isNotNil {
+                    self.last_batchby = (value as! String)
                 }
     
             default:
@@ -128,6 +188,30 @@ public class CompletedFormsHeader: PostgresStORM {
             dictionary.completedFormsHeaderDic.formId = self.form_id
         }
         
+        if self.user_id.isNotNil {
+            dictionary.completedFormsHeaderDic.userId = self.user_id
+        }
+        
+        if self.batchby.isNotNil {
+            dictionary.completedFormsHeaderDic.batchBy = self.batchby
+        }
+        
+        if self.batch_time.isNotNil {
+            dictionary.completedFormsHeaderDic.batchTime = self.batch_time
+        }
+        
+        if self.last_batchby.isNotNil {
+            dictionary.completedFormsHeaderDic.lastBatchBy = self.last_batchby
+        }
+        
+        if self.last_batch_time.isNotNil {
+            dictionary.completedFormsHeaderDic.lastBatchTime = self.last_batch_time
+        }
+        
+        if self.batch_header_id.isNotNil {
+            dictionary.completedFormsHeaderDic.batchHeaderId = self.batch_header_id
+        }
+        
         return dictionary
     }
     
@@ -137,6 +221,30 @@ public class CompletedFormsHeader: PostgresStORM {
         var diff = true
         
         if diff == true, self.form_id != targetItem.form_id {
+            diff = false
+        }
+        
+        if diff == true, self.user_id != targetItem.user_id {
+            diff = false
+        }
+        
+        if diff == true, self.batch_header_id != targetItem.batch_header_id {
+            diff = false
+        }
+        
+        if diff == true, self.batchby != targetItem.batchby {
+            diff = false
+        }
+        
+        if diff == true, self.batch_time != targetItem.batch_time {
+            diff = false
+        }
+        
+        if diff == true, self.last_batch_time != targetItem.last_batch_time {
+            diff = false
+        }
+        
+        if diff == true, self.last_batchby != targetItem.last_batchby {
             diff = false
         }
     
