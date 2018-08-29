@@ -224,7 +224,7 @@ struct TestingAPI {
                                 AuditFunctions().addCustomerCodeAuditRecord(ct)
                                 
                                 // update the users record
-                                UserBalanceFunctions().adjustUserBalance(redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
+                                UserBalanceFunctions().adjustUserBalance(schemaId: schema ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
                                 
                                 // prepare the return
                                 retCode["amount"] = ct.amount!

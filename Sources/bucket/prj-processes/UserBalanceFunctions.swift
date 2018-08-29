@@ -57,7 +57,9 @@ public class UserBalanceFunctions {
         return total
     }
     
-    func adjustUserBalance(_ userid:String, countryid:Int, increase:Double = 0.0, decrease:Double = 0.0) {
+    func adjustUserBalance(schemaId:String? = "local", _ userid:String, countryid:Int, increase:Double = 0.0, decrease:Double = 0.0) {
+        
+        let schema = schemaId!.lowercased()
         
         let ut = UserTotal()
         
@@ -82,7 +84,7 @@ public class UserBalanceFunctions {
         ut.user_id    = userid
         ut.country_id = countryid
         
-        let _ = try? ut.saveWithCustomType()
+        let _ = try? ut.saveWithCustomType(schemaIn: nil)
 
     }
 }

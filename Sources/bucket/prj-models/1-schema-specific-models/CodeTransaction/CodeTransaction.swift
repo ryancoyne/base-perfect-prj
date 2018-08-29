@@ -620,7 +620,8 @@ public class CodeTransaction: PostgresStORM {
             try cth.saveWithCustomType(schemaIn: schema, copyOver: true)
             
             // now hard delete the original record
-            try self.delete(self.id!)
+            let sql = "DELETE FROM \(schema).\(self.table()) WHERE id = \(self.id!)"
+            let _ = try? self.sqlRows(sql, params: [])
             
         } catch {
             // do nothing with errors

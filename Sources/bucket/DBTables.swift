@@ -153,7 +153,10 @@ final class PRJDBTables {
     //MARK: Core DB Table Views
     public func addCodeTransactionNotRedeemedView(_ tablename: String, _ schemaIn:String? = "public")-> String {
     
-        let schema = schemaIn!.lowercased()
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
         
         var viewsql = "CREATE VIEW \(schema).\(tablename)_view_not_redeemed AS "
         viewsql.append("SELECT * FROM \(schema).\(tablename) WHERE redeemed = 0; ")

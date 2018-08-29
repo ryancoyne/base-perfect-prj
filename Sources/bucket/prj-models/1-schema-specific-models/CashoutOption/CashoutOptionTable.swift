@@ -33,7 +33,11 @@ final class CashoutOptionTable {
     //MARK: cashout option table
     private func createCashoutOption(_ schemaIn:String? = "public") {
         
-        let schema = schemaIn!.lowercased()
+                var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
+
         
         // make sure the table level is correct
         let config = Config()
@@ -98,7 +102,11 @@ final class CashoutOptionTable {
     
     private func update(currentlevel: Double, _ schemaIn:String? = "public") {
         
-        let schema = schemaIn!.lowercased()
+                var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
+
         
         // PERFORM THE UPDATE ACCORFING TO REQUIREMENTS
         print("UPDATE \(schema).\(tbl.table().capitalized).  Current Level \(currentlevel), Required Level: \(tablelevel)")
@@ -107,7 +115,11 @@ final class CashoutOptionTable {
     
     private func table(_ schemaIn:String? = "public")-> String {
         
-        let schema = schemaIn!.lowercased()
+                var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
+
         
         var createsql = "CREATE TABLE IF NOT EXISTS "
         createsql.append("\(schema).\(tbl.table()) ")

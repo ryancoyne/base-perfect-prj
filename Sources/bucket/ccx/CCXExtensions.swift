@@ -1069,7 +1069,10 @@ extension PostgresStORM {
     @discardableResult
     func saveWithCustomType(schemaIn:String? = "public", _ user: String? = nil, copyOver : Bool = false) throws -> [StORMRow] {
         
-        let schema = schemaIn!.lowercased()
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
         
         // act accordingly if this is an add or an update
         do {
@@ -1093,7 +1096,10 @@ extension PostgresStORM {
     @discardableResult
     func softDeleteWithCustomType(schemaIn:String? = "public",_ user: String? = nil) throws -> [StORMRow] {
 
-        let schema = schemaIn!.lowercased()
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
         
         // get the key (id)
         let (idcolumn, _) = firstAsKey()
@@ -1146,7 +1152,10 @@ extension PostgresStORM {
     @discardableResult
     func softUnDeleteWithCustomType(schemaIn:String? = "public", _ user: String? = nil) throws -> [StORMRow] {
         
-        let schema = schemaIn!.lowercased()
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
         
         // get the key (id)
         let (idcolumn, _) = firstAsKey()
@@ -1195,7 +1204,10 @@ extension PostgresStORM {
 
     private func insertWithCustomTypes(schemaIn:String? = "public", _ user: String? = nil) throws -> [StORMRow] {
         
-        let schema = schemaIn!.lowercased()
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
         
         // get the variables with their values in the dictionary
         let thedata = asData()
@@ -1295,7 +1307,10 @@ extension PostgresStORM {
      */
     private func addWithCustomTypes(schemaIn:String? = "public", _ user: String? = nil) throws -> [StORMRow] {
         
-        let schema = schemaIn!.lowercased()
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
         
         // get the variables with their values in the dictionary
         let thedata = asData()
@@ -1421,7 +1436,10 @@ extension PostgresStORM {
      */
     private func updateWithCustomType(schemaIn:String? = "public", _ user: String? = nil) throws -> [StORMRow] {
         
-        let schema = schemaIn!.lowercased()
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
         
         // get the variables with their values in the dictionary
         let thedata = self.asData()
@@ -1557,7 +1575,11 @@ extension PostgresStORM {
      */
     private func updateLocationGIS(schemaIn:String? = "public", record_id: Int, locationField: String, longitude: Double, latitude: Double) throws -> [StORMRow] {
         
-        let schema = schemaIn!.lowercased()
+                var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
+
         
         let parms: [String] = [String(record_id), String(longitude), String(latitude)]
         var sqlstatement = "UPDATE \(schema).\(self.table()) "
@@ -1582,7 +1604,10 @@ extension PostgresStORM {
      */
     func getLocationGISsql(schemaIn:String? = "public", sql: String, locationField: String, longitude: Double, latitude: Double, distance: Double) throws -> [StORMRow] {
         
-        let schema = schemaIn!.lowercased()
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
         
         var sqlstatement = sql
         //        var gisfields = " "
@@ -1623,7 +1648,10 @@ extension PostgresStORM {
      */
     func getLocationGIS(schemaIn:String? = "public", longitude: Double, latitude: Double, locationField: String, fields: [String], distance: Double) throws -> [StORMRow] {
         
-        let schema = schemaIn!.lowercased()
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
         
         var sqlstatement = "SELECT "
         

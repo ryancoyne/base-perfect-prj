@@ -33,7 +33,10 @@ final class BatchDetailTable {
     //MARK: batch detail by schema table
     private func createBatchDetail(_ schemaIn:String? = "public") {
 
-        let schema = schemaIn!.lowercased()
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
 
         let config = Config()
 
@@ -98,7 +101,10 @@ final class BatchDetailTable {
     
     private func update(currentlevel: Double, _ schemaIn:String? = "public") {
         
-        let schema = schemaIn!.lowercased()
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
         
         // PERFORM THE UPDATE ACCORFING TO REQUIREMENTS
         print("UPDATE \(schema).\(tbl.table().capitalized).  Current Level \(currentlevel), Required Level: \(tablelevel)")
@@ -107,7 +113,10 @@ final class BatchDetailTable {
     
     private func table(_ schemaIn:String? = "public")-> String {
 
-        let schema = schemaIn!.lowercased()
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
 
         var createsql = "CREATE TABLE IF NOT EXISTS "
         createsql.append("\(schema).\(tbl.table()) ")

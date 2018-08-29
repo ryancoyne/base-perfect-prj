@@ -33,7 +33,11 @@ final class CodeTransactionHistoryTable {
     //MARK: code transaction history table
     private func createCodeTransactionHistory(_ schemaIn: String? = "public") {
         
-        let schema = schemaIn!.lowercased()
+                var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
+
         
         let config = Config()
 
@@ -51,10 +55,10 @@ final class CodeTransactionHistoryTable {
             }
         } else {
             
-            let sequencesql = CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table(), schema)
+//            let sequencesql = CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table(), schema)
             
             // create the sequence
-            let _ = try? tbl.sqlRows(sequencesql, params: [])
+//            let _ = try? tbl.sqlRows(sequencesql, params: [])
             
             let _ = try! tbl.sqlRows(self.table(schema), params: [])
             
@@ -98,7 +102,11 @@ final class CodeTransactionHistoryTable {
     
     private func update(currentlevel: Double,_ schemaIn:String? = "public") {
         
-        let schema = schemaIn!.lowercased()
+                var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
+
         
         // PERFORM THE UPDATE ACCORFING TO REQUIREMENTS
         print("UPDATE \(schema).\(tbl.table().capitalized).  Current Level \(currentlevel), Required Level: \(tablelevel)")
@@ -107,15 +115,20 @@ final class CodeTransactionHistoryTable {
     
     private func table(_ schemaIn:String? = "public")-> String {
         
-        let schema = schemaIn!.lowercased()
+                var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
+
         
         var createsql = "CREATE TABLE IF NOT EXISTS "
         createsql.append("\(schema).\(tbl.table()) ")
         
         // common
         createsql.append("( ")
-        createsql.append("id integer NOT NULL DEFAULT 0 UNIQUE, ")
-        
+//        createsql.append("id integer NOT NULL DEFAULT 0 UNIQUE, ")
+        createsql.append("id integer NOT NULL DEFAULT 0, ")
+
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
@@ -142,10 +155,11 @@ final class CodeTransactionHistoryTable {
         createsql.append("cashedout int NOT NULL DEFAULT 0, ")
         createsql.append("cashedoutby text COLLATE pg_catalog.default, ")
         createsql.append("cashedout_total numeric(10,5) NOT NULL DEFAULT 0, ")
-        createsql.append("cashedout_note text COLLATE pg_catalog.default, ")
+//        createsql.append("cashedout_note text COLLATE pg_catalog.default, ")
+        createsql.append("cashedout_note text COLLATE pg_catalog.default ")
 
         // ending fields
-        createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
+//        createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
         createsql.append("); ")
         
         print(createsql)

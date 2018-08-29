@@ -271,7 +271,8 @@ struct ConsumerAPI {
                 
                 // grab the schema from the code
                 let index = customerCode.index(of: ".")!
-                let schema = customerCode[...index].lowercased()
+                var schema = customerCode[...index].lowercased()
+                schema.removeLast()
                 
                 // Awesome.  We have the customer code, and a user.  Now, we need to find the transaction and mark it as redeemed, and add the value to the ledger table!
                 let ct = CodeTransaction()
@@ -295,7 +296,12 @@ struct ConsumerAPI {
                 // lets redeem the code now
                 let redeemed        = CCXServiceClass.sharedInstance.getNow()
                 let redeemedby      = request.session!.userid
-                try? ct.get(rsp!.first!.data.id!)
+                
+                let sql = "SELECT * FROM \(schema).code_transaction WHERE id = \(rsp!.first!.data.id!)"
+                let ctr = try? ct.sqlRows(sql, params: [])
+                if let c = ctr!.first {
+                    ct.to(c)
+                }
                 
                 ct.redeemed         = redeemed
                 ct.redeemedby       = redeemedby
@@ -306,7 +312,7 @@ struct ConsumerAPI {
                     AuditFunctions().addCustomerCodeAuditRecord(ct)
                     
                     // update the users record
-                    UserBalanceFunctions().adjustUserBalance(redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
+                    UserBalanceFunctions().adjustUserBalance(schemaId: schema ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
                     
                     // prepare the return
                     retCode["amount"] = ct.amount!
@@ -317,7 +323,7 @@ struct ConsumerAPI {
                     }
                     
                     // now archive the record
-                    ct.archiveRecord()
+                    ct.archiveRecord(redeemedby)
                     
                 }
                 
