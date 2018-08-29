@@ -47,6 +47,18 @@ struct CashoutGroupDictionary {
             }
         }
     }
+    var longDescription : String? {
+        get {
+            return self.dic["long_description"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["long_description"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "long_description")
+            }
+        }
+    }
     
     var group_name : String? {
         get {
@@ -109,6 +121,19 @@ struct CashoutGroupDictionary {
                 self.dic["icon_url"] = newValue!
             } else {
                 self.dic.removeValue(forKey: "icon_url")
+            }
+        }
+    }
+    
+    var detailIconURL : String? {
+        get {
+            return self.dic["detail_icon_url"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["detail_icon_url"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "detail_icon_url")
             }
         }
     }

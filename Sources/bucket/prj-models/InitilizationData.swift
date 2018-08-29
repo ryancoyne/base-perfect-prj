@@ -121,12 +121,12 @@ final class InitializeData {
         var schema = usa.code_alpha_2!.lowercased()
         
         var checkuser = "INSERT INTO \(schema).\(tbl.table()) "
-        checkuser.append("(created, createdby, group_name,description, country_id, picture_url, display_order, display, option_layout) ")
+        checkuser.append("(created, createdby, group_name,description, country_id, picture_url, display_order, display, option_layout, long_description) ")
         checkuser.append(" VALUES ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', \(usa.id!),'', 1, true, 'double'), ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.', \(usa.id!),'',2, true, 'double'), ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.', \(usa.id!),'',3, true, 'single'), ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),'',4, true, 'double')")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', \(usa.id!),'', 1, true, 'double', 'Cha-ching!  Shop at your favorite retailers with your prepaid card.  Note that these are virtual cards and cannot be used in physical stores.'), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.', \(usa.id!),'',2, true, 'double', 'Choose from hundreds of gift cards to your favorite stores and restaurants.  Note that these are virtual gift cards and some merchants may not accept them in stores.  Please check with the merchant.'), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.', \(usa.id!),'',3, true, 'single', 'Choose from hundreds of charities and give back to your community.'), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),'',4, true, 'double', null)")
 
         print("Adding cashout groups for \(schema): \(checkuser)")
         _ = try? tbl.sqlRows(checkuser, params: [])
@@ -134,11 +134,11 @@ final class InitializeData {
         schema = singapore.code_alpha_2!.lowercased()
         
         checkuser = "INSERT INTO \(schema).\(tbl.table()) "
-        checkuser.append("(created, createdby, group_name,description, country_id, picture_url, display_order, display, option_layout) ")
+        checkuser.append("(created, createdby, group_name,description, country_id, picture_url, display_order, display, option_layout, long_description) ")
         checkuser.append(" VALUES ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','TopUp','', \(singapore.id!),'',1, true, 'double'),")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),'',2, true, 'double'), ")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','', \(singapore.id!),'',3, true, 'single')")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','TopUp','', \(singapore.id!),'',1, true, 'double', null),")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),'',2, true, 'double', null), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','', \(singapore.id!),'',3, true, 'single', 'Choose from hundreds of charities and give back to your community.')")
 
         print("Adding cashout groups for \(schema): \(checkuser)")
         _ = try? tbl.sqlRows(checkuser, params: [])
