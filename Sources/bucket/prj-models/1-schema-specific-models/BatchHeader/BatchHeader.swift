@@ -32,6 +32,10 @@ public class BatchHeader: PostgresStORM {
     var current_status    : String? = nil
     var status            : Int?    = nil
     var statusby          : String? = nil
+    var initial_send      : Int?    = nil
+    var initial_sendby    : String? = nil
+    var last_send         : Int?    = nil
+    var last_sendby       : String? = nil
     var record_start_date : Int?    = nil
     var record_end_date   : Int?    = nil
 
@@ -89,6 +93,22 @@ public class BatchHeader: PostgresStORM {
             statusby = data
         }
 
+        if let data = this.data.batchHeaderDic.initial_send {
+            initial_send = data
+        }
+        
+        if let data = this.data.batchHeaderDic.initial_sendby {
+            initial_sendby = data
+        }
+
+        if let data = this.data.batchHeaderDic.last_send {
+            last_send = data
+        }
+        
+        if let data = this.data.batchHeaderDic.last_sendby {
+            last_sendby = data
+        }
+
         if let data = this.data.batchHeaderDic.record_start_date {
             record_start_date = data
         }
@@ -139,6 +159,26 @@ public class BatchHeader: PostgresStORM {
             case "statusby":
                 if (value as? String).isNotNil {
                     self.statusby = (value as! String)
+                }
+                
+            case "initial_send":
+                if (value as? Int).isNotNil {
+                    self.initial_send = (value as! Int)
+                }
+                
+            case "initial_sendby":
+                if (value as? String).isNotNil {
+                    self.initial_sendby = (value as! String)
+                }
+                
+            case "last_send":
+                if (value as? Int).isNotNil {
+                    self.last_send = (value as! Int)
+                }
+                
+            case "last_sendby":
+                if (value as? String).isNotNil {
+                    self.last_sendby = (value as! String)
                 }
                 
             case "record_start_date":
@@ -211,6 +251,22 @@ public class BatchHeader: PostgresStORM {
             dictionary.batchHeaderDic.statusby = self.statusby
         }
         
+        if self.initial_send.isNotNil {
+            dictionary.batchHeaderDic.initial_send = self.initial_send
+        }
+        
+        if self.initial_sendby.isNotNil {
+            dictionary.batchHeaderDic.initial_sendby = self.initial_sendby
+        }
+        
+        if self.last_send.isNotNil {
+            dictionary.batchHeaderDic.last_send = self.last_send
+        }
+        
+        if self.last_sendby.isNotNil {
+            dictionary.batchHeaderDic.last_sendby = self.last_sendby
+        }
+
         if self.record_start_date.isNotNil {
             dictionary.batchHeaderDic.record_start_date = self.record_start_date
         }
@@ -236,6 +292,22 @@ public class BatchHeader: PostgresStORM {
         }
         
         if diff == true, self.statusby != targetItem.statusby {
+            diff = false
+        }
+        
+        if diff == true, self.initial_send != targetItem.initial_send {
+            diff = false
+        }
+        
+        if diff == true, self.initial_sendby != targetItem.initial_sendby {
+            diff = false
+        }
+        
+        if diff == true, self.last_send != targetItem.last_send {
+            diff = false
+        }
+        
+        if diff == true, self.last_sendby != targetItem.last_sendby {
             diff = false
         }
         

@@ -89,17 +89,69 @@ struct BatchHeaderDictionary {
     
     var statusby : String? {
         get {
-            return self.dic["statusby"].stringValue
+            return self.dic["status"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["statusby"] = newValue!
+                self.dic["status"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "statusby")
+                self.dic.removeValue(forKey: "status")
             }
         }
     }
 
+    var initial_send : Int? {
+        get {
+            return self.dic["initial_send"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["initial_send"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "initial_send")
+            }
+        }
+    }
+    
+    var initial_sendby : String? {
+        get {
+            return self.dic["initial_sendby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["initial_sendby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "initial_sendby")
+            }
+        }
+    }
+
+    var last_send : Int? {
+        get {
+            return self.dic["last_send"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["last_send"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "last_send")
+            }
+        }
+    }
+    
+    var last_sendby : String? {
+        get {
+            return self.dic["last_sendby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["last_sendby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "last_sendby")
+            }
+        }
+    }
+    
     var record_start_date : Int? {
         get {
             return self.dic["record_start_date"].intValue

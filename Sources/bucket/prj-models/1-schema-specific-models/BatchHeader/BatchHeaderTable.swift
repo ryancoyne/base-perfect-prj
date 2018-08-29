@@ -134,6 +134,10 @@ final class BatchHeaderTable {
         createsql.append("current_status text COLLATE pg_catalog.default, ")
         createsql.append("status int default 0, ")
         createsql.append("statusby text COLLATE pg_catalog.default, ")
+        createsql.append("initial_send int default 0, ")
+        createsql.append("initial_sendby text COLLATE pg_catalog.default, ")
+        createsql.append("last_send int default 0, ")
+        createsql.append("last_sendby text COLLATE pg_catalog.default, ")
         createsql.append("record_start_date int default 0, ")
         createsql.append("record_end_date int default 0, ")
 
