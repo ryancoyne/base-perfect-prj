@@ -131,6 +131,11 @@ final class BatchHeaderTable {
         createsql.append("batch_identifier text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
         createsql.append("country_id int default 0, ")
+        createsql.append("current_status text COLLATE pg_catalog.default, ")
+        createsql.append("status int default 0, ")
+        createsql.append("statusby text COLLATE pg_catalog.default, ")
+        createsql.append("record_start_date int default 0, ")
+        createsql.append("record_end_date int default 0, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

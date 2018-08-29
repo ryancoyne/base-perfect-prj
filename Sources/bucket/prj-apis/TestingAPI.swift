@@ -43,10 +43,26 @@ struct TestingAPI {
                 
                 // SET TESTING STUFF HERE:
 
-                print("test1: \(Country.getSchema("1"))")
-                print("test2: \(Country.getSchema(1))")
-                print("test3: \(Country.getSchema("Us"))")
-                print("test1: \(Country.getSchema("-"))")
+                var batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+
+                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+
+                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+
+                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+
+                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+                
+                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+                
+                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
 
                 // END SET TESTING STUFF
 
@@ -126,7 +142,8 @@ struct TestingAPI {
                 var ret_id = 0
                 var term_serial = ""
                 let term = Terminal()
-                let sqlt = "SELECT * FROM \(schema).terminal WHERE address_id = \(add_id)"
+//                let sqlt = "SELECT * FROM \(schema).terminal WHERE address_id = \(add_id)"
+                let sqlt = "SELECT * FROM \(schema).terminal"
                 let trm = try? term.sqlRows(sqlt, params: [])
                 if let t = trm?.first {
                     term.to(t)
@@ -142,9 +159,10 @@ struct TestingAPI {
                 }
 
                 // SECTION 3: Adding the new customer codes for the terminal
+                let rnd = [1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0]
                 
                 for i in 1...250 {
-                    let ccode = Retailer().createCustomerCode([:])
+                    let ccode = Retailer().createCustomerCode(schemaId: schema,[:])
                 
                     if ccode.success {
                     
@@ -154,17 +172,26 @@ struct TestingAPI {
                         qrCodeURL.append(ccode.message)
                     
                         let terminal = Terminal()
-                        let _ = try? terminal.find(["serial_number":"\(term_serial)"])
+                        let sqlt = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(term_serial)'"
+                        let trm = try? terminal.sqlRows(sqlt, params: [])
+                        if let t = trm?.first {
+                            terminal.to(t)
+                        }
                     
-                        // lets get the country id for this transaction
+                        // lets get the co\untry id for this transaction
                         let add = Address()
-                        try? add.find(["id":String(terminal.address_id!)])
-                    
+                        let sqla = "SELECT * FROM \(schema).address WHERE id = '\(terminal.address_id!)'"
+                        let adda = try? add.sqlRows(sqla, params: [])
+                        if let a = adda?.first {
+                            add.to(a)
+                        }
+
                         var bucket_amount = drand48()
                         bucket_amount = Double(round(bucket_amount * 100) / 100)
                         
                         //let total_trans = arc4random_uniform(10)
-                        let total_trans = Double.random
+                        let total_trans = 2.5
+                        
                         
                         let total_trans_dbl = Double(round(Double(total_trans) * 100) / 100)
                     
@@ -207,13 +234,14 @@ struct TestingAPI {
                         let ct = CodeTransaction()
                         let rsp = try? ct.sqlRows("SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE customer_code = $1 AND country_id = $2 ", params: ["\(i.data["customer_code"]!)", countryId])
                         
-                        if rsp?.first.isNil == false {
+                        if let r = rsp?.first {
                             var retCode:[String:Any] = [:]
                             
                             // lets redeem the code now
                             let redeemed        = CCXServiceClass.sharedInstance.getNow()
                             let redeemedby      = request.session!.userid
-                            try? ct.get(rsp!.first!.data.id!)
+                            
+                            ct.to(r)
                             
                             ct.redeemed         = redeemed
                             ct.redeemedby       = redeemedby

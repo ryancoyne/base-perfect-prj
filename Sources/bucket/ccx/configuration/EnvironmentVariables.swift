@@ -59,6 +59,7 @@ final class EnvironmentVariables {
         self.LISTENING_URL_DOMAIN   = env_variables["LISTENING_URL_DOMAIN"].stringValue
 
         self.API_DOMAIN       = env_variables["API_DOMAIN"].stringValue
+        self.API_PATH         = env_variables["API_PATH"].stringValue
         self.API_URL_PORT     = env_variables["API_URL_PORT"].intValue
         self.API_URL_PROTOCOL = env_variables["API_URL_PROTOCOL"].stringValue
 
@@ -223,7 +224,11 @@ final class EnvironmentVariables {
             if let value = JSONConfigEnhanced.shared.json(forKey: "api")?["API_DOMAIN"] as? String {
                 self.API_DOMAIN = value
             }
-            
+
+            if let value = JSONConfigEnhanced.shared.json(forKey: "api")?["API_PATH"] as? String {
+                self.API_PATH = value
+            }
+
 //            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "api.API_URL_PROTOCOL") as? String {
             if let value = JSONConfigEnhanced.shared.json(forKey: "api")?["API_URL_PROTOCOL"] as? String {
                 self.API_URL_PROTOCOL = value
@@ -378,6 +383,10 @@ final class EnvironmentVariables {
         // here is where we set the defaults of the initial is nil
         if self.API_DOMAIN == nil {
             self.API_DOMAIN = "localhost"
+        }
+
+        if self.API_PATH == nil {
+            self.API_PATH = "/api"
         }
 
         if self.API_URL_PROTOCOL == nil {
@@ -653,6 +662,20 @@ final class EnvironmentVariables {
         }
     }
 
+    private var _API_PATH: String?
+    public var API_PATH: String? {
+        get {
+            return _API_PATH
+        }
+        set {
+            if newValue != nil {
+                _API_PATH = newValue!
+            } else {
+                _API_PATH = nil
+            }
+        }
+    }
+    
     private var _API_URL_PORT: Int?
     public var API_URL_PORT: Int? {
         get {
@@ -901,22 +924,28 @@ final class EnvironmentVariables {
     public var PublicServerApiURL: URL? {
         get {
             if _PublicServerApiURL.isNil {
-                if EnvironmentVariables.sharedInstance.API_URL_PORT != 80 || EnvironmentVariables.sharedInstance.API_URL_PORT != 443 {
-                
+                if EnvironmentVariables.sharedInstance.API_URL_PORT == 80 || EnvironmentVariables.sharedInstance.API_URL_PORT == 443 {
+                    
+                    var burl = EnvironmentVariables.sharedInstance.API_URL_PROTOCOL!
+                    burl.append("://")
+                    burl.append(EnvironmentVariables.sharedInstance.API_DOMAIN!)
+                    burl.append("/")
+                    burl.append(EnvironmentVariables.sharedInstance.API_PATH!)
+                    burl.append("/")
+                    _PublicServerApiURL                         = URL(string: burl)
+
+                } else {
+                    
                     var burl = EnvironmentVariables.sharedInstance.API_URL_PROTOCOL!
                     burl.append("://")
                     burl.append(EnvironmentVariables.sharedInstance.API_DOMAIN!)
                     burl.append(":")
                     burl.append("\(EnvironmentVariables.sharedInstance.API_URL_PORT!)")
                     burl.append("/")
-                    _PublicServerApiURL                         = URL(string: burl)
-                
-                } else {
-                    var burl = EnvironmentVariables.sharedInstance.API_URL_PROTOCOL!
-                    burl.append("://")
-                    burl.append(EnvironmentVariables.sharedInstance.API_DOMAIN!)
+                    burl.append(EnvironmentVariables.sharedInstance.API_PATH!)
                     burl.append("/")
                     _PublicServerApiURL                         = URL(string: burl)
+                
                 }
             }
             

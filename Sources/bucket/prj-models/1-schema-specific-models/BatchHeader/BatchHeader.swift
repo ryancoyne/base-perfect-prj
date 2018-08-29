@@ -10,8 +10,14 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
+struct BatchHeaderStatus {
+    static let working_on_it = "creation"
+    static let in_progress   = "in progress"
+    static let completed     = "completed"
+}
+
 public class BatchHeader: PostgresStORM {
-    
+
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
     var created    : Int?    = nil
@@ -21,10 +27,14 @@ public class BatchHeader: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var batch_identifier : String? = nil
-    var country_id       : Int? = nil
-    var description      : String? = nil
-    
+    var batch_identifier  : String? = nil
+    var description       : String? = nil
+    var current_status    : String? = nil
+    var status            : Int?    = nil
+    var statusby          : String? = nil
+    var record_start_date : Int?    = nil
+    var record_end_date   : Int?    = nil
+
     //MARK: Table name
     override public func table() -> String { return "batch_header" }
     
@@ -59,16 +69,32 @@ public class BatchHeader: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.batchHeaderDic.country_id {
-            country_id = data
-        }
-        
         if let data = this.data.batchHeaderDic.batch_identifier {
             batch_identifier = data
         }
-
+        
         if let data = this.data.batchHeaderDic.description {
             description = data
+        }
+
+        if let data = this.data.batchHeaderDic.current_status {
+            current_status = data
+        }
+
+        if let data = this.data.batchHeaderDic.status {
+            status = data
+        }
+        
+        if let data = this.data.batchHeaderDic.statusby {
+            statusby = data
+        }
+
+        if let data = this.data.batchHeaderDic.record_start_date {
+            record_start_date = data
+        }
+
+        if let data = this.data.batchHeaderDic.record_end_date {
+            record_end_date = data
         }
 
     }
@@ -89,9 +115,10 @@ public class BatchHeader: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "country_id":
-                if (value as? Int).isNotNil {
-                    self.country_id = (value as! Int)
+            case "batch_identifier":
+                if (value as? String).isNotNil {
+                    self.batch_identifier = (value as!
+                    String)
                 }
                 
             case "description":
@@ -99,9 +126,29 @@ public class BatchHeader: PostgresStORM {
                     self.description = (value as! String)
                 }
                 
-            case "batch_identifier":
+            case "current_status":
                 if (value as? String).isNotNil {
-                    self.batch_identifier = (value as! String)
+                    self.current_status = (value as! String)
+                }
+                
+            case "status":
+                if (value as? Int).isNotNil {
+                    self.status = (value as! Int)
+                }
+                
+            case "statusby":
+                if (value as? String).isNotNil {
+                    self.statusby = (value as! String)
+                }
+                
+            case "record_start_date":
+                if (value as? Int).isNotNil {
+                    self.record_start_date = (value as! Int)
+                }
+                
+            case "record_end_date":
+                if (value as? Int).isNotNil {
+                    self.record_end_date = (value as! Int)
                 }
                 
             default:
@@ -144,16 +191,32 @@ public class BatchHeader: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
-        if self.country_id.isNotNil {
-            dictionary.batchHeaderDic.country_id = self.country_id
-        }
-
         if self.description.isNotNil {
             dictionary.batchHeaderDic.description = self.description
         }
 
         if self.batch_identifier.isNotNil {
             dictionary.batchHeaderDic.batch_identifier = self.batch_identifier
+        }
+
+        if self.current_status.isNotNil {
+            dictionary.batchHeaderDic.current_status = self.current_status
+        }
+        
+        if self.status.isNotNil {
+            dictionary.batchHeaderDic.status = self.status
+        }
+        
+        if self.statusby.isNotNil {
+            dictionary.batchHeaderDic.statusby = self.statusby
+        }
+        
+        if self.record_start_date.isNotNil {
+            dictionary.batchHeaderDic.record_start_date = self.record_start_date
+        }
+
+        if self.record_end_date.isNotNil {
+            dictionary.batchHeaderDic.record_end_date = self.record_end_date
         }
 
         return dictionary
@@ -164,7 +227,15 @@ public class BatchHeader: PostgresStORM {
         
         var diff = true
         
-        if diff == true, self.country_id != targetItem.country_id {
+        if diff == true, self.current_status != targetItem.current_status {
+            diff = false
+        }
+        
+        if diff == true, self.status != targetItem.status {
+            diff = false
+        }
+        
+        if diff == true, self.statusby != targetItem.statusby {
             diff = false
         }
         
@@ -173,6 +244,14 @@ public class BatchHeader: PostgresStORM {
         }
 
         if diff == true, self.batch_identifier != targetItem.batch_identifier {
+            diff = false
+        }
+
+        if diff == true, self.record_start_date != targetItem.record_start_date {
+            diff = false
+        }
+
+        if diff == true, self.record_end_date != targetItem.record_end_date {
             diff = false
         }
 

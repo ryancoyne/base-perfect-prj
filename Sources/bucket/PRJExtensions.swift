@@ -163,6 +163,10 @@ extension HTTPResponse {
     var unsupportedCountry : Void {
         try! self.setBody(json: ["errorCode": "UnsupportedCountry", "message": "The country id exists, but we currently are not deployed for this country.  Please try again later."]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 411, message: "Unsupported Country"))
     }
+    var accountPermissionsBounce : Void {
+        try! self.setBody(json: ["errorCode": "UnsupportedUser", "message": "You do not have the correct permissions to access this page"]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 401, message: "Incorrect Permissions"))
+    }
+
 }
 
 //extension Int {

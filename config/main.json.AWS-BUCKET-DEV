@@ -10,14 +10,15 @@
     "url": {
         "note": "These variables are used to build the URL string for the web based path.  It may be the same as the API, but we split them out for more flexibility.  The listening port and domain are the actual settings used by the server.",
         "URL_PROTOCOL": "https",
-        "URL_DOMAIN"  : "d2f9y2mgb9xsgw.cloudfront.net",
+        "URL_DOMAIN"  : "dev.bucketthechange.com",
         "URL_PORT"    : 443,
         "LISTENING_URL_DOMAIN"  : "localhost",
         "LISTENING_URL_PORT"    : 9000
     },
     "api": {
         "note": "These variables are used to build the URL string for the API path.  It may be the same as the web, but we split them out for more flexibility.",
-        "API_DOMAIN"      : "d2f9y2mgb9xsgw.cloudfront.net/api/v1",
+        "API_DOMAIN"      : "dev.bucketthechange.com",
+        "API_PATH"        : "api/v1",
         "API_URL_PROTOCOL": "https",
         "API_URL_PORT"    : 443
     },
