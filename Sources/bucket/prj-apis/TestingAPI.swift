@@ -43,10 +43,26 @@ struct TestingAPI {
                 
                 // SET TESTING STUFF HERE:
 
-                print("test1: \(Country.getSchema("1"))")
-                print("test2: \(Country.getSchema(1))")
-                print("test3: \(Country.getSchema("Us"))")
-                print("test1: \(Country.getSchema("-"))")
+                var batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+
+                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+
+                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+
+                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+
+                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+                
+                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+                
+                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
 
                 // END SET TESTING STUFF
 

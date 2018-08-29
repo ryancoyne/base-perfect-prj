@@ -8,6 +8,7 @@
 import Foundation
 import PostgresStORM
 import PerfectHTTP
+import SwiftMoment
 
 final class SupportFunctions {
     
@@ -74,6 +75,72 @@ final class SupportFunctions {
         }
         
         return returnDataArray
+    }
+    
+    func getNextBatch(schemaId:String? = "public",_ prefix:String? = nil, _ userId:String? = nil)->(headerId:Int, batchIdentifier: String) {
+        
+        var schema = "public"
+        if schemaId.isNotNil { schema = schemaId!.lowercased() }
+        
+        var current_userId = CCXDefaultUserValues.user_server
+        if userId.isNotNil { current_userId = userId! }
+        
+        var batch_id = 1
+        
+        let bh = BatchHeader()
+        let sql = "SELECT id FROM \(schema).batch_header ORDER BY id DESC "
+        let idh = try? bh.sqlRows(sql, params: [])
+        if let i = idh?.first {
+            batch_id = i.data["id"].intValue!
+            batch_id = batch_id + 1
+        }
+
+        let nowdate = Date()
+        let df = DateFormatter()
+        df.dateFormat = "yyyyMMdd"
+        let now = df.string(from: nowdate)
+
+        var batch = ""
+        if prefix.isNotNil {
+            batch = "\(prefix!)-\(now)"
+        } else {
+            batch = "\(now)"
+        }
+        
+        // we are going to make sure the identifier has not been used up until this point
+        var tryme = "\(batch)-\(batch_id)"
+        var sql2 = ""
+        var keepgoing = true
+        
+        var retInt = 0
+        var retString = ""
+        
+        while keepgoing {
+            sql2 = "SELECT * FROM \(schema).batch_header WHERE batch_identifier = '\(tryme)'"
+            let bhchk = try? bh.sqlRows(sql2, params: [])
+            if let _ = bhchk?.first {
+                // found - update the batch ID and retry
+                batch_id = batch_id + 1
+                tryme = "\(batch)-\(batch_id)"
+            } else {
+                // it does not exist!
+                
+                bh.batch_identifier = tryme
+                bh.status = CCXServiceClass.sharedInstance.getNow()
+                bh.statusby = current_userId
+                bh.current_status = BatchHeaderStatus.working_on_it
+                
+                let bhs = try? bh.saveWithCustomType(schemaIn: schema)
+                if let b = bhs?.first {
+                    bh.to(b)
+                    retInt = bh.id!
+                    retString = tryme
+                }
+                keepgoing = false
+            }
+        }
+        
+        return (retInt, retString)
     }
     
 }

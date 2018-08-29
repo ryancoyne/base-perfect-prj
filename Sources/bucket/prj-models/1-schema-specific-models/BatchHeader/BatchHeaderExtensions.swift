@@ -61,16 +61,44 @@ struct BatchHeaderDictionary {
         }
     }
 
-    var country_id : Int? {
+    var current_status : String? {
         get {
-            return self.dic["country_id"].intValue
+            return self.dic["current_status"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["country_id"] = newValue!
+                self.dic["current_status"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "country_id")
+                self.dic.removeValue(forKey: "current_status")
             }
         }
     }
+
+    var status : Int? {
+        get {
+            return self.dic["status"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["status"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "status")
+            }
+        }
+    }
+    
+    var statusby : String? {
+        get {
+            return self.dic["statusby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["statusby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "statusby")
+            }
+        }
+    }
+
 }
+
