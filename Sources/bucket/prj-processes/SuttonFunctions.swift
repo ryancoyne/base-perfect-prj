@@ -10,7 +10,7 @@ public class SuttonoFunctions {
         static let schema = "us"
     }
     
-    func addUsers(_ userId:String? = nil,_ batchId:Int? = nil,_ batchIdentifier:String? = nil) {
+    func startBatch(_ userId:String? = nil,_ batchId:Int? = nil,_ batchIdentifier:String? = nil) {
         
         var runningUser = ""
         if userId.isNotNil {
@@ -52,9 +52,35 @@ public class SuttonoFunctions {
             runningBatchIdentifier = batch.batchIdentifier
         }
         
-        // we are ready to start putting together the user accont information
+        var nextnumber = 0
+        
+        // we are ready to start putting together the user account information
+        self.addHeader(runningUser, runningBatchId)
+        nextnumber = self.addCodes(nextNumber: nextnumber, runningUser, runningBatchId)
+        nextnumber = self.addUsers(nextNumber: nextnumber, runningUser, runningBatchId)
+        self.addFooter(runningUser, runningBatchId)
+    }
+
+    private func addHeader(_ userId:String? = nil,_ batchId:Int? = nil) {
         
         
+    }
+
+    private func addFooter(_ userId:String? = nil,_ batchId:Int? = nil) {
+        
+        
+    }
+
+    private func addUsers(nextNumber:Int,_ userId:String? = nil,_ batchId:Int? = nil)-> Int {
+        
+        
+        return nextNumber + 1
+    }
+
+    private func addCodes(nextNumber:Int,_ userId:String? = nil,_ batchId:Int? = nil)-> Int {
+        
+        
+        return nextNumber + 1
     }
     
 }
