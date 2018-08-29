@@ -31,6 +31,7 @@ public class CashoutGroup: PostgresStORM {
     var option_layout : String?=nil
     var display_order : Int? = nil
     var country_id    : Int? = nil
+    var threshold_amount : Double? = nil
     
     //MARK: Table name
     override public func table() -> String { return "cashout_group" }
@@ -97,6 +98,10 @@ public class CashoutGroup: PostgresStORM {
         if let data = this.data.cashoutGroupDic.group_name {
             group_name = data
         }
+        
+        if let data = this.data.cashoutGroupDic.thresholdAmount {
+            threshold_amount = data
+        }
 
         if let data = this.data.cashoutGroupDic.picture_url {
             picture_url = data
@@ -137,6 +142,11 @@ public class CashoutGroup: PostgresStORM {
             case "long_description":
                 if (value as? String).isNotNil {
                     self.long_description = (value as! String)
+                }
+                
+            case "threshold_amount":
+                if (value as? Double).isNotNil {
+                    self.threshold_amount = (value as! Double)
                 }
                 
             case "icon_url":
@@ -249,6 +259,10 @@ public class CashoutGroup: PostgresStORM {
         if self.picture_url.isNotNil {
             dictionary.cashoutGroupDic.picture_url = self.picture_url
         }
+        
+        if self.threshold_amount.isNotNil {
+            dictionary.cashoutGroupDic.thresholdAmount = self.threshold_amount
+        }
 
         if self.display.isNotNil {
             dictionary.cashoutGroupDic.display = self.display
@@ -267,6 +281,10 @@ public class CashoutGroup: PostgresStORM {
         }
         
         if diff == true, self.icon_url != targetItem.icon_url {
+            diff = false
+        }
+        
+        if diff == true, self.threshold_amount != targetItem.threshold_amount {
             diff = false
         }
         

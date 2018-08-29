@@ -141,6 +141,7 @@ final class CashoutGroupTable {
         createsql.append("display_order int default 0, ")
         createsql.append("display boolean default false, ")
         createsql.append("country_id int default 0, ")
+        createsql.append("threshold_amount numeric(10,5) NOT NULL DEFAULT 0, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

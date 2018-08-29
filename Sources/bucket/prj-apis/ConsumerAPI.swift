@@ -483,6 +483,11 @@ struct ConsumerAPI {
         
                 let res = try? cg.sqlRows(countsql, params: [codes])
 
+                var currentUserBalance = 0.0
+                if let countryId = Country.idWith(isoNumericCode: countryCode) {
+                    currentUserBalance = UserBalanceFunctions().getCurrentBalance(request.session!.userid, countryid: countryId)
+                }
+                
                 if res.isNotNil {
                     // creating the return JSON with results
                     var retJSONSub:[[String:Any]] = []
@@ -493,6 +498,10 @@ struct ConsumerAPI {
                         if let name = i.data.cashoutGroupDic.group_name { s["name"] = name }
                         if let desc = i.data.cashoutGroupDic.description { s["description"] = desc }
                         if let countryId = i.data.cashoutGroupDic.country_id { s["countryId"] = countryId }
+                        if let threshAmount = i.data.cashoutGroupDic.thresholdAmount {
+                            s["thresholdAmount"] = threshAmount
+                            s["disabled"] = threshAmount > currentUserBalance
+                        }
                         if let longDesc = i.data.cashoutGroupDic.longDescription { s["longDescription"] = longDesc }
                         if let optionCount = i.data["option_count"] {
                             s["optionCount"] = optionCount
@@ -506,6 +515,9 @@ struct ConsumerAPI {
                         }
                         if let icon = i.data.cashoutGroupDic.iconURL, !icon.isEmpty {
                             imageDic["icon"] = icon
+                        }
+                        if let icon = i.data.cashoutGroupDic.detailIconURL, !icon.isEmpty {
+                            imageDic["detailIcon"] = icon
                         }
                         // Fill the image dictionary if we have any images:
                         if !imageDic.isEmpty {
