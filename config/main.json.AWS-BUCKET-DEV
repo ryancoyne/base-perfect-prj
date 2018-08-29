@@ -17,7 +17,8 @@
     },
     "api": {
         "note": "These variables are used to build the URL string for the API path.  It may be the same as the web, but we split them out for more flexibility.",
-        "API_DOMAIN"      : "dev.bucketthechange.com/api/v1",
+        "API_DOMAIN"      : "dev.bucketthechange.com",
+        "API_PATH"        : "api/v1",
         "API_URL_PROTOCOL": "https",
         "API_URL_PORT"    : 443
     },
