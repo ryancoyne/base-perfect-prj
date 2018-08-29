@@ -493,30 +493,23 @@ struct ConsumerAPI {
                         if let name = i.data.cashoutGroupDic.group_name { s["name"] = name }
                         if let desc = i.data.cashoutGroupDic.description { s["description"] = desc }
                         if let countryId = i.data.cashoutGroupDic.country_id { s["countryId"] = countryId }
+                        if let longDesc = i.data.cashoutGroupDic.longDescription { s["longDescription"] = longDesc }
                         if let optionCount = i.data["option_count"] {
                             s["optionCount"] = optionCount
                             if let optionLayout = i.data["option_layout"] { s["optionLayout"] = optionLayout }
                         }
 
-                        if let image = i.data.cashoutGroupDic.picture_url, image.length > 1 {
-
-                            var imgdict:[String:Any] = [:]
-                            // check to see if the image contains http
-                            let testimage = image.lowercased()
-                            if testimage.contains(string: "http") {
-                                imgdict["small"] = image
-                                imgdict["large"] = image
-                                imgdict["icon"]  = image
-                            } else {
-                                if let imageurl = EnvironmentVariables.sharedInstance.ImageBaseURL {
-                                    imgdict["small"] = "\(imageurl)/small/\(image)"
-                                    imgdict["large"] = "\(imageurl)/large/\(image)"
-                                    imgdict["icon"]  = "\(imageurl)/icon/\(image)"
-                                }
-                            }
-                            
-                            // add the images to the return
-                            s["image"] = imgdict
+                        // See if we have any images:
+                        var imageDic : [String:Any] = [:]
+                        if let background = i.data.cashoutGroupDic.picture_url, !background.isEmpty {
+                            imageDic["background"] = background
+                        }
+                        if let icon = i.data.cashoutGroupDic.iconURL, !icon.isEmpty {
+                            imageDic["icon"] = icon
+                        }
+                        // Fill the image dictionary if we have any images:
+                        if !imageDic.isEmpty {
+                            s["image"] = imageDic
                         }
                         
                         // add this entry to the array of entries
