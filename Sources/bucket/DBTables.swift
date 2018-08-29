@@ -243,7 +243,8 @@ final class PRJDBTables {
         CashoutSourceTable.sharedInstance.create()
         CashoutGroupTable.sharedInstance.create()
         CashoutOptionTable.sharedInstance.create()
-        CompletedFormsTable.sharedInstance.create()
+        CompletedFormsHeaderTable.sharedInstance.create()
+        CompletedFormsDetailTable.sharedInstance.create()
         
         CodeTransactionTable.sharedInstance.create()
         CodeTransactionHistoryTable.sharedInstance.create()

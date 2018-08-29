@@ -1,8 +1,8 @@
 //
-//  CompletedForms.swift
-//  bucket
+//  CompletedFormsDetail.swift
+//  COpenSSL
 //
-//  Created by Ryan Coyne on 8/9/18.
+//  Created by Ryan Coyne on 8/29/18.
 //
 
 import Foundation
@@ -10,7 +10,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class CompletedForms: PostgresStORM {
+public class CompletedFormsDetail: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -21,15 +21,14 @@ public class CompletedForms: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var form_id     : Int? = nil
-    var option_id     : Int? = nil
-    var user_id     : String? = nil
-    var field_name     : String? = nil
-    var field_value     : String? = nil
-    var value_data_type     : String? = nil
+    var cf_header_id : Int? = nil
+    var batch_group     : String? = nil
+    var batch_order     : Int? = nil
+    
+    var detail_line     : String? = nil
     
     //MARK: Table name
-    override public func table() -> String { return "completed_forms" }
+    override public func table() -> String { return "completed_forms_detail" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -62,36 +61,28 @@ public class CompletedForms: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.completedFormsDic.formId {
-            form_id = data
+        if let data = this.data.cfDetailDic.cfHeaderId {
+            cf_header_id = data
         }
         
-        if let data = this.data.completedFormsDic.optionId {
-            option_id = data
+        if let data = this.data.batchDetailDic.batch_group {
+            batch_group = data
         }
         
-        if let data = this.data.completedFormsDic.userId {
-            user_id = data
+        if let data = this.data.batchDetailDic.batch_order {
+            batch_order = data
         }
         
-        if let data = this.data.completedFormsDic.fieldValue {
-            field_value = data
-        }
-        
-        if let data = this.data.completedFormsDic.fieldName {
-            field_name = data
-        }
-        
-        if let data = this.data.completedFormsDic.valueDataType {
-            value_data_type = data
+        if let data = this.data.batchDetailDic.detail_line {
+            detail_line = data
         }
         
     }
     
-    func rows() -> [CompletedForms] {
-        var rows = [CompletedForms]()
+    func rows() -> [CompletedFormsDetail] {
+        var rows = [CompletedFormsDetail]()
         for i in 0..<self.results.rows.count {
-            let row = CompletedForms()
+            let row = CompletedFormsDetail()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -104,34 +95,24 @@ public class CompletedForms: PostgresStORM {
             
             switch key.lowercased() {
                 
-            case "form_id":
+            case "cf_header_id":
                 if (value as? Int).isNotNil {
-                    self.form_id = (value as! Int)
+                    self.cf_header_id = (value as! Int)
                 }
                 
-            case "option_id":
+            case "batch_group":
+                if (value as? String).isNotNil {
+                    self.batch_group = (value as! String)
+                }
+                
+            case "batch_order":
                 if (value as? Int).isNotNil {
-                    self.option_id = (value as! Int)
+                    self.batch_order = (value as! Int)
                 }
                 
-            case "user_id":
+            case "detail_line":
                 if (value as? String).isNotNil {
-                    self.user_id = (value as! String)
-                }
-                
-            case "field_value":
-                if (value as? String).isNotNil {
-                    self.field_value = (value as! String)
-                }
-                
-            case "field_name":
-                if (value as? String).isNotNil {
-                    self.field_name = (value as! String)
-                }
-                
-            case "value_data_type":
-                if (value as? String).isNotNil {
-                    self.value_data_type = (value as! String)
+                    self.detail_line = (value as! String)
                 }
                 
             default:
@@ -174,59 +155,43 @@ public class CompletedForms: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
-        if self.form_id.isNotNil {
-            dictionary.completedFormsDic.formId = self.form_id
+        if self.cf_header_id.isNotNil {
+            dictionary.cfDetailDic.cfHeaderId = self.cf_header_id
         }
         
-        if self.option_id.isNotNil {
-            dictionary.completedFormsDic.optionId = self.form_id
+        if self.batch_group.isNotNil {
+            dictionary.cfDetailDic.batch_group = self.batch_group
         }
         
-        if self.user_id.isNotNil {
-            dictionary.completedFormsDic.userId = self.user_id
+        if self.batch_order.isNotNil {
+            dictionary.cfDetailDic.batch_order = self.batch_order
         }
         
-        if self.field_value.isNotNil {
-            dictionary.completedFormsDic.fieldValue = self.field_value
-        }
-        
-        if self.field_name.isNotNil {
-            dictionary.completedFormsDic.fieldName = self.field_name
-        }
-        
-        if self.value_data_type.isNotNil {
-            dictionary.completedFormsDic.valueDataType = self.value_data_type
+        if self.detail_line.isNotNil {
+            dictionary.cfDetailDic.detail_line = self.detail_line
         }
         
         return dictionary
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: CompletedForms)-> Bool {
+    func compare(targetItem: CompletedFormsDetail)-> Bool {
         
         var diff = true
         
-        if diff == true, self.form_id != targetItem.form_id {
+        if diff == true, self.cf_header_id != targetItem.cf_header_id {
             diff = false
         }
         
-        if diff == true, self.option_id != targetItem.option_id {
+        if diff == true, self.batch_group != targetItem.batch_group {
             diff = false
         }
         
-        if diff == true, self.user_id != targetItem.user_id {
+        if diff == true, self.batch_order != targetItem.batch_order {
             diff = false
         }
         
-        if diff == true, self.field_value != targetItem.field_value {
-            diff = false
-        }
-        
-        if diff == true, self.field_name != targetItem.field_name {
-            diff = false
-        }
-        
-        if diff == true, self.value_data_type != targetItem.value_data_type {
+        if diff == true, self.detail_line != targetItem.detail_line {
             diff = false
         }
         
