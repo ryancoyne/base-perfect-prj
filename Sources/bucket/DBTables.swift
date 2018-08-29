@@ -258,6 +258,7 @@ final class PRJDBTables {
         
         BatchHeaderTable.sharedInstance.create()
         BatchDetailTable.sharedInstance.create()
+        USBankTable.sharedInstance.create()
         
         // make sure the tables exist.... if not - then create it
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()

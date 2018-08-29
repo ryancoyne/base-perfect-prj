@@ -1,49 +1,46 @@
 //
-//  CashoutTypesTable.swift
+//  AddressTable.swift
 //  bucket
 //
-//  Created by Ryan Coyne on 8/9/18.
+//  Created by Ryan Coyne on 8/8/18.
 //
 
 import Foundation
 import PostgresStORM
 
-final class BatchHeaderTable {
+final class USBankTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
     
-    static let sharedInstance = BatchHeaderTable()
-    let tbl = BatchHeader()
+    static let sharedInstance = USBankTable()
+    let tbl = USBank()
     
     let tablelevel = 1.00
     
     //MARK:-
-    //MARK: batch header table
+    //MARK: address table
     func create() {
         
-        for i in PRJCountries.list  {
-            createBatchHeader((i.uppercased()))
-        }
+        
+        createUSBank("us")
+        
     }
 
     //MARK:-
-    //MARK: header table
-    private func createBatchHeader(_ schemaIn: String? = "public") {
-
-        var schema = "public"
-        if schemaIn.isNotNil {
-            schema = schemaIn!.lowercased()
-        }
+    //MARK: Addresses table
+    private func createUSBank(_ schemaId:String? = "public") {
         
+        let schema = schemaId!.lowercased()
+        
+        // make sure the table level is correct
         let config = Config()
-
+        
         // make sure the schema is there
         let _ = try? config.sqlRows(PRJDBTables.sharedInstance.addSchema("\(schema)"), params: [])
         
-        // make sure the table level is correct
         var thesql = "SELECT val, name FROM config WHERE name = $1"
         var tr = try! config.sqlRows(thesql, params: ["\(schema).table_\(tbl.table())"])
         if tr.count > 0 {
@@ -63,7 +60,7 @@ final class BatchHeaderTable {
             
             // new one - set the default 1.00
             thesql = "INSERT INTO config(name,val) VALUES('\(schema).table_\(tbl.table())','1.00')"
-            let _ = try? config.sqlRows(thesql, params: [])
+            let _ = try! config.sqlRows(thesql, params: [])
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
@@ -99,24 +96,18 @@ final class BatchHeaderTable {
         
     }
     
-    private func update(currentlevel: Double, _ schemaIn:String? = "public") {
-
-        var schema = "public"
-        if schemaIn.isNotNil {
-            schema = schemaIn!.lowercased()
-        }
-
+    private func update(currentlevel: Double, _ schemaId:String? = "public") {
+        
+        let schema = schemaId!.lowercased()
+        
         // PERFORM THE UPDATE ACCORFING TO REQUIREMENTS
         print("UPDATE \(schema).\(tbl.table().capitalized).  Current Level \(currentlevel), Required Level: \(tablelevel)")
         
     }
     
-    private func table(_ schemaIn:String? = "public")-> String {
+    private func table(_ schemaId:String? = "public")-> String {
         
-        var schema = "public"
-        if schemaIn.isNotNil {
-            schema = schemaIn!.lowercased()
-        }
+        let schema = schemaId!.lowercased()
         
         var createsql = "CREATE TABLE IF NOT EXISTS "
         createsql.append("\(schema).\(tbl.table()) ")
@@ -128,18 +119,16 @@ final class BatchHeaderTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
-        createsql.append("batch_identifier text COLLATE pg_catalog.default, ")
-        createsql.append("description text COLLATE pg_catalog.default, ")
-        createsql.append("country_id int default 0, ")
-        createsql.append("current_status text COLLATE pg_catalog.default, ")
-        createsql.append("status int default 0, ")
-        createsql.append("statusby text COLLATE pg_catalog.default, ")
-        createsql.append("initial_send int default 0, ")
-        createsql.append("initial_sendby text COLLATE pg_catalog.default, ")
-        createsql.append("last_send int default 0, ")
-        createsql.append("last_sendby text COLLATE pg_catalog.default, ")
-        createsql.append("record_start_date int default 0, ")
-        createsql.append("record_end_date int default 0, ")
+        createsql.append("country_id int NOT NULL DEFAULT 0, ")
+        createsql.append("retailer_id int NOT NULL DEFAULT 0, ")
+        createsql.append("retailer_contact_id int NOT NULL DEFAULT 0, ")
+        createsql.append("address1 text COLLATE pg_catalog.default, ")
+        createsql.append("address2 text COLLATE pg_catalog.default, ")
+        createsql.append("address3 text COLLATE pg_catalog.default, ")
+        createsql.append("state text COLLATE pg_catalog.default, ")
+        createsql.append("postal_code text COLLATE pg_catalog.default, ")
+        createsql.append("city text COLLATE pg_catalog.default, ")
+        createsql.append("ach_transfer_minimum numeric(10,5) DEFAULT 0.0, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
@@ -150,4 +139,3 @@ final class BatchHeaderTable {
         return createsql
     }
 }
-
