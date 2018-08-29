@@ -507,6 +507,9 @@ struct ConsumerAPI {
                         if let icon = i.data.cashoutGroupDic.iconURL, !icon.isEmpty {
                             imageDic["icon"] = icon
                         }
+                        if let icon = i.data.cashoutGroupDic.detailIconURL, !icon.isEmpty {
+                            imageDic["detailIcon"] = icon
+                        }
                         // Fill the image dictionary if we have any images:
                         if !imageDic.isEmpty {
                             s["image"] = imageDic
