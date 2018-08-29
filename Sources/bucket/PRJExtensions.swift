@@ -1,4 +1,4 @@
-import PerfectHTTP
+    import PerfectHTTP
 import Foundation
 
 //extension String {
@@ -108,15 +108,39 @@ extension HTTPRequest {
     
     //MARK: - Country will be used across both API's:
     var countryCode : String? {
-        let countryCode = self.urlVariables["countryCode"]?.uppercased()
         
-        if countryCode.isNil { return nil }
-        // Check if it exists:
-        if Country.idWith(isoNumericCode: countryCode!).isNotNil {
-            return countryCode!
-        } else {
-            return nil
+        // they may pass in either the code or the number
+        if let countryCode = self.urlVariables["countryCode"] {
+            
+            if countryCode.isAlpha(), Country.idWith(isoNumericCode: countryCode.uppercased()).isNotNil {
+                return countryCode
+            } else if countryCode.isNumeric() {
+                // get the country code alpha
+                let cc = Country()
+                let _ = try? cc.get(countryCode.intValue!)
+                if cc.code_alpha_2.isNotNil {
+                    return cc.code_alpha_2!
+                }
+            } else {
+                // incorrect format passed in
+                return nil
+            }
+        
         }
+        
+        // was not passed in correctly
+        return nil
+        
+        
+//        let countryCode = self.urlVariables["countryCode"]?.uppercased()
+//
+//        if countryCode.isNil { return nil }
+//        // Check if it exists:
+//        if Country.idWith(isoNumericCode: countryCode!).isNotNil {
+//            return countryCode!
+//        } else {
+//            return nil
+//        }
     }
     var countryId : Int? {
         let sentCountryId = self.header(.custom(name: "countryId")) ?? self.urlVariables["countryId"]
