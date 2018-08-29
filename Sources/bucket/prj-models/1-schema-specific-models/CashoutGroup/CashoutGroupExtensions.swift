@@ -125,6 +125,19 @@ struct CashoutGroupDictionary {
         }
     }
     
+    var detailIconURL : String? {
+        get {
+            return self.dic["detail_icon_url"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["detail_icon_url"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "detail_icon_url")
+            }
+        }
+    }
+    
     var optionLayout : String? {
         get {
             return self.dic["option_layout"].stringValue

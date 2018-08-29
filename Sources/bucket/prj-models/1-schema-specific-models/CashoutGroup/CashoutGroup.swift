@@ -27,6 +27,7 @@ public class CashoutGroup: PostgresStORM {
     var long_description   : String? = nil
     var picture_url   : String? = nil
     var icon_url : String?=nil
+    var detail_icon_url : String?=nil
     var option_layout : String?=nil
     var display_order : Int? = nil
     var country_id    : Int? = nil
@@ -71,6 +72,10 @@ public class CashoutGroup: PostgresStORM {
         
         if let data = this.data.cashoutGroupDic.iconURL {
             icon_url = data
+        }
+        
+        if let data = this.data.cashoutGroupDic.detailIconURL {
+            detail_icon_url = data
         }
         
         if let data = this.data.cashoutGroupDic.country_id {
@@ -137,6 +142,11 @@ public class CashoutGroup: PostgresStORM {
             case "icon_url":
                 if (value as? String).isNotNil {
                     self.icon_url = (value as! String)
+                }
+                
+            case "detail_icon_url":
+                if (value as? String).isNotNil {
+                    self.detail_icon_url = (value as! String)
                 }
                 
             case "option_layout":
@@ -212,6 +222,10 @@ public class CashoutGroup: PostgresStORM {
             dictionary.cashoutGroupDic.iconURL = self.icon_url
         }
         
+        if self.detail_icon_url.isNotNil {
+            dictionary.cashoutGroupDic.detailIconURL = self.detail_icon_url
+        }
+        
         if self.country_id.isNotNil {
             dictionary.cashoutGroupDic.country_id = self.country_id
         }
@@ -253,6 +267,10 @@ public class CashoutGroup: PostgresStORM {
         }
         
         if diff == true, self.icon_url != targetItem.icon_url {
+            diff = false
+        }
+        
+        if diff == true, self.detail_icon_url != targetItem.detail_icon_url {
             diff = false
         }
         
