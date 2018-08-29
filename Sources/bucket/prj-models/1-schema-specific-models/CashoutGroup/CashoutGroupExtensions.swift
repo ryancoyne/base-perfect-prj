@@ -138,6 +138,19 @@ struct CashoutGroupDictionary {
         }
     }
     
+    var thresholdAmount : Double? {
+        get {
+            return self.dic["threshold_amount"].doubleValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["threshold_amount"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "threshold_amount")
+            }
+        }
+    }
+    
     var optionLayout : String? {
         get {
             return self.dic["option_layout"].stringValue
