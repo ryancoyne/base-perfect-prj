@@ -47,6 +47,18 @@ struct CashoutGroupDictionary {
             }
         }
     }
+    var longDescription : String? {
+        get {
+            return self.dic["long_description"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["long_description"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "long_description")
+            }
+        }
+    }
     
     var group_name : String? {
         get {

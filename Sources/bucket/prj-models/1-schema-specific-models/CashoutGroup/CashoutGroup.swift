@@ -24,6 +24,7 @@ public class CashoutGroup: PostgresStORM {
     var display       : Bool? = nil
     var group_name    : String? = nil
     var description   : String? = nil
+    var long_description   : String? = nil
     var picture_url   : String? = nil
     var icon_url : String?=nil
     var option_layout : String?=nil
@@ -79,6 +80,10 @@ public class CashoutGroup: PostgresStORM {
         if let data = this.data.cashoutGroupDic.description {
             description = data
         }
+        
+        if let data = this.data.cashoutGroupDic.longDescription {
+            long_description = data
+        }
 
         if let data = this.data.cashoutGroupDic.display_order {
             display_order = data
@@ -122,6 +127,11 @@ public class CashoutGroup: PostgresStORM {
             case "description":
                 if (value as? String).isNotNil {
                     self.description = (value as! String)
+                }
+            
+            case "long_description":
+                if (value as? String).isNotNil {
+                    self.long_description = (value as! String)
                 }
                 
             case "icon_url":
@@ -217,8 +227,12 @@ public class CashoutGroup: PostgresStORM {
         if self.description.isNotNil {
             dictionary.cashoutGroupDic.description = self.description
         }
+        
+        if self.long_description.isNotNil {
+            dictionary.cashoutGroupDic.longDescription = self.long_description
+        }
 
-        if self.description.isNotNil {
+        if self.picture_url.isNotNil {
             dictionary.cashoutGroupDic.picture_url = self.picture_url
         }
 
@@ -247,6 +261,10 @@ public class CashoutGroup: PostgresStORM {
         }
         
         if diff == true, self.description != targetItem.description {
+            diff = false
+        }
+        
+        if diff == true, self.long_description != targetItem.long_description {
             diff = false
         }
 

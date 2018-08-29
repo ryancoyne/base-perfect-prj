@@ -133,6 +133,7 @@ final class CashoutGroupTable {
         // table specific fields
         createsql.append("group_name text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
+        createsql.append("long_description text COLLATE pg_catalog.default, ")
         createsql.append("picture_url text COLLATE pg_catalog.default, ")
         createsql.append("icon_url text COLLATE pg_catalog.default, ")
         createsql.append("option_layout text COLLATE pg_catalog.default, ")
