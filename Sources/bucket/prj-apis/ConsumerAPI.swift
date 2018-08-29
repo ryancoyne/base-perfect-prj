@@ -483,6 +483,11 @@ struct ConsumerAPI {
         
                 let res = try? cg.sqlRows(countsql, params: [codes])
 
+                var currentUserBalance = 0.0
+                if let countryId = Country.idWith(isoNumericCode: countryCode) {
+                    currentUserBalance = UserBalanceFunctions().getCurrentBalance(request.session!.userid, countryid: countryId)
+                }
+                
                 if res.isNotNil {
                     // creating the return JSON with results
                     var retJSONSub:[[String:Any]] = []
@@ -495,6 +500,7 @@ struct ConsumerAPI {
                         if let countryId = i.data.cashoutGroupDic.country_id { s["countryId"] = countryId }
                         if let threshAmount = i.data.cashoutGroupDic.thresholdAmount {
                             s["thresholdAmount"] = threshAmount
+                            s["disabled"] = threshAmount > currentUserBalance
                         }
                         if let longDesc = i.data.cashoutGroupDic.longDescription { s["longDescription"] = longDesc }
                         if let optionCount = i.data["option_count"] {
