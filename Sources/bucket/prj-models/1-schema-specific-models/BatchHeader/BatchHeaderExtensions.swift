@@ -100,5 +100,31 @@ struct BatchHeaderDictionary {
         }
     }
 
+    var record_start_date : Int? {
+        get {
+            return self.dic["record_start_date"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["record_start_date"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "record_start_date")
+            }
+        }
+    }
+
+    var record_end_date : Int? {
+        get {
+            return self.dic["record_end_date"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["record_end_date"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "record_end_date")
+            }
+        }
+    }
+
 }
 

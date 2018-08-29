@@ -86,13 +86,17 @@ final class SupportFunctions {
         if userId.isNotNil { current_userId = userId! }
         
         var batch_id = 1
+        var start_date = 0
         
         let bh = BatchHeader()
-        let sql = "SELECT id FROM \(schema).batch_header ORDER BY id DESC "
+        let sql = "SELECT * FROM \(schema).batch_header ORDER BY id DESC "
         let idh = try? bh.sqlRows(sql, params: [])
         if let i = idh?.first {
             batch_id = i.data["id"].intValue!
             batch_id = batch_id + 1
+            if let sd = i.data["record_end_date"].intValue, sd > 0 {
+                start_date = sd + 1
+            }
         }
 
         let nowdate = Date()
@@ -129,6 +133,11 @@ final class SupportFunctions {
                 bh.status = CCXServiceClass.sharedInstance.getNow()
                 bh.statusby = current_userId
                 bh.current_status = BatchHeaderStatus.working_on_it
+                
+                // if there is an end date, set the start datee one second after the end date
+                if start_date > 0 {
+                    bh.record_start_date = start_date
+                }
                 
                 let bhs = try? bh.saveWithCustomType(schemaIn: schema)
                 if let b = bhs?.first {

@@ -1854,5 +1854,24 @@ extension Account {
             }
         }
     }
+    
+    static func adminBouce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {
+        // Here we want to check the csrf & the authorization.
+        guard let csrf = request.session?.data["csrf"].stringValue, let sendCsrf = request.header(.custom(name: "X-CSRF-Token")) else {
+            response.notLoggedIn()
+            return true
+        }
+        guard request.session?.userid.isEmpty == false && csrf == sendCsrf else {  response.notLoggedIn(); return true  }
+        // Okay they are logged in.  Lets see when the last time, if they have, used any of the API's:
+        let user = Account()
+        try? user.get(request.session!.userid)
+
+        if !user.isAdmin() {
+            return true
+        }
+        
+        return false
+    }
+
 }
 

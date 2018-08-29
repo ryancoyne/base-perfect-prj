@@ -27,11 +27,13 @@ public class BatchHeader: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var batch_identifier : String? = nil
-    var description      : String? = nil
-    var current_status   : String? = nil
-    var status           : Int?    = nil
-    var statusby         : String? = nil
+    var batch_identifier  : String? = nil
+    var description       : String? = nil
+    var current_status    : String? = nil
+    var status            : Int?    = nil
+    var statusby          : String? = nil
+    var record_start_date : Int?    = nil
+    var record_end_date   : Int?    = nil
 
     //MARK: Table name
     override public func table() -> String { return "batch_header" }
@@ -86,7 +88,15 @@ public class BatchHeader: PostgresStORM {
         if let data = this.data.batchHeaderDic.statusby {
             statusby = data
         }
-        
+
+        if let data = this.data.batchHeaderDic.record_start_date {
+            record_start_date = data
+        }
+
+        if let data = this.data.batchHeaderDic.record_end_date {
+            record_end_date = data
+        }
+
     }
     
     func rows() -> [BatchHeader] {
@@ -129,6 +139,16 @@ public class BatchHeader: PostgresStORM {
             case "statusby":
                 if (value as? String).isNotNil {
                     self.statusby = (value as! String)
+                }
+                
+            case "record_start_date":
+                if (value as? Int).isNotNil {
+                    self.record_start_date = (value as! Int)
+                }
+                
+            case "record_end_date":
+                if (value as? Int).isNotNil {
+                    self.record_end_date = (value as! Int)
                 }
                 
             default:
@@ -191,6 +211,13 @@ public class BatchHeader: PostgresStORM {
             dictionary.batchHeaderDic.statusby = self.statusby
         }
         
+        if self.record_start_date.isNotNil {
+            dictionary.batchHeaderDic.record_start_date = self.record_start_date
+        }
+
+        if self.record_end_date.isNotNil {
+            dictionary.batchHeaderDic.record_end_date = self.record_end_date
+        }
 
         return dictionary
     }
@@ -217,6 +244,14 @@ public class BatchHeader: PostgresStORM {
         }
 
         if diff == true, self.batch_identifier != targetItem.batch_identifier {
+            diff = false
+        }
+
+        if diff == true, self.record_start_date != targetItem.record_start_date {
+            diff = false
+        }
+
+        if diff == true, self.record_end_date != targetItem.record_end_date {
             diff = false
         }
 

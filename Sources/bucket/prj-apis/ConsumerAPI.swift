@@ -1,5 +1,5 @@
 //
-//  RetailerAPI.swift
+//  ConsumerAPI.swift
 //  COpenSSL
 //
 //  Created by Ryan Coyne on 8/9/18.
