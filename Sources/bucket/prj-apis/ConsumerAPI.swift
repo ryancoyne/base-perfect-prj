@@ -493,6 +493,9 @@ struct ConsumerAPI {
                         if let name = i.data.cashoutGroupDic.group_name { s["name"] = name }
                         if let desc = i.data.cashoutGroupDic.description { s["description"] = desc }
                         if let countryId = i.data.cashoutGroupDic.country_id { s["countryId"] = countryId }
+                        if let threshAmount = i.data.cashoutGroupDic.thresholdAmount {
+                            s["thresholdAmount"] = threshAmount
+                        }
                         if let longDesc = i.data.cashoutGroupDic.longDescription { s["longDescription"] = longDesc }
                         if let optionCount = i.data["option_count"] {
                             s["optionCount"] = optionCount
