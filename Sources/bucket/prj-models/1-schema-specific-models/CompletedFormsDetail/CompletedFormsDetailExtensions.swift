@@ -61,6 +61,32 @@ struct CompletedFormsDetailDictionary {
         }
     }
     
+    var fieldName : String? {
+        get {
+            return self.dic["field_name"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["field_name"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "field_name")
+            }
+        }
+    }
+    
+    var fieldValue : String? {
+        get {
+            return self.dic["field_value"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["field_value"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "field_value")
+            }
+        }
+    }
+    
     var batch_order : Int? {
         get {
             return self.dic["batch_order"].intValue

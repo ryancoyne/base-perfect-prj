@@ -130,6 +130,8 @@ final class CompletedFormsDetailTable {
         // table specific fields
         createsql.append("cf_header_id int default 0, ")
         createsql.append("batch_group text COLLATE pg_catalog.default, ")
+        createsql.append("field_value text COLLATE pg_catalog.default, ")
+        createsql.append("field_name text COLLATE pg_catalog.default, ")
         createsql.append("batch_order int default 0, ")
         createsql.append("detail_line text COLLATE pg_catalog.default, ")
         

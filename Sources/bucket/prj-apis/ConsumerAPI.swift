@@ -569,9 +569,6 @@ struct ConsumerAPI {
                     guard let countryId = request.countryId, countryId != 0 else { return response.invalidCountryCode }
                     let schema = Country.getSchema(request)
                     
-                    // Lets figure out what fields they needed to send:
-                    
-                    
                     // lets get the minimum amount permitted
                     let sqloption = "SELECT minimum, maximum, name, group_id, form_id FROM \(schema).cashout_option_view_deleted_no WHERE id = \(theoption)"
                     let coop = CashoutOption()
@@ -580,44 +577,35 @@ struct ConsumerAPI {
                     var min_cashout  = 0.0
                     var max_cashout  = 0.0
                     var name_cashout = ""
-                    var group_id     = 0
                     var form_id = 0
                     
                     if resopt.isNotNil, let i = resopt?.first! {
-                        min_cashout  = i.data["minimum"].doubleValue!
-                        max_cashout  = i.data["maximum"].doubleValue!
-                        name_cashout = i.data["name"].stringValue!
-                        group_id     = i.data["group_id"].intValue!
-                        form_id = i.data["form_id"].intValue!
+                        min_cashout  = i.data["minimum"].doubleValue ?? 0.0
+                        max_cashout  = i.data["maximum"].doubleValue ?? 0.0
+                        name_cashout = i.data["name"].stringValue ?? ""
+                        form_id = i.data["form_id"].intValue ?? 0
                     }
                     
                     // If no fields are submitted, send back an error.
-                    let submittedFields = request.formFields
+                    var submittedFields = request.formFields
                     
+                    // Now that we have the form id, we can get the form fields, and make sure they are entering these:
                     let formFields = SupportFunctions.sharedInstance.getFormFields(form_id, schema: schema) as?[[String:Any]] ?? []
                     var unsubmittedFields : [String] = []
                     for field in formFields {
                         // Go thru all the fields, if they are required, make sure they are in the submitted fields.
-                        if field["isReq"].boolValue == true, let key = field["key"].stringValue {
-                            if submittedFields?[key].isNil == true {
-                                unsubmittedFields.append(key)
+                        if let key = field["key"].stringValue, let name = field["name"].stringValue {
+                            if field["isReq"].boolValue == true && submittedFields?[key].isNil == true {
+                                unsubmittedFields.append(key+" (\(name))")
+                            } else {
+                                let c = submittedFields?.removeValue(forKey: key)
+                                submittedFields?[name] = c
                             }
                         }
                     }
                     
+                    // Send back the unsubmitted fields.
                     guard unsubmittedFields.isEmpty else { return response.missingFormFields(unsubmittedFields) }
-                    
-                    // Now that we have the form id, we can get the form fields, and make sure they are entering these:
-                    
-                    
-                    
-                    //                var country_id = 0
-                    //                let sqlgroup = "SELECT country_id FROM cashout_group_view_deleted_no WHERE id = \(group_id)"
-                    //                let cg = CashoutGroup()
-                    //                let resultcg = try? cg.sqlRows(sqlgroup, params: [])
-                    //                if resultcg.isNotNil {
-                    //                    country_id = resultcg!.first!.data["country_id"].intValue!
-                    //                }
                     
                     // get the cashout amount
                     let amount_to_cashout = request.cashoutAmount!
@@ -652,6 +640,11 @@ struct ConsumerAPI {
                                 if (totalcount + tam) <= amount_to_cashout {
                                     totalcount += tam
                                     included.append(i.data["id"].intValue!)
+                                } else if tam > amount_to_cashout {
+                                    // the rare case where one code is worth more than the cashout request
+                                    totalcount = tam
+                                    lastoneamount = amount_to_cashout
+                                    lastone = i.data["id"].intValue!
                                 } else if totalcount < amount_to_cashout {
                                     lastoneamount = amount_to_cashout - totalcount
                                     lastone = i.data["id"].intValue!
@@ -663,6 +656,21 @@ struct ConsumerAPI {
                     // now we have the list of records to include and the final partial record
                     if totalcount < amount_to_cashout {
                         return response.invalidCashoutBalance
+                    }
+                    
+                    // The user has enough to cashout, so lets go and write in their entered fields:
+                    if submittedFields?.isEmpty == false {
+                        let cfHeader = CompletedFormsHeader()
+                        _=try? cfHeader.saveWithCustomType(schemaIn: schema, request.session!.userid, copyOver: false)
+                        
+                        // Now write in the details:
+                        for field in submittedFields! {
+                            let detail = CompletedFormsDetail()
+                            detail.cf_header_id = cfHeader.id
+                            detail.field_name = field.key
+                            detail.field_value = field.value
+                            _=try? detail.saveWithCustomType(schemaIn: schema, request.session!.userid, copyOver: false)
+                        }
                     }
                     
                     // process the records
@@ -730,7 +738,8 @@ struct ConsumerAPI {
                         // add the cashout record
                         
                         
-                        
+                        // Decrement the users balance:
+                        UserBalanceFunctions().adjustUserBalance(schemaId: schema, request.session!.userid, countryid: countryId, decrease: amount_to_cashout)
                         
                         // this is where we show success
                         let _ = try? response.setBody(json: ["amount":amount_to_cashout,"country_id":countryId])

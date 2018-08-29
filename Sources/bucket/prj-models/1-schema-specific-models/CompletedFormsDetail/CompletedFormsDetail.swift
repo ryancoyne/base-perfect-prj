@@ -21,6 +21,8 @@ public class CompletedFormsDetail: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
+    var field_name : String? = nil
+    var field_value : String? = nil
     var cf_header_id : Int? = nil
     var batch_group     : String? = nil
     var batch_order     : Int? = nil
@@ -105,6 +107,16 @@ public class CompletedFormsDetail: PostgresStORM {
                     self.batch_group = (value as! String)
                 }
                 
+            case "field_name":
+                if (value as? String).isNotNil {
+                    self.field_name = (value as! String)
+                }
+                
+            case "field_value":
+                if (value as? String).isNotNil {
+                    self.field_value = (value as! String)
+                }
+                
             case "batch_order":
                 if (value as? Int).isNotNil {
                     self.batch_order = (value as! Int)
@@ -157,6 +169,14 @@ public class CompletedFormsDetail: PostgresStORM {
         
         if self.cf_header_id.isNotNil {
             dictionary.cfDetailDic.cfHeaderId = self.cf_header_id
+        }
+        
+        if self.field_name.isNotNil {
+            dictionary.cfDetailDic.fieldName = self.field_name
+        }
+        
+        if self.field_value.isNotNil {
+            dictionary.cfDetailDic.fieldValue = self.field_value
         }
         
         if self.batch_group.isNotNil {
