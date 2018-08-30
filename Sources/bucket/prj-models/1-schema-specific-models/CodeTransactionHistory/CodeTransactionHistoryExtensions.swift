@@ -256,6 +256,18 @@ struct CodeTransactionHistoryDictionary {
             }
         }
     }
+    var description : String? {
+        get {
+            return self.dic["description"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["description"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "description")
+            }
+        }
+    }
     var terminalId : Int? {
         get {
             return self.dic["terminal_id"].intValue

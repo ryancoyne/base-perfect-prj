@@ -46,6 +46,7 @@ public class CodeTransaction: PostgresStORM {
     var amount_available : Double? = nil
     var total_amount : Double? = nil
     var status : String? = nil
+    var description : String? = nil
 
     var disputed : Int? = nil
     var disputedby : String? = nil
@@ -184,6 +185,10 @@ public class CodeTransaction: PostgresStORM {
         if let data = this.data.codeTransactionDic.status.stringValue {
             status = data
         }
+        
+        if let data = this.data.codeTransactionDic.description.stringValue {
+            description = data
+        }
 
     }
     
@@ -320,6 +325,11 @@ public class CodeTransaction: PostgresStORM {
             case "archived":
                 if (value as? Int).isNotNil {
                     self.archived = (value as! Int)
+                }
+                
+            case "description":
+                if (value as? String).isNotNil {
+                    self.description = (value as! String)
                 }
 
             default:
@@ -470,7 +480,9 @@ public class CodeTransaction: PostgresStORM {
             dictionary.codeTransactionDic.customerCodeURL = self.customer_codeurl
         }
         
-        
+        if self.description.isNotNil {
+            dictionary.codeTransactionDic.description = self.description
+        }
         
         return dictionary
     }
@@ -565,6 +577,10 @@ public class CodeTransaction: PostgresStORM {
         }
         
         if diff == true, self.cashedout_total != targetItem.cashedout_total {
+            diff = false
+        }
+        
+        if diff == true, self.description != targetItem.description {
             diff = false
         }
 

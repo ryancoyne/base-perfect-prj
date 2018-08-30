@@ -159,6 +159,7 @@ final class CodeTransactionTable {
         createsql.append("client_location text COLLATE pg_catalog.default, ")
         createsql.append("client_transaction_id text COLLATE pg_catalog.default, ")
         createsql.append("status text COLLATE pg_catalog.default, ")
+        createsql.append("description text COLLATE pg_catalog.default, ")
         createsql.append("customer_code text COLLATE pg_catalog.default, ")
         createsql.append("deleted_reason text COLLATE pg_catalog.default, ")
         createsql.append("disputed_reason text COLLATE pg_catalog.default, ")

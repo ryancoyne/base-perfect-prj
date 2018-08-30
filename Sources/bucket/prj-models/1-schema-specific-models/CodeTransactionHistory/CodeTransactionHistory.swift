@@ -38,7 +38,8 @@ public class CodeTransactionHistory: PostgresStORM {
     var amount_available      : Double? = nil
     var total_amount          : Double? = nil
     var status : String? = nil
-    
+    var description : String? = nil
+
     var disputed : Int? = nil
     var disputedby : String? = nil
     var redeemed : Int? = nil
@@ -174,7 +175,11 @@ public class CodeTransactionHistory: PostgresStORM {
         if let data = this.data.codeTransactionDic.status.stringValue {
             status = data
         }
-        
+
+        if let data = this.data.codeTransactionDic.description.stringValue {
+            description = data
+        }
+
     }
     
     func rows() -> [CodeTransactionHistory] {
@@ -266,6 +271,11 @@ public class CodeTransactionHistory: PostgresStORM {
             case "status":
                 if (value as? String).isNotNil {
                     self.status = (value as! String)
+                }
+
+            case "description":
+                if (value as? String).isNotNil {
+                    self.description = (value as! String)
                 }
 
             case "redeemedby":
@@ -470,7 +480,11 @@ public class CodeTransactionHistory: PostgresStORM {
         if self.total_amount.isNotNil {
             dictionary.codeTransactionDic.totalAmount = self.total_amount
         }
-        
+
+        if self.description.isNotNil {
+            dictionary.codeTransactionDic.description = self.description
+        }
+
         return dictionary
     }
     
@@ -544,6 +558,10 @@ public class CodeTransactionHistory: PostgresStORM {
         }
 
         if diff == true, self.status != targetItem.status {
+            diff = false
+        }
+
+        if diff == true, self.description != targetItem.description {
             diff = false
         }
 

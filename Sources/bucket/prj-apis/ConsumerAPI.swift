@@ -219,7 +219,7 @@ struct ConsumerAPI {
                 var substuff:[Any] = []
                 
                 let cth = CodeTransactionHistory()
-                
+            
                 let res = try? cth.sqlRows(sql, params: [])
                 if res.isNotNil {
 
@@ -231,15 +231,18 @@ struct ConsumerAPI {
                         tmp["amount"] = i.data["amount"].doubleValue
                         tmp["status"] = i.data["status"]
                         
-                        if let thetime = i.data["cashedout"].intValue, thetime > 0 {
+                        if let thetime = i.data["cashedout"].intValue, thetime > 0, let co = i.data["amount"].doubleValue, co == 0.0 {
                             tmp["type"] = "cashout"
                             tmp["description"] = i.data["cashedout_note"]
-                            tmp["amount"] = i.data["cashedout_total"]
+                            tmp["amount"] = i.data["cashedout_total"].doubleValue
                             tmp["created"] = thetime.dateString
                         } else {
                             tmp["type"] = "scan"
                             if let thetime = i.data["redeemed"].intValue {
                                 tmp["created"] = thetime.dateString
+                            }
+                            if let d = i.data["description"].stringValue {
+                                tmp["description"] = d
                             }
                         }
                         
@@ -268,6 +271,7 @@ struct ConsumerAPI {
                 
                 // Okay, the user is logged in and we have their id!  Lets see if we have the customer code!
                 guard let customerCode = request.customerCode, !customerCode.isEmpty else { return response.invalidCode }
+                if !customerCode.contains(string: ".") { return response.invalidCode }
                 
                 // grab the schema from the code
                 let index = customerCode.index(of: ".")!
@@ -638,16 +642,21 @@ struct ConsumerAPI {
                             
                             if let tam = i.data["amount_available"].doubleValue {
                                 if (totalcount + tam) <= amount_to_cashout {
+                                    // keet looping because we did not pick enough of the codes yet
                                     totalcount += tam
                                     included.append(i.data["id"].intValue!)
-                                } else if tam > amount_to_cashout {
+                                } else if (tam > amount_to_cashout) && (totalcount == 0) {
                                     // the rare case where one code is worth more than the cashout request
                                     totalcount = tam
                                     lastoneamount = amount_to_cashout
                                     lastone = i.data["id"].intValue!
+                                    break
                                 } else if totalcount < amount_to_cashout {
+                                    // the last one still has a small amount of value left
                                     lastoneamount = amount_to_cashout - totalcount
                                     lastone = i.data["id"].intValue!
+                                    totalcount = totalcount + lastoneamount
+                                    break
                                 }
                             }
                         }

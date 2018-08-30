@@ -452,6 +452,7 @@ struct RetailerAPI {
                         if let cc = add.country_id {
                             transaction.country_id = cc
                         }
+                        transaction.description = retailer.name
                         
                         // Save the transaction
                         let _ = try? transaction.saveWithCustomType(schemaIn: schema, CCXDefaultUserValues.user_server)
