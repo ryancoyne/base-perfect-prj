@@ -480,10 +480,14 @@ struct RetailerAPI {
                         transaction.description = retailer.name
                         
                         // Save the transaction
-                        let _ = try? transaction.saveWithCustomType(schemaIn: schema, CCXDefaultUserValues.user_server)
-                        
-                        // and now - lets save the transaction in the Audit table
+                        let trn = try? transaction.saveWithCustomType(schemaIn: schema, CCXDefaultUserValues.user_server)
+                        if let t = trn?.first, let tid = t.data["id"]  {
+                            transaction.id = tid as! Int
+                        }
+                        // and now - lets save theb transaction in the Audit table
                         AuditFunctions().addCustomerCodeAuditRecord(transaction)
+                        
+                        json!["bucketTransactionId"] = transaction.id
                         
                         // if we are here then everything went well
                         try? response.setBody(json: json!)
