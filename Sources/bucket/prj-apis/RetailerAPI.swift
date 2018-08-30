@@ -25,7 +25,7 @@ struct RetailerAPI {
         static var routes : [[String:Any]] {
             return [
                 ["method":"get",    "uri":"/api/v1/closeInterval/{intervalId}", "handler":closeInterval],
-                ["method":"get",    "uri":"/api/v1/billDenoms", "handler":billDenoms],
+                ["method":"post",    "uri":"/api/v1/billDenoms", "handler":billDenoms],
                 ["method":"get",    "uri":"/api/v1/closeInterval", "handler":closeInterval],
                 ["method":"post",   "uri":"/api/v1/registerterminal", "handler":registerTerminal],
                 ["method":"post",   "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],

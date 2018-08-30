@@ -27,11 +27,11 @@ struct ConsumerAPI {
                 ["method":"post",    "uri":"/api/v1/balance", "handler":balance],
                 ["method":"post",    "uri":"/api/v1/balance/{countryId}", "handler":balanceWithCountry],
                 // TRANSACTION ENDPOINTS:
-                ["method":"get",    "uri":"/api/v1/history", "handler":transactionHistory],
-                ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
+                ["method":"post",    "uri":"/api/v1/history", "handler":transactionHistory],
+                ["method":"post",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
                 // CASHOUT ENDPOINTS:
-                ["method":"get",    "uri":"/api/v1/cashout/{countryCode}/groups", "handler":cashoutTypes],
-                ["method":"get",    "uri":"/api/v1/cashout/{groupId}/options", "handler":cashoutOptions],
+                ["method":"post",    "uri":"/api/v1/cashout/{countryCode}/groups", "handler":cashoutTypes],
+                ["method":"post",    "uri":"/api/v1/cashout/{groupId}/options", "handler":cashoutOptions],
                 ["method":"post",    "uri":"/api/v1/cashout/{optionId}", "handler":cashout]
             ]
         }
