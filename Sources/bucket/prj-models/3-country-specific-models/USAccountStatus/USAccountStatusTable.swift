@@ -8,15 +8,15 @@
 import Foundation
 import PostgresStORM
 
-final class USBankTable {
+final class USAccountStatusTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
     
-    static let sharedInstance = USBankTable()
-    let tbl = USBank()
+    static let sharedInstance = USAccountStatusTable()
+    let tbl = USAccountStatus()
     
     let tablelevel = 1.00
     
@@ -25,13 +25,13 @@ final class USBankTable {
     func create() {
         
         
-        createUSBank("us")
+        createUSAccountStatus("us")
         
     }
 
     //MARK:-
     //MARK: Addresses table
-    private func createUSBank(_ schemaId:String? = "public") {
+    private func createUSAccountStatus(_ schemaId:String? = "public") {
         
         let schema = schemaId!.lowercased()
         
@@ -119,16 +119,12 @@ final class USBankTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
-        createsql.append("country_id int NOT NULL DEFAULT 0, ")
-        createsql.append("retailer_id int NOT NULL DEFAULT 0, ")
-        createsql.append("retailer_contact_id int NOT NULL DEFAULT 0, ")
-        createsql.append("address1 text COLLATE pg_catalog.default, ")
-        createsql.append("address2 text COLLATE pg_catalog.default, ")
-        createsql.append("address3 text COLLATE pg_catalog.default, ")
-        createsql.append("state text COLLATE pg_catalog.default, ")
-        createsql.append("postal_code text COLLATE pg_catalog.default, ")
-        createsql.append("city text COLLATE pg_catalog.default, ")
-        createsql.append("ach_transfer_minimum numeric(10,5) DEFAULT 0.0, ")
+        createsql.append("record_type text COLLATE pg_catalog.default, ")
+        createsql.append("change_date text COLLATE pg_catalog.default, ")
+        createsql.append("change_time text COLLATE pg_catalog.default, ")
+        createsql.append("code_number text COLLATE pg_catalog.default, ")
+        createsql.append("value_original int NOT NULL DEFAULT 0, ")
+        createsql.append("value_new int NOT NULL DEFAULT 0, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

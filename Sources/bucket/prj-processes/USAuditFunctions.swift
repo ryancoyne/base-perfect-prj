@@ -1,10 +1,3 @@
-//
-//  AuditFunctions.swift
-//
-//
-//  Created by Mike Silvers on 8/14/18.
-//
-
 import Foundation
 import StORM
 import PostgresStORM
@@ -12,13 +5,40 @@ import PerfectHTTP
 import PerfectLib
 import PerfectLocalAuthentication
 
-public class AuditFunctions {
+public struct USRecordType {
+    static let codeDetail     = "CD"
+    static let accountDetail  = "BD"
+    static let codeSummary    = "CS"
+    static let accountSummary = "BS"
+}
 
-    func customerCodeAuditRecord(_ record: Any ) {
+public struct USCodeStatusType {
+    static let firstentry  = 0
+    static let create      = 1
+    static let claimed     = 2
+    static let deactivated = 3
+    static let lost        = 4
+}
+
+public struct USAccountStatusType {
+    static let firstentry  = 0
+    static let active      = 1
+    static let frozen      = 2
+    static let lost_stolen = 3
+    static let breakage    = 4
+    static let inactive    = 5
+    static let fraud       = 6
+}
+
+public class USAuditFunctions {
+    
+    func customerCodeAuditRecord(_ record: Any, _ fromFunction:USCodeStatusType, _ toFunction:USCodeStatusType ) {
         
         var schema = ""
         var user = ""
         
+        let ar = USAccountStatus()
+        ar.created   = CCXServiceClass.sharedInstance.getNow()
         
         switch record {
         case is CodeTransaction:
@@ -34,6 +54,8 @@ public class AuditFunctions {
                 user = u
             }
             
+            // start completing the record
+            ar.createdby = user
             
             break
             
@@ -58,13 +80,19 @@ public class AuditFunctions {
             break
         }
         
+        // save the audit record
+        let _ = try? ar.saveWithCustomType(schemaIn: schema, user)
+        
     }
     
     
-    func customerAccountAuditRecord(_ record: Account ) {
+    func customerAccountAuditRecord(_ record: Account, _ fromFunction:USAccountStatusType, _ toFunction:USAccountStatusType ) {
         
         var schema = ""
         var user = ""
+        
+//        let ar = USBank()
+//        ar.created   = CCXServiceClass.sharedInstance.getNow()
         
         switch record {
         case is CodeTransaction:
@@ -79,6 +107,9 @@ public class AuditFunctions {
             } else if let u = ct.createdby, !u.isEmpty {
                 user = u
             }
+            
+            // start completing the record
+//            ar.createdby = user
             
             break
             
@@ -95,6 +126,7 @@ public class AuditFunctions {
                 user = u
             }
             
+            
             break
             
         default:
@@ -102,5 +134,9 @@ public class AuditFunctions {
             break
         }
         
+        // save the audit record
+//        let _ = try? ar.saveWithCustomType(schemaIn: schema, user)
+        
     }
+    
 }

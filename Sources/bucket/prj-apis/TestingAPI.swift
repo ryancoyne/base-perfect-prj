@@ -215,7 +215,7 @@ struct TestingAPI {
                         
                         // and now - lets save the transaction in the Audit table
                         let af = AuditFunctions()
-                        af.addCustomerCodeAuditRecord(transaction)
+                        af.customerCodeAuditRecord(transaction)
                         
                     }
                 }
@@ -249,7 +249,7 @@ struct TestingAPI {
                             if let _            = try? ct.saveWithCustomType(schemaIn: schema, redeemedby) {
                                 
                                 // this means it was saved - audit and archive
-                                AuditFunctions().addCustomerCodeAuditRecord(ct)
+                                AuditFunctions().customerCodeAuditRecord(ct)
                                 
                                 // update the users record
                                 UserBalanceFunctions().adjustUserBalance(schemaId: schema ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
