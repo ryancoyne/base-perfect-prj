@@ -39,9 +39,9 @@ struct RetailerAPI {
             return {
                 request, response in
                 // We will have a country passed in through the header:
-                guard let countryId = request.countryId else { return response.invalidCountryCode }
+                guard let _ = request.countryId else { return response.invalidCountryCode }
                 
-                let schema = Country.getSchema(countryId)
+                let schema = Country.getSchema(request)
                 
                 switch schema {
                 case "us":
