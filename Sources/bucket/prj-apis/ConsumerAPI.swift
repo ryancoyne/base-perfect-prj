@@ -24,8 +24,8 @@ struct ConsumerAPI {
         static var routes : [[String:Any]] {
             return [
                 // BALANCE ENDPOINT:
-                ["method":"get",    "uri":"/api/v1/balance", "handler":balance],
-                ["method":"get",    "uri":"/api/v1/balance/{countryId}", "handler":balanceWithCountry],
+                ["method":"post",    "uri":"/api/v1/balance", "handler":balance],
+                ["method":"post",    "uri":"/api/v1/balance/{countryId}", "handler":balanceWithCountry],
                 // TRANSACTION ENDPOINTS:
                 ["method":"get",    "uri":"/api/v1/history", "handler":transactionHistory],
                 ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
