@@ -34,11 +34,13 @@ final class SupportFunctions {
         // date formatter: yyyyMMdd
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
+        dateFormatter.timeZone = TimeZone(identifier: "UTC")
         let retDate = dateFormatter.string(from: thedate)
         
         // time formatter: hhmmss
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "hhmmss"
+        timeFormatter.timeZone = TimeZone(identifier: "UTC")
         let retTime = timeFormatter.string(from: thedate)
         
         return (retDate,retTime)

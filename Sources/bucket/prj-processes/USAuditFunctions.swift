@@ -8,8 +8,8 @@ import PerfectLocalAuthentication
 public struct USRecordType {
     static let codeDetail     = "CD"
     static let accountDetail  = "BD"
-    static let codeSummary    = "CS"
-    static let accountSummary = "BS"
+    static let codeStatus     = "CS"
+    static let accountStatus  = "BS"
 }
 
 public struct USCodeStatusType {
@@ -39,9 +39,10 @@ public class USAuditFunctions {
         var user = ""
         
         let ar = USAccountCodeStatus()
-        ar.record_type = USRecordType.codeSummary
+        ar.record_type = USRecordType.codeStatus
         
-//        let ad = USAccountCodeDetail()
+        let ad = USAccountCodeDetail()
+        ad.record_type = USRecordType.codeDetail
         
         switch record {
         case is CodeTransaction:
@@ -57,10 +58,11 @@ public class USAuditFunctions {
                 user = u
             }
             
+            // -- Status Record
             // start completing the record
             ar.created        = ct.created
             ar.createdby      = user
-            ar.record_type    = USRecordType.codeSummary
+            ar.record_type    = USRecordType.codeStatus
             ar.code_number    = ct.customer_code
             ar.value_original = fromFunction
             ar.value_new      = toFunction
@@ -69,7 +71,21 @@ public class USAuditFunctions {
             let thedates = SupportFunctions.sharedInstance.getDateAndTime(ar.created!)
             ar.change_date = thedates.date
             ar.change_time = thedates.time
+
+            // -- Detail Record
+            // start completing the detail record
+            ad.created        = ct.created
+            ad.createdby      = user
+            ad.record_type    = USRecordType.codeDetail
+            ad.code_number    = ct.customer_code
+            ad.value_original = fromFunction
+            ad.value_new      = toFunction
+            ad.amount         = ct.amount
             
+            // dates
+            ad.change_date = thedates.date
+            ad.change_time = thedates.time
+
             break
             
         case is CodeTransactionHistory:
@@ -85,10 +101,11 @@ public class USAuditFunctions {
                 user = u
             }
             
+            // -- Status Record
             // start completing the record
             ar.created        = ct.created
             ar.createdby      = user
-            ar.record_type    = USRecordType.codeSummary
+            ar.record_type    = USRecordType.codeStatus
             ar.code_number    = ct.customer_code
             ar.value_original = fromFunction
             ar.value_new      = toFunction
@@ -97,6 +114,20 @@ public class USAuditFunctions {
             let thedates = SupportFunctions.sharedInstance.getDateAndTime(ar.created!)
             ar.change_date = thedates.date
             ar.change_time = thedates.time
+
+            // -- Detail Record
+            // start completing the detail record
+            ad.created        = ct.created
+            ad.createdby      = user
+            ad.record_type    = USRecordType.codeDetail
+            ad.code_number    = ct.customer_code
+            ad.value_original = fromFunction
+            ad.value_new      = toFunction
+            ad.amount         = ct.amount
+            
+            // dates
+            ad.change_date = thedates.date
+            ad.change_time = thedates.time
 
             break
             
@@ -107,7 +138,8 @@ public class USAuditFunctions {
         
         // save the audit record
         let _ = try? ar.saveWithCustomType(schemaIn: schema, user)
-        
+        let _ = try? ad.saveWithCustomType(schemaIn: schema, user)
+
     }
     
     
