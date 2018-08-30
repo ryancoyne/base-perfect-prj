@@ -25,6 +25,7 @@ struct RetailerAPI {
         static var routes : [[String:Any]] {
             return [
                 ["method":"get",    "uri":"/api/v1/closeInterval/{intervalId}", "handler":closeInterval],
+                ["method":"get",    "uri":"/api/v1/billDenoms", "handler":billDenoms],
                 ["method":"get",    "uri":"/api/v1/closeInterval", "handler":closeInterval],
                 ["method":"post",   "uri":"/api/v1/registerterminal", "handler":registerTerminal],
                 ["method":"post",   "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],
@@ -32,6 +33,30 @@ struct RetailerAPI {
                 ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction],
             ]
         }
+        
+        //MARK: - Get Bill Denominations:
+        public static func billDenoms(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                // We will have a country passed in through the header:
+                guard let _ = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(request)
+                
+                switch schema {
+                case "us":
+                // Return the US denominations:
+                    _=try? response.setBody(json: ["usesNaturalChangeFunction":false]).setHeader(.custom(name: "Content-Type"), value: "application/json; charset=UTF-8").completed(status: .ok)
+                    break
+                case "sg":
+                // Return the SG Denominations:
+                    _=try? response.setBody(json: ["usesNaturalChangeFunction":true, "denominations":[100.00, 50.00, 20.00, 10.00, 5.00, 2.00]]).setHeader(.custom(name: "Content-Type"), value: "application/json; charset=UTF-8").completed(status: .ok)
+                    break
+                default: return response.unsupportedCountry
+                }
+            }
+        }
+        
         //MARK: - Close Interval Function
         public static func closeInterval(_ data: [String:Any]) throws -> RequestHandler {
             return {
