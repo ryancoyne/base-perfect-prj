@@ -483,7 +483,7 @@ struct RetailerAPI {
                         let _ = try? transaction.saveWithCustomType(schemaIn: schema, CCXDefaultUserValues.user_server)
                         
                         // and now - lets save the transaction in the Audit table
-                        AuditFunctions().customerCodeAuditRecord(transaction)
+                        AuditFunctions().addCustomerCodeAuditRecord(transaction)
                         
                         // if we are here then everything went well
                         try? response.setBody(json: json!)
@@ -573,7 +573,7 @@ struct RetailerAPI {
                     let _ = try? thecode.saveWithCustomType(schemaIn: schema,thecode.deletedby, copyOver: false)
                     
                     // audit the delete
-                    AuditFunctions().customerCodeAuditRecord(thecode)
+                    AuditFunctions().deleteCustomerCodeAuditRecord(thecode)
                     
                     // all OK - returned at the bottom
                     _=try? response.setBody(json: ["result":"Successfully deleted the transaction."])

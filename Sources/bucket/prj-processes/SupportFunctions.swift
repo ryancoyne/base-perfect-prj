@@ -19,6 +19,31 @@ final class SupportFunctions {
     
     static let sharedInstance = SupportFunctions()
 
+    func getDateAndTime(_ formatTime:Int? = nil)->(date:String, time:String) {
+        
+        var checkTime = 0
+        
+        if formatTime.isNil {
+            checkTime = CCXServiceClass.sharedInstance.getNow()
+        } else {
+            checkTime = formatTime!
+        }
+        
+        let thedate = Date(timeIntervalSince1970: TimeInterval(checkTime))
+        
+        // date formatter: yyyyMMdd
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMdd"
+        let retDate = dateFormatter.string(from: thedate)
+        
+        // time formatter: hhmmss
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "hhmmss"
+        let retTime = timeFormatter.string(from: thedate)
+        
+        return (retDate,retTime)
+    }
+    
     func getCountryId(_ countryCode: String)->Int {
         
         let cc = Country()

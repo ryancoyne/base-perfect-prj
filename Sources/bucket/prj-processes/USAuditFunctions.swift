@@ -18,6 +18,7 @@ public struct USCodeStatusType {
     static let claimed     = 2
     static let deactivated = 3
     static let lost        = 4
+    static let cashedout   = 5
 }
 
 public struct USAccountStatusType {
@@ -32,13 +33,15 @@ public struct USAccountStatusType {
 
 public class USAuditFunctions {
     
-    func customerCodeAuditRecord(_ record: Any, _ fromFunction:USCodeStatusType, _ toFunction:USCodeStatusType ) {
+    func customerCodeAuditRecord(_ record: Any, _ fromFunction:Int, _ toFunction:Int, _ userId:String? = nil ) {
         
         var schema = ""
         var user = ""
         
-        let ar = USAccountStatus()
-        ar.created   = CCXServiceClass.sharedInstance.getNow()
+        let ar = USAccountCodeStatus()
+        ar.record_type = USRecordType.codeSummary
+        
+//        let ad = USAccountCodeDetail()
         
         switch record {
         case is CodeTransaction:
@@ -55,7 +58,17 @@ public class USAuditFunctions {
             }
             
             // start completing the record
-            ar.createdby = user
+            ar.created        = ct.created
+            ar.createdby      = user
+            ar.record_type    = USRecordType.codeSummary
+            ar.code_number    = ct.customer_code
+            ar.value_original = fromFunction
+            ar.value_new      = toFunction
+            
+            // dates
+            let thedates = SupportFunctions.sharedInstance.getDateAndTime(ar.created!)
+            ar.change_date = thedates.date
+            ar.change_time = thedates.time
             
             break
             
@@ -72,7 +85,19 @@ public class USAuditFunctions {
                 user = u
             }
             
+            // start completing the record
+            ar.created        = ct.created
+            ar.createdby      = user
+            ar.record_type    = USRecordType.codeSummary
+            ar.code_number    = ct.customer_code
+            ar.value_original = fromFunction
+            ar.value_new      = toFunction
             
+            // dates
+            let thedates = SupportFunctions.sharedInstance.getDateAndTime(ar.created!)
+            ar.change_date = thedates.date
+            ar.change_time = thedates.time
+
             break
             
         default:

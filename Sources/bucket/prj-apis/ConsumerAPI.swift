@@ -313,7 +313,7 @@ struct ConsumerAPI {
                 if let _            = try? ct.saveWithCustomType(schemaIn: schema, redeemedby) {
                     
                     // this means it was saved - audit and archive
-                    AuditFunctions().customerCodeAuditRecord(ct)
+                    AuditFunctions().redeemCustomerCodeAuditRecord(ct)
                     
                     // update the users record
                     UserBalanceFunctions().adjustUserBalance(schemaId: schema ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
@@ -723,7 +723,7 @@ struct ConsumerAPI {
                             let _ = try? working_cth.saveWithCustomType(schemaIn: schema)
                             
                             // Write the audit record
-                            AuditFunctions().customerCodeAuditRecord(working_cth)
+                            AuditFunctions().cashoutCustomerCodeAuditRecord(working_cth)
                             
                         }
                         

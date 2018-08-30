@@ -8,15 +8,15 @@
 import Foundation
 import PostgresStORM
 
-final class USAccountStatusTable {
+final class USAccountCodeStatusTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
     
-    static let sharedInstance = USAccountStatusTable()
-    let tbl = USAccountStatus()
+    static let sharedInstance = USAccountCodeStatusTable()
+    let tbl = USAccountCodeStatus()
     
     let tablelevel = 1.00
     

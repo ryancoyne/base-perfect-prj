@@ -10,7 +10,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
-public class USAccountStatus: PostgresStORM {
+public class USAccountCodeStatus: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
     var id         : Int?    = nil
@@ -29,7 +29,7 @@ public class USAccountStatus: PostgresStORM {
     var value_new       : Int? = nil
     
     //MARK: Table name
-    override public func table() -> String { return "us_account_status" }
+    override public func table() -> String { return "us_account_code_status" }
     
     //MARK: Functions to retrieve data and such
     override open func to(_ this: StORMRow) {
@@ -87,10 +87,10 @@ public class USAccountStatus: PostgresStORM {
         }
     }
     
-    func rows() -> [USAccountStatus] {
-        var rows = [USAccountStatus]()
+    func rows() -> [USAccountCodeStatus] {
+        var rows = [USAccountCodeStatus]()
         for i in 0..<self.results.rows.count {
-            let row = USAccountStatus()
+            let row = USAccountCodeStatus()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -202,7 +202,7 @@ public class USAccountStatus: PostgresStORM {
     }
     
     // true if they are the same, false if the target item is different than the core item
-    func compare(targetItem: USAccountStatus)-> Bool {
+    func compare(targetItem: USAccountCodeStatus)-> Bool {
         
         var diff = true
         
