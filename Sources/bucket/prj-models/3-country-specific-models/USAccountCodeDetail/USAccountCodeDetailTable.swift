@@ -25,13 +25,13 @@ final class USAccountCodeDetailTable {
     func create() {
         
         
-        createUSAccountStatus("us")
+        createUSAccountDetail("us")
         
     }
 
     //MARK:-
     //MARK: Addresses table
-    private func createUSAccountStatus(_ schemaId:String? = "public") {
+    private func createUSAccountDetail(_ schemaId:String? = "public") {
         
         let schema = schemaId!.lowercased()
         
