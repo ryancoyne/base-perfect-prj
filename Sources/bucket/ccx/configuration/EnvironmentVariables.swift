@@ -620,6 +620,32 @@ final class EnvironmentVariables {
         }
     }
     
+    private var _Public_URL_Full_Domain:String?
+    public var Public_URL_Full_Domain: String? {
+        get {
+            if _Public_URL_Full_Domain.isNil {
+                if EnvironmentVariables.sharedInstance.URL_PORT == 80 || EnvironmentVariables.sharedInstance.URL_PORT == 443 {
+                    
+                    var burl = EnvironmentVariables.sharedInstance.URL_PROTOCOL!
+                    burl.append("://")
+                    burl.append(EnvironmentVariables.sharedInstance.URL_DOMAIN!)
+                    _Public_URL_Full_Domain                         = burl
+                    
+                } else {
+                    
+                    var burl = EnvironmentVariables.sharedInstance.URL_PROTOCOL!
+                    burl.append("://")
+                    burl.append(EnvironmentVariables.sharedInstance.URL_DOMAIN!)
+                    burl.append(":")
+                    burl.append("\(EnvironmentVariables.sharedInstance.URL_PORT!)")
+                    _Public_URL_Full_Domain                         = burl
+                }
+            }
+            
+            return _Public_URL_Full_Domain
+        }
+    }
+
     private var _LISTENING_URL_PORT: Int?
     public var LISTENING_URL_PORT: Int? {
         get {
