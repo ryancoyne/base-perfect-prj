@@ -1808,7 +1808,7 @@ extension Account {
             return .registerError
         }
         
-        var h = "<p><center><a href='http://buckettechnologies.com'><img src='\(baseURL)/assets/images/Logo-Refresh-RGB_vertical' alt='Bucket Technologies' height='42' width='42'></a></p>"
+        var h = "<p><center><a href='http://buckettechnologies.com'><img src='\(baseURL)/assets/images/Logo-Refresh-RGB_vertical.png' alt='Bucket Technologies' height='42' width='42'></a></p>"
         h += "<p><center><h2>Welcome to Bucket!</h2></center></p>"
         h += "<p><center>We’re glad you decided to join us in ridding the world of coins. With Bucket, you can effortlessly save all your change digitally for something useful - such as that next item on your Bucket list (har har).</center></p>"
         h += "<p><center>To finish setting up your new account, please <a href=\"\(baseURL)/verifyAccount/\(acc.passvalidation)\">click here.</a>  If the link does not work, copy and paste the following link into your browser: <br>\(baseURL)/verifyAccount/\(acc.passvalidation)</center></p>"
