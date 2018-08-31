@@ -191,8 +191,13 @@ struct ConsumerAPI {
                 let ct = CodeTransaction()
                 let rsp = try? ct.sqlRows("SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
                 
+                // make sure the schema exists - if not we do not service that country
+                let sqls = "SELECT schema_name FROM information_schema.schemata WHERE schema_name = '\(schema)'"
+                let sct = try? ct.sqlRows(sqls, params: [])
+                guard let _ = sct?.first else { return response.unsupportedCountry }
+                                
                 if rsp?.first.isNil == true {
-                    // if we did not find it, check histry to see if we have already redeemed it (we are using the summary table in the public schema
+                    // if we did not find it, check history to see if we have already redeemed it (we are using the summary table in the public schema
                     // to avoid performance costly functions looking thru schemas
                     let strs = CodeTransactionHistory()
                     let rsp2 = try? strs.sqlRows("SELECT * FROM \(schema).code_transaction_history WHERE customer_code = $1", params: ["\(request.customerCode!)"])
