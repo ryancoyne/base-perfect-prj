@@ -189,13 +189,15 @@ struct ConsumerAPI {
                 
                 // Awesome.  We have the customer code, and a user.  Now, we need to find the transaction and mark it as redeemed, and add the value to the ledger table!
                 let ct = CodeTransaction()
-                let rsp = try? ct.sqlRows("SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
                 
                 // make sure the schema exists - if not we do not service that country
                 let sqls = "SELECT schema_name FROM information_schema.schemata WHERE schema_name = '\(schema)'"
                 let sct = try? ct.sqlRows(sqls, params: [])
                 guard let _ = sct?.first else { return response.unsupportedCountry }
-                                
+                
+                // ok - now we can keep going :)
+                let rsp = try? ct.sqlRows("SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
+                
                 if rsp?.first.isNil == true {
                     // if we did not find it, check history to see if we have already redeemed it (we are using the summary table in the public schema
                     // to avoid performance costly functions looking thru schemas
