@@ -118,6 +118,18 @@ struct USAccountCodeDetailDictionary {
             }
         }
     }
+    var note : String? {
+        get {
+            return self.dic["note"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["note"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "note")
+            }
+        }
+    }
 }
 
 

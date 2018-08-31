@@ -27,7 +27,8 @@ public class USAccountCodeStatus: PostgresStORM {
     var code_number     : String? = nil
     var value_original  : Int? = nil
     var value_new       : Int? = nil
-    
+    var note            : String? = nil
+
     //MARK: Table name
     override public func table() -> String { return "us_account_code_status" }
     
@@ -85,6 +86,11 @@ public class USAccountCodeStatus: PostgresStORM {
         if let data = this.data.usAccountStatusDic.value_new {
             value_new = data
         }
+        
+        if let data = this.data.usAccountStatusDic.note {
+            note = data
+        }
+
     }
     
     func rows() -> [USAccountCodeStatus] {
@@ -132,7 +138,12 @@ public class USAccountCodeStatus: PostgresStORM {
                 if (value as? Int).isNotNil {
                     self.value_new = (value as! Int)
                 }
-                
+
+            case "note":
+                if (value as? String).isNotNil {
+                    self.note = (value as! String)
+                }
+
             default:
                 print("This should not occur")
             }
@@ -197,7 +208,11 @@ public class USAccountCodeStatus: PostgresStORM {
         if self.value_new.isNotNil {
             dictionary.usAccountStatusDic.value_new = self.value_new
         }
-        
+
+        if self.note.isNotNil {
+            dictionary.usAccountStatusDic.note = self.note
+        }
+
         return dictionary
     }
     
@@ -229,7 +244,11 @@ public class USAccountCodeStatus: PostgresStORM {
         if diff == true, self.value_new != targetItem.value_new {
             diff = false
         }
-        
+
+        if diff == true, self.note != targetItem.note {
+            diff = false
+        }
+
         return diff
         
     }

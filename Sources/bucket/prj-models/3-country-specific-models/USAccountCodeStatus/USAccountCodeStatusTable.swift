@@ -125,6 +125,7 @@ final class USAccountCodeStatusTable {
         createsql.append("code_number text COLLATE pg_catalog.default, ")
         createsql.append("value_original int NOT NULL DEFAULT 0, ")
         createsql.append("value_new int NOT NULL DEFAULT 0, ")
+        createsql.append("note text COLLATE pg_catalog.default, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

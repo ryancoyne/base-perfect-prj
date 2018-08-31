@@ -28,6 +28,7 @@ public class USAccountCodeDetail: PostgresStORM {
     var value_original  : Int? = nil
     var value_new       : Int? = nil
     var amount          : Double? = nil
+    var note            : String? = nil
 
     //MARK: Table name
     override public func table() -> String { return "us_account_code_detail" }
@@ -90,6 +91,11 @@ public class USAccountCodeDetail: PostgresStORM {
         if let data = this.data.usAccountDetailDic.amount {
             amount = data
         }
+
+        if let data = this.data.usAccountDetailDic.note {
+            note = data
+        }
+
     }
     
     func rows() -> [USAccountCodeDetail] {
@@ -141,6 +147,11 @@ public class USAccountCodeDetail: PostgresStORM {
             case "amount":
                 if (value as? Double).isNotNil {
                     self.amount = (value as! Double)
+                }
+
+            case "note":
+                if (value as? String).isNotNil {
+                    self.note = (value as! String)
                 }
 
             default:
@@ -212,6 +223,10 @@ public class USAccountCodeDetail: PostgresStORM {
             dictionary.usAccountDetailDic.amount = self.amount
         }
 
+        if self.note.isNotNil {
+            dictionary.usAccountDetailDic.note = self.note
+        }
+
         return dictionary
     }
     
@@ -245,6 +260,10 @@ public class USAccountCodeDetail: PostgresStORM {
         }
 
         if diff == true, self.amount != targetItem.amount {
+            diff = false
+        }
+
+        if diff == true, self.note != targetItem.note {
             diff = false
         }
 
