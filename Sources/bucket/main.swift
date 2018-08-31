@@ -23,9 +23,9 @@
 // Then....
 // a. Create the database:  CREATE DATABASE bucket;
 // b. Create the user: CREATE USER bucket WITH ENCRYPTED PASSWORD 'xHClEyTLxMV888QU';
-// c. Grant permission to the user: GRANT ALL PRIVILEGES ON DATABASE bucket TO bucket;
-// d. Add PostGIS: (command line as postgres user): psql -d bucket -c "CREATE EXTENSION postgis;"
-// e. Add PostGIS Topo: (command line as postgres user): psql -d bucket -c "CREATE EXTENSION postgis_topology;"
+// c. Add PostGIS: (command line as postgres user): psql -d bucket -c "CREATE EXTENSION postgis;"
+// d. Add PostGIS Topo: (command line as postgres user): psql -d bucket -c "CREATE EXTENSION postgis_topology;"
+// e. Grant permission to the user: GRANT ALL PRIVILEGES ON DATABASE bucket TO bucket;
 // Then....
 // i. Upload the program to the server
 // ii. Copy the config/main.json file and adjust the settings

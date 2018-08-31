@@ -144,7 +144,7 @@ struct UserAPI {
                     guard let email = json["email"].stringValue else { return try! response.setBody(json: ["errorCode":"RequiredJSON","message":"You need to send at least an email to register."]).completed(status: .badRequest) }
                     let username = json["username"].stringValue ?? ""
                     
-                    let err = Account.register(username.lowercased(), email, .provisional, baseURL: AuthenticationVariables.baseURL)
+                    let err = Account.registerWithEmail(username.lowercased(), email, .provisional, baseURL: AuthenticationVariables.baseURL)
                     
                     if err != .noError {
                         try? response.setBody(json: ["errorCode":"RegistrationIssue", "message":"The email attempting to be registered already exists."])

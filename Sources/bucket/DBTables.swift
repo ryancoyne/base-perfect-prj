@@ -265,8 +265,6 @@ final class PRJDBTables {
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
         if thereturn.postgis && thereturn.postgis_topo {
             // create the postgis tables here
-
-            
             
             // add the default data
             self.insertDefaultData()
