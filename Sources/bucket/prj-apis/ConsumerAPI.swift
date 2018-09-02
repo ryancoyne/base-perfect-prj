@@ -88,28 +88,30 @@ struct ConsumerAPI {
                 var sql = "SELECT cth.* "
 
                 // we do not need the retailer for cashouts - there will be no retailer for that type.
-                if transType != "CASHOUT" {
+//                if transType != "CASHOUT" {
                     sql.append(", r.name FROM \(schema).code_transaction_history AS cth ")
                     sql.append("LEFT JOIN \(schema).retailer AS r ")
                     sql.append("ON cth.retailer_id = r.id ")
-                } else {
-                    sql.append("FROM \(schema).code_transaction_history AS cth ")
-                }
+//                } else {
+//                    sql.append("FROM \(schema).code_transaction_history AS cth ")
+//                }
 
                 sql.append("WHERE cth.redeemedby = '\(userId)' ")
+                sql.append("AND ")
+                sql.append("((cth.country_id = \(countryid) ")
                 sql.append("AND cth.country_id = \(countryid) ")
-                sql.append("AND cth.deleted = 0 ")
+                sql.append("AND cth.deleted = 0) ")
                 
                 switch transType {
                 case "SCAN":
-                    sql.append("AND cth.customer_code <> '' ")
+                    sql.append("AND (cth.customer_code <> '') ) ")
                     break
                 case "CASHOUT":
-                    sql.append("AND (cth.customer_code = '' OR cth.customer_code IS NULL) ")
+                    sql.append(" AND (cth.customer_code = '' OR cth.customer_code IS NULL) ) ")
                     break
                 default:
                     // this is both scan and cashout - so do not include the cashout detail records
-                    sql.append("OR (cth.cashedout > 0 AND (cth.customer_code = '' OR cth.customer_code IS NULL)) ")
+                    sql.append("OR (cth.cashedout > 0 AND (cth.customer_code = '' OR cth.customer_code IS NULL)) ) ")
                     break
                 }
 
