@@ -25,9 +25,40 @@ struct TestingAPI {
         static var routes : [[String:Any]] {
             return [
                 ["method":"post",    "uri":"/api/v1/testingProcess", "handler":testFunction],
-                ["method":"get",    "uri":"/api/v1/testing/fillCodes/{countryCode}", "handler":addTestTransaction]
+                ["method":"get",    "uri":"/api/v1/testing/fillCodes/{countryCode}", "handler":addTestTransaction],
+                ["method":"post",    "uri":"/api/v1/testing/getQRCodes/{countryCode}", "handler":getCodes]
             ]
         }
+        //MARK: - Get QR Codes:
+        public static func getCodes(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // make sure we are NOT in production
+                if EnvironmentVariables.sharedInstance.Server!.rawValue == "PROD" {
+                    return response.functionNotOn
+                }
+                
+                // Bounce the user... we need a user.
+                guard !Account.userBouce(request, response) else { return }
+                
+                // Okay we have a user.  Lets check if they sent their country code in:
+                guard let countryId = request.countryId else { return response.invalidCountryCode }
+                
+                // Get how many codes:
+                let numberOfQrCodes = request.qrCodeCount
+                let codeSize = request.qrCodeSize
+                
+                // Okay... lets create the codes, and send the email!
+                for i in 1...numberOfQrCodes {
+                    let theQRCodeURL = ""
+                    let response = Utility2.makeRequest(.get, "https://api.qrserver.com/v1/create-qr-code/?data=\(theQRCodeURL)&size=\(codeSize)x\(codeSize)")
+                    
+                }
+                
+            }
+        }
+        
         //MARK: - Close Interval Function
         public static func testFunction(_ data: [String:Any]) throws -> RequestHandler {
             return {
@@ -35,8 +66,7 @@ struct TestingAPI {
                 
                 // make sure we are NOT in production
                 if EnvironmentVariables.sharedInstance.Server!.rawValue == "PROD" {
-                    let _ = try? response.setBody(json: " { \"error\": \"This function is not on\" } ")
-                    return response.completed(status: .internalServerError)
+                    return response.functionNotOn
                 }
                 
                 guard !Account.userBouce(request, response) else { return }
@@ -272,5 +302,14 @@ struct TestingAPI {
                 return response.completed(status: .ok)
             }
         }
+    }
+}
+
+fileprivate extension HTTPRequest {
+    var qrCodeCount : Int {
+        return self.header(.custom(name: "count")).intValue ?? 20
+    }
+    var qrCodeSize : Int {
+        return self.header(.custom(name: "size")).intValue ?? 150
     }
 }
