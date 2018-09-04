@@ -73,26 +73,31 @@ struct TestingAPI {
                 
                 // SET TESTING STUFF HERE:
 
-                var batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
-
-                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
-
-                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
-
-                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
-
-                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+                let header = SuttonFunctions().createFileHeader()
+                if header.batch_number > 0 {
+                    let footer = SuttonFunctions().createFileFooter(1, header.batch_number, header.file_date!)
+                }
                 
-                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
-                
-                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//                var batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//
+//                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//
+//                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//
+//                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//
+//                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//
+//                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//
+//                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
 
                 // END SET TESTING STUFF
 

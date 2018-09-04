@@ -4,6 +4,8 @@
 logs
 files
 StORMlog.txt
+transferfiles
+transferfiles/*
 
 # perfect server stuff
 .build_lin
