@@ -588,7 +588,7 @@ struct ConsumerAPI {
                     // The user has enough to cashout, so lets go and write in their entered fields:
                     if submittedFields?.isEmpty == false {
                         let cfHeader = CompletedFormsHeader()
-                        _=try? cfHeader.saveWithCustomType(schemaIn: schema, request.session!.userid, copyOver: false)
+                        _=try? cfHeader.saveWithCustomType(schemaIn: schema, userId!, copyOver: false)
                         
                         // Now write in the details:
                         for field in submittedFields! {
@@ -596,7 +596,7 @@ struct ConsumerAPI {
                             detail.cf_header_id = cfHeader.id
                             detail.field_name = field.key
                             detail.field_value = field.value
-                            _=try? detail.saveWithCustomType(schemaIn: schema, request.session!.userid, copyOver: false)
+                            _=try? detail.saveWithCustomType(schemaIn: schema, userId!, copyOver: false)
                         }
                     }
                     
@@ -666,10 +666,12 @@ struct ConsumerAPI {
                         
                         
                         // Decrement the users balance:
-                        UserBalanceFunctions().adjustUserBalance(schemaId: schema, request.session!.userid, countryid: countryId, decrease: amount_to_cashout)
+                        UserBalanceFunctions().adjustUserBalance(schemaId: schema, userId!, countryid: countryId, decrease: amount_to_cashout)
                         
                         // this is where we show success
-                        let _ = try? response.setBody(json: ["amount":amount_to_cashout,"country_id":countryId])
+                        // show the bucket amount response like in the login
+                        let buckets = UserBalanceFunctions().getConsumerBalances(userId!)
+                        let _ = try? response.setBody(json: ["buckets":buckets])
                         response.completed(status: .ok)
                         return
                     }
