@@ -12,7 +12,7 @@ public class SuttonFunctions {
         static let usFileDirectory = Dir("transferfiles/us")
     }
     
-    func checkFileDirectory() {
+    private func checkFileDirectory() {
 
         let main_file_dir = SuttonDefaults.mainFileDirectory
         if !main_file_dir.exists {
@@ -28,7 +28,7 @@ public class SuttonFunctions {
         
     }
     
-    func createFileHeader(_ fileNumber:Int? = 1, _ fileDate:Date? = nil, _ repeatFile:Bool? = false) -> (file_name: String, batch_number:Int, file_date:Date?) {
+    private func createFileHeader(_ fileNumber:Int? = 1, _ fileDate:Date? = nil, _ repeatFile:Bool? = false) -> (file_name: String, main_file_name:String, batch_number:Int, file_date:Date?) {
         
         // make sure the driectory is there
         self.checkFileDirectory()
@@ -48,7 +48,8 @@ public class SuttonFunctions {
         
         
         // lets put together the file
-        let filename = "\(SuttonDefaults.usFileDirectory.path)sutton_accounts_\(thedate)_header.txt"
+        let filename = "\(SuttonDefaults.usFileDirectory.path)sutton_accounts_\(thedate).header"
+        let fileprefix = "\(SuttonDefaults.usFileDirectory.path)sutton_accounts_\(thedate).txt"
         
         let file = File(filename)
         
@@ -59,7 +60,7 @@ public class SuttonFunctions {
         }
 
         if file.fd == -1 {
-            return ("", 0, nil)
+            return ("", "", 0, nil)
         }
         
         let timeFormatter = DateFormatter()
@@ -97,12 +98,12 @@ public class SuttonFunctions {
         // and close it...
         file.close()
         
-        return (filename, filenumber, finalFileDate)
+        return (filename, fileprefix, filenumber, finalFileDate)
         
     }
     
     // returns the string of the file
-    func createFileFooter(_ batch_count:Int, _ batch_number:Int, _ fileDate:Date)-> String {
+    private func createFileFooter(_ batch_count:Int, _ batch_number:Int, _ fileDate:Date)-> String {
         
         // make sure the driectory is there
         self.checkFileDirectory()
@@ -113,7 +114,7 @@ public class SuttonFunctions {
         
         
         // lets put together the file
-        let filename = "\(SuttonDefaults.usFileDirectory.path)sutton_accounts_\(thedate)_footer.txt"
+        let filename = "\(SuttonDefaults.usFileDirectory.path)sutton_accounts_\(thedate).footer"
         
         let file = File(filename)
         
@@ -197,32 +198,38 @@ public class SuttonFunctions {
         var nextnumber = 0
         
         // we are ready to start putting together the user account information
-        self.addHeader(runningUser, runningBatchId)
-        nextnumber = self.addCodes(nextNumber: nextnumber, runningUser, runningBatchId)
-        nextnumber = self.addUsers(nextNumber: nextnumber, runningUser, runningBatchId)
-        self.addFooter(runningUser, runningBatchId)
+//        self.addHeader(runningUser, runningBatchId)
+//        nextnumber = self.addCodes(nextNumber: nextnumber, runningUser, runningBatchId)
+//        nextnumber = self.addUsers(nextNumber: nextnumber, runningUser, runningBatchId)
+//        self.addFooter(runningUser, runningBatchId)
     }
+    
+    func createTransferFile () {
 
-    private func addHeader(_ userId:String? = nil,_ batchId:Int? = nil) {
-        
-        
-    }
+        // order by number.
+        // 1 = file header
+        // 1x to 99 =
+        // 1xxx to 999 =
+        // 1xxxx to 9999 =
+        // 100000 = file footer
 
-    private func addFooter(_ userId:String? = nil,_ batchId:Int? = nil) {
+        
+        var files:[Int:String] = [:]
+        let date_count = Date(timeIntervalSince1970: Double(CCXServiceClass.sharedInstance.getNow()))
         
         
-    }
-
-    private func addUsers(nextNumber:Int,_ userId:String? = nil,_ batchId:Int? = nil)-> Int {
+        let header = self.createFileHeader(nil, date_count, false)
+        files[1] = header.file_name
         
+        var batch_count = 0
         
-        return nextNumber + 1
-    }
-
-    private func addCodes(nextNumber:Int,_ userId:String? = nil,_ batchId:Int? = nil)-> Int {
+        files[100000] = self.createFileFooter(batch_count, header.batch_number, date_count)
         
+        let sortedfiles = files.sorted { $0.key < $1.key }
         
-        return nextNumber + 1
+        for (key, value) in sortedfiles {
+            print("Sorted: \(key): \(value)")
+        }
     }
     
 }
