@@ -647,6 +647,7 @@ struct ConsumerAPI {
                         
                         // add the cashout record to the history record
                         let newrec = CodeTransactionHistory()
+                        newrec.id = 0
                         newrec.amount = 0.0
                         newrec.amount_available = 0.0
                         newrec.archived = cth_cashedout
