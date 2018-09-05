@@ -258,8 +258,11 @@ final class PRJDBTables {
         
         BatchHeaderTable.sharedInstance.create()
         BatchDetailTable.sharedInstance.create()
+        
         USAccountCodeStatusTable.sharedInstance.create()
         USAccountCodeDetailTable.sharedInstance.create()
+        USBucketAccountStatusTable.sharedInstance.create()
+        USBucketAccountDetailTable.sharedInstance.create()
         
         // make sure the tables exist.... if not - then create it
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
