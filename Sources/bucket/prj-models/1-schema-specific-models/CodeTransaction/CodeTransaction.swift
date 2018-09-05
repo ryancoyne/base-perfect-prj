@@ -644,4 +644,62 @@ public class CodeTransaction: PostgresStORM {
             print("There was an error on the archive.  Main record id: \(String(describing: self.id))  The error is \(error.localizedDescription)")
         }
     }
+    
+    @discardableResult
+    static func qrCodeCreate(schema : String, user : String, terminal : Terminal, increment : Int) -> CodeTransaction? {
+        
+        let ccode = Retailer().createCustomerCode(schemaId: schema,[:])
+        
+        if ccode.success {
+            
+            var qrCodeURL = ""
+            qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerApiURL?.absoluteString ?? "")
+            qrCodeURL.append("redeem/")
+            qrCodeURL.append(ccode.message)
+            
+            // lets get the co\untry id for this transaction
+            let add = Address()
+            let sqla = "SELECT * FROM \(schema).address WHERE id = '\(terminal.address_id!)'"
+            let adda = try? add.sqlRows(sqla, params: [])
+            if let a = adda?.first {
+                add.to(a)
+            }
+            
+            var bucket_amount = drand48()
+            bucket_amount = Double(round(bucket_amount * 100) / 100)
+            
+            //let total_trans = arc4random_uniform(10)
+            let total_trans = 2.5
+            
+            
+            let total_trans_dbl = Double(round(Double(total_trans) * 100) / 100)
+            
+            let transaction = CodeTransaction()
+            transaction.created = CCXServiceClass.sharedInstance.getNow() + increment
+            transaction.amount = bucket_amount
+            transaction.amount_available = bucket_amount
+            transaction.total_amount = (1 - bucket_amount) + total_trans_dbl + 1
+            transaction.client_location = "TESTING_\(user)_\(increment)"
+            transaction.client_transaction_id = "TESTING_\(user)_\(increment)"
+            transaction.terminal_id = terminal.id
+            transaction.retailer_id = terminal.retailer_id
+            transaction.customer_code = ccode.message
+            transaction.customer_codeurl = qrCodeURL
+            if let cc = add.country_id {
+                transaction.country_id = cc
+            }
+            
+            // Save the transaction
+            let _ = try? transaction.saveWithCustomType(schemaIn: schema, CCXDefaultUserValues.user_server)
+            
+            // and now - lets save the transaction in the Audit table
+            AuditFunctions().addCustomerCodeAuditRecord(transaction)
+            
+            return transaction
+            
+        }
+        
+        return nil
+    }
+    
 }

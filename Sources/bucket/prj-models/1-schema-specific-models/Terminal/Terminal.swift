@@ -267,5 +267,21 @@ public class Terminal: PostgresStORM {
         return nil
         
     }
+    
+    public static func getFirst(_ schema : String) -> Terminal? {
+        
+        let term = Terminal()
+        let sqlt = "SELECT * FROM \(schema).terminal"
+        let trm = try? term.sqlRows(sqlt, params: [])
+        if let t = trm?.first {
+            term.to(t)
+            return term
+        } else {
+        
+            return nil
+            
+        }
+        
+    }
 
 }
