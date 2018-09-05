@@ -25,8 +25,8 @@ struct TestingAPI {
         static var routes : [[String:Any]] {
             return [
                 ["method":"post",    "uri":"/api/v1/testingProcess", "handler":testFunction],
-                ["method":"get",    "uri":"/api/v1/testing/fillCodes/{countryCode}", "handler":addTestTransaction],
-                ["method":"get",    "uri":"/api/v1/testing/getQRCodes/{countryCode}", "handler":getCodes]
+                ["method":"post",    "uri":"/api/v1/testing/fillCodes/{countryCode}", "handler":addTestTransaction],
+                ["method":"post",    "uri":"/api/v1/testing/getQRCodes/{countryCode}", "handler":getCodes]
             ]
         }
         //MARK: - Get QR Codes:
@@ -105,11 +105,13 @@ struct TestingAPI {
                 }
 
                 theHTML.append("</tr></table> \n")
-                 theHTML.append("</body> \n")
+                theHTML.append("</body> \n")
 
+                let environment = EnvironmentVariables.sharedInstance.Server!
+                    
                 // Send the response:
                 try? response.setBody(json: ["message":"Success!  Your QR codes are on their way, by email."]).completed(status: .ok)
-                Utility.sendMail(name: "", address: email, subject: "QR Code Generation!", html: theHTML, text: "")
+                Utility.sendMail(name: "Bucket Technologies", address: email, subject: "QR Code Generation for \(environment)", html: theHTML, text: "Please Enable HTML email to get your codes.")
                 return
                 
             }
