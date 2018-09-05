@@ -53,7 +53,7 @@ struct TestingAPI {
                 let codeSize = request.qrCodeSize
                 
                 let user = request.session!.userid
-                let email = request.account!.email
+                let email = request.email ?? request.account!.email
                 
                 // look for a terminal
                 let term = Terminal.getFirst(schema)
@@ -305,5 +305,8 @@ fileprivate extension HTTPRequest {
     }
     var qrCodeSize : Int {
         return self.header(.custom(name: "size")).intValue ?? 150
+    }
+    var email : String? {
+        return self.header(.custom(name: "email")).stringValue
     }
 }
