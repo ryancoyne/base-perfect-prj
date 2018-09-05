@@ -1830,6 +1830,35 @@ extension Account {
         return .noError
     }
     
+    func resendForgotPasswordEmail() {
+        let h = "<p>To reset your password for your account, please <a href=\"\(AuthenticationVariables.baseURL)/verifyAccount/forgotpassword/\(passreset)\">click here</a></p>"
+        Utility.sendMail(name: username, address: email, subject: "Password reset!", html: h, text: "")
+    }
+    
+    func resendRegistrationEmail() {
+        
+        let baseURL = EnvironmentVariables.sharedInstance.Public_URL_Full_Domain ?? ""
+        var h = "<p><center><a href='http://buckettechnologies.com'><img src='\(baseURL)/assets/images/Logo-Refresh-RGB_vertical.png' alt='Bucket Technologies' height='100' width='100'></a></p>"
+        h += "<p><center><h2>Welcome to Bucket!</h2></center></p>"
+        h += "<p><center>We’re glad you decided to join us in ridding the world of coins. With Bucket, you can effortlessly save all your change digitally for something useful - such as that next item on your Bucket list (har har).</center></p>"
+        h += "<p><center>To finish setting up your new account, please <a href=\"\(baseURL)/verifyAccount/\(passvalidation)\">click here.</a>  If the link does not work, copy and paste the following link into your browser: <br>\(baseURL)/verifyAccount/\(passvalidation)</center></p>"
+        h += "<p><center>We’re excited to have you on board and please reach out if you have any questions.</center><br />"
+        h += "<center><mailto: hello@buckettechnologies.com></center></p><br />"
+        h += "<p><center>Happy Bucketing!</center></p><br />"
+        h += "<p><center>The Bucket Team</center></p>"
+        
+        var t = "Welcome to Bucket!\n\n"
+        t += "We’re glad you decided to join us in ridding the world of coins. With Bucket, you can effortlessly save all your change digitally for something useful - such as that next item on your Bucket list (har har).\n\n"
+        t += "To finish setting up your new account, please follow this link: \(baseURL)/verifyAccount/\(passvalidation)\n\n"
+        t += "We’re excited to have you on board and please reach out if you have any questions.\n"
+        t += "hello@buckettechnologies.com\n\n"
+        t += "Happy Bucketing!\n\n"
+        t += "The Bucket Team"
+        
+        Utility.sendMail(name: username, address: email, subject: "Welcome to your account", html: h, text: t)
+        
+    }
+
     var lastSeen : Int? {
         get {
             return self.detail["last_seen"].intValue

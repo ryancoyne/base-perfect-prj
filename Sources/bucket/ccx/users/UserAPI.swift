@@ -33,10 +33,52 @@ struct UserAPI {
                     ["method":"post",   "uri":"/api/v1/forgotpassword", "handler":forgotPassword],
                     ["method":"post",   "uri":"/api/v1/user/update", "handler":updateProfile],
                     ["method":"post",   "uri":"/api/v1/user/upload", "handler":uploadPicture],
-                    ["method":"post",   "uri":"/api/v1/changepassword", "handler":changePassword]
+                    ["method":"post",   "uri":"/api/v1/changepassword", "handler":changePassword],
+                    ["method":"post",   "uri":"/api/v1/resendEmail", "handler":resendEmail]
 //                    ["method":"post",   "uri":"/api/v1/check", "handler":checkEmailOrUsername]
             ]
         }
+        //MARK: - Resend Email
+        public static func resendEmail(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Okay, we are resending an email, check the email:
+                do {
+                    let json = try request.postBodyJSON()!
+                    guard !json.isEmpty else { return response.emptyJSONBody }
+                    
+                    guard let resendType = request.resendType else { return try! response.setBody(json: ["errorCode":"InvalidType", "message":"Please check the resendType header."]).completed(status: .custom(code: 417, message: "Type Required")) }
+                    guard let email = json["email"].stringValue else { return try! response.setBody(json: ["errorCode":"InvalidCredentials", "message":"You need to give us an email to resend"]).completed(status: .custom(code: 413, message: "Email Required")) }
+                    
+                    let accoun = Account()
+                    try? accoun.find(["email":email])
+                    
+                    guard !accoun.id.isEmpty else { return }
+                    
+                    switch resendType {
+                    case .forgotPassword:
+                    // Resend the forgot password email:
+                        guard !accoun.passreset.isEmpty else { return try! response.setBody(json: ["errorCode":"Unavailable", "message":"You currently have no pending forgot password email."]).completed(status: .custom(code: 415, message: "Unavailable")) }
+                        try? response.setBody(json: ["message":"We sent the forgot password email again!"]).completed(status: .ok)
+                        accoun.resendForgotPasswordEmail()
+                        return
+                    case .registration:
+                    // Resend the registration email:
+                        guard !accoun.passvalidation.isEmpty else { return try! response.setBody(json: ["errorCode":"Unavailable", "message":"You currently have no pending registration email."]).completed(status: .custom(code: 415, message: "Unavailable")) }
+                        try? response.setBody(json: ["message":"We sent the registration email again!"]).completed(status: .ok)
+                        accoun.resendRegistrationEmail()
+                        return
+                    }
+        
+                } catch BucketAPIError.unparceableJSON(let string) {
+                    return response.invalidRequest(string)
+                } catch {
+                    return response.caughtError(error)
+                }
+            }
+        }
+        
         //MARK: - Logout
         public static func logout(_ data: [String:Any]) throws -> RequestHandler {
             return {
@@ -1293,6 +1335,16 @@ extension Account {
         } catch {
             print(error)
         }
+    }
+}
+
+enum ResendType : String {
+    case forgotPassword="forgotpassword", registration="registration"
+}
+fileprivate extension HTTPRequest {
+    var resendType : ResendType? {
+        guard let type = self.header(.custom(name: "resendType")) else { return nil }
+        return ResendType(rawValue: type)
     }
 }
 
