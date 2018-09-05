@@ -44,6 +44,8 @@ public class USAuditFunctions {
         let ad = USAccountCodeDetail()
         ad.record_type = USRecordType.codeDetail
         
+        let timenow = CCXServiceClass.sharedInstance.getNow()
+        
         switch record {
         case is CodeTransaction:
             
@@ -60,7 +62,19 @@ public class USAuditFunctions {
             
             // -- Status Record
             // start completing the record
-            ar.created        = ct.created
+            let sql = "SELECT id FROM \(schema).\(ar.table()) WHERE code_number = '\(ct.customer_code!)' "
+            let slqr = try? ar.sqlRows(sql, params: [])
+            if let sqlra = slqr?.first {
+                ar.to(sqlra)
+            }
+            if ar.id.isNil {
+                ar.created        = timenow
+                ar.createdby      = user
+            } else {
+                ar.modified   = timenow
+                ar.modifiedby = user
+            }
+            ar.created        = timenow
             ar.createdby      = user
             ar.record_type    = USRecordType.codeStatus
             ar.code_number    = ct.customer_code
@@ -68,13 +82,13 @@ public class USAuditFunctions {
             ar.value_new      = toFunction
             
             // dates
-            let thedates = SupportFunctions.sharedInstance.getDateAndTime(ar.created!)
+            let thedates = SupportFunctions.sharedInstance.getDateAndTime(timenow)
             ar.change_date = thedates.date
             ar.change_time = thedates.time
 
             // -- Detail Record
             // start completing the detail record
-            ad.created        = ct.created
+            ad.created        = timenow
             ad.createdby      = user
             ad.record_type    = USRecordType.codeDetail
             ad.code_number    = ct.customer_code
@@ -103,21 +117,31 @@ public class USAuditFunctions {
             
             // -- Status Record
             // start completing the record
-            ar.created        = ct.created
-            ar.createdby      = user
+            let sql = "SELECT id FROM \(schema).\(ar.table()) WHERE code_number = '\(ct.customer_code!)' "
+            let slqr = try? ar.sqlRows(sql, params: [])
+            if let sqlra = slqr?.first {
+                ar.to(sqlra)
+            }
+            if ar.id.isNil {
+                ar.created        = timenow
+                ar.createdby      = user
+            } else {
+                ar.modified   = timenow
+                ar.modifiedby = user
+            }
             ar.record_type    = USRecordType.codeStatus
             ar.code_number    = ct.customer_code
             ar.value_original = fromFunction
             ar.value_new      = toFunction
             
             // dates
-            let thedates = SupportFunctions.sharedInstance.getDateAndTime(ar.created!)
+            let thedates = SupportFunctions.sharedInstance.getDateAndTime(timenow)
             ar.change_date = thedates.date
             ar.change_time = thedates.time
 
             // -- Detail Record
             // start completing the detail record
-            ad.created        = ct.created
+            ad.created        = timenow
             ad.createdby      = user
             ad.record_type    = USRecordType.codeDetail
             ad.code_number    = ct.customer_code
@@ -148,51 +172,6 @@ public class USAuditFunctions {
         var schema = ""
         var user = ""
         
-//        let ar = USBank()
-//        ar.created   = CCXServiceClass.sharedInstance.getNow()
-        
-        switch record {
-        case is CodeTransaction:
-            
-            let ct = record as! CodeTransaction
-            
-            schema = Country.getSchema(ct.country_id!)
-            
-            // picking the user from most important to least important
-            if let u = ct.redeemedby, !u.isEmpty {
-                user = u
-            } else if let u = ct.createdby, !u.isEmpty {
-                user = u
-            }
-            
-            // start completing the record
-//            ar.createdby = user
-            
-            break
-            
-        case is CodeTransactionHistory:
-            
-            let ct = record as! CodeTransactionHistory
-            
-            schema = Country.getSchema(ct.country_id!)
-            
-            // picking the user from most important to least important
-            if let u = ct.redeemedby, !u.isEmpty {
-                user = u
-            } else if let u = ct.createdby, !u.isEmpty {
-                user = u
-            }
-            
-            
-            break
-            
-        default:
-            // do nothing  the correct classes were not passed in
-            break
-        }
-        
-        // save the audit record
-//        let _ = try? ar.saveWithCustomType(schemaIn: schema, user)
         
     }
     

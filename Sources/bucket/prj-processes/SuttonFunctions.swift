@@ -153,7 +153,7 @@ public class SuttonFunctions {
         return filename
     }
     
-    func startBatch(_ userId:String? = nil,_ batchId:Int? = nil,_ batchIdentifier:String? = nil) {
+    func startBatchFileRecord(_ userId:String? = nil,_ batchId:Int? = nil,_ batchIdentifier:String? = nil) {
         
         var runningUser = ""
         if userId.isNotNil {
@@ -223,6 +223,9 @@ public class SuttonFunctions {
         
         var batch_count = 0
         
+        // this is where we are creating the batches within this file itself.
+        
+        
         files[100000] = self.createFileFooter(batch_count, header.batch_number, date_count)
         
         let sortedfiles = files.sorted { $0.key < $1.key }
@@ -231,5 +234,29 @@ public class SuttonFunctions {
             print("Sorted: \(key): \(value)")
         }
     }
-    
+
+    private func createBatchHeader(_ batch_number:Int) {
+        
+    }
+
+    private func createBatchFooter(_ batch_number:Int) {
+        
+    }
+
+    private func createCodeAccountStatusBatch(_ batch_number:Int) {
+        
+    }
+
+    private func createBucketAccountStatusBatch(_ batch_number:Int) {
+        
+    }
+
+    private func createCodeAccountDetailBatch(_ batch_number:Int) {
+        
+    }
+
+    private func createBucketAccountDetailBatch(_ batch_number:Int) {
+        
+    }
+
 }
