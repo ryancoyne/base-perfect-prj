@@ -1844,6 +1844,10 @@ extension Account {
     }
     
     static func userBouce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {
+        
+        // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+        guard request.SecurityCheck() else { response.badSecurityToken; return true }
+        
         // Here we want to check the csrf & the authorization.
         guard let csrf = request.session?.data["csrf"].stringValue, let sendCsrf = request.header(.custom(name: "X-CSRF-Token")) else {
             response.notLoggedIn()
@@ -1890,6 +1894,10 @@ extension Account {
     }
     
     static func adminBouce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {
+        
+        // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+        guard request.SecurityCheck() else { response.badSecurityToken; return true }
+
         // Here we want to check the csrf & the authorization.
         guard let csrf = request.session?.data["csrf"].stringValue, let sendCsrf = request.header(.custom(name: "X-CSRF-Token")) else {
             response.notLoggedIn()

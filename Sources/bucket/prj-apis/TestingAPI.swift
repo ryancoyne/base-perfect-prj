@@ -129,26 +129,29 @@ struct TestingAPI {
                 
                 // SET TESTING STUFF HERE:
 
-                var batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
 
-                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
-
-                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
-
-                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
-
-                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+                SuttonFunctions().createTransferFile()
                 
-                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
-                
-                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
-                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//                var batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//
+//                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//
+//                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//
+//                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//
+//                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//
+//                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
+//
+//                batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
+//                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
 
                 // END SET TESTING STUFF
 
@@ -168,6 +171,9 @@ struct TestingAPI {
                     return response.completed(status: .internalServerError)
                 }
                 
+                // check for the security token
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+
                 guard !Account.userBouce(request, response) else { return }
             
                 // get the country code

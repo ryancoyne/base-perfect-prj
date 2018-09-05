@@ -47,6 +47,38 @@ extension HTTPRequest {
         }
     }
     
+    func SecurityCheck() -> Bool {
+        
+        var passedCheck = false
+        
+        // check for the header value from the CloudFront instance
+        
+        // the header field "check" should have one of the following values:
+        // PROD:    P-A5B26A04-45FE-4C48-B111-84F0A07BB5A3
+        // STAGING: S-792B9A88-26E1-4502-AD04-E0D89E63822D
+        // DEV:     D-4B2E93B2-C844-4F18-A1AE-C13EA1F7D12F
+        
+        let checkvalue = self.header(.custom(name: "check")) ?? "nope"
+        let env = EnvironmentVariables.sharedInstance.Server!
+        
+        switch env {
+        case .production:
+            if checkvalue == "P-A5B26A04-45FE-4C48-B111-84F0A07BB5A3" { passedCheck = true }
+            break
+        case .staging:
+            if checkvalue == "S-792B9A88-26E1-4502-AD04-E0D89E63822D" { passedCheck = true }
+            break
+        case .development:
+            if checkvalue == "D-4B2E93B2-C844-4F18-A1AE-C13EA1F7D12F" { passedCheck = true }
+            break
+        default:
+            break
+        }
+        
+        // let them know if you pass the security check
+        return passedCheck
+    }
+    
     //MARK: - Country will be used across both API's:
     var countryCode : String? {
         
@@ -92,6 +124,16 @@ extension HTTPRequest {
 }
 
 extension HTTPResponse {
+    var badSecurityToken : Void {
+        return try! self
+            .setBody(json: ["errorCode":"SecurityError", "message":"There was a problem with a security token"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .unauthorized)
+    }
+    var badSecurityTokenWeb: String {
+        return "<div class='error'>There was a problem with a security token</div>"
+    }
+
     func invalidRequest(_ invalidJsonString : String) {
         return try! self
             .setBody(json: ["errorCode":"InvalidRequest", "message":"Unable to parse JSON body: \(invalidJsonString)"])
