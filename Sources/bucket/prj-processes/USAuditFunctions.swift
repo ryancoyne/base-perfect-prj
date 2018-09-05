@@ -167,12 +167,43 @@ public class USAuditFunctions {
     }
     
     
-    func customerAccountAuditRecord(_ record: Account, _ fromFunction:USAccountStatusType, _ toFunction:USAccountStatusType ) {
+    func customerAccountAuditRecord(_ record: Account, _ fromFunction:Int, _ toFunction:Int, _ codeRecord: Any? = nil, _ userId:String? = nil  ) {
         
-        var schema = ""
+        let cas = USBucketAccountStatus()
+        let cad = USBucketAccountDetail()
+
+        
+        var schema = "us"
         var user = ""
         
+        if !userId.isNil {
+            user = userId!
+        }
         
+        // lets setup the status record - it should be updated if it exists
+        let sql = "SELECT id FROM \(schema).us_bucket_account_status WHERE account_number = '\(user)' "
+        
+        
+        // lets setup the detail record - it always is written
+        
+        
+        switch codeRecord {
+        case is CodeTransaction:
+            break
+            
+        case is CodeTransactionHistory:
+            break
+            
+        default:
+            // do nothing  the correct classes were not passed in
+            break
+        }
+
+        // save the audit record
+        let _ = try? cas.saveWithCustomType(schemaIn: schema, user)
+        let _ = try? cad.saveWithCustomType(schemaIn: schema, user)
+
+
     }
     
 }
