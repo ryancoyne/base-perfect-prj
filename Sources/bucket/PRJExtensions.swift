@@ -123,6 +123,9 @@ extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .unauthorized)
     }
+    var badSecurityTokenWeb: String {
+        return "<div class='error'>There was a problem with a security token</div>"
+    }
 
     func invalidRequest(_ invalidJsonString : String) {
         return try! self

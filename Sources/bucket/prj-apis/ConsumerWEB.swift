@@ -86,13 +86,23 @@ struct ConsumerWEB {
         public static func login(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                
-                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-                guard request.SecurityCheck() else { return response.badSecurityToken }
 
                 var template = "views/msg" // where it goes to after
-                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
                 var context: [String : Any] = ["title": "Bucket Technologies", "subtitle":"Goodbye coins, Hello Change"]
+
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                var problem:String
+                if !request.SecurityCheck() {
+                    problem = response.badSecurityTokenWeb
+                    context["msg_title"] = "Login Error."
+                    context["msg_body"] = problem
+                    template = "views/msg"
+                    response.render(template: template, context: context)
+                    response.completed()
+                    return
+                }
+
+                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
                 context["csrfToken"] = request.session?.data["csrf"] as? String ?? ""
                 
                 if let email = request.param(name: "email").stringValue, !email.isEmpty,
