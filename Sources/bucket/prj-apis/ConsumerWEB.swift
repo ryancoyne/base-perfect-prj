@@ -33,6 +33,9 @@ struct ConsumerWEB {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+
                 response.render(template: "views/forgotpassword")
                 response.completed()
                 
@@ -43,6 +46,9 @@ struct ConsumerWEB {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+
                 // get the email:
                 guard let email = request.param(name: "email") else { return }
                 // Okay see if we can find the account:
@@ -80,6 +86,10 @@ struct ConsumerWEB {
         public static func login(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+
                 var template = "views/msg" // where it goes to after
                 if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
                 var context: [String : Any] = ["title": "Bucket Technologies", "subtitle":"Goodbye coins, Hello Change"]

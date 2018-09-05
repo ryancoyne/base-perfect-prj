@@ -38,6 +38,10 @@ struct RetailerAPI {
         public static func billDenoms(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+
                 // We will have a country passed in through the header:
                 guard let _ = request.countryId else { return response.invalidCountryCode }
                 
@@ -83,7 +87,12 @@ struct RetailerAPI {
         public static func registerTerminal(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+
                 // *IMPORTANT*  If this is development, then we can automatically verify the device.  If we are production, then we will make them to go the web and verify the device is theirs.
+                
                 
                 do {
                     
@@ -259,6 +268,10 @@ struct RetailerAPI {
         public static func unregisterTerminal(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+
                 // *IMPORTANT*  If this is development, then we can automatically verify the device.  If we are production, then we will make them to go the web and verify the device is theirs.
                 
                 do {
@@ -761,6 +774,9 @@ extension Retailer {
     @discardableResult
     public static func retailerBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> Int? {
         
+        // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+        guard request.SecurityCheck() else { response.badSecurityToken; return nil }
+
         //Make sure we have the retailer Id and retailer secret:
         guard let retailerId = request.retailerId else { response.invalidRetailer; return nil }
         guard let countryId = request.countryId else {  response.invalidCountryCode; return nil }
@@ -786,6 +802,9 @@ extension Retailer {
 
     public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> Bool {
         
+        // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+        guard request.SecurityCheck() else { response.badSecurityToken; return true }
+
         //Make sure we have the retailer Id and retailer secret:
         guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
         guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return true }
