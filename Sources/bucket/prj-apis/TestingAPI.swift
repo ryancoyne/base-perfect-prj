@@ -26,7 +26,7 @@ struct TestingAPI {
             return [
                 ["method":"post",    "uri":"/api/v1/testingProcess", "handler":testFunction],
                 ["method":"get",    "uri":"/api/v1/testing/fillCodes/{countryCode}", "handler":addTestTransaction],
-                ["method":"post",    "uri":"/api/v1/testing/getQRCodes/{countryCode}", "handler":getCodes]
+                ["method":"get",    "uri":"/api/v1/testing/getQRCodes/{countryCode}", "handler":getCodes]
             ]
         }
         //MARK: - Get QR Codes:
@@ -45,16 +45,72 @@ struct TestingAPI {
                 // Okay we have a user.  Lets check if they sent their country code in:
                 guard let countryId = request.countryId else { return response.invalidCountryCode }
                 
+                // Get the schema:
+                let schema = Country.getSchema(countryId)
+                
                 // Get how many codes:
                 let numberOfQrCodes = request.qrCodeCount
                 let codeSize = request.qrCodeSize
                 
-                // Okay... lets create the codes, and send the email!
-                for i in 1...numberOfQrCodes {
-                    let theQRCodeURL = ""
-                    let response = Utility2.makeRequest(.get, "https://api.qrserver.com/v1/create-qr-code/?data=\(theQRCodeURL)&size=\(codeSize)x\(codeSize)")
-                    
+                let user = request.session!.userid
+                let email = request.account!.email
+                
+                // look for a terminal
+                let term = Terminal.getFirst(schema)
+                if term.isNil {
+                    try? response.setBody(json: ["error":"There are no terminals in country id \(countryId)"]).completed(status: .custom(code: 451, message: "No Terminals in Country \(countryId)"))
+                    return
                 }
+                
+                // Okay... lets create the codes, and send the email!
+                var theHTML = "<head>\n"
+                 theHTML.append("<style>\n")
+                 theHTML.append("table, th, td { \n")
+                  theHTML.append("   border: 1px solid black; \n")
+                 theHTML.append("    border-collapse: collapse; \n")
+                 theHTML.append("} \n")
+                 theHTML.append("th, td { \n")
+                 theHTML.append("    padding: 40px; \n")
+                 theHTML.append("    text-align: center; \n")
+                 theHTML.append("} \n")
+                theHTML.append(" </style> \n")
+                 theHTML.append("</head> \n")
+                 theHTML.append("<body> \n")
+                    
+                theHTML.append("<p>Hello there!  We have you your QR Codes!!!</p><br /> \n")
+                theHTML.append("<table> \n")
+                
+                var ctr = 0
+                for i in 1...numberOfQrCodes {
+                    
+                    if ctr == 0 {
+                        theHTML.append("<tr> \n")
+                    } else if ctr == 4 {
+                        theHTML.append("</tr> \n")
+                        ctr = 0
+                    }
+                    ctr += 1
+                    
+                    // Create the transaction:
+                    let transaction = CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i)
+                    
+                    let theQRCodeURL = transaction?.customer_codeurl ?? ""
+                    let theHTMLQrCodeURL = "https://api.qrserver.com/v1/create-qr-code/?data=\(theQRCodeURL)&size=\(codeSize)x\(codeSize)"
+                    let imageHTML = "<img src='\(theHTMLQrCodeURL)' />"
+                    
+                    theHTML.append("<td >")
+                    theHTML.append(imageHTML)
+                    theHTML.append("</td> \n")
+
+                }
+
+                theHTML.append("</tr></table> \n")
+                 theHTML.append("</body> \n")
+
+                // Send the response:
+                try? response.setBody(json: ["message":"Success!  Your QR codes are on their way, by email."]).completed(status: .ok)
+                Utility.sendMail(name: "", address: email, subject: "QR Code Generation!", html: theHTML, text: "")
+                return
                 
             }
         }
@@ -169,84 +225,16 @@ struct TestingAPI {
                 }
                 
                 // look for a terminal
-                var ret_id = 0
-                var term_serial = ""
-                let term = Terminal()
-//                let sqlt = "SELECT * FROM \(schema).terminal WHERE address_id = \(add_id)"
-                let sqlt = "SELECT * FROM \(schema).terminal"
-                let trm = try? term.sqlRows(sqlt, params: [])
-                if let t = trm?.first {
-                    term.to(t)
-                    ret_id = term.retailer_id!
-                    term_serial = term.serial_number!
-                } else {
-                    
-                    // return the no terminal for that country error
-                    // error must return an error code for the response and get out of this flow
+                let term = Terminal.getFirst(schema)
+                if term.isNil {
                     try? response.setBody(json: ["error":"There are no terminals in country id \(countryId)"]).completed(status: .custom(code: 451, message: "No Terminals in Country \(countryId)"))
                     return
-                    
-                }
+                } 
 
                 // SECTION 3: Adding the new customer codes for the terminal
-                let rnd = [1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0]
-                
                 for i in 1...250 {
-                    let ccode = Retailer().createCustomerCode(schemaId: schema,[:])
-                
-                    if ccode.success {
-                    
-                        var qrCodeURL = ""
-                        qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerApiURL?.absoluteString ?? "")
-                        qrCodeURL.append("redeem/")
-                        qrCodeURL.append(ccode.message)
-                    
-                        let terminal = Terminal()
-                        let sqlt = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(term_serial)'"
-                        let trm = try? terminal.sqlRows(sqlt, params: [])
-                        if let t = trm?.first {
-                            terminal.to(t)
-                        }
-                    
-                        // lets get the co\untry id for this transaction
-                        let add = Address()
-                        let sqla = "SELECT * FROM \(schema).address WHERE id = '\(terminal.address_id!)'"
-                        let adda = try? add.sqlRows(sqla, params: [])
-                        if let a = adda?.first {
-                            add.to(a)
-                        }
-
-                        var bucket_amount = drand48()
-                        bucket_amount = Double(round(bucket_amount * 100) / 100)
-                        
-                        //let total_trans = arc4random_uniform(10)
-                        let total_trans = 2.5
-                        
-                        
-                        let total_trans_dbl = Double(round(Double(total_trans) * 100) / 100)
-                    
-                        let transaction = CodeTransaction()
-                        transaction.created = (CCXServiceClass.sharedInstance.getNow() + i)
-                        transaction.amount = bucket_amount
-                        transaction.amount_available = bucket_amount
-                        transaction.total_amount = (1 - bucket_amount) + total_trans_dbl + 1
-                        transaction.client_location = "TESTING_\(user)_\(i)"
-                        transaction.client_transaction_id = "TESTING_\(user)_\(i)"
-                        transaction.terminal_id = terminal.id
-                        transaction.retailer_id = ret_id
-                        transaction.customer_code = ccode.message
-                        transaction.customer_codeurl = qrCodeURL
-                        if let cc = add.country_id {
-                            transaction.country_id = cc
-                        }
-                        
-                        // Save the transaction
-                        let _ = try? transaction.saveWithCustomType(schemaIn: schema, CCXDefaultUserValues.user_server)
-                        
-                        // and now - lets save the transaction in the Audit table
-                        AuditFunctions().addCustomerCodeAuditRecord(transaction)
-                        
-                    }
+                    // This was all chopped down to this function to use to email QR Codess
+                    CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i)
                 }
             
                 // SECTION 4: Claim the customer codes we just added (to make sure the process is working correctly)

@@ -1,5 +1,6 @@
 import PerfectHTTP
 import Foundation
+import PerfectLocalAuthentication
 
 extension String {
     
@@ -30,6 +31,12 @@ enum BucketAPIError: Error {
 }
 
 extension HTTPRequest {
+    var account : Account? {
+        guard let userid = session?.userid else { return nil }
+        let acount = Account()
+        try? acount.get(userid)
+        return acount
+    }
     func postBodyJSON() throws -> [String:Any]? {
         if let json = try? self.postBodyString?.jsonDecode() as? [String:Any], json.isNotNil {
             return json
@@ -67,7 +74,7 @@ extension HTTPRequest {
         
     }
     var countryId : Int? {
-        let sentCountryId = self.header(.custom(name: "countryId")) ?? self.urlVariables["countryId"]
+        let sentCountryId = self.header(.custom(name: "countryId")) ?? self.urlVariables["countryId"] ?? self.urlVariables["countryCode"]
         // We need to
         if sentCountryId?.isNumeric() == true {
             // It is an integer, lets return the integer value:
