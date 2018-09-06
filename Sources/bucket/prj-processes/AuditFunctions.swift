@@ -52,6 +52,13 @@ public class AuditFunctions {
             // lets add the audit record for the US
             let usa = USAuditFunctions()
             usa.customerCodeAuditRecord(record, USCodeStatusType.create, USCodeStatusType.claimed)
+            usa.customerAccountDetailAuditRecord(userId: user,
+                                                 changed: record.created!,
+                                                 toValue: USDetailNewValues.codeAdded,
+                                                 codeNumber: record.customer_code,
+                                                 amount: record.amount,
+                                                 adjustmentReason: nil,
+                                                 disbursementReason: nil)
         }
         
         // Add the overall auditing here
