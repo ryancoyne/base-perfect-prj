@@ -176,5 +176,17 @@ struct CashoutGroupDictionary {
             }
         }
     }
-
+    
+    var detail_disbursement_reasons : Int? {
+        get {
+            return self.dic["detail_disbursement_reasons"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["detail_disbursement_reasons"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "detail_disbursement_reasons")
+            }
+        }
+    }
 }

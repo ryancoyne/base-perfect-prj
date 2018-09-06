@@ -392,7 +392,7 @@ final class PRJDBTables {
         } catch {
             print(error)
         }
-        
+ 
         // set the sample data to NO - so no more is added
         do {
             let conf = Config()
@@ -404,7 +404,6 @@ final class PRJDBTables {
         } catch {
             print(error)
         }
-        
     }
 
     //MARK:-

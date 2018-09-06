@@ -1872,6 +1872,43 @@ extension Account {
         }
     }
     
+    var countries : [String]? {
+        get {
+            if let ret = self.detail["countries"] {
+                return ret as? [String]
+            }
+            return nil
+        }
+        set {
+            if newValue.isNotNil {
+                self.detail["countries"] = newValue
+            } else {
+                self.detail.removeValue(forKey: "countries")
+            }
+        }
+    }
+    
+    func addCountry(_ newCountry: String)  {
+        
+        if let _ = self.countries {
+            var ctry = self.countries!
+            ctry.append(newCountry.lowercased())
+            self.countries = ctry
+        } else {
+            var ctry:[String] = []
+            ctry.append(newCountry.lowercased())
+            self.countries = ctry
+        }
+        
+    }
+    
+    func countryExists(_ country: String)->Bool {
+        if let ctry = self.detail["countries"] as? [String] {
+            if ctry.contains(country.lowercased()) { return true }
+        }
+        return false
+    }
+    
     static func userBouce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {
         
         // check for the security token - this is the token that shows the request is coming from CloudFront and not outside

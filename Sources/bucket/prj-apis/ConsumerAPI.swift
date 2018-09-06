@@ -501,11 +501,19 @@ struct ConsumerAPI {
                     var name_cashout = ""
                     var form_id = 0
                     
+                    var cog = CashoutGroup()
+                    
                     if resopt.isNotNil, let i = resopt?.first! {
                         min_cashout  = i.data["minimum"].doubleValue ?? 0.0
                         max_cashout  = i.data["maximum"].doubleValue ?? 0.0
                         name_cashout = i.data["name"].stringValue ?? ""
                         form_id = i.data["form_id"].intValue ?? 0
+                        
+                        let gid = i.data["group_id"].intValue
+                        let gid_i = try? cog.sqlRows("SELECT * FROM \(schema).cashout_group WHERE id = \(gid!)", params: [])
+                        if let g = gid_i?.first {
+                            cog.to(g)
+                        }
                     }
                     
                     // If no fields are submitted, send back an error.
@@ -641,8 +649,12 @@ struct ConsumerAPI {
                             let _ = try? working_cth.saveWithCustomType(schemaIn: schema)
                             
                             // Write the audit record
-                            AuditFunctions().cashoutCustomerCodeAuditRecord(working_cth)
-                            
+                            if schema == "us" {
+                                // figure out what type
+                                let co_type = cog.detail_disbursement_reasons ?? 0
+                                
+                                AuditFunctions().cashoutCustomerCodeAuditRecord(working_cth, co_type)
+                            }
                         }
                         
                         // add the cashout record to the history record

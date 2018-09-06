@@ -32,6 +32,7 @@ public class CashoutGroup: PostgresStORM {
     var display_order : Int? = nil
     var country_id    : Int? = nil
     var threshold_amount : Double? = nil
+    var detail_disbursement_reasons : Int? = nil
     
     //MARK: Table name
     override public func table() -> String { return "cashout_group" }
@@ -111,6 +112,12 @@ public class CashoutGroup: PostgresStORM {
             display = data
         }
 
+        if let data = this.data.cashoutGroupDic.detail_disbursement_reasons {
+            detail_disbursement_reasons = data
+        }
+
+        
+
     }
     
     func rows() -> [CashoutGroup] {
@@ -182,6 +189,11 @@ public class CashoutGroup: PostgresStORM {
             case "display":
                 if (value as? Bool).isNotNil {
                     self.display = (value as! Bool)
+                }
+                
+            case "detail_disbursement_reasons":
+                if (value as? Int).isNotNil {
+                    self.detail_disbursement_reasons = (value as! Int)
                 }
 
             default:
@@ -268,6 +280,10 @@ public class CashoutGroup: PostgresStORM {
             dictionary.cashoutGroupDic.display = self.display
         }
 
+        if self.detail_disbursement_reasons.isNotNil {
+            dictionary.cashoutGroupDic.detail_disbursement_reasons = self.detail_disbursement_reasons
+        }
+
         return dictionary
     }
     
@@ -320,6 +336,10 @@ public class CashoutGroup: PostgresStORM {
             diff = false
         }
 
+        if diff == true, self.detail_disbursement_reasons != targetItem.detail_disbursement_reasons {
+            diff = false
+        }
+        
         return diff
         
     }

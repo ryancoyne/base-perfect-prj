@@ -53,6 +53,7 @@ public struct USDetailDisbursementReasons {
     static let openLoopCard   = 1
     static let closedLoopCard = 2
     static let donation       = 3
+    static let crypto         = 4
 }
 
 public class USAuditFunctions {
@@ -248,7 +249,7 @@ public class USAuditFunctions {
         if record.usertype == .provisional { return }
         
         // lets first make sure there is a US based transaction before doing this
-        let sql = "SELECT id FROM \(schema).code_transaction_history WHERE redeemedby = \(user) LIMIT 1"
+        let sql = "SELECT id FROM \(schema).code_transaction_history WHERE redeemedby = '\(user)' LIMIT 1"
         let sql_a = try? record.sqlRows(sql, params: [])
         // if there are no US transactions, then do not continue
         guard (sql_a?.first) != nil else { return }
@@ -256,6 +257,28 @@ public class USAuditFunctions {
         let changed_date_time = SupportFunctions.sharedInstance.getDateAndTime(changed)
         let timenow           = CCXServiceClass.sharedInstance.getNow()
 
+        // see if we need to add the status record
+        if !record.countryExists(schema) {
+            // add the country
+            record.addCountry(schema)
+            let _ = try? record.saveWithCustomType()
+            
+            // add the status record
+            let cas = USBucketAccountStatus()
+            
+            cas.created        = timenow
+            cas.createdby      = user
+            cas.record_type    = USRecordType.accountStatus
+            cas.change_date    = changed_date_time.date
+            cas.change_time    = changed_date_time.time
+            cas.account_number = user
+            cas.value_original = USAccountStatusType.firstentry
+            cas.value_new      = USAccountStatusType.active
+            
+            let _ = try? cas.saveWithCustomType(schemaIn: schema, user)
+        }
+        
+        // add the detail record (always done)
         let cad = USBucketAccountDetail()
 
         // lets setup the detail record - it always is written

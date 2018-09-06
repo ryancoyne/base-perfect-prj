@@ -36,7 +36,7 @@ public class AuditFunctions {
         
     }
 
-    func redeemCustomerCodeAuditRecord(_ record: CodeTransaction ) {
+    func redeemCustomerCodeAuditRecord(_ record: CodeTransaction) {
         
         var schema = ""
         var user = ""
@@ -44,11 +44,12 @@ public class AuditFunctions {
         schema = Country.getSchema(record.country_id!)
         
         // picking the user from most important to least important
-        if let u = record.createdby, !u.isEmpty {
+        if let u = record.redeemedby, !u.isEmpty {
             user = u
         }
         
         if schema == "us" {
+            
             // lets add the audit record for the US
             let usa = USAuditFunctions()
             usa.customerCodeAuditRecord(record, USCodeStatusType.create, USCodeStatusType.claimed)
@@ -65,7 +66,7 @@ public class AuditFunctions {
         
     }
 
-    func cashoutCustomerCodeAuditRecord(_ record: CodeTransactionHistory ) {
+    func cashoutCustomerCodeAuditRecord(_ record: CodeTransactionHistory, _ US_detail_disbursement_reasons:Int ) {
         
         var schema = ""
         var user = ""
@@ -73,7 +74,7 @@ public class AuditFunctions {
         schema = Country.getSchema(record.country_id!)
         
         // picking the user from most important to least important
-        if let u = record.createdby, !u.isEmpty {
+        if let u = record.redeemedby, !u.isEmpty {
             user = u
         }
         
@@ -81,6 +82,13 @@ public class AuditFunctions {
             // lets add the audit record for the US
             let usa = USAuditFunctions()
             usa.customerCodeAuditRecord(record, USCodeStatusType.claimed, USCodeStatusType.cashedout)
+            usa.customerAccountDetailAuditRecord(userId: user,
+                                                 changed: record.cashedout!,
+                                                 toValue: USDetailNewValues.fundsDispersed,
+                                                 codeNumber: record.customer_code!,
+                                                 amount: record.total_amount,
+                                                 adjustmentReason: USDetailAdjustmentReasons.generalSubtract,
+                                                 disbursementReason: US_detail_disbursement_reasons)
         }
         
         // Add the overall auditing here
