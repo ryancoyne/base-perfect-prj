@@ -240,7 +240,7 @@ struct TestingAPI {
                 } 
 
                 // SECTION 3: Adding the new customer codes for the terminal
-                for i in 1...250 {
+                for i in 1...100 {
                     // This was all chopped down to this function to use to email QR Codess
                     CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i)
                 }
