@@ -129,10 +129,10 @@ final class EnvironmentVariables {
                     if thedata.isNotNil {
                         json = try? JSONSerialization.jsonObject(with: thedata!.data(using: String.Encoding.utf16)!, options: .allowFragments) as! [String:Any]
 //                        var servers:[String:Any]?
-                        if let s = json?["services"] {
-                            let ss = s as! [String:Any]
-                            servers = ss
-                        }
+//                        if let s = json?["services"] {
+//                            let ss = s as! [String:Any]
+//                            servers = ss
+//                        }
                         
 //                        if servers.isNotNil {
 //                            // process the servers individually
