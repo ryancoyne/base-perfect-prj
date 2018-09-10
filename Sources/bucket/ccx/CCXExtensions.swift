@@ -1602,12 +1602,7 @@ extension PostgresStORM {
      - parameter distance: The comparison distance in miles
      - Returns: An array of StORMRow objects with the resulting dataset
      */
-    func getLocationGISsql(schemaIn:String? = "public", sql: String, locationField: String, longitude: Double, latitude: Double, distance: Double) throws -> [StORMRow] {
-        
-        var schema = "public"
-        if schemaIn.isNotNil {
-            schema = schemaIn!.lowercased()
-        }
+    func getLocationGISsql(sql: String, locationField: String, longitude: Double, latitude: Double, distance: Double) throws -> [StORMRow] {
         
         var sqlstatement = sql
         //        var gisfields = " "

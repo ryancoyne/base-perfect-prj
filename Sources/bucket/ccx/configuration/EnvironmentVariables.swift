@@ -79,7 +79,7 @@ final class EnvironmentVariables {
         self.CheckOnStart_Server1 = env_variables["SERVER_1_ON_START"].boolValue
         self.CheckOnStart_Server2 = env_variables["SERVER_2_ON_START"].boolValue
         
-        let public_url = env_variables["SERVER_PUBLIC_URL"].stringValue
+//        let public_url = env_variables["SERVER_PUBLIC_URL"].stringValue
 //        if !public_url.isEmptyOrNil {
 //
 //            self.PublicServerApiURL = URL(string: public_url!)
@@ -128,7 +128,7 @@ final class EnvironmentVariables {
                     var json:[String:Any]?
                     if thedata.isNotNil {
                         json = try? JSONSerialization.jsonObject(with: thedata!.data(using: String.Encoding.utf16)!, options: .allowFragments) as! [String:Any]
-                        var servers:[String:Any]?
+//                        var servers:[String:Any]?
                         if let s = json?["services"] {
                             let ss = s as! [String:Any]
                             servers = ss

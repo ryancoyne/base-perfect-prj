@@ -71,8 +71,6 @@ extension HTTPRequest {
         case .development:
             if checkvalue == "D-4B2E93B2-C844-4F18-A1AE-C13EA1F7D12F" { passedCheck = true }
             break
-        default:
-            break
         }
         
         // let them know if you pass the security check

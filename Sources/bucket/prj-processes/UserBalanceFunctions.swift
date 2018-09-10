@@ -65,7 +65,7 @@ public class UserBalanceFunctions {
         
         var balance:Double = 0.0
         
-        let sql = "SELECT id FROM \(ut.table()) WHERE user_id = '\(userid)' AND country_id = \(countryid)"
+        let sql = "SELECT id FROM \(schema).\(ut.table()) WHERE user_id = '\(userid)' AND country_id = \(countryid)"
         let theid = try? ut.sqlRows(sql, params: [])
         if theid.isNotNil, theid!.count > 0 {
             try? ut.get(theid!.first!.data.id!)

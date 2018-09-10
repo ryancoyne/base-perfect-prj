@@ -217,15 +217,10 @@ struct TestingAPI {
                 // SECTION 2: Get a terminal for a retailer for the country
                 
                 // look for a retailer in the country we are using
-                var add_id = 0
                 let sql_add = "SELECT id from \(schema).address WHERE retailer_id > 0 AND country_id = \(countryId.intValue!)"
                 let addy = Address()
                 let addy_ret = try? addy.sqlRows(sql_add, params: [])
-                if addy_ret.isNotNil {
-                    // grab the address id to look up in the terminal file
-                    // set the add_id
-                    add_id = addy_ret?.first?.data["id"].intValue ?? 0
-                } else {
+                if addy_ret.isNil {
                     // error that there is no terminal for that country code
                     // error must return an error code for the response and get out of this flow
                     try? response.setBody(json: ["error":"There are no retailers in country id \(countryId)"]).completed(status: .custom(code: 450, message: "No Retailers in Country \(countryId)"))

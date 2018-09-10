@@ -501,7 +501,7 @@ struct ConsumerAPI {
                     var name_cashout = ""
                     var form_id = 0
                     
-                    var cog = CashoutGroup()
+                    let cog = CashoutGroup()
                     
                     if resopt.isNotNil, let i = resopt?.first! {
                         min_cashout  = i.data["minimum"].doubleValue ?? 0.0

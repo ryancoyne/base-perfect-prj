@@ -76,7 +76,7 @@ struct RetailerAPI {
             
                 guard var startDate = moment(intervalId, dateFormat: "yyyyMMdd") else { return }
                 startDate = startDate - 4.hours
-                let endDate = startDate + (1.days - 1.seconds)
+//                let endDate = startDate + (1.days - 1.seconds)
                 
 //                return response.completed(status: .ok)
                 
@@ -500,7 +500,7 @@ struct RetailerAPI {
                         // Save the transaction
                         let trn = try? transaction.saveWithCustomType(schemaIn: schema, CCXDefaultUserValues.user_server)
                         if let t = trn?.first, let tid = t.data["id"]  {
-                            transaction.id = tid as! Int
+                            transaction.id = (tid as! Int)
                         }
                         // and now - lets save theb transaction in the Audit table
                         AuditFunctions().addCustomerCodeAuditRecord(transaction)

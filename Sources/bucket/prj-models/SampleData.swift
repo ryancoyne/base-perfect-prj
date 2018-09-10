@@ -256,12 +256,12 @@ final class SampleData {
         checkuser = "INSERT INTO us.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'The Bucket','bucket1@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
-        var results = try? tbl.sqlRows(checkuser, params: [])
+        let _ = try? tbl.sqlRows(checkuser, params: [])
 
         checkuser = "INSERT INTO sg.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'The Bucket','bucket1@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
-        results = try? tbl.sqlRows(checkuser, params: [])
+        let _ = try? tbl.sqlRows(checkuser, params: [])
 
         // new one
         userid = UUID().uuidString
@@ -280,13 +280,13 @@ final class SampleData {
         checkuser = "INSERT INTO us.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'Ryan Coyne','bucket2@buckettechnologies.com','4102026292', \(retailerid)) RETURNING id ")
-        results = try? tbl.sqlRows(checkuser, params: [])
+        let _ = try? tbl.sqlRows(checkuser, params: [])
 
         // add the retailer user
         checkuser = "INSERT INTO sg.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'Ryan Coyne','bucket2@buckettechnologies.com','4102026292', \(retailerid)) RETURNING id ")
-        results = try? tbl.sqlRows(checkuser, params: [])
+        let _ = try? tbl.sqlRows(checkuser, params: [])
 
         // new one
         userid = UUID().uuidString
@@ -305,13 +305,13 @@ final class SampleData {
         checkuser = "INSERT INTO us.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'Mike Silvers','bucket3@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
-        results = try? tbl.sqlRows(checkuser, params: [])
+        let _ = try? tbl.sqlRows(checkuser, params: [])
         
         // add the retailer user
         checkuser = "INSERT INTO sg.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'Mike Silvers','bucket3@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
-        results = try? tbl.sqlRows(checkuser, params: [])
+        let _ = try? tbl.sqlRows(checkuser, params: [])
 
 
         

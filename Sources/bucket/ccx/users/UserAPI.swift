@@ -453,7 +453,7 @@ struct UserAPI {
                 if let json = try? request.postBodyString?.jsonDecode() as? [String:Any] {
                     if let json = json {
                         
-                        var user = Account()
+                        let user = Account()
                         try! user.get(session.userid)
                         
                         if json.isEmpty {
