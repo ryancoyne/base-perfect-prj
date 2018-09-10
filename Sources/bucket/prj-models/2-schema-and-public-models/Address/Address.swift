@@ -32,6 +32,8 @@ public class Address: PostgresStORM {
     var address3 : String? = nil
     var ach_transfer_minimum: Double? = nil
     
+    var geopoint : CCXGeographyPoint? = nil
+
     //MARK: Table name
     override public func table() -> String { return "address" }
     
@@ -106,6 +108,15 @@ public class Address: PostgresStORM {
             ach_transfer_minimum = data
         }
         
+        if let long = this.data.longitude, let lat = this.data.latitude {
+            if geopoint.isNil {
+                geopoint = CCXGeographyPoint()
+            }
+            geopoint?.longitude = long
+            geopoint?.latitude = lat
+        }
+
+        
         
     }
     
@@ -120,6 +131,9 @@ public class Address: PostgresStORM {
     }
     
     func fromDictionary(sourceDictionary: [String:Any]) {
+        
+        var lat = 0.0
+        var lon = 0.0
         
         for (key, value) in sourceDictionary {
             
@@ -174,11 +188,28 @@ public class Address: PostgresStORM {
                 if (value as? Double).isNotNil {
                     self.ach_transfer_minimum = (value as! Double)
                 }
-                
+
+            case "latituide":
+                if (value as? Double).isNotNil {
+                    lat = (value as! Double)
+                }
+
+            case "longitude":
+                if (value as? Double).isNotNil {
+                    lon = (value as! Double)
+                }
+
             default:
                 print("This should not occur")
             }
             
+        }
+        
+        // add the geopoint if the lat and lon are sent in - if not get rid of the geopooint
+        if lat != 0.0 && lon != 0.0 {
+            self.geopoint = CCXGeographyPoint(latitude: lat, longitude: lon)
+        } else {
+            self.geopoint = nil
         }
         
     }
@@ -255,7 +286,12 @@ public class Address: PostgresStORM {
         if self.ach_transfer_minimum.isNotNil {
             dictionary.addressDic.ach_transfer_minimum = self.ach_transfer_minimum
         }
-        
+
+        if self.geopoint.isNotNil {
+            dictionary.addressDic.latitude  = self.geopoint?.latitude
+            dictionary.addressDic.longitude = self.geopoint?.longitude
+        }
+
         return dictionary
     }
     
@@ -301,6 +337,14 @@ public class Address: PostgresStORM {
         }
 
         if diff == true, self.ach_transfer_minimum != targetItem.ach_transfer_minimum {
+            diff = false
+        }
+
+        if diff == true, self.geopoint?.latitude != targetItem.geopoint?.latitude  {
+            diff = false
+        }
+
+        if diff == true, self.geopoint?.longitude != targetItem.geopoint?.longitude  {
             diff = false
         }
 

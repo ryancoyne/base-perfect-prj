@@ -156,6 +156,32 @@ struct AddressDictionary {
         }
     }
 
+    var latitude : Double? {
+        get {
+            return self.dic["latitude"].doubleValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["latitude"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "latitude")
+            }
+        }
+    }
+
+    var longitude : Double? {
+        get {
+            return self.dic["longitude"].doubleValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["longitude"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "longitude")
+            }
+        }
+    }
+
 }
 
 
