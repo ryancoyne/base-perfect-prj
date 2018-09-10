@@ -218,7 +218,7 @@ final class PRJDBTables {
             }
 
             // do the config file
-            var conf = Config()
+            let conf = Config()
             try? conf.setup()
             
         } catch {
@@ -231,7 +231,6 @@ final class PRJDBTables {
         // Bucket specific tables
         CountryTable.sharedInstance.create()
         POSTable.sharedInstance.create()
-        AddressTable.sharedInstance.create()
         TerminalTable.sharedInstance.create()
         RetailerTable.sharedInstance.create()
         RetailerContactsTable.sharedInstance.create()
@@ -270,7 +269,9 @@ final class PRJDBTables {
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
         if thereturn.postgis && thereturn.postgis_topo {
             // create the postgis tables here
-            
+
+            AddressTable.sharedInstance.create()
+
             // add the default data
             self.insertDefaultData()
 
@@ -319,19 +320,13 @@ final class PRJDBTables {
             return
         }
         
-        do {
+        // set the flag to allow sample data to be added:
+        // UPDATE config SET val=1 WHERE name='sampledata-prj'
             
-            // set the flag to allow sample data to be added:
-            // UPDATE config SET val=1 WHERE name='sampledata-prj'
-            
-            // This is where we are adding the sample data
-            SampleData.sharedInstance.addUserData()
-            SampleData.sharedInstance.addRetailerData()
-            SampleData.sharedInstance.addRetailerUsers()
-
-        } catch {
-            print(error)
-        }
+        // This is where we are adding the sample data
+        SampleData.sharedInstance.addUserData()
+        SampleData.sharedInstance.addRetailerData()
+        SampleData.sharedInstance.addRetailerUsers()
 
         // set the sample data to NO - so no more is added
         do {
@@ -373,27 +368,21 @@ final class PRJDBTables {
             return
         }
         
-        do {
-            
-            // This is where we are adding the default data
-            InitializeData.sharedInstance.addCountryCodes()
-            InitializeData.sharedInstance.addContactTypes()
-            InitializeData.sharedInstance.addPOS()
-            InitializeData.sharedInstance.addFormFieldType()
-            InitializeData.sharedInstance.addFormField()
-            InitializeData.sharedInstance.addForms()
-            InitializeData.sharedInstance.addFormFields()
+        // This is where we are adding the default data
+        InitializeData.sharedInstance.addCountryCodes()
+        InitializeData.sharedInstance.addContactTypes()
+        InitializeData.sharedInstance.addPOS()
+        InitializeData.sharedInstance.addFormFieldType()
+        InitializeData.sharedInstance.addFormField()
+        InitializeData.sharedInstance.addForms()
+        InitializeData.sharedInstance.addFormFields()
 
-            InitializeData.sharedInstance.addLedgerTypes()
-            InitializeData.sharedInstance.addLedgerAccountTypes()
-            InitializeData.sharedInstance.addLedgerAccounts()
+        InitializeData.sharedInstance.addLedgerTypes()
+        InitializeData.sharedInstance.addLedgerAccountTypes()
+        InitializeData.sharedInstance.addLedgerAccounts()
 
-            InitializeData.sharedInstance.addCashoutGroup()
-            InitializeData.sharedInstance.addCashoutOption()
-
-        } catch {
-            print(error)
-        }
+        InitializeData.sharedInstance.addCashoutGroup()
+        InitializeData.sharedInstance.addCashoutOption()
  
         // set the sample data to NO - so no more is added
         do {
