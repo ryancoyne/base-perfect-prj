@@ -115,6 +115,13 @@ public class AuditFunctions {
                 user = u
             }
             
+            // add the deleted record to the file
+            if schema == "us" {
+                // lets add the audit record for the US
+                let usa = USAuditFunctions()
+                usa.customerCodeAuditRecord(ct, 1, 3, user)
+            }
+            
             break
             
         case is CodeTransactionHistory:
@@ -128,6 +135,20 @@ public class AuditFunctions {
                 user = u
             } else if let u = ct.createdby, !u.isEmpty {
                 user = u
+            }
+            
+            // add the deleted record to the file
+            if schema == "us" {
+                // lets add the audit record for the US
+                let usa = USAuditFunctions()
+                usa.customerCodeAuditRecord(ct, 1, 3, user)
+                usa.customerAccountDetailAuditRecord(userId: user,
+                                                     changed: CCXServiceClass.sharedInstance.getNow(),
+                                                     toValue: 4,
+                                                     codeNumber: ct.customer_code!,
+                                                     amount: ct.total_amount!,
+                                                     adjustmentReason: 2,
+                                                     disbursementReason: 0)
             }
             
             break

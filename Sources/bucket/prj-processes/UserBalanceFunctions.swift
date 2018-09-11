@@ -57,18 +57,21 @@ public class UserBalanceFunctions {
         return total
     }
     
-    func adjustUserBalance(schemaId:String? = "local", _ userid:String, countryid:Int, increase:Double = 0.0, decrease:Double = 0.0) {
+    func adjustUserBalance(schemaId:String? = "public", _ userid:String, countryid:Int, increase:Double = 0.0, decrease:Double = 0.0) {
         
-        let schema = schemaId!.lowercased()
+        var schema = "public"
+        if schemaId.isNotNil {
+            schema = schemaId!.lowercased()
+        }
         
         let ut = UserTotal()
         
         var balance:Double = 0.0
         
-        let sql = "SELECT id FROM \(schema).\(ut.table()) WHERE user_id = '\(userid)' AND country_id = \(countryid)"
+        let sql = "SELECT * FROM \(schema).\(ut.table()) WHERE user_id = '\(userid)' AND country_id = \(countryid)"
         let theid = try? ut.sqlRows(sql, params: [])
         if theid.isNotNil, theid!.count > 0 {
-            try? ut.get(theid!.first!.data.id!)
+            ut.to(theid!.first!)
         }
         
         // if the record has been found - return it

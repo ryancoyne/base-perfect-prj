@@ -234,7 +234,7 @@ struct ConsumerAPI {
                     AuditFunctions().redeemCustomerCodeAuditRecord(ct)
                     
                     // update the users record
-                    UserBalanceFunctions().adjustUserBalance(schemaId: schema ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
+                    UserBalanceFunctions().adjustUserBalance(schemaId: nil ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
                     
                     // prepare the return
                     retCode["amount"] = ct.amount!
@@ -679,7 +679,7 @@ struct ConsumerAPI {
                         
                         
                         // Decrement the users balance:
-                        UserBalanceFunctions().adjustUserBalance(schemaId: schema, userId!, countryid: countryId, decrease: amount_to_cashout)
+                        UserBalanceFunctions().adjustUserBalance(schemaId: nil, userId!, countryid: countryId, decrease: amount_to_cashout)
                         
                         // this is where we show success
                         // show the bucket amount response like in the login

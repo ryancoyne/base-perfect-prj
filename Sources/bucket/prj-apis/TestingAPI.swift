@@ -209,14 +209,48 @@ struct TestingAPI {
                 case 0:
                     
                     // Delete the testing codes not in the history
-                    let sql = "DELETE FROM \(schema).code_transaction WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
-                    let current_codes = CodeTransaction()
-                    let _ = try? current_codes.sqlRows(sql, params: [])
+//                    let sql = "DELETE FROM \(schema).code_transaction WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
+//                    let current_codes = CodeTransaction()
+//                    let _ = try? current_codes.sqlRows(sql, params: [])
+
+                    let deletedtime = CCXServiceClass.sharedInstance.getNow()
                     
+                    let sql = "SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!) "
+                    let current_codes = CodeTransaction()
+                    let ct = try? current_codes.sqlRows(sql, params: [])
+                    if ct.isNotNil {
+                        for c in ct! {
+                            let ctt = CodeTransaction()
+                            ctt.to(c)
+                            ctt.deleted = deletedtime
+                            ctt.deletedby = user
+                            _ = try? ctt.saveWithCustomType(schemaIn: schema, user, copyOver: false)
+
+                            if schema == "us" { AuditFunctions().deleteCustomerCodeAuditRecord(ctt) }
+
+                        }
+                    }
+
                     // Delete the testing codes in the history
-                    let sql2 = "DELETE FROM \(schema).code_transaction_history WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
+                    let sql2 = "SELECT * FROM \(schema).code_transaction_history_view_deleted_no WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
                     let current_codes2 = CodeTransactionHistory()
-                    let _ = try? current_codes2.sqlRows(sql2, params: [])
+                    let cth = try? current_codes2.sqlRows(sql2, params: [])
+                    
+                    if cth.isNotNil {
+                        for c in cth! {
+                            let ctth = CodeTransactionHistory()
+                            ctth.to(c)
+                            ctth.deleted = deletedtime
+                            ctth.deletedby = user
+                            _ = try? ctth.saveWithCustomType(schemaIn: schema, user, copyOver: false)
+                            
+                            // decrement the users balance
+                            UserBalanceFunctions().adjustUserBalance(schemaId: nil, user, countryid: ctth.country_id!, increase: 0.00, decrease: ctth.amount!)
+                            
+                            if schema == "us" { AuditFunctions().deleteCustomerCodeAuditRecord(ctth) }
+                            
+                        }
+                    }
                     
                     // set the account balance to 0
                     let sql_del = "UPDATE public.user_total SET balance = 0.0 WHERE country_id = \(countryId.intValue!) AND user_id = '\(user)'"
@@ -285,7 +319,7 @@ struct TestingAPI {
                                     AuditFunctions().redeemCustomerCodeAuditRecord(ct)
                                     
                                     // update the users record
-                                    UserBalanceFunctions().adjustUserBalance(schemaId: schema ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
+                                    UserBalanceFunctions().adjustUserBalance(schemaId: nil ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
                                     
                                     // prepare the return
                                     retCode["amount"] = ct.amount!
