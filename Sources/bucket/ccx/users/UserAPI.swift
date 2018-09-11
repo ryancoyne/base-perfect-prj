@@ -473,53 +473,53 @@ struct UserAPI {
             return {
                 request, response in
                 
-                guard let session = request.session, !session.userid.isEmpty else { return response.notLoggedIn() }
-                
                 // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
                 guard request.SecurityCheck() else { response.badSecurityToken; return }
-
-                if let json = try? request.postBodyString?.jsonDecode() as? [String:Any] {
-                    if let json = json {
-                        
-                        let user = Account()
-                        try! user.get(session.userid)
-                        
-                        if json.isEmpty {
-                            try? response.setBody(json: ["error":"Empty json"])
-                                .setHeader(.contentType, value: "application/json")
-                                .completed(status: .badRequest)
-                        }
-                        
-                        if json["email"].stringValue.isNotNil {
-                            user.email = json["email"].stringValue!
-                        }
-                        
-                        if json["username"].stringValue.isNotNil {
-                            user.username = json["username"].stringValue!.lowercased()
-                        }
-                        
-                        if json["lastname"].stringValue.isNotNil {
-                            user.detail["lastname"] = json["lastname"].stringValue!
-                        }
-                        
-                        if json["firstname"].stringValue.isNotNil {
-                            user.detail["firstname"] = json["firstname"].stringValue!
-                        }
-                        
-//                        if !json["detail"].dicValue.isEmpty {
-//                            user.detail = json["detail"].dicValue
-//                        }
-                        
-                        user.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
-                        user.detail["modifiedby"] = session.userid
-
-                        // no need for the GIS save as the location is not saved nin a geo field (it is in detail)
-                        try! user.save()
-                        
-                        try? response.setBody(json: ["result":"success"])
-                            .setHeader(.contentType, value: "application/json")
-                            .completed(status: .ok)
+                
+                // Check if the user is loged in:
+                guard !Account.userBouce(request, response) else { return }
+                
+                let user = request.account!
+                
+                do {
+                    
+                    let json = try request.postBodyJSON()!
+                    guard !json.isEmpty else { return response.emptyJSONBody }
+                    
+                    if json["username"].stringValue.isNotNil {
+                        user.username = json["username"].stringValue!.lowercased()
                     }
+                    
+                    if json["lastname"].stringValue.isNotNil {
+                        user.detail["lastname"] = json["lastname"].stringValue!
+                    }
+                    
+                    if json["firstname"].stringValue.isNotNil {
+                        user.detail["firstname"] = json["firstname"].stringValue!
+                    }
+                    
+                    if let emailNot = json["emailNotifications"].boolValue {
+                        user.detail["emailNotifications"] = emailNot
+                    }
+                    
+                    if let appNotif = json["appNotifications"].boolValue {
+                        user.detail["appNotifications"] = appNotif
+                    }
+                    
+                    user.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
+                    user.detail["modifiedby"] = user.id
+                    
+                    // no need for the GIS save as the location is not saved nin a geo field (it is in detail)
+                    try! user.save()
+                    
+                    try? response.setBody(json: ["result":"success"])
+                        .setHeader(.contentType, value: "application/json")
+                        .completed(status: .ok)
+                    
+                } catch BucketAPIError.unparceableJSON(let attemptedJSON) {
+                    return response.invalidRequest(attemptedJSON)
+                } catch {
+                    return response.caughtError(error)
                 }
             }
         }
