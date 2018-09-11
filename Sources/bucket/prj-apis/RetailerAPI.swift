@@ -76,7 +76,7 @@ struct RetailerAPI {
             
                 guard var startDate = moment(intervalId, dateFormat: "yyyyMMdd") else { return }
                 startDate = startDate - 4.hours
-                let endDate = startDate + (1.days - 1.seconds)
+//                let endDate = startDate + (1.days - 1.seconds)
                 
 //                return response.completed(status: .ok)
                 
@@ -108,10 +108,12 @@ struct RetailerAPI {
                     guard let _ = request.countryId else { return response.invalidCountryCode }
                 
                     let schema = Country.getSchema(request)
-                    
+ //MARK--
+// CHANGE ME WHEN THE WEBPAGE IS UP
                     switch server {
                     // Production & Staging are acting the same.
-                    case .production, .staging:
+//                    case .production, .staging:
+                    case .production:
                         // We should do everything like regular here:
                         
                         // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
@@ -178,7 +180,10 @@ struct RetailerAPI {
                         }
                         
                         break
-                    case .development:
+// MARK--
+// CHANGE WHEN THE WEB PAGES ARE UP
+//                    case .development:
+                    case .development, .staging:
                         // In development, we are automatically setting the terminal as approved, so they do not need to go to the web.
                         
                         // We need to check if the terminal exists, if it doesn't we send back a thing telling them to go and approve the device.
@@ -495,7 +500,7 @@ struct RetailerAPI {
                         // Save the transaction
                         let trn = try? transaction.saveWithCustomType(schemaIn: schema, CCXDefaultUserValues.user_server)
                         if let t = trn?.first, let tid = t.data["id"]  {
-                            transaction.id = tid as! Int
+                            transaction.id = (tid as! Int)
                         }
                         // and now - lets save theb transaction in the Audit table
                         AuditFunctions().addCustomerCodeAuditRecord(transaction)
@@ -644,6 +649,12 @@ fileprivate extension HTTPResponse {
     var unauthorizedTerminal : Void {
         return try! self
             .setBody(json: ["errorCode":"InvalidRetailer", "message":"Please Check Retailer Id and Secret Code."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .unauthorized)
+    }
+    var terminalNotApproved : Void {
+        return try! self
+            .setBody(json: ["errorCode":"TerminalNotApproved", "message":"Please login the website and approve the terminal."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .unauthorized)
     }

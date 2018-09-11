@@ -612,7 +612,7 @@ public class CodeTransaction: PostgresStORM {
 
         // add the archive audit info
         cth.archived = CCXServiceClass.sharedInstance.getNow()
-        if archiveUserId == nil {
+        if archiveUserId.isNil {
             cth.archivedby = CCXDefaultUserValues.user_server
         } else {
             cth.archivedby = archiveUserId

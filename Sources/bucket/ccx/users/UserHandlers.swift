@@ -10,6 +10,9 @@ extension Handlers {
         return {
             request, response in
             
+            // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+            guard request.SecurityCheck() else { response.badSecurityToken; return }
+
             if (request.session?.userid ?? "").isEmpty { response.completed(status: .notAcceptable) }
             
             // Verify Admin
@@ -55,6 +58,10 @@ extension Handlers {
     static func userList(data: [String:Any]) throws -> RequestHandler {
         return {
             request, response in
+            
+            // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+            guard request.SecurityCheck() else { response.badSecurityToken; return }
+
             let contextAccountID = request.session?.userid ?? ""
             let contextAuthenticated = !(request.session?.userid ?? "").isEmpty
             if !contextAuthenticated { response.redirect(path: "/login") }
@@ -87,6 +94,9 @@ extension Handlers {
         return {
             request, response in
             
+            // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+            guard request.SecurityCheck() else { response.badSecurityToken; return }
+
             let contextAccountID = request.session?.userid ?? ""
             let contextAuthenticated = !(request.session?.userid ?? "").isEmpty
             if !contextAuthenticated { response.redirect(path: "/login") }
@@ -154,6 +164,9 @@ extension Handlers {
         return {
             request, response in
             
+            // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+            guard request.SecurityCheck() else { response.badSecurityToken; return }
+
             let contextAccountID = request.session?.userid ?? ""
             let contextAuthenticated = !(request.session?.userid ?? "").isEmpty
             if !contextAuthenticated { response.redirect(path: "/login") }

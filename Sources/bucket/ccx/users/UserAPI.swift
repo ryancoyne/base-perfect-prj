@@ -43,6 +43,9 @@ struct UserAPI {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 // Okay, we are resending an email, check the email:
                 do {
                     let json = try request.postBodyJSON()!
@@ -84,6 +87,9 @@ struct UserAPI {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 if request.session?.userid.isEmpty == false {
                     
                     PostgresSessions().destroy(request, response)
@@ -119,11 +125,17 @@ struct UserAPI {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 // If they are already logged in, just send back their information:
                 if let s = request.session, !s.userid.isEmpty, s.data["csrf"].stringValue == request.header(.custom(name: "X-CSRF-Token")) {
                     response.alreadyAuthenticated(request)
                     return
                 }
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
                 
                 do {
                     
@@ -177,6 +189,9 @@ struct UserAPI {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 do {
                     
                     let json = try request.postBodyJSON()!
@@ -229,6 +244,9 @@ struct UserAPI {
                 
                 guard let session = request.session, !session.userid.isEmpty else { return response.notLoggedIn() }
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 let i = request.session!.userid
                 let acc = Account()
                 do {
@@ -270,6 +288,9 @@ struct UserAPI {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 let json = try? request.postBodyString?.jsonDecode() as? [String:Any]
                 
                 if json.isNil {
@@ -305,6 +326,7 @@ struct UserAPI {
             static let twitter : TwitterOAuth = TwitterOAuth()
             
             public static func createOrLoginUser(_ json : [String:Any] /*, _ request : HTTPRequest*/, _ type: String) throws -> Account {
+                
                 let user = Account()
                 var json = json
                 let findDic:[String:Any] = ["source": type, "remoteid": json["id"].stringValue!]
@@ -384,6 +406,9 @@ struct UserAPI {
                         return
                     }
                     
+                    // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                    guard request.SecurityCheck() else { response.badSecurityToken; return }
+                    
                     do {
                         
                         let json = try request.postBodyJSON()!
@@ -450,10 +475,13 @@ struct UserAPI {
                 
                 guard let session = request.session, !session.userid.isEmpty else { return response.notLoggedIn() }
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 if let json = try? request.postBodyString?.jsonDecode() as? [String:Any] {
                     if let json = json {
                         
-                        var user = Account()
+                        let user = Account()
                         try! user.get(session.userid)
                         
                         if json.isEmpty {
@@ -576,6 +604,9 @@ struct UserAPI {
         static func uploadPicture(data : [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
 
             // security
             guard let session = request.session, !session.userid.isEmpty else { return response.notLoggedIn() }
@@ -718,6 +749,9 @@ struct UserAPI {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 do {
                     
                     let json = try request.postBodyJSON()!
@@ -793,6 +827,10 @@ struct UserAPI {
         public static func registerVerify(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 let t = request.session?.data["csrf"] as? String ?? ""
                 if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
                 var context: [String : Any] = appExtras(request)
@@ -822,6 +860,10 @@ struct UserAPI {
         public static func registerCompletion(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 let t = request.session?.data["csrf"] as? String ?? ""
                 if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
                 var context: [String : Any] = appExtras(request)
@@ -887,6 +929,10 @@ struct UserAPI {
         public static func forgotpassVerify(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 let t = request.session?.data["csrf"] as? String ?? ""
                 
                 var context: [String : Any] = appExtras(request)
@@ -916,6 +962,10 @@ struct UserAPI {
         public static func forgotpasswordCompletion(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 let t = request.session?.data["csrf"] as? String ?? ""
                 if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
             

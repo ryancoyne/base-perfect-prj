@@ -25,8 +25,8 @@ struct TestingAPI {
         static var routes : [[String:Any]] {
             return [
                 ["method":"post",    "uri":"/api/v1/testingProcess", "handler":testFunction],
-                ["method":"get",    "uri":"/api/v1/testing/fillCodes/{countryCode}", "handler":addTestTransaction],
-                ["method":"get",    "uri":"/api/v1/testing/getQRCodes/{countryCode}", "handler":getCodes]
+                ["method":"post",    "uri":"/api/v1/testing/fillCodes/{countryCode}", "handler":addTestTransaction],
+                ["method":"post",    "uri":"/api/v1/testing/getQRCodes/{countryCode}", "handler":getCodes]
             ]
         }
         //MARK: - Get QR Codes:
@@ -104,11 +104,13 @@ struct TestingAPI {
                 }
 
                 theHTML.append("</tr></table> \n")
-                 theHTML.append("</body> \n")
+                theHTML.append("</body> \n")
 
+                let environment = EnvironmentVariables.sharedInstance.Server!
+                    
                 // Send the response:
                 try? response.setBody(json: ["message":"Success!  Your QR codes are on their way, by email."]).completed(status: .ok)
-                Utility.sendMail(name: "", address: email, subject: "QR Code Generation!", html: theHTML, text: "")
+                Utility.sendMail(name: "Bucket Technologies", address: email, subject: "QR Code Generation for \(environment)", html: theHTML, text: "Please Enable HTML email to get your codes.")
                 return
                 
             }
@@ -169,9 +171,6 @@ struct TestingAPI {
                     return response.functionNotOn
                 }
                 
-                // check for the security token
-                guard request.SecurityCheck() else { return response.badSecurityToken }
-
                 guard !Account.userBouce(request, response) else { return }
             
                 // get the country code
@@ -192,23 +191,15 @@ struct TestingAPI {
                     }
                 }
 
+                var endmessage = ""
                 
                 let user = request.session!.userid
             
                 // SECTION 1: Delete all the existing test records for the user and the country
-                
-                // Delete the testing codes not in the history
-                let sql = "DELETE FROM \(schema).code_transaction WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
-                let current_codes = CodeTransaction()
-                let _ = try? current_codes.sqlRows(sql, params: [])
-            
-                // Delete the testing codes in the history
-                let sql2 = "DELETE FROM \(schema).code_transaction_history WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
-                let current_codes2 = CodeTransactionHistory()
-                let _ = try? current_codes2.sqlRows(sql2, params: [])
-            
-                
-                // update the balances table eventially (now that we have country codes)
+                // BUT: only if the count == 0
+                // get the count
+                let cnt = request.header(.custom(name: "count")).intValue ?? 20
+
 
                 // SECTION 2: Get a terminal for a retailer for the country
                 
@@ -233,62 +224,149 @@ struct TestingAPI {
                     return response.noTerminalsInCountry(countryId: countryId.intValue!)
                 } 
 
-                // SECTION 3: Adding the new customer codes for the terminal
-                for i in 1...250 {
-                    // This was all chopped down to this function to use to email QR Codess
-                    CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i)
-                }
-            
-                // SECTION 4: Claim the customer codes we just added (to make sure the process is working correctly)
-                
-                let reup_sql = "SELECT * FROM \(schema).code_transaction WHERE client_location LIKE ('TESTING_%') AND country_id = \(countryId)"
-                let reup_ct = CodeTransaction()
-                let reup_res = try? reup_ct.sqlRows(reup_sql, params: [])
-                
-                if reup_res.isNotNil {
-                    for i in reup_res! {
-                        
-                        // redeem the transactions
-                        
-                        let ct = CodeTransaction()
-                        let rsp = try? ct.sqlRows("SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE customer_code = $1 AND country_id = $2 ", params: ["\(i.data["customer_code"]!)", countryId])
-                        
-                        if let r = rsp?.first {
-                            var retCode:[String:Any] = [:]
+                switch cnt {
+                case 0:
+                    
+                    // Delete the testing codes not in the history
+//                    let sql = "DELETE FROM \(schema).code_transaction WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
+//                    let current_codes = CodeTransaction()
+//                    let _ = try? current_codes.sqlRows(sql, params: [])
+
+
+                    let deletedtime = CCXServiceClass.sharedInstance.getNow()
+                    
+                    let sql = "SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!) "
+                    let current_codes = CodeTransaction()
+                    let ct = try? current_codes.sqlRows(sql, params: [])
+                    if ct.isNotNil {
+                        for c in ct! {
+                            let ctt = CodeTransaction()
+                            ctt.to(c)
+                            ctt.deleted = deletedtime
+                            ctt.deletedby = user
+                            _ = try? ctt.saveWithCustomType(schemaIn: schema, user, copyOver: false)
+
+                            if schema == "us" { AuditFunctions().deleteCustomerCodeAuditRecord(ctt) }
+
+                        }
+                    }
+
+                    // Delete the testing codes in the history
+                    let sql2 = "SELECT * FROM \(schema).code_transaction_history_view_deleted_no WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
+                    let current_codes2 = CodeTransactionHistory()
+                    let cth = try? current_codes2.sqlRows(sql2, params: [])
+                    
+                    if cth.isNotNil {
+                        for c in cth! {
+                            let ctth = CodeTransactionHistory()
+                            ctth.to(c)
+                            ctth.deleted = deletedtime
+                            ctth.deletedby = user
+                            _ = try? ctth.saveWithCustomType(schemaIn: schema, user, copyOver: false)
                             
-                            // lets redeem the code now
-                            let redeemed        = CCXServiceClass.sharedInstance.getNow()
-                            let redeemedby      = request.session!.userid
+                            // decrement the users balance
+                            UserBalanceFunctions().adjustUserBalance(schemaId: nil, user, countryid: ctth.country_id!, increase: 0.00, decrease: ctth.amount!)
                             
-                            ct.to(r)
+                            if schema == "us" { AuditFunctions().deleteCustomerCodeAuditRecord(ctth) }
                             
-                            ct.redeemed         = redeemed
-                            ct.redeemedby       = redeemedby
-                            ct.status           = CodeTransactionCodes.merchant_pending
-                            if let _            = try? ct.saveWithCustomType(schemaIn: schema, redeemedby) {
+                        }
+                    }
+                    
+                    // set the account balance to 0
+                    let sql_del = "UPDATE public.user_total SET balance = 0.0 WHERE country_id = \(countryId.intValue!) AND user_id = '\(user)'"
+                    let _ = try? current_codes.sqlRows(sql_del, params: [])
+                    
+                    endmessage = "Transactions were removed from your account!"
+                    
+                default:
+                    // SECTION 2: Get a terminal for a retailer for the country
+                    var nbr_added = 0
+                    
+                    // look for a retailer in the country we are using
+                    let sql_add = "SELECT id from \(schema).address WHERE retailer_id > 0 AND country_id = \(countryId.intValue!)"
+                    let addy = Address()
+                    let addy_ret = try? addy.sqlRows(sql_add, params: [])
+                    if addy_ret.isNil {
+                        // error that there is no terminal for that country code
+                        // error must return an error code for the response and get out of this flow
+                        try? response.setBody(json: ["error":"There are no retailers in country id \(countryId)"]).completed(status: .custom(code: 450, message: "No Retailers in Country \(countryId)"))
+                        return
+                    }
+                    
+                    // look for a terminal
+                    let term = Terminal.getFirst(schema)
+                    if term.isNil {
+                        try? response.setBody(json: ["error":"There are no terminals in country id \(countryId)"]).completed(status: .custom(code: 451, message: "No Terminals in Country \(countryId)"))
+                        return
+                    }
+                    
+                    // SECTION 3: Adding the new customer codes for the terminal
+                    
+                    for i in 1...cnt {
+                        // This was all chopped down to this function to use to email QR Codess
+                        CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i)
+                    }
+                    
+                    // SECTION 4: Claim the customer codes we just added (to make sure the process is working correctly)
+                    
+                    let reup_sql = "SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE client_location LIKE ('TESTING_%') AND country_id = \(countryId)"
+                    let reup_ct = CodeTransaction()
+                    let reup_res = try? reup_ct.sqlRows(reup_sql, params: [])
+                    
+                    if reup_res.isNotNil {
+                        for i in reup_res! {
+                            
+                            // redeem the transactions
+                            
+                            let ct = CodeTransaction()
+                            let rsp = try? ct.sqlRows("SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE customer_code = $1 AND country_id = $2 ", params: ["\(i.data["customer_code"]!)", countryId])
+                            
+                            if let r = rsp?.first {
+                                var retCode:[String:Any] = [:]
                                 
-                                // this means it was saved - audit and archive
-                                AuditFunctions().redeemCustomerCodeAuditRecord(ct)
+                                // lets redeem the code now
+                                let redeemed        = CCXServiceClass.sharedInstance.getNow()
+                                let redeemedby      = request.session!.userid
                                 
-                                // update the users record
-                                UserBalanceFunctions().adjustUserBalance(schemaId: schema ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
+                                ct.to(r)
                                 
-                                // prepare the return
-                                retCode["amount"] = ct.amount!
-                                
-                                let wallet = UserBalanceFunctions().getConsumerBalances(redeemedby)
-                                if wallet.count > 0 {
-                                    retCode["buckets"] = wallet
+                                ct.redeemed         = redeemed
+                                ct.redeemedby       = redeemedby
+                                ct.status           = CodeTransactionCodes.merchant_pending
+                                if let _            = try? ct.saveWithCustomType(schemaIn: schema, redeemedby) {
+                                    
+                                    // this means it was saved - audit and archive
+                                    AuditFunctions().redeemCustomerCodeAuditRecord(ct)
+                                    
+                                    // update the users record
+                                    UserBalanceFunctions().adjustUserBalance(schemaId: nil ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
+                                    
+                                    // prepare the return
+                                    retCode["amount"] = ct.amount!
+                                    
+                                    let wallet = UserBalanceFunctions().getConsumerBalances(redeemedby)
+                                    if wallet.count > 0 {
+                                        retCode["buckets"] = wallet
+                                    }
+                                    
+                                    // now archive the record
+                                    ct.archiveRecord()
+                                    
+                                    nbr_added += 1
+                                    
                                 }
-                                
-                                // now archive the record
-                                ct.archiveRecord()
-                                
                             }
                         }
                     }
+                    
+                    endmessage = "Added \(nbr_added) transactions and redeemed them to your account!"
+                    
                 }
-                _=try? response.setBody(json: ["message": "Added transactions and redeemed them to your account!"])
+                
+                    // update the balances table eventially (now that we have country codes)
+
+                
+                _=try? response.setBody(json: ["message": endmessage])
                 return response.completed(status: .ok)
             }
         }

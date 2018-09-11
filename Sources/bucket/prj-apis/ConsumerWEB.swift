@@ -87,6 +87,9 @@ struct ConsumerWEB {
             return {
                 request, response in
 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 var template = "views/msg" // where it goes to after
                 var context: [String : Any] = ["title": "Bucket Technologies", "subtitle":"Goodbye coins, Hello Change"]
 

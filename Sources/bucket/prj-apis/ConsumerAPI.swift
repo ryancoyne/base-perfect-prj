@@ -89,7 +89,7 @@ struct ConsumerAPI {
 
                 // we do not need the retailer for cashouts - there will be no retailer for that type.
 //                if transType != "CASHOUT" {
-                    sql.append(", r.name FROM \(schema).code_transaction_history AS cth ")
+                    sql.append(", r.name FROM \(schema).code_transaction_history_view_deleted_no AS cth ")
                     sql.append("LEFT JOIN \(schema).retailer AS r ")
                     sql.append("ON cth.retailer_id = r.id ")
 //                } else {
@@ -203,6 +203,7 @@ struct ConsumerAPI {
                 if rsp?.first.isNil == true {
                     // if we did not find it, check history to see if we have already redeemed it (we are using the summary table in the public schema
                     // to avoid performance costly functions looking thru schemas
+                    // (do not use the view deleted no because we want to make sure it was not redeemed and deleted)
                     let strs = CodeTransactionHistory()
                     let rsp2 = try? strs.sqlRows("SELECT * FROM \(schema).code_transaction_history WHERE customer_code = $1", params: ["\(request.customerCode!)"])
                     if let t = rsp2?.first?.data, (t["created"] as! Int) > 0 {
@@ -219,7 +220,7 @@ struct ConsumerAPI {
                 let redeemed        = CCXServiceClass.sharedInstance.getNow()
                 let redeemedby      = request.session!.userid
                 
-                let sql = "SELECT * FROM \(schema).code_transaction WHERE id = \(rsp!.first!.data.id!)"
+                let sql = "SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE id = \(rsp!.first!.data.id!)"
                 let ctr = try? ct.sqlRows(sql, params: [])
                 if let c = ctr!.first {
                     ct.to(c)
@@ -234,7 +235,7 @@ struct ConsumerAPI {
                     AuditFunctions().redeemCustomerCodeAuditRecord(ct)
                     
                     // update the users record
-                    UserBalanceFunctions().adjustUserBalance(schemaId: schema ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
+                    UserBalanceFunctions().adjustUserBalance(schemaId: nil ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
                     
                     // prepare the return
                     retCode["amount"] = ct.amount!
@@ -501,11 +502,19 @@ struct ConsumerAPI {
                     var name_cashout = ""
                     var form_id = 0
                     
+                    let cog = CashoutGroup()
+                    
                     if resopt.isNotNil, let i = resopt?.first! {
                         min_cashout  = i.data["minimum"].doubleValue ?? 0.0
                         max_cashout  = i.data["maximum"].doubleValue ?? 0.0
                         name_cashout = i.data["name"].stringValue ?? ""
                         form_id = i.data["form_id"].intValue ?? 0
+                        
+                        let gid = i.data["group_id"].intValue
+                        let gid_i = try? cog.sqlRows("SELECT * FROM \(schema).cashout_group WHERE id = \(gid!)", params: [])
+                        if let g = gid_i?.first {
+                            cog.to(g)
+                        }
                     }
                     
                     // If no fields are submitted, send back an error.
@@ -641,8 +650,12 @@ struct ConsumerAPI {
                             let _ = try? working_cth.saveWithCustomType(schemaIn: schema)
                             
                             // Write the audit record
-                            AuditFunctions().cashoutCustomerCodeAuditRecord(working_cth)
-                            
+                            if schema == "us" {
+                                // figure out what type
+                                let co_type = cog.detail_disbursement_reasons ?? 0
+                                
+                                AuditFunctions().cashoutCustomerCodeAuditRecord(working_cth, co_type)
+                            }
                         }
                         
                         // add the cashout record to the history record
@@ -667,7 +680,7 @@ struct ConsumerAPI {
                         
                         
                         // Decrement the users balance:
-                        UserBalanceFunctions().adjustUserBalance(schemaId: schema, userId!, countryid: countryId, decrease: amount_to_cashout)
+                        UserBalanceFunctions().adjustUserBalance(schemaId: nil, userId!, countryid: countryId, decrease: amount_to_cashout)
                         
                         // this is where we show success
                         // show the bucket amount response like in the login

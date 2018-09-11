@@ -32,6 +32,9 @@ struct AdminAPI {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 guard Account.adminBouce(request, response) else { response.accountPermissionsBounce; return  }
                 
                 let user = Account()

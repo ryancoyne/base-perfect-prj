@@ -31,6 +31,31 @@ public struct USAccountStatusType {
     static let fraud       = 6
 }
 
+public struct USDetailNewValues {
+    static let codeAdded         = 1
+    static let accountAdjustment = 2
+    static let fundsDispersed    = 3
+    static let codeReversed      = 4
+    static let sentForBreakage   = 5
+    static let fundsRemoved      = 6
+}
+
+public struct USDetailAdjustmentReasons {
+    static let generalAdd              = 1
+    static let generalSubtract         = 2
+    static let fraudAdd                = 3
+    static let fraudSubtract           = 4
+    static let customrServiceAdd       = 5
+    static let customerServiceSubtract = 6
+}
+
+public struct USDetailDisbursementReasons {
+    static let openLoopCard   = 1
+    static let closedLoopCard = 2
+    static let donation       = 3
+    static let crypto         = 4
+}
+
 public class USAuditFunctions {
     
     func customerCodeAuditRecord(_ record: Any, _ fromFunction:Int, _ toFunction:Int, _ userId:String? = nil ) {
@@ -166,13 +191,114 @@ public class USAuditFunctions {
 
     }
     
-    
-    func customerAccountAuditRecord(_ record: Account, _ fromFunction:USAccountStatusType, _ toFunction:USAccountStatusType ) {
+
+    // this takes care of when accounts have actions against them (US accounts only)
+    func customerAccountStatusAuditRecord(record: Account, changed:Int, fromStatus:Int, toStatus:Int, codeRecord: Any? = nil ) {
+
+        let schema = "us"
+        let user   = record.id
+
+        // make sure the acount is not provisional (not yet confirmed)
+        if record.usertype == .provisional { return }
         
-        var schema = ""
-        var user = ""
+        // lets first make sure there is a US based transaction before doing this
+        var sql = "SELECT id FROM \(schema).code_transaction_history WHERE redeemedby = \(user) LIMIT 1"
+        let sql_a = try? record.sqlRows(sql, params: [])
+        // if there are no US transactions, then do not continue
+        guard (sql_a?.first) != nil else { return }
         
+        let changed_date_time = SupportFunctions.sharedInstance.getDateAndTime(changed)
+        let timenow           = CCXServiceClass.sharedInstance.getNow()
+
+        var cas = USBucketAccountStatus()
         
+        cas  = USBucketAccountStatus()
+        // lets setup the status record - it should be updated if it exists
+        sql = "SELECT id FROM \(schema).us_bucket_account_status_view_deleted_no WHERE account_number = '\(user)' "
+        let sqlr = try? cas.sqlRows(sql, params: [])
+        if let a = sqlr?.first {
+            cas.to(a)
+            cas.modified   = timenow
+            cas.modifiedby = user
+        } else {
+            cas.created   = timenow
+            cas.createdby = user
+        }
+            
+        cas.account_number = user
+        cas.change_date    = changed_date_time.date
+        cas.change_time    = changed_date_time.time
+        cas.record_type    = USRecordType.accountStatus
+        cas.value_original = fromStatus
+        cas.value_new      = toStatus
+        
+        // save the audit record
+        let _ = try? cas.saveWithCustomType(schemaIn: schema, user)
+
     }
+    
+    func customerAccountDetailAuditRecord(userId: String, changed:Int, toValue:Int, codeNumber:String? = nil, amount:Double? = nil, adjustmentReason:Int? = nil, disbursementReason:Int? = nil) {
+
+        let record = Account()
+        let _ = try? record.get(id: userId)
+        
+        let schema = "us"
+        let user   = record.id
+        
+        // make sure the acount is not provisional (not yet confirmed)
+        if record.usertype == .provisional { return }
+        
+        // lets first make sure there is a US based transaction before doing this
+        let sql = "SELECT id FROM \(schema).code_transaction_history WHERE redeemedby = '\(user)' LIMIT 1"
+        let sql_a = try? record.sqlRows(sql, params: [])
+        // if there are no US transactions, then do not continue
+        guard (sql_a?.first) != nil else { return }
+        
+        let changed_date_time = SupportFunctions.sharedInstance.getDateAndTime(changed)
+        let timenow           = CCXServiceClass.sharedInstance.getNow()
+
+        // see if we need to add the status record
+        if !record.countryExists(schema) {
+            // add the country
+            record.addCountry(schema)
+            let _ = try? record.saveWithCustomType()
+            
+            // add the status record
+            let cas = USBucketAccountStatus()
+            
+            cas.created        = timenow
+            cas.createdby      = user
+            cas.record_type    = USRecordType.accountStatus
+            cas.change_date    = changed_date_time.date
+            cas.change_time    = changed_date_time.time
+            cas.account_number = user
+            cas.value_original = USAccountStatusType.firstentry
+            cas.value_new      = USAccountStatusType.active
+            
+            let _ = try? cas.saveWithCustomType(schemaIn: schema, user)
+        }
+        
+        // add the detail record (always done)
+        let cad = USBucketAccountDetail()
+
+        // lets setup the detail record - it always is written
+        cad.created        = timenow
+        cad.createdby      = user
+        cad.record_type    = USRecordType.accountDetail
+        cad.change_date    = changed_date_time.date
+        cad.change_time    = changed_date_time.time
+        cad.account_number = user
+        
+        // add the values
+        cad.value_new = toValue
+        if !codeNumber.isNil { cad.code_number = codeNumber! }
+        if !amount.isNil { cad.amount = amount! }
+        if !adjustmentReason.isNil { cad.adjustment_reason = adjustmentReason! }
+        if !disbursementReason.isNil { cad.disbursement_reason = disbursementReason! }
+
+        let _ = try? cad.saveWithCustomType(schemaIn: schema, user)
+
+    }
+
     
 }

@@ -26,8 +26,11 @@ struct CCXStatisticsV1Controller {
         return {
             request, response in
 
-        // security
-        guard let session = request.session, !session.userid.isEmpty else { return response.notLoggedIn() }
+            // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+            guard request.SecurityCheck() else { response.badSecurityToken; return }
+
+            // security
+            guard let session = request.session, !session.userid.isEmpty else { return response.notLoggedIn() }
         
                 do {
                     let incoming = request.postBodyString
@@ -72,6 +75,9 @@ struct CCXStatisticsV1Controller {
         public static func getAdminStatisticsWeb(_ data : [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
 
                 // security
                 let contextAccountID = request.session?.userid ?? ""

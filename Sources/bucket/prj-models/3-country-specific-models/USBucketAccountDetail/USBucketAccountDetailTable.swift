@@ -1,43 +1,39 @@
 //
-//  CashoutTypesTable.swift
+//  AddressTable.swift
 //  bucket
 //
-//  Created by Ryan Coyne on 8/9/18.
+//  Created by Ryan Coyne on 8/8/18.
 //
 
 import Foundation
 import PostgresStORM
 
-final class CashoutGroupTable {
+final class USBucketAccountDetailTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
     
-    static let sharedInstance = CashoutGroupTable()
-    let tbl = CashoutGroup()
+    static let sharedInstance = USBucketAccountDetailTable()
+    let tbl = USBucketAccountDetail()
     
     let tablelevel = 1.00
     
     //MARK:-
-    //MARK: Cashout Group table
+    //MARK: address table
     func create() {
         
-        for i in PRJCountries.list  {
-            createCashoutGroup((i.uppercased()))
-        }
+        
+        createUSAccountDetail("us")
+        
     }
 
     //MARK:-
-    //MARK: cashout group table
-    private func createCashoutGroup(_ schemaIn:String? = "public") {
+    //MARK: Addresses table
+    private func createUSAccountDetail(_ schemaId:String? = "public") {
         
-        var schema = "public"
-        if schemaIn.isNotNil {
-            schema = schemaIn!.lowercased()
-        }
-
+        let schema = schemaId!.lowercased()
         
         // make sure the table level is correct
         let config = Config()
@@ -100,26 +96,18 @@ final class CashoutGroupTable {
         
     }
     
-    private func update(currentlevel: Double, _ schemaIn:String? = "public") {
+    private func update(currentlevel: Double, _ schemaId:String? = "public") {
         
-                var schema = "public"
-        if schemaIn.isNotNil {
-            schema = schemaIn!.lowercased()
-        }
-
+        let schema = schemaId!.lowercased()
         
         // PERFORM THE UPDATE ACCORFING TO REQUIREMENTS
         print("UPDATE \(schema).\(tbl.table().capitalized).  Current Level \(currentlevel), Required Level: \(tablelevel)")
         
     }
     
-    private func table(_ schemaIn:String? = "public")-> String {
+    private func table(_ schemaId:String? = "public")-> String {
         
-                var schema = "public"
-        if schemaIn.isNotNil {
-            schema = schemaIn!.lowercased()
-        }
-
+        let schema = schemaId!.lowercased()
         
         var createsql = "CREATE TABLE IF NOT EXISTS "
         createsql.append("\(schema).\(tbl.table()) ")
@@ -131,18 +119,17 @@ final class CashoutGroupTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
-        createsql.append("group_name text COLLATE pg_catalog.default, ")
-        createsql.append("description text COLLATE pg_catalog.default, ")
-        createsql.append("long_description text COLLATE pg_catalog.default, ")
-        createsql.append("picture_url text COLLATE pg_catalog.default, ")
-        createsql.append("icon_url text COLLATE pg_catalog.default, ")
-        createsql.append("detail_icon_url text COLLATE pg_catalog.default, ")
-        createsql.append("option_layout text COLLATE pg_catalog.default, ")
-        createsql.append("display_order int default 0, ")
-        createsql.append("display boolean default false, ")
-        createsql.append("country_id int default 0, ")
-        createsql.append("threshold_amount numeric(10,5) NOT NULL DEFAULT 0, ")
-        createsql.append("detail_disbursement_reasons int default 0, ")
+        createsql.append("record_type text COLLATE pg_catalog.default, ")
+        createsql.append("change_date text COLLATE pg_catalog.default, ")
+        createsql.append("change_time text COLLATE pg_catalog.default, ")
+        createsql.append("account_number text COLLATE pg_catalog.default, ")
+        createsql.append("value_original int NOT NULL DEFAULT 0, ")
+        createsql.append("value_new int NOT NULL DEFAULT 0, ")
+        createsql.append("code_number text COLLATE pg_catalog.default, ")
+        createsql.append("amount numeric(10,5) NOT NULL DEFAULT 0, ")
+        createsql.append("adjustment_reason int NOT NULL DEFAULT 0, ")
+        createsql.append("disbursement_reason int NOT NULL DEFAULT 0, ")
+        createsql.append("note text COLLATE pg_catalog.default, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
@@ -153,4 +140,3 @@ final class CashoutGroupTable {
         return createsql
     }
 }
-

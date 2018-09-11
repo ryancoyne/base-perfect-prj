@@ -26,6 +26,9 @@ struct InstallationsV1Controller {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 do {
                     let json = try request.postBodyJSON()!
                     guard !json.isEmpty else { return response.emptyJSONBody }

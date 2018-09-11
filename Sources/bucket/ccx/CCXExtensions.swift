@@ -1602,12 +1602,7 @@ extension PostgresStORM {
      - parameter distance: The comparison distance in miles
      - Returns: An array of StORMRow objects with the resulting dataset
      */
-    func getLocationGISsql(schemaIn:String? = "public", sql: String, locationField: String, longitude: Double, latitude: Double, distance: Double) throws -> [StORMRow] {
-        
-        var schema = "public"
-        if schemaIn.isNotNil {
-            schema = schemaIn!.lowercased()
-        }
+    func getLocationGISsql(sql: String, locationField: String, longitude: Double, latitude: Double, distance: Double) throws -> [StORMRow] {
         
         var sqlstatement = sql
         //        var gisfields = " "
@@ -1870,6 +1865,43 @@ extension Account {
                 self.detail.removeValue(forKey: "last_seen")
             }
         }
+    }
+    
+    var countries : [String]? {
+        get {
+            if let ret = self.detail["countries"] {
+                return ret as? [String]
+            }
+            return nil
+        }
+        set {
+            if newValue.isNotNil {
+                self.detail["countries"] = newValue
+            } else {
+                self.detail.removeValue(forKey: "countries")
+            }
+        }
+    }
+    
+    func addCountry(_ newCountry: String)  {
+        
+        if let _ = self.countries {
+            var ctry = self.countries!
+            ctry.append(newCountry.lowercased())
+            self.countries = ctry
+        } else {
+            var ctry:[String] = []
+            ctry.append(newCountry.lowercased())
+            self.countries = ctry
+        }
+        
+    }
+    
+    func countryExists(_ country: String)->Bool {
+        if let ctry = self.detail["countries"] as? [String] {
+            if ctry.contains(country.lowercased()) { return true }
+        }
+        return false
     }
     
     static func userBouce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {

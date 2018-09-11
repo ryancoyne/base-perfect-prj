@@ -132,6 +132,7 @@ final class AddressTable {
         createsql.append("postal_code text COLLATE pg_catalog.default, ")
         createsql.append("city text COLLATE pg_catalog.default, ")
         createsql.append("ach_transfer_minimum numeric(10,5) DEFAULT 0.0, ")
+        createsql.append("geopoint geography(Point,4326), ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

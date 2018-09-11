@@ -30,6 +30,9 @@ class Handlers {
 		return {
 			request, response in
 
+            // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+            guard request.SecurityCheck() else { response.badSecurityToken; return }
+
 			let users = Account()
 			try? users.findAll()
 			if users.rows().count == 0 {
@@ -87,6 +90,9 @@ class Handlers {
         return {
             request, response in
             
+            // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+            guard request.SecurityCheck() else { response.badSecurityToken; return }
+
             let users = Account()
             try? users.findAll()
             if users.rows().count > 0 {
@@ -177,6 +183,10 @@ class Handlers {
     static func healthcheck(data: [String:Any]) throws -> RequestHandler {
         return {
             request, response in
+
+            // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+            guard request.SecurityCheck() else { response.badSecurityToken; return }
+
             let _ = try? response.setBody(json: ["health": "ok"])
             response.completed(status: .ok)
         }

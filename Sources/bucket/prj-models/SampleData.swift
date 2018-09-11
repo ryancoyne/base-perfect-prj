@@ -147,6 +147,7 @@ final class SampleData {
                 a.city = "Washington"
                 a.state = "DC"
                 a.postal_code = "20009"
+                a.geopoint = CCXGeographyPoint(latitude: 38.920441, longitude: -77.031007)
                 let _ = try? a.saveWithCustomType(schemaIn: "us")
                 
             case 1:
@@ -156,6 +157,7 @@ final class SampleData {
                 a.city = "Washington"
                 a.state = "DC"
                 a.postal_code = "20009"
+                a.geopoint = CCXGeographyPoint(latitude: 38.920757, longitude: -77.032072)
                 let _ = try? a.saveWithCustomType(schemaIn: "us")
 
 //            case 2:
@@ -165,6 +167,7 @@ final class SampleData {
 //                a.country_id = singapore.id
 //                a.state = "Singapore"
 //                a.postal_code = "080004"
+//                a.geopoint = CCXGeographyPointlatitude: 1.277129, longitude: 103.839368)
 //                let _ = try? a.saveWithCustomType()
 
             default:
@@ -174,8 +177,9 @@ final class SampleData {
                 a.city = "Washington"
                 a.state = "DC"
                 a.postal_code = "20009"
+                a.geopoint = CCXGeographyPoint(latitude: 38.920172, longitude: -77.031801)
                 let _ = try? a.saveWithCustomType(schemaIn: "us")
-                
+
             }
             
             ctr += 1
@@ -198,6 +202,7 @@ final class SampleData {
                 a.country_id = singapore.id
                 a.state = "Singapore"
                 a.postal_code = "080004"
+                a.geopoint = CCXGeographyPoint(latitude: 1.277129, longitude: 103.839368)
                 let _ = try? a.saveWithCustomType(schemaIn: singapore.code_alpha_2!.lowercased())
 
             case 1:
@@ -207,6 +212,7 @@ final class SampleData {
                 a.country_id = singapore.id
                 a.state = "Singapore"
                 a.postal_code = "080004"
+                a.geopoint = CCXGeographyPoint(latitude: 1.277129, longitude: 103.839368)
                 let _ = try? a.saveWithCustomType(schemaIn: singapore.code_alpha_2!.lowercased())
 
             case 2:
@@ -216,6 +222,7 @@ final class SampleData {
                 a.country_id = singapore.id
                 a.state = "Singapore"
                 a.postal_code = "080004"
+                a.geopoint = CCXGeographyPoint(latitude: 1.277129, longitude: 103.839368)
                 let _ = try? a.saveWithCustomType(schemaIn: singapore.code_alpha_2!.lowercased())
                 
             default:
@@ -225,6 +232,7 @@ final class SampleData {
                 a.country_id = singapore.id
                 a.state = "Singapore"
                 a.postal_code = "080004"
+                a.geopoint = CCXGeographyPoint(latitude: 1.277129, longitude: 103.839368)
                 let _ = try? a.saveWithCustomType(schemaIn: singapore.code_alpha_2!.lowercased())
 
             }
@@ -256,12 +264,12 @@ final class SampleData {
         checkuser = "INSERT INTO us.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'The Bucket','bucket1@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
-        var results = try? tbl.sqlRows(checkuser, params: [])
+        let _ = try? tbl.sqlRows(checkuser, params: [])
 
         checkuser = "INSERT INTO sg.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'The Bucket','bucket1@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
-        results = try? tbl.sqlRows(checkuser, params: [])
+        let _ = try? tbl.sqlRows(checkuser, params: [])
 
         // new one
         userid = UUID().uuidString
@@ -280,13 +288,13 @@ final class SampleData {
         checkuser = "INSERT INTO us.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'Ryan Coyne','bucket2@buckettechnologies.com','4102026292', \(retailerid)) RETURNING id ")
-        results = try? tbl.sqlRows(checkuser, params: [])
+        let _ = try? tbl.sqlRows(checkuser, params: [])
 
         // add the retailer user
         checkuser = "INSERT INTO sg.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'Ryan Coyne','bucket2@buckettechnologies.com','4102026292', \(retailerid)) RETURNING id ")
-        results = try? tbl.sqlRows(checkuser, params: [])
+        let _ = try? tbl.sqlRows(checkuser, params: [])
 
         // new one
         userid = UUID().uuidString
@@ -305,13 +313,13 @@ final class SampleData {
         checkuser = "INSERT INTO us.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'Mike Silvers','bucket3@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
-        results = try? tbl.sqlRows(checkuser, params: [])
+        let _ = try? tbl.sqlRows(checkuser, params: [])
         
         // add the retailer user
         checkuser = "INSERT INTO sg.retailer_contacts "
         checkuser.append(" (created, createdby,user_id,name,email_address, phone_number, retailer_id) VALUES ")
         checkuser.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)', '\(userid)', 'Mike Silvers','bucket3@buckettechnologies.com','4104224503', \(retailerid)) RETURNING id ")
-        results = try? tbl.sqlRows(checkuser, params: [])
+        let _ = try? tbl.sqlRows(checkuser, params: [])
 
 
         
