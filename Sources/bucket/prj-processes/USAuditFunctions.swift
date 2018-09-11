@@ -214,7 +214,7 @@ public class USAuditFunctions {
         
         cas  = USBucketAccountStatus()
         // lets setup the status record - it should be updated if it exists
-        sql = "SELECT id FROM \(schema).us_bucket_account_status WHERE account_number = '\(user)' "
+        sql = "SELECT id FROM \(schema).us_bucket_account_status_view_deleted_no WHERE account_number = '\(user)' "
         let sqlr = try? cas.sqlRows(sql, params: [])
         if let a = sqlr?.first {
             cas.to(a)

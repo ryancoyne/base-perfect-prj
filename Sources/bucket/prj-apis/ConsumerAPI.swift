@@ -89,7 +89,7 @@ struct ConsumerAPI {
 
                 // we do not need the retailer for cashouts - there will be no retailer for that type.
 //                if transType != "CASHOUT" {
-                    sql.append(", r.name FROM \(schema).code_transaction_history AS cth ")
+                    sql.append(", r.name FROM \(schema).code_transaction_history_view_deleted_no AS cth ")
                     sql.append("LEFT JOIN \(schema).retailer AS r ")
                     sql.append("ON cth.retailer_id = r.id ")
 //                } else {
@@ -203,6 +203,7 @@ struct ConsumerAPI {
                 if rsp?.first.isNil == true {
                     // if we did not find it, check history to see if we have already redeemed it (we are using the summary table in the public schema
                     // to avoid performance costly functions looking thru schemas
+                    // (do not use the view deleted no because we want to make sure it was not redeemed and deleted)
                     let strs = CodeTransactionHistory()
                     let rsp2 = try? strs.sqlRows("SELECT * FROM \(schema).code_transaction_history WHERE customer_code = $1", params: ["\(request.customerCode!)"])
                     if let t = rsp2?.first?.data, (t["created"] as! Int) > 0 {
@@ -219,7 +220,7 @@ struct ConsumerAPI {
                 let redeemed        = CCXServiceClass.sharedInstance.getNow()
                 let redeemedby      = request.session!.userid
                 
-                let sql = "SELECT * FROM \(schema).code_transaction WHERE id = \(rsp!.first!.data.id!)"
+                let sql = "SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE id = \(rsp!.first!.data.id!)"
                 let ctr = try? ct.sqlRows(sql, params: [])
                 if let c = ctr!.first {
                     ct.to(c)
