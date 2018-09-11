@@ -25,7 +25,7 @@ struct InstallationsV1Controller {
         public static func saveInstallation(_ data : [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                
+            
                 // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
                 guard request.SecurityCheck() else { response.badSecurityToken; return }
 
@@ -44,6 +44,8 @@ struct InstallationsV1Controller {
                     
                     if json["id"].intValue.isNotNil {
                         inst.id = json["id"].intValue!
+                        // We need to check if this id exists.
+                        guard Installation.exists(inst.id!) else { return response.installIdDNE(inst.id!) }
                     }
                     
                     if json["devicetoken"].stringValue.isNotNil {
@@ -102,66 +104,19 @@ struct InstallationsV1Controller {
                         }
                         
                         if retrow.count > 0, let installationid = retrow.first?.data["id"].intValue {
+                            // This is a new object!
                             
                             // grab the new record (or existing record)
                             try inst.get(installationid)
                             
-                            // only deal with the notification record if there is a device token (it means that there is a yes to get notifications)
-                            if inst.devicetoken.isNotNil {
-                                
-                                var therewerechanges = false
-                                
-                                let notif = Notification()
-                                
-                                do {
-                                    try notif.find([("devicetoken", inst.devicetoken!)])
-                                    
-                                    // now lets set the stuff....
-                                    if notif.id.isNil {
-                                        notif.devicetoken = inst.devicetoken
-                                        therewerechanges = true
-                                    }
-                                    if inst.devicetype.isNotNil && inst.devicetype != notif.devicetype {
-                                        notif.devicetype = inst.devicetype
-                                        therewerechanges = true
-                                    }
-                                    if inst.user_id.isNotNil && inst.user_id != notif.user_id {
-                                        notif.user_id = inst.user_id
-                                        therewerechanges = true
-                                    }
-                                    if inst.timezone.isNotNil && inst.timezone != notif.timezone {
-                                        notif.timezone = inst.timezone
-                                        therewerechanges = true
-                                    }
-                                    
-                                    // now lets try to save this notification
-                                    if therewerechanges {
-                                        try notif.saveWithCustomType(schemaIn: "public",uid)
-                                    }
-                                } catch {
-                                    //TODO:  Maybe log something here indicating an issue with saving to notifications table?
-                                }
-                                
-                            }
+                            inst.dealWithNotificationTable(uid)
                             
                         } else {
-                            // The installation
-                            // setup the return
-                            if let installationId = inst.id {
-                                try? response.setBody(json: ["errorCode":"InstallationId", "message":"The installation id '\(installationId)' does not exist."])
-                                    .setHeader(.contentType, value: "application/json")
-                                    .completed(status: .ok)
-                                
-                                return
-                            } else {
-                                
-                                try? response.setBody(json: ["error":"Unknown Error"])
-                                    .setHeader(.contentType, value: "application/json")
-                                    .completed(status: .internalServerError)
-                                
-                                return
-                            }
-                            
+                            // This was an update!
+                            // grab the new record (or existing record)
+                            try inst.get(inst.id!)
+                            inst.dealWithNotificationTable(uid)
+
                         }
                         
                         // setup the return
@@ -187,5 +142,12 @@ struct InstallationsV1Controller {
                 
             }
         }
+    }
+}
+
+fileprivate extension HTTPResponse {
+    func  installIdDNE(_ installationId: Int) -> Void {
+        return try! self.setBody(json: ["errorCode":"InstallationId", "message":"The installation id '\(installationId)' does not exist."])
+                                 .completed(status: .ok)
     }
 }

@@ -195,5 +195,50 @@ public class Installation: PostgresStORM {
         
         return dictionary
     }
+    
+    func dealWithNotificationTable(_ uid : String) {
+        // only deal with the notification record if there is a device token (it means that there is a yes to get notifications)
+        if self.devicetoken.isNotNil {
+            
+            var therewerechanges = false
+            
+            let notif = Notification()
+            
+            do {
+                try notif.find([("devicetoken", devicetoken!)])
+                
+                // now lets set the stuff....
+                if notif.devicetoken != devicetoken {
+                    notif.devicetoken = devicetoken
+                    therewerechanges = true
+                }
+                if devicetype != notif.devicetype {
+                    notif.devicetype = devicetype
+                    therewerechanges = true
+                }
+                if user_id != notif.user_id {
+                    notif.user_id = user_id
+                    therewerechanges = true
+                }
+                if timezone != notif.timezone {
+                    notif.timezone = timezone
+                    therewerechanges = true
+                }
+                // now lets try to save this notification
+                if therewerechanges {
+                    try notif.saveWithCustomType(schemaIn: "public",uid)
+                }
+            } catch {
+                //TODO:  Maybe log something here indicating an issue with saving to notifications table?
+            }
+        }
+    }
+    
+    static func exists(_ id : Int) -> Bool {
+        let inst = Installation()
+        try? inst.get(id)
+        return inst.id.isNotNil
+    }
 }
+
 
