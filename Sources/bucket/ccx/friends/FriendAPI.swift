@@ -26,6 +26,10 @@ struct FriendAPI {
         public static func getFriend(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 // Check if the user is logged in.
                 guard let session = request.session, !session.userid.isEmpty else { return response.notLoggedIn() }
 
@@ -100,6 +104,10 @@ struct FriendAPI {
         public static func addFriend(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 // Check if the user is logged in.
                 guard let session = request.session, !session.userid.isEmpty else { return response.notLoggedIn() }
                 
@@ -121,6 +129,10 @@ struct FriendAPI {
         public static func deleteFriend(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+
                 // Check if the user is logged in.
                 guard let session = request.session, !session.userid.isEmpty else { return response.notLoggedIn() }
                 

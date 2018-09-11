@@ -173,9 +173,6 @@ struct TestingAPI {
                     return response.completed(status: .internalServerError)
                 }
                 
-                // check for the security token
-                guard request.SecurityCheck() else { return response.badSecurityToken }
-
                 guard !Account.userBouce(request, response) else { return }
             
                 // get the country code
