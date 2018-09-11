@@ -58,8 +58,7 @@ struct TestingAPI {
                 // look for a terminal
                 let term = Terminal.getFirst(schema)
                 if term.isNil {
-                    try? response.setBody(json: ["error":"There are no terminals in country id \(countryId)"]).completed(status: .custom(code: 451, message: "No Terminals in Country \(countryId)"))
-                    return
+                    return response.noTerminalsInCountry(countryId: countryId)
                 }
                 
                 // Okay... lets create the codes, and send the email!
@@ -167,8 +166,7 @@ struct TestingAPI {
                 
                 // make sure we are NOT in production
                 if EnvironmentVariables.sharedInstance.Server!.rawValue == "PROD" {
-                    let _ = try? response.setBody(json: ["error":"This function is not on."])
-                    return response.completed(status: .internalServerError)
+                    return response.functionNotOn
                 }
                 
                 // check for the security token
@@ -226,15 +224,13 @@ struct TestingAPI {
                 } else {
                     // error that there is no terminal for that country code
                     // error must return an error code for the response and get out of this flow
-                    try? response.setBody(json: ["error":"There are no retailers in country id \(countryId)"]).completed(status: .custom(code: 450, message: "No Retailers in Country \(countryId)"))
-                    return
+                    return response.noRetailersInCountry(countryId: countryId.intValue!)
                 }
                 
                 // look for a terminal
                 let term = Terminal.getFirst(schema)
                 if term.isNil {
-                    try? response.setBody(json: ["error":"There are no terminals in country id \(countryId)"]).completed(status: .custom(code: 451, message: "No Terminals in Country \(countryId)"))
-                    return
+                    return response.noTerminalsInCountry(countryId: countryId.intValue!)
                 } 
 
                 // SECTION 3: Adding the new customer codes for the terminal
@@ -296,6 +292,15 @@ struct TestingAPI {
                 return response.completed(status: .ok)
             }
         }
+    }
+}
+
+fileprivate extension HTTPResponse {
+    func noRetailersInCountry(countryId : Int) -> Void {
+        return try! self.setBody(json: ["error":"There are no retailers in country id \(countryId)"]).completed(status: .custom(code: 450, message: "No Retailers in Country \(countryId)"))
+    }
+    func noTerminalsInCountry(countryId : Int) -> Void {
+        return try! self.setBody(json: ["errorCode":"NoTerminalsInCountry","message":"There are no terminals in country id \(countryId)"]).completed(status: .custom(code: 451, message: "No Terminals in Country \(countryId)"))
     }
 }
 
