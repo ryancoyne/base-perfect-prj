@@ -162,6 +162,6 @@ extension HTTPResponse {
         try! self.setBody(json: ["errorCode": "UnsupportedUser", "message": "You do not have the correct permissions to access this page"]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 401, message: "Incorrect Permissions"))
     }
     var functionNotOn : Void {
-        try! self.setBody(json: ["errorCode":"EndpointOff", "message":"This function is not turned on."]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 500, message: "Endpoint Off"))
+        try! self.setBody(json: ["errorCode":"FunctionOff", "message":"This function is not on."]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 500, message: "Endpoint Off"))
     }
 }

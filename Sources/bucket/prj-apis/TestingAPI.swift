@@ -58,8 +58,7 @@ struct TestingAPI {
                 // look for a terminal
                 let term = Terminal.getFirst(schema)
                 if term.isNil {
-                    try? response.setBody(json: ["error":"There are no terminals in country id \(countryId)"]).completed(status: .custom(code: 451, message: "No Terminals in Country \(countryId)"))
-                    return
+                    return response.noTerminalsInCountry(countryId: countryId)
                 }
                 
                 // Okay... lets create the codes, and send the email!
@@ -169,8 +168,7 @@ struct TestingAPI {
                 
                 // make sure we are NOT in production
                 if EnvironmentVariables.sharedInstance.Server!.rawValue == "PROD" {
-                    let _ = try? response.setBody(json: ["error":"This function is not on."])
-                    return response.completed(status: .internalServerError)
+                    return response.functionNotOn
                 }
                 
                 guard !Account.userBouce(request, response) else { return }
@@ -203,6 +201,30 @@ struct TestingAPI {
                 // get the count
                 let cnt = request.header(.custom(name: "count")).intValue ?? 20
 
+
+                // SECTION 2: Get a terminal for a retailer for the country
+                
+                // look for a retailer in the country we are using
+                var add_id = 0
+                let sql_add = "SELECT id from \(schema).address WHERE retailer_id > 0 AND country_id = \(countryId.intValue!)"
+                let addy = Address()
+                let addy_ret = try? addy.sqlRows(sql_add, params: [])
+                if addy_ret.isNotNil {
+                    // grab the address id to look up in the terminal file
+                    // set the add_id
+                    add_id = addy_ret?.first?.data["id"].intValue ?? 0
+                } else {
+                    // error that there is no terminal for that country code
+                    // error must return an error code for the response and get out of this flow
+                    return response.noRetailersInCountry(countryId: countryId.intValue!)
+                }
+                
+                // look for a terminal
+                let term = Terminal.getFirst(schema)
+                if term.isNil {
+                    return response.noTerminalsInCountry(countryId: countryId.intValue!)
+                } 
+
                 switch cnt {
                 case 0:
                     
@@ -210,6 +232,7 @@ struct TestingAPI {
 //                    let sql = "DELETE FROM \(schema).code_transaction WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!)"
 //                    let current_codes = CodeTransaction()
 //                    let _ = try? current_codes.sqlRows(sql, params: [])
+
 
                     let deletedtime = CCXServiceClass.sharedInstance.getNow()
                     
@@ -339,6 +362,15 @@ struct TestingAPI {
                 
             }
         }
+    }
+}
+
+fileprivate extension HTTPResponse {
+    func noRetailersInCountry(countryId : Int) -> Void {
+        return try! self.setBody(json: ["error":"There are no retailers in country id \(countryId)"]).completed(status: .custom(code: 450, message: "No Retailers in Country \(countryId)"))
+    }
+    func noTerminalsInCountry(countryId : Int) -> Void {
+        return try! self.setBody(json: ["errorCode":"NoTerminalsInCountry","message":"There are no terminals in country id \(countryId)"]).completed(status: .custom(code: 451, message: "No Terminals in Country \(countryId)"))
     }
 }
 
