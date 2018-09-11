@@ -91,7 +91,7 @@ struct TestingAPI {
                     ctr += 1
                     
                     // Create the transaction:
-                    let transaction = CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i)
+                    let transaction = CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i, minimum: 0.50)
                     
                     let theQRCodeURL = transaction?.customer_codeurl ?? ""
                     let theHTMLQrCodeURL = "https://api.qrserver.com/v1/create-qr-code/?data=\(theQRCodeURL)&size=\(codeSize)x\(codeSize)"
@@ -191,8 +191,9 @@ struct TestingAPI {
                     }
                 }
 
-                var endmessage = ""
-                
+                var endmessage:[String:Any] = [:]
+                // lets redeem the code now
+                let redeemed        = CCXServiceClass.sharedInstance.getNow()
                 let user = request.session!.userid
             
                 // SECTION 1: Delete all the existing test records for the user and the country
@@ -276,7 +277,7 @@ struct TestingAPI {
                     let sql_del = "UPDATE public.user_total SET balance = 0.0 WHERE country_id = \(countryId.intValue!) AND user_id = '\(user)'"
                     let _ = try? current_codes.sqlRows(sql_del, params: [])
                     
-                    endmessage = "Transactions were removed from your account!"
+                    endmessage["message"] = "Transactions were removed from your account!"
                     
                 default:
                     // SECTION 2: Get a terminal for a retailer for the country
@@ -304,7 +305,7 @@ struct TestingAPI {
                     
                     for i in 1...cnt {
                         // This was all chopped down to this function to use to email QR Codess
-                        CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i)
+                        CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i, minimum: 0.50)
                     }
                     
                     // SECTION 4: Claim the customer codes we just added (to make sure the process is working correctly)
@@ -322,32 +323,19 @@ struct TestingAPI {
                             let rsp = try? ct.sqlRows("SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE customer_code = $1 AND country_id = $2 ", params: ["\(i.data["customer_code"]!)", countryId])
                             
                             if let r = rsp?.first {
-                                var retCode:[String:Any] = [:]
-                                
-                                // lets redeem the code now
-                                let redeemed        = CCXServiceClass.sharedInstance.getNow()
-                                let redeemedby      = request.session!.userid
                                 
                                 ct.to(r)
                                 
                                 ct.redeemed         = redeemed
-                                ct.redeemedby       = redeemedby
+                                ct.redeemedby       = user
                                 ct.status           = CodeTransactionCodes.merchant_pending
-                                if let _            = try? ct.saveWithCustomType(schemaIn: schema, redeemedby) {
+                                if let _            = try? ct.saveWithCustomType(schemaIn: schema, user) {
                                     
                                     // this means it was saved - audit and archive
                                     AuditFunctions().redeemCustomerCodeAuditRecord(ct)
                                     
                                     // update the users record
-                                    UserBalanceFunctions().adjustUserBalance(schemaId: nil ,redeemedby, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
-                                    
-                                    // prepare the return
-                                    retCode["amount"] = ct.amount!
-                                    
-                                    let wallet = UserBalanceFunctions().getConsumerBalances(redeemedby)
-                                    if wallet.count > 0 {
-                                        retCode["buckets"] = wallet
-                                    }
+                                    UserBalanceFunctions().adjustUserBalance(schemaId: nil ,user, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
                                     
                                     // now archive the record
                                     ct.archiveRecord()
@@ -359,15 +347,19 @@ struct TestingAPI {
                         }
                     }
                     
-                    endmessage = "Added \(nbr_added) transactions and redeemed them to your account!"
+                    let wallet = UserBalanceFunctions().getConsumerBalances(user)
+                    if wallet.count > 0 {
+                        endmessage["buckets"] = wallet
+                    }
+
+                    endmessage["message"] = "Added \(nbr_added) transactions and redeemed them to your account!"
                     
                 }
                 
-                    // update the balances table eventially (now that we have country codes)
-
-                
-                _=try? response.setBody(json: ["message": endmessage])
+                // update the balances table eventially (now that we have country codes)
+                _=try? response.setBody(json: endmessage)
                 return response.completed(status: .ok)
+                
             }
         }
     }
