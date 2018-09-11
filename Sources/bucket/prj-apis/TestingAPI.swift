@@ -91,7 +91,7 @@ struct TestingAPI {
                     ctr += 1
                     
                     // Create the transaction:
-                    let transaction = CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i)
+                    let transaction = CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i, minimum: 0.50)
                     
                     let theQRCodeURL = transaction?.customer_codeurl ?? ""
                     let theHTMLQrCodeURL = "https://api.qrserver.com/v1/create-qr-code/?data=\(theQRCodeURL)&size=\(codeSize)x\(codeSize)"
@@ -305,7 +305,7 @@ struct TestingAPI {
                     
                     for i in 1...cnt {
                         // This was all chopped down to this function to use to email QR Codess
-                        CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i)
+                        CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i, minimum: 0.50)
                     }
                     
                     // SECTION 4: Claim the customer codes we just added (to make sure the process is working correctly)

@@ -646,7 +646,10 @@ public class CodeTransaction: PostgresStORM {
     }
     
     @discardableResult
-    static func qrCodeCreate(schema : String, user : String, terminal : Terminal, increment : Int) -> CodeTransaction? {
+    static func qrCodeCreate(schema : String, user : String, terminal : Terminal, increment : Int, minimum : Double?) -> CodeTransaction? {
+        
+        var minimum_amount = 0.0
+        if minimum.isNotNil { minimum_amount = minimum! }
         
         let ccode = Retailer().createCustomerCode(schemaId: schema,[:])
         
@@ -665,12 +668,15 @@ public class CodeTransaction: PostgresStORM {
                 add.to(a)
             }
             
-            var bucket_amount = drand48()
-            bucket_amount = Double(round(bucket_amount * 100) / 100)
+            // make sure the random amount is greater than the minimum passed in
+            var bucket_amount:Double = 0.0
+            while bucket_amount <= minimum_amount {
+                bucket_amount = drand48()
+                bucket_amount = Double(round(bucket_amount * 100) / 100)
+            }
             
             //let total_trans = arc4random_uniform(10)
             let total_trans = 2.5
-            
             
             let total_trans_dbl = Double(round(Double(total_trans) * 100) / 100)
             
