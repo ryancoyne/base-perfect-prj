@@ -28,7 +28,10 @@
         "EMAIL_USERNAME"         : "bucket@buckettechnologies.com",
         "EMAIL_PASSWORD"         : "B1ck1tT1chn1l1g11s",
         "EMAIL_FROM_ADDRESS"     : "bucket@buckettechnologies.com",
-        "EMAIL_FROM_DISPLAY_NAME": "Bucket Technologies"
+        "EMAIL_FROM_DISPLAY_NAME": "Bucket Technologies",
+        "RECOMMEND_RETAILER_EMAIL"        : "mike.silvers@buckettechnologies.com",
+        "RECOMMEND_RETAILER_SUBJECT"      : "A new retailer has been recommended!",
+        "RECOMMEND_RETAILER_DISPLAY_NAME" : "Retailer Suggestion"
     },
     "aws": {
         "AWS_FILE_URL": "https://s3.amazonaws.com/offroaddc/"

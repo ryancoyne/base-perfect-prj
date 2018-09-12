@@ -32,7 +32,9 @@ struct ConsumerAPI {
                 // CASHOUT ENDPOINTS:
                 ["method":"post",    "uri":"/api/v1/cashout/{countryCode}/groups", "handler":cashoutTypes],
                 ["method":"post",    "uri":"/api/v1/cashout/{groupId}/options", "handler":cashoutOptions],
-                ["method":"post",    "uri":"/api/v1/cashout/{optionId}", "handler":cashout]
+                ["method":"post",    "uri":"/api/v1/cashout/{optionId}", "handler":cashout],
+                // Recommend A Retailer
+                ["method":"post",    "uri":"/api/v1/referRetailer", "handler":referRetailer]
             ]
         }
         //MARK: - Balance Function:
@@ -706,6 +708,110 @@ struct ConsumerAPI {
                     
                 }
 
+            }
+        }
+        //MARK: - Refer Retailer Function:
+        public static func referRetailer(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Check the user:
+                guard !Account.userBouce(request, response) else { return }
+                
+                // lets get the parms
+                if let json = try? request.postBodyJSON() {
+                    
+                    let rr = RecommendRetailer()
+
+                    if let n = json!["name"].stringValue {
+                        rr.name = n
+                    }
+                    
+                    if let n = json!["phoneNumber"].stringValue {
+                        rr.phone = n
+                    }
+                    
+
+                    if let n = json!["state"].stringValue {
+                        rr.state = n
+                    }
+                    
+
+                    if let n = json!["city"].stringValue {
+                        rr.city = n
+                    }
+                    
+
+                    if let n = json!["address"].stringValue {
+                        rr.address = n
+                    }
+                    
+
+                    if let n = json!["countryCode"].stringValue {
+                        rr.country_code = n
+                    }
+                    
+
+                    if let n = json!["postalCode"].stringValue {
+                        rr.postal_code = n
+                    }
+                    
+
+                    var schema = "public"
+                    if let cc = rr.country_code {
+                        schema = Country.getSchema(cc)
+                    }
+                    // check to see if the schema is valid
+                    // make sure the schema exists - if not we do not service that country
+                    let ct = Country()
+                    let sqls = "SELECT schema_name FROM information_schema.schemata WHERE schema_name = '\(schema)'"
+                    let sct = try? ct.sqlRows(sqls, params: [])
+                    if sct?.first == nil {
+                        schema = "public"
+                    }
+
+                    
+                    // setup the other auditing fields and such
+                    rr.user_id = request.session?.userid
+                    
+                    // now save it all
+                    let _ = try? rr.saveWithCustomType(schemaIn: schema, rr.user_id, copyOver: false)
+
+                    // and send the email to the correct email address -- well, hopefully!
+                    var h = "<p>A Recommended Retailer</p>"
+                    h += "<p>"
+                    h += "Retailer: \(rr.name ?? "No Name")<hr />"
+                    h += "Address: \(rr.address ?? "No Address")<hr />"
+                    h += "City: \(rr.city ?? "No City")<hr />"
+                    h += "State/Providence: \(rr.state ?? "No State")<hr />"
+                    h += "Postal Code: \(rr.postal_code ?? "No Postal Code")<hr />"
+                    h += "Phone: \(rr.phone ?? "No Phone")<hr />"
+                    h += "<hr />Record Database: \(schema).\(rr.table())<hr />"
+                    h += "</p>"
+                    
+                    var t = "A Recommended Retailer\n\n"
+                    t += "Retailer: \(rr.name ?? "No Name")\n"
+                    t += "Address: \(rr.address ?? "No Address")\n"
+                    t += "City: \(rr.city ?? "No City")\n"
+                    t += "State/Providence: \(rr.state ?? "No State")\n"
+                    t += "Postal Code: \(rr.postal_code ?? "No Postal Code")\n"
+                    t += "Phone: \(rr.phone ?? "No Phone")\n"
+                    t += "\nRecord Database: \(schema).\(rr.table())\n"
+                    
+                    Utility.sendMail(name: EnvironmentVariables.sharedInstance.RECOMMEND_RETAILER_DISPLAY_NAME!,
+                                     address: EnvironmentVariables.sharedInstance.RECOMMEND_RETAILER_EMAIL!,
+                                     subject: EnvironmentVariables.sharedInstance.RECOMMEND_RETAILER_SUBJECT!,
+                                     html: h,
+                                     text: t)
+                    
+                    try? response.setBody(json: ["message":"Thank you for referring \(rr.name ?? "Oops - No Name").  Our team will review and validate your referral shortly."])
+                        .completed(status: .ok)
+                    return
+
+                } else {
+                    response.invalidJSONFormat
+                    return
+                }
             }
         }
     }

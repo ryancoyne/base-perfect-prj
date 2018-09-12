@@ -263,7 +263,19 @@ final class EnvironmentVariables {
             if let value = JSONConfigEnhanced.shared.json(forKey: "email")?["EMAIL_FROM_DISPLAY_NAME"] as? String {
                 self.EMAIL_FROM_DISPLAY_NAME = value
             }
-            
+
+            if let value = JSONConfigEnhanced.shared.json(forKey: "email")?["RECOMMEND_RETAILER_EMAIL"] as? String {
+                self.RECOMMEND_RETAILER_EMAIL = value
+            }
+
+            if let value = JSONConfigEnhanced.shared.json(forKey: "email")?["RECOMMEND_RETAILER_SUBJECT"] as? String {
+                self.RECOMMEND_RETAILER_SUBJECT = value
+            }
+
+            if let value = JSONConfigEnhanced.shared.json(forKey: "email")?["RECOMMEND_RETAILER_DISPLAY_NAME"] as? String {
+                self.RECOMMEND_RETAILER_DISPLAY_NAME = value
+            }
+
 //            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "misc.STORM_DEBUG") as? Bool {
             if let value = JSONConfigEnhanced.shared.json(forKey: "misc")?["STORM_DEBUG"] as? Bool {
                 self.StORMdebug = value
@@ -504,6 +516,50 @@ final class EnvironmentVariables {
         }
     }
 
+    //MARK: --
+    //MARK: Request retailer Email
+    private var _RECOMMEND_RETAILER_EMAIL: String?
+    public var RECOMMEND_RETAILER_EMAIL: String? {
+        get {
+            return _RECOMMEND_RETAILER_EMAIL
+        }
+        set {
+            if newValue != nil {
+                _RECOMMEND_RETAILER_EMAIL = newValue!
+            } else {
+                _RECOMMEND_RETAILER_EMAIL = nil
+            }
+        }
+    }
+
+    private var _RECOMMEND_RETAILER_SUBJECT: String?
+    public var RECOMMEND_RETAILER_SUBJECT: String? {
+        get {
+            return _RECOMMEND_RETAILER_SUBJECT
+        }
+        set {
+            if newValue != nil {
+                _RECOMMEND_RETAILER_SUBJECT = newValue!
+            } else {
+                _RECOMMEND_RETAILER_SUBJECT = nil
+            }
+        }
+    }
+    
+    private var _RECOMMEND_RETAILER_DISPLAY_NAME: String?
+    public var RECOMMEND_RETAILER_DISPLAY_NAME: String? {
+        get {
+            return _RECOMMEND_RETAILER_DISPLAY_NAME
+        }
+        set {
+            if newValue != nil {
+                _RECOMMEND_RETAILER_DISPLAY_NAME = newValue!
+            } else {
+                _RECOMMEND_RETAILER_DISPLAY_NAME = nil
+            }
+        }
+    }
+    
     //MARK: --
     //MARK: Email Variable definitions
     private var _EMAIL_SERVER: String?
