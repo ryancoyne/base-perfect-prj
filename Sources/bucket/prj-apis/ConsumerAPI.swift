@@ -780,12 +780,13 @@ struct ConsumerAPI {
                     // and send the email to the correct email address -- well, hopefully!
                     var h = "<p>A Recommended Retailer</p>"
                     h += "<p>"
-                    h += "Retailer: \(rr.name ?? "No Name")<hr />"
-                    h += "Address: \(rr.address ?? "No Address")<hr />"
-                    h += "City: \(rr.city ?? "No City")<hr />"
-                    h += "State/Providence: \(rr.state ?? "No State")<hr />"
-                    h += "Postal Code: \(rr.postal_code ?? "No Postal Code")<hr />"
-                    h += "Phone: \(rr.phone ?? "No Phone")<hr />"
+                    h += "Retailer: \(rr.name ?? "No Name")<br />"
+                    h += "Address: \(rr.address ?? "No Address")<br />"
+                    h += "City: \(rr.city ?? "No City")<br />"
+                    h += "State/Providence: \(rr.state ?? "No State")<br />"
+                    h += "Postal Code: \(rr.postal_code ?? "No Postal Code")<br />"
+                    h += "Country: \(rr.country_code ?? "No Postal Code")<br />"
+                    h += "Phone: \(rr.phone ?? "No Phone")<br />"
                     h += "<hr />Record Database: \(schema).\(rr.table())<hr />"
                     h += "</p>"
                     
@@ -795,6 +796,7 @@ struct ConsumerAPI {
                     t += "City: \(rr.city ?? "No City")\n"
                     t += "State/Providence: \(rr.state ?? "No State")\n"
                     t += "Postal Code: \(rr.postal_code ?? "No Postal Code")\n"
+                    h += "Country: \(rr.country_code ?? "No Postal Code")\n"
                     t += "Phone: \(rr.phone ?? "No Phone")\n"
                     t += "\nRecord Database: \(schema).\(rr.table())\n"
                     
