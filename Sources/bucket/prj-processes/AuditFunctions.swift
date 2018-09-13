@@ -16,6 +16,9 @@ public class AuditFunctions {
 
     func addCustomerCodeAuditRecord(_ record: CodeTransaction ) {
         
+        // Do NOT audit a sample
+        if record.isSample() { return }
+        
         var schema = ""
         var user = ""
         
@@ -38,6 +41,9 @@ public class AuditFunctions {
 
     func redeemCustomerCodeAuditRecord(_ record: CodeTransaction) {
         
+        // Do NOT audit a sample
+        if record.isSample() { return }
+
         var schema = ""
         var user = ""
         
@@ -68,6 +74,9 @@ public class AuditFunctions {
 
     func cashoutCustomerCodeAuditRecord(_ record: CodeTransactionHistory, _ US_detail_disbursement_reasons:Int ) {
         
+        // Do NOT audit a sample
+        if record.isSample() { return }
+
         var schema = ""
         var user = ""
         
@@ -106,6 +115,9 @@ public class AuditFunctions {
             
             let ct = record as! CodeTransaction
             
+            // Do NOT audit a sample
+            if ct.isSample() { return }
+
             schema = Country.getSchema(ct.country_id!)
             
             // picking the user from most important to least important
@@ -128,6 +140,9 @@ public class AuditFunctions {
             
             let ct = record as! CodeTransactionHistory
             
+            // Do NOT audit a sample
+            if ct.isSample() { return }
+
             schema = Country.getSchema(ct.country_id!)
             
             // picking the user from most important to least important

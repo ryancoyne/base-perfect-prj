@@ -228,11 +228,33 @@ struct ConsumerAPI {
                     ct.to(c)
                 }
                 
+                // if the code is a sample code, see if this is a sample user
+                if ct.isSample() {
+                    
+                    let testA = Account()
+                    _ = try? testA.get(redeemedby)
+                    
+                    if testA.id.isEmpty {
+                        // we did not pull the account - returh the error
+                        return response.unableToGetUser
+                    }
+                    
+                    if !testA.isSample() {
+                        // this is a sample being redeemed on a non-sample account - NO
+                        return response.sampleCodeRedeemError
+                    }
+                    
+                }
+                                
+                // we are in the proper status now
                 ct.redeemed         = redeemed
                 ct.redeemedby       = redeemedby
                 ct.status           = CodeTransactionCodes.merchant_pending
                 if let _            = try? ct.saveWithCustomType(schemaIn: schema, redeemedby) {
                     
+                    // now archive the record: this is a timing issue - we need to do this because of the auditing fucntions
+                    ct.archiveRecord(redeemedby)
+
                     // this means it was saved - audit and archive
                     AuditFunctions().redeemCustomerCodeAuditRecord(ct)
                     
@@ -246,9 +268,6 @@ struct ConsumerAPI {
                     if wallet.count > 0 {
                         retCode["buckets"] = wallet
                     }
-                    
-                    // now archive the record
-                    ct.archiveRecord(redeemedby)
                     
                 }
                 
@@ -481,6 +500,8 @@ struct ConsumerAPI {
                     
                     let userId = request.session?.userid
                     
+                    let user = request.account
+                    
                     // Okay we are finding the specific type, and grabbing the fields we need:
                     var theoption = 0
                     if let cooption = request.optionId.intValue, cooption > 0 {
@@ -597,7 +618,9 @@ struct ConsumerAPI {
                     }
                     
                     // The user has enough to cashout, so lets go and write in their entered fields:
-                    if submittedFields?.isEmpty == false {
+                    // only do this if the user is NOT a sample account
+                    if submittedFields?.isEmpty == false, user.isNotNil, !user!.isSample() {
+                        
                         let cfHeader = CompletedFormsHeader()
                         _=try? cfHeader.saveWithCustomType(schemaIn: schema, userId!, copyOver: false)
                         

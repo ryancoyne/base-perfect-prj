@@ -447,15 +447,23 @@ struct RetailerAPI {
                         ccode = Retailer().createCustomerCode(schemaId: schema, json!)
                     }
                     
+                    var itsASample = false
+                    if let sample = json!["sample"].boolValue {
+                        itsASample = sample
+                    }
+                    
                     // put together the return dictionary
                     if ccode.success {
+                        
+                        var thecode: String = ccode.message
+                        if itsASample { thecode.append(".SAMPLE") }
                     
-                        json!["customerCode"] = ccode.message
+                        json!["customerCode"] = thecode
                         
                         var qrCodeURL = ""
                         qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerApiURL?.absoluteString ?? "")
                         qrCodeURL.append("redeem/")
-                        qrCodeURL.append(ccode.message)
+                        qrCodeURL.append(thecode)
                         json!["qrCodeContent"] = qrCodeURL
                         
                         // We need to go and get the integer terminal id:

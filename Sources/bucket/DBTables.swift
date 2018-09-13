@@ -385,6 +385,8 @@ final class PRJDBTables {
 
         InitializeData.sharedInstance.addCashoutGroup()
         InitializeData.sharedInstance.addCashoutOption()
+        
+        InitializeData.sharedInstance.addSampleUsers()
  
         // set the sample data to NO - so no more is added
         do {

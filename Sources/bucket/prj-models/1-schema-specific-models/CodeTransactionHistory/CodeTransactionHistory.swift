@@ -588,4 +588,12 @@ public class CodeTransactionHistory: PostgresStORM {
         return diff
         
     }
+    
+    func isSample()->Bool {
+        
+        if self.customer_code.isNil { return false }
+        
+        return self.customer_code!.contains(string: ".SAMPLE")
+    }
+
 }

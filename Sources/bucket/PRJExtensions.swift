@@ -30,6 +30,21 @@ enum BucketAPIError: Error {
     case unparceableJSON(String)
 }
 
+extension Account {
+    // this function returns the boolean to determine if the user is a sample user or not
+    func isSample()->Bool {
+        
+        switch self.id {
+        case SampleUser.user1, SampleUser.user2:
+            return true
+        default:
+            return false
+        }
+        
+        
+    }
+}
+
 extension HTTPRequest {
     var account : Account? {
         guard let userid = session?.userid else { return nil }
@@ -37,6 +52,7 @@ extension HTTPRequest {
         try? acount.get(userid)
         return acount
     }
+    
     func postBodyJSON() throws -> [String:Any]? {
         if let json = try? self.postBodyString?.jsonDecode() as? [String:Any], json.isNotNil {
             return json
@@ -122,6 +138,18 @@ extension HTTPRequest {
 }
 
 extension HTTPResponse {
+    var unableToGetUser : Void {
+        return try! self
+            .setBody(json: ["errorCode":"UserError", "message":"There was a problem retrieving the user account"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 455, message: "Unable to access the user account"))
+    }
+    var sampleCodeRedeemError : Void {
+        return try! self
+            .setBody(json: ["errorCode":"SampleCodeRedeem", "message":"There was a problem redeeming the sample code"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 456, message: "Sample Codes are only allowed to be redeemed by sample accounts"))
+    }
     var badSecurityToken : Void {
         return try! self
             .setBody(json: ["errorCode":"SecurityError", "message":"There was a problem with a security token"])

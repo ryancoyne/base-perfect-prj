@@ -9,6 +9,11 @@ import Foundation
 import PostgresStORM
 import PerfectLocalAuthentication
 
+struct SampleUser {
+    static let user1 = "SAMPLE1S-AMPL-E1SA-MPLE-1SAMPLE1SAMP"
+    static let user2 = "SAMPLE2S-AMPL-E2SA-MPLE-2SAMPLE2SAMP"
+}
+
 final class InitializeData {
     
     //MARK:-
@@ -16,11 +21,58 @@ final class InitializeData {
     private init() {
     }
     
-//    static let createdby  = "AUTO_CREATED_USER"
-//    static let modifiedby = "AUTO_MODIFIED_USER"
-//    static let deletedby  = "AUTO_DELETED_USER"
-    
     static let sharedInstance = InitializeData()
+    
+    func addSampleUsers() {
+    
+        let tbl = Account()
+        
+        let createdtime = CCXServiceClass.sharedInstance.getNow()
+        
+        var checkuser = "SELECT id FROM public.account WHERE id = '\(SampleUser.user1)'; "
+        var tr = try? tbl.sqlRows(checkuser, params: [])
+        if let thecount = tr?.count, thecount == 0 {
+            // it does not exist - add it
+            checkuser = "INSERT INTO public.account "
+            checkuser.append("(id,username,email,usertype, source, detail) VALUES(" )
+            checkuser.append("'\(SampleUser.user1)',")
+            checkuser.append("'sample1',")
+            checkuser.append("'bucket.sample1@gmail.com',")
+            checkuser.append("'standard',")
+            checkuser.append("'local',")
+            checkuser.append("'{\"created\":\(createdtime)}')")
+            print("Adding user: \(checkuser)")
+            _ = try? tbl.sqlRows(checkuser, params: [])
+            
+            let acc = Account()
+            _ = try? acc.get(SampleUser.user1)
+            acc.makePassword("B0ck0TB!")
+            _ = try? acc.save()
+        }
+        
+        checkuser = "SELECT id FROM public.account WHERE id = '\(SampleUser.user2)'; "
+        tr = try? tbl.sqlRows(checkuser, params: [])
+        if let thecount = tr?.count, thecount == 0 {
+            // it does not exist - add it
+            checkuser = "INSERT INTO public.account "
+            checkuser.append("(id,username,email,usertype, source, detail) VALUES(" )
+            checkuser.append("'\(SampleUser.user2)',")
+            checkuser.append("'sample2',")
+            checkuser.append("'bucket.sample2@gmail.com',")
+            checkuser.append("'standard',")
+            checkuser.append("'local',")
+            checkuser.append("'{\"created\":\(createdtime)}')")
+            print("Adding user: \(checkuser)")
+            _ = try? tbl.sqlRows(checkuser, params: [])
+            
+            let acc = Account()
+            _ = try? acc.get(SampleUser.user2)
+            acc.makePassword("B0ck0TB!")
+            _ = try? acc.save()
+
+        }
+
+    }
     
     func addLedgerAccountTypes() {
         let tbl = LedgerAccountType()

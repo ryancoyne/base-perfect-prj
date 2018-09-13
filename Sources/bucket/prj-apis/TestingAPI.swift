@@ -331,14 +331,14 @@ struct TestingAPI {
                                 ct.status           = CodeTransactionCodes.merchant_pending
                                 if let _            = try? ct.saveWithCustomType(schemaIn: schema, user) {
                                     
+                                    // now archive the record
+                                    ct.archiveRecord()
+                                    
                                     // this means it was saved - audit and archive
                                     AuditFunctions().redeemCustomerCodeAuditRecord(ct)
                                     
                                     // update the users record
                                     UserBalanceFunctions().adjustUserBalance(schemaId: nil ,user, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
-                                    
-                                    // now archive the record
-                                    ct.archiveRecord()
                                     
                                     nbr_added += 1
                                     
