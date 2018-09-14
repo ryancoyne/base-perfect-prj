@@ -172,25 +172,28 @@ final class InitializeData {
 
         var schema = usa.code_alpha_2!.lowercased()
         
+        // Prepaid Card Group:
         var checkuser = "INSERT INTO \(schema).\(tbl.table()) "
         checkuser.append("(created, createdby, group_name,description, country_id, picture_url, icon_url, display_order, display, option_layout, long_description, detail_disbursement_reasons) ")
         checkuser.append(" VALUES ")
         var pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/")
+        pic.append("/backgrounds/transfer_bank_account_background.png")
         var pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', \(usa.id!),'\(pic)','\(pic_icon)', 1, true, 'double', 'Cha-ching!  Shop at your favorite retailers with your prepaid card.  Note that these are virtual cards and cannot be used in physical stores.', \(USDetailDisbursementReasons.closedLoopCard)), ")
+        pic_icon.append("/icons/prepaid_card_icon.png")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', \(usa.id!),'\(pic)','\(pic_icon)', 2, true, 'double', 'Cha-ching!  Shop at your favorite retailers with your prepaid card.  Note that these are virtual cards and cannot be used in physical stores.', \(USDetailDisbursementReasons.closedLoopCard)), ")
         
+        // Gift Card Group:
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/")
+        pic.append("/backgrounds/gift_card_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.', \(usa.id!),'\(pic)','\(pic_icon)',2, true, 'double', 'Choose from hundreds of gift cards to your favorite stores and restaurants.  Note that these are virtual gift cards and some merchants may not accept them in stores.  Please check with the merchant.', \(USDetailDisbursementReasons.openLoopCard)), ")
+        pic_icon.append("/icons/gift_card_icon.png")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.', \(usa.id!),'\(pic)','\(pic_icon)',1, true, 'double', 'Choose from hundreds of gift cards to your favorite stores and restaurants.  Note that these are virtual gift cards and some merchants may not accept them in stores.  Please check with the merchant.', \(USDetailDisbursementReasons.openLoopCard)), ")
         
+        // Donate Group:
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/")
+        pic.append("/backgrounds/donate_to_charity_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/")
+        pic_icon.append("/icons/donate_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.', \(usa.id!),'\(pic)','\(pic_icon)',3, true, 'single', 'Choose from hundreds of charities and give back to your community.', \(USDetailDisbursementReasons.donation)), ")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
@@ -208,23 +211,29 @@ final class InitializeData {
         checkuser.append("(created, createdby, group_name,description, country_id, picture_url,icon_url, display_order, display, option_layout, long_description) ")
         checkuser.append(" VALUES ")
         
-        pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/")
-        pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','TopUp','', \(singapore.id!),'\(pic)','\(pic_icon)',1, true, 'double', null),")
+//        pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
+//        pic.append("/backgrounds/")
+//        pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
+//        pic_icon.append("/icons/")
+//        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','TopUp','', \(singapore.id!),'\(pic)','\(pic_icon)',1, true, 'double', null),")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/")
+        pic.append("/backgrounds/transfer_bank_account_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),'\(pic)','\(pic_icon)',2, true, 'double', null), ")
+        pic_icon.append("/icons/transfer_to_bank_icon.png")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Transfer To Bank Account','Cash out to a bank account of your choice.', \(singapore.id!),'\(pic)','\(pic_icon)',2, true, 'double', null),")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/")
+        pic.append("/backgrounds/")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','', \(singapore.id!),'\(pic)','\(pic_icon)',3, true, 'single', 'Choose from hundreds of charities and give back to your community.')")
+        pic_icon.append("/icons/")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),'\(pic)','\(pic_icon)',3, true, 'double', null), ")
+        
+        pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
+        pic.append("/backgrounds/donate_to_charity_background.png")
+        pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
+        pic_icon.append("/icons/donate_icon.png")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','', \(singapore.id!),'\(pic)','\(pic_icon)',1, true, 'single', 'Choose from hundreds of charities and give back to your community.')")
 
         print("Adding cashout groups for \(schema): \(checkuser)")
         _ = try? tbl.sqlRows(checkuser, params: [])
