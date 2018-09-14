@@ -47,6 +47,6 @@
         "SERVER_ENVIRONMENT": "DEV",
         "SESSION_NAME"      : "bucket",
         "HTTP_DOCUMENT_ROOT": "./webroot",
-        "IMAGE_BASE_URL"    : "http://pictures.com"
+        "IMAGE_BASE_URL"    : "https://images.bucketthechange.com"
     }
 }
