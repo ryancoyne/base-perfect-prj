@@ -404,14 +404,8 @@ public class Address: PostgresStORM {
                 }
 
                 print("GeoCode: json: \(json)")
-//                let jsonresults: [String:Any] = json["results"] as! [String : Any]
-//                if jsonresults.isEmpty {
-                    // there was probably an error
-                    //TODO: Report the error to us via email or something fun like that
-//                    print("GeoReturn: \(json)")
-//                }
-                // here is the data
-//                print("GeoCode Information: \(jsonresults)")
+                // Refer to:  https://developers.google.com/maps/documentation/geocoding/start
+                //TODO: Report the error to us via email or something fun like that
                 //TODO: Add the lat and lon to the address object
                 
             }
