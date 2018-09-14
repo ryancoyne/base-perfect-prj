@@ -29,7 +29,9 @@ public class CashoutOption: PostgresStORM {
     var website           : String? = nil
     var description       : String? = nil
     var long_description  : String? = nil
-    var pictureURL        : String? = nil
+    var picture_url        : String? = nil
+    var sm_picture_url        : String? = nil
+    var icon_url        : String? = nil
     var minimum           : Double? = nil
     var maximum           : Double? = nil
     var display           : Bool? = nil
@@ -89,7 +91,15 @@ public class CashoutOption: PostgresStORM {
         }
         
         if let data = this.data.cashoutOptionsDic.pictureURL {
-            pictureURL = data
+            picture_url = data
+        }
+        
+        if let data = this.data.cashoutOptionsDic.smallPictureURL {
+            sm_picture_url = data
+        }
+        
+        if let data = this.data.cashoutOptionsDic.iconURL {
+            icon_url = data
         }
         
         if let data = this.data.cashoutOptionsDic.name {
@@ -159,9 +169,19 @@ public class CashoutOption: PostgresStORM {
                     self.minimum = (value as! Double)
                 }
                 
-            case "pictureURL":
+            case "picture_url":
                 if (value as? String).isNotNil {
-                    self.pictureURL = (value as! String)
+                    self.picture_url = (value as! String)
+                }
+                
+            case "sm_picture_url":
+                if (value as? String).isNotNil {
+                    self.sm_picture_url = (value as! String)
+                }
+                
+            case "icon_url":
+                if (value as? String).isNotNil {
+                    self.icon_url = (value as! String)
                 }
                 
             case "display_order":
@@ -254,8 +274,16 @@ public class CashoutOption: PostgresStORM {
             dictionary.cashoutOptionsDic.displayOrder = self.display_order
         }
         
-        if self.pictureURL.isNotNil {
-            dictionary.cashoutOptionsDic.pictureURL = self.pictureURL
+        if self.picture_url.isNotNil {
+            dictionary.cashoutOptionsDic.pictureURL = self.picture_url
+        }
+        
+        if self.sm_picture_url.isNotNil {
+            dictionary.cashoutOptionsDic.smallPictureURL = self.sm_picture_url
+        }
+        
+        if self.icon_url.isNotNil {
+            dictionary.cashoutOptionsDic.iconURL = self.icon_url
         }
         
         if self.description.isNotNil {
@@ -314,7 +342,15 @@ public class CashoutOption: PostgresStORM {
             diff = false
         }
         
-        if diff == true, self.pictureURL != targetItem.pictureURL {
+        if diff == true, self.picture_url != targetItem.picture_url {
+            diff = false
+        }
+        
+        if diff == true, self.sm_picture_url != targetItem.sm_picture_url {
+            diff = false
+        }
+        
+        if diff == true, self.icon_url != targetItem.icon_url {
             diff = false
         }
         

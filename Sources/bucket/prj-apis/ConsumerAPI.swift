@@ -337,27 +337,20 @@ struct ConsumerAPI {
                             optdict["maximumAmount"] = value
                         }
 
-                        if let image = i.data.cashoutOptionsDic.pictureURL, image.length > 1 {
-                            
-                            var imgdict:[String:Any] = [:]
-                            // check to see if the image contains http
-                            let testimage = image.lowercased()
-                            if testimage.contains(string: "http") {
-                                imgdict["small"] = image
-                                imgdict["large"] = image
-                                imgdict["icon"]  = image
-                            } else {
-                                if let imageurl = EnvironmentVariables.sharedInstance.ImageBaseURL {
-                                    imgdict["small"] = "\(imageurl)/small/\(image)"
-                                    imgdict["large"] = "\(imageurl)/large/\(image)"
-                                    imgdict["icon"]  = "\(imageurl)/icon/\(image)"
-                                }
-                            }
-                            
-                            // add the images to the return
-                            optdict["image"] = imgdict
-                            
+                        var imgdict:[String:Any] = [:]
+                        if let picUrl = i.data.cashoutOptionsDic.pictureURL {
+                            imgdict["large"] = picUrl
                         }
+                        
+                        if let picUrl = i.data.cashoutOptionsDic.smallPictureURL {
+                            imgdict["small"] = picUrl
+                        }
+                        
+                        if let picUrl = i.data.cashoutOptionsDic.iconURL {
+                            imgdict["icon"] = picUrl
+                        }
+                        
+                        if !imgdict.isEmpty { optdict["image"] = imgdict }
                         
                         // pull in the form fields and add them
                         let fields = SupportFunctions.sharedInstance.getFormFields(i.data.cashoutOptionsDic.formId!, schema: schema)
