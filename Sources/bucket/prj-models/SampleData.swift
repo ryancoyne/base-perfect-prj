@@ -132,7 +132,8 @@ final class SampleData {
         print("Adding retailers: \(sqlstatement)")
         let _ = try? tbl.sqlRows(sqlstatement, params: [])
 
-        var retrows = try? tbl.sqlRows("SELECT * FROM us.retailer", params: [])
+        // We add the retailer 1 in the production initialization of data
+        var retrows = try? tbl.sqlRows("SELECT * FROM us.retailer WHERE id != 1", params: [])
         var ctr = 0
         for i in retrows! {
             

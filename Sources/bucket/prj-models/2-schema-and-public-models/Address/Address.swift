@@ -9,6 +9,7 @@ import Foundation
 import PerfectHTTP
 import StORM
 import PostgresStORM
+import PerfectCURL
 
 public class Address: PostgresStORM {
     
@@ -350,6 +351,72 @@ public class Address: PostgresStORM {
 
         return diff
         
+    }
+    
+    // this function will geocode the address using the Google functions
+    func geocodeAddress() {
+        
+        //  https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=YOUR_API_KEY
+        let geoAPIKey = "AIzaSyDlXIpscr63KfNdPhWqPHHbmJmF2tAtSGE"
+        
+        var query = URLComponents()
+        query.scheme = "https"
+        query.host = "maps.googleapis.com"
+        query.path = "/maps/api/geocode/json"
+        
+        var address = ""
+        if self.address1.isNotNil { address.append(self.address1!); address.append(" ") }
+        if self.address2.isNotNil { address.append(self.address2!); address.append(" ") }
+        if self.address3.isNotNil { address.append(self.address3!); address.append(" ") }
+        if self.city.isNotNil { address.append(self.city!); address.append(" ") }
+        if self.state.isNotNil { address.append(self.state!); address.append(" ") }
+        if self.postal_code.isNotNil { address.append(self.postal_code!); address.append(" ") }
+        
+        var querystring = ""
+        if !address.isEmpty {
+            query.queryItems = [URLQueryItem(name: "address", value: address), URLQueryItem(name: "key", value: geoAPIKey)]
+            querystring = query.string!
+        }
+
+        if !querystring.isEmpty {
+            querystring = querystring.replacingOccurrences(of: "%20", with: "+", options: .literal, range: nil)
+            
+            print("Address GeoCode: \(querystring)")
+            
+            // do the call now
+            
+            
+            if let json: [String:Any] = try? CURLRequest(querystring, .failOnError, .useSSL).perform().bodyJSON {
+                
+                if let jsonresults: [String:Any] = json["results"] as? [String : Any] {
+                    // there are results
+                    print("GeoCode Results: \(jsonresults)")
+                }
+
+                if let jsonstatus:String = json["status"] as? String {
+                    // there are results
+                    print("GeoCode Status: \(jsonstatus)")
+                }
+
+                if let jsonerror:String = json["error_message"] as? String {
+                    // there are results
+                    print("GeoCode Results: \(jsonerror )")
+                }
+
+                print("GeoCode: json: \(json)")
+//                let jsonresults: [String:Any] = json["results"] as! [String : Any]
+//                if jsonresults.isEmpty {
+                    // there was probably an error
+                    //TODO: Report the error to us via email or something fun like that
+//                    print("GeoReturn: \(json)")
+//                }
+                // here is the data
+//                print("GeoCode Information: \(jsonresults)")
+                //TODO: Add the lat and lon to the address object
+                
+            }
+
+        }
     }
 }
 

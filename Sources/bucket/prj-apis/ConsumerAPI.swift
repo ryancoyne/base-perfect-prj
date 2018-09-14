@@ -428,7 +428,7 @@ struct ConsumerAPI {
                 let res = try? cg.sqlRows(countsql, params: [codes])
 
                 var currentUserBalance = 0.0
-                if let countryId = Country.idWith(isoNumericCode: countryCode) {
+                if let countryId = Country.idWith(countryCode) {
                     currentUserBalance = UserBalanceFunctions().getCurrentBalance(request.session!.userid, countryid: countryId)
                 }
                 

@@ -10,11 +10,11 @@ extension String {
 }
 
 extension Country {
-    static public func idWith(isoNumericCode: String?) -> Int? {
-        if isoNumericCode.isNil { return nil }
+    static public func idWith(_ alphaCountryCode: String?) -> Int? {
+        if alphaCountryCode.isNil { return nil }
         // Okay lets see:
         let country = Country()
-        try? country.find(["code_alpha_2":isoNumericCode!.uppercased()])
+        try? country.find(["code_alpha_2":alphaCountryCode!.uppercased()])
         return country.id
     }
     static public func exists(withId: String?) -> Bool {
@@ -99,7 +99,7 @@ extension HTTPRequest {
         // they may pass in either the code or the number
         if let countryCode = self.urlVariables["countryCode"] {
             
-            if countryCode.isAlpha(), Country.idWith(isoNumericCode: countryCode.uppercased()).isNotNil {
+            if countryCode.isAlpha(), Country.idWith(countryCode).isNotNil {
                 return countryCode
             } else if countryCode.isNumeric() {
                 // get the country code alpha
@@ -131,7 +131,7 @@ extension HTTPRequest {
             }
         } else {
             // It is US, or SG here. We need to go and query for the integer id value:
-            return Country.idWith(isoNumericCode: sentCountryId?.uppercased())
+            return Country.idWith(sentCountryId)
         }
     }
     

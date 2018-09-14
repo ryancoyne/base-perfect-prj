@@ -387,6 +387,8 @@ final class PRJDBTables {
         InitializeData.sharedInstance.addCashoutOption()
         
         InitializeData.sharedInstance.addSampleUsers()
+        
+        InitializeData.sharedInstance.addBucketUSRetailer()
  
         // set the sample data to NO - so no more is added
         do {
