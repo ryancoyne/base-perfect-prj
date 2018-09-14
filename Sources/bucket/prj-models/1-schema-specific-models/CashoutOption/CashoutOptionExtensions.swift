@@ -133,13 +133,37 @@ struct CashoutOptionsDictionary {
     }
     var pictureURL : String? {
         get {
-            return self.dic["pictureURL"].stringValue
+            return self.dic["picture_url"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["pictureURL"] = newValue!
+                self.dic["picture_url"] = newValue!
             } else {
-                self.dic.removeValue(forKey: "pictureURL")
+                self.dic.removeValue(forKey: "picture_url")
+            }
+        }
+    }
+    var smallPictureURL : String? {
+        get {
+            return self.dic["sm_picture_url"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["sm_picture_url"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "sm_picture_url")
+            }
+        }
+    }
+    var iconURL : String? {
+        get {
+            return self.dic["icon_url"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["icon_url"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "icon_url")
             }
         }
     }
