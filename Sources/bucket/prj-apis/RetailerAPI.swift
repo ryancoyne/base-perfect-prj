@@ -93,7 +93,6 @@ struct RetailerAPI {
 
                 // *IMPORTANT*  If this is development, then we can automatically verify the device.  If we are production, then we will make them to go the web and verify the device is theirs.
                 
-                
                 do {
                     
                     // Get our post body JSON.  This will throw an error, along with the string that it tried parsing.
@@ -108,6 +107,14 @@ struct RetailerAPI {
                     guard let _ = request.countryId else { return response.invalidCountryCode }
                 
                     let schema = Country.getSchema(request)
+                    
+                    // If there is only one location, lets automagically attach it to the one location for this retailer
+                    let add = Address()
+                    let add_sql = "SELECT * FROM \(schema).\(add.table()) WHERE retailer_id = \(retailerIntegerId)"
+                    let addresses = try? add.sqlRows(add_sql, params: [])
+                    if let _ = addresses, addresses!.count < 2, let a = addresses!.first {
+                        _ = try? add.get(a.data.id)
+                    }
  //MARK--
 // CHANGE ME WHEN THE WEBPAGE IS UP
                     switch server {
@@ -141,6 +148,11 @@ struct RetailerAPI {
                             term.terminal_key = apiKey.ourPasswordHash
                             
                             do {
+                                
+                                // there is only one address for this company
+                                if add.id.isNotNil {
+                                    term.address_id = add.id
+                                }
                                 
                                 try term.saveWithCustomType(schemaIn: schema)
                                 try? response.setBody(json: ["isApproved":false, "apiKey":apiKey])
