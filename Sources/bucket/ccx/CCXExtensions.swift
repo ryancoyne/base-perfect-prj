@@ -32,6 +32,9 @@ extension Optional {
         return self != nil
     }
     var boolValue : Bool? {
+        if self is String {
+            return Bool(self as! String)
+        }
         return self as? Bool
     }
     // Going to use this for the Optional<Any> date fields from our dictionary :)

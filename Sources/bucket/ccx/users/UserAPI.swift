@@ -1215,7 +1215,7 @@ struct GoogleOAuth {
                     returnedGoogleData["email"] = googleData["email"]
                 }
                 if googleData["email_verified"].isNotNil {
-                    returnedGoogleData["email_verified"] = googleData["email_verified"]
+                    returnedGoogleData["email_verified"] = googleData["email_verified"].boolValue
                 }
                 if googleData["family_name"] != nil {
                     returnedGoogleData["lastname"] = googleData["family_name"]
