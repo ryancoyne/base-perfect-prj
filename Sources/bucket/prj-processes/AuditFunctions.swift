@@ -72,15 +72,13 @@ public class AuditFunctions {
         
     }
 
-    func cashoutCustomerCodeAuditRecord(_ record: CodeTransactionHistory, _ US_detail_disbursement_reasons:Int ) {
+    func cashoutCustomerCodeAuditRecord(_ schemaId: String, _ record: CodeTransactionHistory, _ US_detail_disbursement_reasons:Int ) {
         
         // Do NOT audit a sample
         if record.isSample() { return }
 
-        var schema = ""
+        let schema = schemaId.lowercased()
         var user = ""
-        
-        schema = Country.getSchema(record.country_id!)
         
         // picking the user from most important to least important
         if let u = record.redeemedby, !u.isEmpty {

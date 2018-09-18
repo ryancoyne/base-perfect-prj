@@ -245,7 +245,7 @@ struct TestingAPI {
                             ctt.to(c)
                             ctt.deleted = deletedtime
                             ctt.deletedby = user
-                            _ = try? ctt.saveWithCustomType(schemaIn: schema, user, copyOver: false)
+                            _ = try? ctt.saveWithCustomType(schemaIn: schema, user)
 
                             if schema == "us" { AuditFunctions().deleteCustomerCodeAuditRecord(ctt) }
 
@@ -263,7 +263,7 @@ struct TestingAPI {
                             ctth.to(c)
                             ctth.deleted = deletedtime
                             ctth.deletedby = user
-                            _ = try? ctth.saveWithCustomType(schemaIn: schema, user, copyOver: false)
+                            _ = try? ctth.saveWithCustomType(schemaIn: schema, user)
                             
                             // decrement the users balance
                             UserBalanceFunctions().adjustUserBalance(schemaId: nil, user, countryid: ctth.country_id!, increase: 0.00, decrease: ctth.amount!)

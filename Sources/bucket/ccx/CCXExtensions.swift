@@ -1067,7 +1067,12 @@ extension PostgresStORM {
      - Returns: An Any type.  For a new inser, we will return the id
      */
     @discardableResult
-    func saveWithCustomType(schemaIn:String? = "public", _ user: String? = nil, copyOver : Bool = false) throws -> [StORMRow] {
+    func saveWithCustomType(schemaIn:String? = "public", _ user: String? = nil,_ insertRecord : Bool? = false) throws -> [StORMRow] {
+        
+        var copyOver = false
+        if insertRecord.isNotNil {
+            copyOver = insertRecord!
+        }
         
         var schema = "public"
         if schemaIn.isNotNil {
