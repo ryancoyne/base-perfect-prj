@@ -130,9 +130,31 @@ struct TestingAPI {
                 
                 // SET TESTING STUFF HERE:
 
+                // get the logged in user
+                if let user = request.account {
+                    // add some retailers in the US
 
-                SuttonFunctions().createTransferFile()
-                
+                    var dt = try? user.detail.jsonEncodedString()
+                    print("Retailer Admin: \(dt ?? "")")
+
+                    user.addRetailerAdmin("us", 1)
+                    dt = try? user.detail.jsonEncodedString()
+                    print("Retailer Admin: \(dt ?? "")")
+                    
+                    user.addRetailerAdmin("us", 2)
+                    dt = try? user.detail.jsonEncodedString()
+                    print("Retailer Admin: \(dt ?? "")")
+
+                    user.deleteRetailerAdmin("us", 2)
+                    dt = try? user.detail.jsonEncodedString()
+                    print("Retailer Admin: \(dt ?? "")")
+
+                    user.deleteRetailerAdmin("us", 1)
+                    dt = try? user.detail.jsonEncodedString()
+                    print("Retailer Admin: \(dt ?? "")")
+
+                }
+
 //                var batch = SupportFunctions.sharedInstance.getNextBatch(schemaId: "us", "STTN")
 //                print("Batch test: \(batch.headerId):\(batch.batchIdentifier)")
 //

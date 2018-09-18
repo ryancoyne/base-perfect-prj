@@ -40,9 +40,152 @@ extension Account {
         default:
             return false
         }
-        
-        
     }
+    
+    // this function will check to see if the account is permitted to access this retailer
+    func bounceRetailerAdmin(_ schema: String, _ retailer_id:Int)->Bool {
+        
+        // lets see if this user is permitted to access this retailr
+        // the retailer array is in the detail section
+        // { "retailers": { "us":[123,456] } }
+        if let retailers:[String:Any] = self.detail["retailer"] as? [String : Any],
+            let retailer_array:[Int] = retailers["\(schema)"] as? [Int] {
+            
+            // so if we are here, they do have some retailer permissions for this retailer
+            for i in retailer_array {
+                if i == retailer_id { return false }
+            }
+        }
+        
+        return true
+    }
+    
+    func addRetailerAdmin(_ schema: String, _ retailer_id:Int) {
+
+        // lets see if this user is permitted to access this retailr
+        // the retailer array is in the detail section
+        // { "retailers": { "us":[123,456] } }
+        
+        if let retailers:[String:Any] = self.detail["retailers"] as? [String : Any],
+            var retailer_array:[Int] = retailers["\(schema)"] as? [Int] {
+            
+            // so if we are here, they do have some retailer permissions for this retailer
+            var alreadyin = false
+            
+            for i in retailer_array {
+                if i == retailer_id { alreadyin = true }
+            }
+            
+            if !alreadyin {
+                // add it and update
+                retailer_array.append(retailer_id)
+                
+                var new_detail = self.detail
+                
+                // add it to the detail:
+                var new_retailers:[String:Any] = [:]
+                new_retailers["\(schema)"] = retailer_array
+                
+                // no set them in the dictionary
+                new_detail["retailers"] = new_retailers
+                
+                // update the account
+                self.detail = new_detail
+                _ = try? self.saveWithCustomType()
+            }
+        } else {
+            // there was no detail yet - frst one!
+            var retailer_detail:[String:Any] = [:]
+            var theretailers:[String:Any] = [:]
+            theretailers["\(schema)"] = [retailer_id]
+            retailer_detail["retailers"] = theretailers
+
+            var new_detail = self.detail
+            
+            // add it to the detail:
+            var new_retailers:[String:Any] = [:]
+            new_retailers["\(schema)"] = [retailer_id]
+            
+            // no set them in the dictionary
+            new_detail["retailers"] = new_retailers
+            
+            // update the account
+            self.detail = new_detail
+            _ = try? self.saveWithCustomType()
+
+        }
+    }
+    
+    func deleteRetailerAdmin(_ schema: String, _ retailer_id:Int) {
+
+        if let retailers:[String:Any] = self.detail["retailers"] as? [String : Any],
+            let retailer_array:[Int] = retailers["\(schema)"] as? [Int] {
+            
+            // so if we are here, they do have some retailer permissions for this retailer
+            var alreadyin = false
+            var new_retailer_list:[Int] = []
+            
+            for i in retailer_array {
+                if i == retailer_id {
+                    alreadyin = true
+                } else {
+                    new_retailer_list.append(i)
+                }
+            }
+            
+            var new_retailers:[String:Any] = [:]
+            
+            if alreadyin {
+                
+                if new_retailer_list.count > 0 {
+                    // there is at least one in the array
+                    new_retailers["\(schema)"] = new_retailer_list
+                }
+                
+                var new_detail = self.detail
+                
+                if new_retailers.count > 0 {
+                    new_detail["retailers"] = new_retailers
+                } else {
+                    var nr:[String:Any] = new_detail["retailers"] as! [String : Any]
+                    nr.removeValue(forKey: "\(schema)")
+                    if nr.count > 0 {
+                        // there is one or more left
+                        new_detail["retailers"] = nr
+                    } else {
+                        // none left
+                        new_detail.removeValue(forKey: "retailers")
+                    }
+                }
+                
+                // update the account
+                self.detail = new_detail
+                _ = try? self.saveWithCustomType()
+            }
+//        } else {
+//            // there was no detail yet - frst one!
+//            var retailer_detail:[String:Any] = [:]
+//            var theretailers:[String:Any] = [:]
+//            theretailers["\(schema)"] = [retailer_id]
+//            retailer_detail["retailers"] = theretailers
+//            
+//            var new_detail = self.detail
+//            
+//            // add it to the detail:
+//            var new_retailers:[String:Any] = [:]
+//            new_retailers["\(schema)"] = [retailer_id]
+//            
+//            // no set them in the dictionary
+//            new_detail["retailers"] = new_retailers
+//            
+//            // update the account
+//            self.detail = new_detail
+//            _ = try? self.saveWithCustomType()
+//            
+        }
+
+    }
+
 }
 
 extension HTTPRequest {

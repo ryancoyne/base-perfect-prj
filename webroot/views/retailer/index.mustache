@@ -1,0 +1,22 @@
+{{>header}}
+
+<!-- <section> -->
+<!--    <div class="jumbotron text-center"> -->
+        <div class="container-fluid">
+            <div class="row">
+                {{#authenticated}}
+                    <div class="col-xs-2">{{>left}}</div>
+                    <div class="col-xs-8">&nbsp;</div>
+                    <div class="col-xs-2">&nbsp;</div>
+                {{/authenticated}}
+                {{^authenticated}}
+                  <div class="col-xs-2">&nbsp;</div>
+                  <div class="col-xs-8">{{>login-body}}</div>
+                  <div class="col-xs-2">&nbsp;</div>
+                {{/authenticated}}
+            </div>
+        </div>
+<!--     </div> -->
+<!-- </section> -->
+
+{{>footer}}
