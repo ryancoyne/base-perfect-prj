@@ -156,6 +156,8 @@ struct ConsumerAPI {
                             }
                             if let d = i.data["description"].stringValue {
                                 tmp["description"] = d
+                            } else if let d = i.data["name"].stringValue {
+                                tmp["description"] = d
                             }
                         }
                         
