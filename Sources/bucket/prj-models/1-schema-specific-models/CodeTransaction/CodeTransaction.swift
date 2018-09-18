@@ -9,6 +9,7 @@ import Foundation
 import PerfectHTTP
 import StORM
 import PostgresStORM
+import PerfectLocalAuthentication
 
 struct CodeTransactionCodes {
     static let completed                = "completed" // the code has been complete
@@ -632,9 +633,38 @@ public class CodeTransaction: PostgresStORM {
                 schema = (r.data["code_alpha_2"].stringValue!).lowercased()
             }
                 
-            // save the archive record
-            try cth.saveWithCustomType(schemaIn: schema, copyOver: true)
-            
+            // save the archive record - we are doing the copy over option to insert (we have an ID in the record object)
+            // see if the record exists - if so it is anb iupdate, if not, it is a copyover
+            if cth.id.isNotNil, cth.id! > 0 {
+                let sql_check = "SELECT * FROM \(schema).code_transaction_history WHERE id = \(cth.id!)"
+                let chk = try? cth.sqlRows(sql_check, params: [])
+                if let _ = chk?.first {
+                    // this means that there is a record out there already - update the record
+                    let oldrec = CodeTransactionHistory()
+                    oldrec.to(chk!.first!)
+                    // let us know what is going on though:
+                    if oldrec.id.isNotNil {
+                        var email_text = "There was already a record for \(schema).code_transaction_history with id = \(oldrec.id!)\n"
+                        email_text.append("OLD RECORD:\n")
+                        if let jsond = try? oldrec.asDictionary().jsonEncodedString() {
+                            email_text.append(jsond)
+                        }
+                        email_text.append("\nNEW RECORD:\n")
+                        if let jsond = try? cth.asDictionary().jsonEncodedString() {
+                            email_text.append(jsond)
+                        }
+                        // now lets send the information
+                        Utility.sendMail(name: "Bucket Server Problem", address: "engineering@buckettechnologies.com", subject: "Issue with the archive of code transaction history", html: email_text, text: email_text)
+                    }
+                    try cth.saveWithCustomType(schemaIn: schema, self.modifiedby)
+                } else {
+                    // this means that there is no record out there - add the new record with the current id
+                    try cth.saveWithCustomType(schemaIn: schema, self.modifiedby, true)
+                }
+            } else {
+                try cth.saveWithCustomType(schemaIn: schema, self.modifiedby, true)
+            }
+
             // now hard delete the original record
             let sql = "DELETE FROM \(schema).\(self.table()) WHERE id = \(self.id!)"
             let _ = try? self.sqlRows(sql, params: [])

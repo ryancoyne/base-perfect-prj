@@ -563,7 +563,8 @@ struct ConsumerAPI {
                     }
                     
                     // there are a couple of things we need to do.  First -- we need to loop thru the records - from oldest to newest (based on redeemed code dates)
-                    var sql = "SELECT id, amount, amount_available, customer_code, redeemedby "
+//                    var sql = "SELECT id, amount, amount_available, customer_code, redeemedby "
+                    var sql = "SELECT * "
                     sql.append("FROM \(schema).code_transaction_history_view_deleted_no ")
                     sql.append("WHERE redeemedby = '\(userId!)' ")
                     sql.append("AND amount_available > 0 ")
@@ -574,31 +575,41 @@ struct ConsumerAPI {
                     
                     // we will determine the records to use their entire amount and the records to use portions
                     
-                    var included:[Int] = []
-                    var lastone = 0
+//                    var included:[Int] = []
+//                    var lastone = 0
                     var lastoneamount:Double = 0.0
                     var totalcount:Double = 0.0
+                    
+                    var theitems:[CodeTransactionHistory] = []
+                    var thelastone:CodeTransactionHistory? = nil
                     
                     // calculate wiich records we will use for the cashout amount.
                     if cth_rec.isNotNil {
                         for i in cth_rec! {
                             
-                            if let tam = i.data["amount_available"].doubleValue {
+                            let cth_r = CodeTransactionHistory()
+                            cth_r.to(i)
+                            
+                            if let tam = cth_r.amount_available {
                                 if (totalcount + tam) <= amount_to_cashout {
                                     // keet looping because we did not pick enough of the codes yet
                                     totalcount += tam
-                                    included.append(i.data["id"].intValue!)
+//                                    included.append(cth_r.id!)
+                                    theitems.append(cth_r)
                                 } else if (tam > amount_to_cashout) && (totalcount == 0) {
                                     // the rare case where one code is worth more than the cashout request
                                     totalcount = tam
                                     lastoneamount = amount_to_cashout
-                                    lastone = i.data["id"].intValue!
+//                                    lastone = cth_r.id!
+                                    thelastone = cth_r
+
                                     break
                                 } else if totalcount < amount_to_cashout {
                                     // the last one still has a small amount of value left
                                     lastoneamount = amount_to_cashout - totalcount
-                                    lastone = i.data["id"].intValue!
+//                                    lastone = cth_r.id!
                                     totalcount = totalcount + lastoneamount
+                                    thelastone = cth_r
                                     break
                                 }
                             }
@@ -615,7 +626,7 @@ struct ConsumerAPI {
                     if submittedFields?.isEmpty == false, user.isNotNil, !user!.isSample() {
                         
                         let cfHeader = CompletedFormsHeader()
-                        _=try? cfHeader.saveWithCustomType(schemaIn: schema, userId!, copyOver: false)
+                        _=try? cfHeader.saveWithCustomType(schemaIn: schema, userId!)
                         
                         // Now write in the details:
                         for field in submittedFields! {
@@ -623,42 +634,18 @@ struct ConsumerAPI {
                             detail.cf_header_id = cfHeader.id
                             detail.field_name = field.key
                             detail.field_value = field.value
-                            _=try? detail.saveWithCustomType(schemaIn: schema, userId!, copyOver: false)
+                            _=try? detail.saveWithCustomType(schemaIn: schema, userId!)
                         }
                     }
-                    
-                    // process the records
-                    var thein = ""
-                    for i in included {
-                        thein.append("\(i),")
-                    }
-                    // add the last one
-                    if lastone > 0 {
-                        thein.append("\(lastone)")
-                    } else {
-                        // get rid of the last comma
-                        thein.removeLast()
-                    }
-                    
-                    // get the records together for us to process:
-                    let rec_sql = "SELECT * FROM \(schema).code_transaction_history_view_deleted_no WHERE id IN(\(thein))"
-                    
+
+                    // process the records we saved earlier
                     let cth_cashedout = CCXServiceClass.sharedInstance.getNow()
-                    let cth_now = CodeTransactionHistory()
-                    let resul = try? cth_now.sqlRows(rec_sql, params: [])
-                    if resul.isNotNil {
-                        for i in resul! {
-                            let working_cth = CodeTransactionHistory()
-                            working_cth.to(i)
-                            
+                    if theitems.count > 0 {
+                        for working_cth in theitems {
+
                             // update the available amount
-                            if working_cth.id != lastone {
-                                working_cth.amount_available = 0.0
-                                working_cth.cashedout_total  = working_cth.amount
-                            } else {
-                                working_cth.amount_available = working_cth.amount! - lastoneamount
-                                working_cth.cashedout_total  = lastoneamount
-                            }
+                            working_cth.amount_available = 0.0
+                            working_cth.cashedout_total  = working_cth.amount
                             
                             working_cth.cashedout      = cth_cashedout
                             working_cth.cashedoutby    = userId!
@@ -672,8 +659,32 @@ struct ConsumerAPI {
                                 // figure out what type
                                 let co_type = cog.detail_disbursement_reasons ?? 0
                                 
-                                AuditFunctions().cashoutCustomerCodeAuditRecord(working_cth, co_type)
+                                AuditFunctions().cashoutCustomerCodeAuditRecord(schema, working_cth, co_type)
                             }
+                        }
+                        
+                        // if there is a last record, lets process that single recors
+                        if thelastone.isNotNil, let lastonenow = thelastone {
+
+                            let amount_left = lastonenow.amount_available! - lastoneamount
+                            lastonenow.amount_available = amount_left
+                            lastonenow.cashedout_total  = lastoneamount
+                            
+                            lastonenow.cashedout      = cth_cashedout
+                            lastonenow.cashedoutby    = userId!
+                            lastonenow.cashedout_note = "CASHOUT: \(name_cashout)"
+                            
+                            // we are complete - lets save and move on
+                            let _ = try? lastonenow.saveWithCustomType(schemaIn: schema)
+                            
+                            // Write the audit record
+                            if schema == "us" {
+                                // figure out what type
+                                let co_type = cog.detail_disbursement_reasons ?? 0
+                                
+                                AuditFunctions().cashoutCustomerCodeAuditRecord(schema, lastonenow, co_type)
+                            }
+
                         }
                         
                         // add the cashout record to the history record
@@ -692,7 +703,7 @@ struct ConsumerAPI {
                         newrec.redeemedby = userId!
                         newrec.status = CodeTransactionCodes.cashout_pending
                         
-                        let _ = try? newrec.saveWithCustomType(schemaIn: schema, userId!, copyOver: false)
+                        let _ = try? newrec.saveWithCustomType(schemaIn: schema, userId!)
                         
                         // add the cashout record
                         
@@ -791,7 +802,7 @@ struct ConsumerAPI {
                     rr.user_id = request.session?.userid
                     
                     // now save it all
-                    let _ = try? rr.saveWithCustomType(schemaIn: schema, rr.user_id, copyOver: false)
+                    let _ = try? rr.saveWithCustomType(schemaIn: schema, rr.user_id)
 
                     // and send the email to the correct email address -- well, hopefully!
                     var h = "<p>A Recommended Retailer</p>"

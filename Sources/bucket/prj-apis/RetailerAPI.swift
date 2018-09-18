@@ -612,7 +612,7 @@ struct RetailerAPI {
                         thecode.deletedby = CCXDefaultUserValues.user_server
                     }
                     
-                    let _ = try? thecode.saveWithCustomType(schemaIn: schema,thecode.deletedby, copyOver: false)
+                    let _ = try? thecode.saveWithCustomType(schemaIn: schema,thecode.deletedby)
                     
                     // audit the delete
                     AuditFunctions().deleteCustomerCodeAuditRecord(thecode)
