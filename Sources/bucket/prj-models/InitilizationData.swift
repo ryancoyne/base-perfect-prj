@@ -262,20 +262,26 @@ final class InitializeData {
             switch i.data.cashoutGroupDic.group_name {
             case "Prepaid Card"?:
                 // card 1
+                var imageName = "visa_icon.png"
+                var smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/prepaidcard/small/\(imageName)")
+                var largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/prepaidcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'Visa',")
                 ussql.append("'https://visa.com', ")
                 ussql.append("'The VISA prepaid card may be used anywhere online!', ")
                 ussql.append("'Come join the VISA family and use this card worldwide!', ")
-                ussql.append("'https://usa.visa.com/content/dam/VCOM/nav-assets/logo.png','', ")
+                ussql.append("'\(largeImage)','\(smallImage)', ")
                 ussql.append("50.00,0,true),")
                 // card 2
+                imageName = "mastercard_icon.png"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/prepaidcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/prepaidcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 2, ")
                 ussql.append("'MasterCard',")
                 ussql.append("'https://mastercard.com', ")
                 ussql.append("'The MasterCard prepaid card may be used anywhere online!', ")
                 ussql.append("'Come join the MasterCard family and use this card worldwide!', ")
-                ussql.append("'https://www.mastercard.us/etc/designs/mccom/en-us/jcr:content/global/logo.img.png/1472151229727.png','', ")
+                ussql.append("'\(largeImage)','\(smallImage)', ")
                 ussql.append("50.00,0,true),")
                 break
             case "Gift Card"?:
