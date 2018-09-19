@@ -177,23 +177,23 @@ final class InitializeData {
         checkuser.append("(created, createdby, group_name,description, country_id, picture_url, icon_url, display_order, display, option_layout, long_description, detail_disbursement_reasons) ")
         checkuser.append(" VALUES ")
         var pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/backgrounds/transfer_bank_account_background.png")
+        pic.append("/groups/prepaidcard/backgrounds/transfer_bank_account_background.png")
         var pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/icons/prepaid_card_icon.png")
+        pic_icon.append("/groups/prepaidcard/icons/prepaid_card_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', \(usa.id!),'\(pic)','\(pic_icon)', 2, true, 'double', 'Cha-ching!  Shop at your favorite retailers with your prepaid card.  Note that these are virtual cards and cannot be used in physical stores.', \(USDetailDisbursementReasons.closedLoopCard)), ")
         
         // Gift Card Group:
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/backgrounds/gift_card_background.png")
+        pic.append("/groups/giftcard/backgrounds/gift_card_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/icons/gift_card_icon.png")
+        pic_icon.append("/groups/giftcard/icons/gift_card_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.', \(usa.id!),'\(pic)','\(pic_icon)',1, true, 'double', 'Choose from hundreds of gift cards to your favorite stores and restaurants.  Note that these are virtual gift cards and some merchants may not accept them in stores.  Please check with the merchant.', \(USDetailDisbursementReasons.openLoopCard)), ")
         
         // Donate Group:
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/backgrounds/donate_to_charity_background.png")
+        pic.append("/groups/donate/backgrounds/donate_to_charity_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/icons/donate_icon.png")
+        pic_icon.append("/groups/donate/icons/donate_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.', \(usa.id!),'\(pic)','\(pic_icon)',3, true, 'single', 'Choose from hundreds of charities and give back to your community.', \(USDetailDisbursementReasons.donation)), ")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
@@ -218,21 +218,22 @@ final class InitializeData {
 //        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','TopUp','', \(singapore.id!),'\(pic)','\(pic_icon)',1, true, 'double', null),")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/backgrounds/transfer_bank_account_background.png")
+        pic.append("/groups/topup/backgrounds/transfer_bank_account_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/icons/transfer_to_bank_icon.png")
+        pic_icon.append("groups/topup/icons/transfer_to_bank_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Transfer To Bank Account','Cash out to a bank account of your choice.', \(singapore.id!),'\(pic)','\(pic_icon)',2, true, 'double', null),")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/backgrounds/")
+        pic.append("/groups/bucketcoin/backgrounds/")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/icons/")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),'\(pic)','\(pic_icon)',3, true, 'double', null), ")
+        pic_icon.append("groups/icons/")
+        // The pic and pic_icon are being set to null for now since we do not have any images just yet.
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),null,null,3, true, 'double', null), ")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/backgrounds/donate_to_charity_background.png")
+        pic.append("/groups/donate/backgrounds/donate_to_charity_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/icons/donate_icon.png")
+        pic_icon.append("/groups/donate/icons/donate_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','', \(singapore.id!),'\(pic)','\(pic_icon)',1, true, 'single', 'Choose from hundreds of charities and give back to your community.')")
 
         print("Adding cashout groups for \(schema): \(checkuser)")
@@ -278,53 +279,104 @@ final class InitializeData {
                 ussql.append("50.00,0,true),")
                 break
             case "Gift Card"?:
+                
+                // This is our new imported list for gift cards...  Only charities have the icon image.  Gift cards only have a small and large logo.
                 // card 1
+                var imageName = "810-Amazon.png"
+                var smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                smallImage.append("/giftcards/small/\(imageName)")
+                var largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                largeImage.append("giftcards/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'Amazon',")
                 ussql.append("'https://amazon.com',")
                 ussql.append("'Amazon holds the world at your fingertips.',")
                 ussql.append("'Amazon is the largest onine retailer in the world.  Use your Amazon card here!',")
-                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/5360.jpg','',")
+                ussql.append("'\(largeImage)','\(smallImage)',")
                 ussql.append("50.00,0,true),")
+                
                 // card 2
+                imageName = "678-Target.jpg"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                smallImage.append("/giftcards/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                largeImage.append("/giftcards/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 2, ")
                 ussql.append("'Target',")
                 ussql.append("'https://target.com',")
                 ussql.append("'Target is the store with the big red dot.',")
                 ussql.append("'Target is a department store with a little bit of everything!',")
-                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/7039.jpg','',")
+                ussql.append("'\(largeImage)','\(smallImage)',")
                 ussql.append("50.00,0,true),")
+                
                 // card 3
+                imageName = "933-Thinkgeek.png"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                smallImage.append("/giftcards/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                largeImage.append("/giftcards/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 3, ")
                 ussql.append("'ThinkGeek',")
                 ussql.append("'https://thinkgeek.com',")
                 ussql.append("'Fun things for geeks',")
                 ussql.append("'Want to buy an amazing gift for a geek?  Get it here!',")
-                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/81112.png','',")
+                ussql.append("'\(largeImage)','\(smallImage)',")
                 ussql.append("50.00,0,true),")
+                
                 // card 4
+                imageName = "768-WholeFoods.png"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                smallImage.append("/giftcards/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                largeImage.append("/giftcards/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 4, ")
                 ussql.append("'Whole Foods',")
                 ussql.append("'https://wholefoods.com',")
                 ussql.append("'Want good food?',")
                 ussql.append("'Whole Foods provides a wholistic approach to feed.',")
-                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/82068.png','',")
+                ussql.append("'\(largeImage)','\(smallImage)',")
                 ussql.append("50.00,0,true),")
+                
                 // card 5
+                imageName = "1044-TheCheeseCakeFactory.jpg"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                smallImage.append("/giftcards/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                largeImage.append("/giftcards/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 5, ")
                 ussql.append("'The Cheesecake Factory',")
                 ussql.append("'https://www.thecheesecakefactory.com',")
                 ussql.append("'Want Cheesecake?',")
                 ussql.append("'The Cheesecake Factory creates cheesecake masterpieces!',")
-                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/6230.jpg','',")
+                ussql.append("'\(largeImage)','\(smallImage)',")
                 ussql.append("50.00,0,true),")
+                
                 // card 6
+                imageName = "924-RubyTuesday.png"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                smallImage.append("/giftcards/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                largeImage.append("/giftcards/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
                 ussql.append("'Ruby Tuesday',")
                 ussql.append("'https://www.rubytuesday.com',")
                 ussql.append("'Eat here!',")
                 ussql.append("'Hungry on Tuesday?  Come here and join us for dinner.',")
-                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/81244.png','',")
+                ussql.append("'\(largeImage)','\(smallImage)',")
+                ussql.append("50.00,0,true),")
+                
+                // card 7
+                imageName = "996-BurgerKing.png"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                smallImage.append("/giftcards/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
+                largeImage.append("/giftcards/large/\(imageName)")
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
+                ussql.append("'Burger King',")
+                ussql.append("'https://www.bk.com',")
+                ussql.append("'The original HOME OF THE WHOPPER®',")
+                ussql.append("'The original HOME OF THE WHOPPER®, our commitment to premium ingredients, signature recipes, and family-friendly dining experiences is what has defined our brand for more than 50 successful years.',")
+                ussql.append("'\(largeImage)','\(smallImage)',")
                 ussql.append("50.00,0,true),")
 
                 break
