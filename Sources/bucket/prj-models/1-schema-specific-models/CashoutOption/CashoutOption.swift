@@ -34,6 +34,7 @@ public class CashoutOption: PostgresStORM {
     var icon_url        : String? = nil
     var minimum           : Double? = nil
     var maximum           : Double? = nil
+    var increment           : Double? = nil
     var display           : Bool? = nil
 
     //MARK: Table name
@@ -68,6 +69,10 @@ public class CashoutOption: PostgresStORM {
         
         if let data = this.data.deletedBy {
             deletedby = data
+        }
+        
+        if let data = this.data.cashoutOptionsDic.increment {
+            increment = data
         }
 
         if let data = this.data.cashoutOptionsDic.cashoutSourceId {
@@ -164,6 +169,11 @@ public class CashoutOption: PostgresStORM {
                     self.maximum = (value as! Double)
                 }
                 
+            case "increment":
+                if (value as? Double).isNotNil {
+                    self.increment = (value as! Double)
+                }
+                
             case "minimum":
                 if (value as? Double).isNotNil {
                     self.minimum = (value as! Double)
@@ -254,6 +264,10 @@ public class CashoutOption: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
+        if self.increment.isNotNil {
+            dictionary.cashoutOptionsDic.increment = self.increment
+        }
+        
         if self.group_id.isNotNil {
             dictionary.cashoutOptionsDic.groupId = self.group_id
         }
@@ -319,6 +333,10 @@ public class CashoutOption: PostgresStORM {
         var diff = true
         
         if diff == true, self.cashout_source_id != targetItem.cashout_source_id {
+            diff = false
+        }
+        
+        if diff == true, self.increment != targetItem.increment {
             diff = false
         }
         

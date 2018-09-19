@@ -330,13 +330,33 @@ struct ConsumerAPI {
                         var optdict:[String:Any] = [:]
 
                         optdict["id"] = i.data.id!
-                        optdict["minimumAmount"] = i.data.cashoutOptionsDic.minimum
-                        optdict["longDescription"] = i.data.cashoutOptionsDic.longDescription
-                        optdict["name"] = i.data.cashoutOptionsDic.name
-                        optdict["description"] = i.data.shortdescription
-                        optdict["website"] = i.data.cashoutOptionsDic.website
+                        
+                        if let val = i.data.cashoutOptionsDic.longDescription, !val.isEmpty {
+                            optdict["longDescription"] = val
+                        }
+                        
+                        if let val = i.data.cashoutOptionsDic.name, !val.isEmpty {
+                            optdict["name"] = val
+                        }
+                        
+                        if let val = i.data.shortdescription, !val.isEmpty {
+                            optdict["description"] = val
+                        }
+                        
+                        if let val = i.data.cashoutOptionsDic.website, !val.isEmpty {
+                            optdict["website"] = val
+                        }
+                        
                         if let value = i.data.cashoutOptionsDic.maximum, value > 0 {
                             optdict["maximumAmount"] = value
+                        }
+                        
+                        if let value = i.data.cashoutOptionsDic.increment, value > 0 {
+                            optdict["incrementAmount"] = value
+                        }
+                        
+                        if let value = i.data.cashoutOptionsDic.minimum, value > 0 {
+                            optdict["minimumAmount"] = value
                         }
 
                         var imgdict:[String:Any] = [:]
@@ -433,12 +453,16 @@ struct ConsumerAPI {
                     for i in res! {
                         // put it together..
                         var s:[String:Any] = [:]
-                        if let _ = i.data.id { s["id"] = i.data.id! }
+                        if let id = i.data.id { s["id"] = id }
                         if let name = i.data.cashoutGroupDic.group_name { s["name"] = name }
                         if let desc = i.data.cashoutGroupDic.description { s["description"] = desc }
                         if let countryId = i.data.cashoutGroupDic.country_id { s["countryId"] = countryId }
-                        if let threshAmount = i.data.cashoutGroupDic.thresholdAmount {
-                            s["thresholdAmount"] = threshAmount
+                        if let threshAmount = i.data.cashoutGroupDic.thresholdAmount, threshAmount > 0 {
+                            if threshAmount > 0  {
+                                s["thresholdAmount"] = threshAmount
+                            }
+                            // This is NOT the display boolean.  This is a pre-compared bool to show if the user has enough to even view the options.
+                            // The display boolean is used behind the scene to even return the group.
                             s["disabled"] = threshAmount > currentUserBalance
                         }
                         if let longDesc = i.data.cashoutGroupDic.longDescription { s["longDescription"] = longDesc }
