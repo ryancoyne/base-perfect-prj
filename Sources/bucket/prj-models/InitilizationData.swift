@@ -289,10 +289,8 @@ final class InitializeData {
                 // This is our new imported list for gift cards...  Only charities have the icon image.  Gift cards only have a small and large logo.
                 // card 1
                 var imageName = "810-Amazon.png"
-                var smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                smallImage.append("/giftcards/small/\(imageName)")
-                var largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                largeImage.append("giftcards/large/\(imageName)")
+                var smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                var largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'Amazon',")
                 ussql.append("'amazon.com',")
@@ -302,11 +300,9 @@ final class InitializeData {
                 ussql.append("50.00,0,true),")
                 
                 // card 2
-                imageName = "678-Target.jpg"
-                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                smallImage.append("/giftcards/small/\(imageName)")
-                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                largeImage.append("/giftcards/large/\(imageName)")
+                imageName = "678-Target.png"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 2, ")
                 ussql.append("'Target',")
                 ussql.append("'target.com',")
@@ -317,10 +313,8 @@ final class InitializeData {
                 
                 // card 3
                 imageName = "933-Thinkgeek.png"
-                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                smallImage.append("/giftcards/small/\(imageName)")
-                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                largeImage.append("/giftcards/large/\(imageName)")
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 3, ")
                 ussql.append("'ThinkGeek',")
                 ussql.append("'thinkgeek.com',")
@@ -331,10 +325,8 @@ final class InitializeData {
                 
                 // card 4
                 imageName = "768-WholeFoods.png"
-                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                smallImage.append("/giftcards/small/\(imageName)")
-                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                largeImage.append("/giftcards/large/\(imageName)")
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 4, ")
                 ussql.append("'Whole Foods',")
                 ussql.append("'wholefoods.com',")
@@ -345,10 +337,8 @@ final class InitializeData {
                 
                 // card 5
                 imageName = "1044-TheCheeseCakeFactory.jpg"
-                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                smallImage.append("/giftcards/small/\(imageName)")
-                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                largeImage.append("/giftcards/large/\(imageName)")
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 5, ")
                 ussql.append("'The Cheesecake Factory',")
                 ussql.append("'thecheesecakefactory.com',")
@@ -359,10 +349,8 @@ final class InitializeData {
                 
                 // card 6
                 imageName = "924-RubyTuesday.png"
-                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                smallImage.append("/giftcards/small/\(imageName)")
-                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                largeImage.append("/giftcards/large/\(imageName)")
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
                 ussql.append("'Ruby Tuesday',")
                 ussql.append("'rubytuesday.com',")
@@ -373,10 +361,8 @@ final class InitializeData {
                 
                 // card 7
                 imageName = "996-BurgerKing.png"
-                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                smallImage.append("/giftcards/small/\(imageName)")
-                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!
-                largeImage.append("/giftcards/large/\(imageName)")
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcards/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcards/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
                 ussql.append("'Burger King',")
                 ussql.append("'bk.com',")
