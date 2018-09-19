@@ -200,7 +200,7 @@ final class InitializeData {
         pic.append("/")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
         pic_icon.append("/")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),'\(pic)','\(pic_icon)',4, true, 'double', null, \(USDetailDisbursementReasons.crypto))")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),null,null,4, true, 'double', null, \(USDetailDisbursementReasons.crypto))")
 
         print("Adding cashout groups for \(schema): \(checkuser)")
         _ = try? tbl.sqlRows(checkuser, params: [])
