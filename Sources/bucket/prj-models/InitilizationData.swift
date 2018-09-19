@@ -218,15 +218,15 @@ final class InitializeData {
 //        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','TopUp','', \(singapore.id!),'\(pic)','\(pic_icon)',1, true, 'double', null),")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/groups/topup/backgrounds/transfer_bank_account_background.png")
+        pic.append("/groups/banktransfer/backgrounds/transfer_bank_account_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("groups/topup/icons/transfer_to_bank_icon.png")
+        pic_icon.append("groups/banktransfer/icons/transfer_to_bank_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Transfer To Bank Account','Cash out to a bank account of your choice.', \(singapore.id!),'\(pic)','\(pic_icon)',2, true, 'double', null),")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
         pic.append("/groups/bucketcoin/backgrounds/")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("groups/icons/")
+        pic_icon.append("/groups/bucketcoin/icons/")
         // The pic and pic_icon are being set to null for now since we do not have any images just yet.
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),null,null,3, true, 'double', null), ")
         
