@@ -361,8 +361,8 @@ final class InitializeData {
                 
                 // card 7
                 imageName = "996-BurgerKing.png"
-                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcards/small/\(imageName)")
-                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcards/large/\(imageName)")
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
                 ussql.append("'Burger King',")
                 ussql.append("'bk.com',")
