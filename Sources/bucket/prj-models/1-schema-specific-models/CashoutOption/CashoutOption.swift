@@ -36,6 +36,7 @@ public class CashoutOption: PostgresStORM {
     var maximum           : Double? = nil
     var increment           : Double? = nil
     var display           : Bool? = nil
+    var vendor_detail : [String:Any]? = nil
 
     //MARK: Table name
     override public func table() -> String { return "cashout_option" }
@@ -73,6 +74,10 @@ public class CashoutOption: PostgresStORM {
         
         if let data = this.data.cashoutOptionsDic.increment {
             increment = data
+        }
+        
+        if let data = this.data.cashoutOptionsDic.vendorDetail {
+            vendor_detail = data
         }
 
         if let data = this.data.cashoutOptionsDic.cashoutSourceId {
@@ -167,6 +172,11 @@ public class CashoutOption: PostgresStORM {
             case "maximum":
                 if (value as? Double).isNotNil {
                     self.maximum = (value as! Double)
+                }
+                
+            case "vendor_detail":
+                if (value as? [String:Any]).isNotNil {
+                    self.vendor_detail = (value as! [String:Any])
                 }
                 
             case "increment":
@@ -268,6 +278,10 @@ public class CashoutOption: PostgresStORM {
             dictionary.cashoutOptionsDic.increment = self.increment
         }
         
+        if self.vendor_detail.isNotNil {
+            dictionary.cashoutOptionsDic.vendorDetail = self.vendor_detail
+        }
+        
         if self.group_id.isNotNil {
             dictionary.cashoutOptionsDic.groupId = self.group_id
         }
@@ -337,6 +351,10 @@ public class CashoutOption: PostgresStORM {
         }
         
         if diff == true, self.increment != targetItem.increment {
+            diff = false
+        }
+        
+        if diff == true, self.vendor_detail?.count != targetItem.vendor_detail?.count {
             diff = false
         }
         
