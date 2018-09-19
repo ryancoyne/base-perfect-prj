@@ -458,11 +458,9 @@ struct ConsumerAPI {
                         if let desc = i.data.cashoutGroupDic.description { s["description"] = desc }
                         if let countryId = i.data.cashoutGroupDic.country_id { s["countryId"] = countryId }
                         if let threshAmount = i.data.cashoutGroupDic.thresholdAmount, threshAmount > 0 {
-                            if threshAmount > 0  {
-                                s["thresholdAmount"] = threshAmount
-                            }
                             // This is NOT the display boolean.  This is a pre-compared bool to show if the user has enough to even view the options.
                             // The display boolean is used behind the scene to even return the group.
+                            s["thresholdAmount"] = threshAmount
                             s["disabled"] = threshAmount > currentUserBalance
                         }
                         if let longDesc = i.data.cashoutGroupDic.longDescription { s["longDescription"] = longDesc }
