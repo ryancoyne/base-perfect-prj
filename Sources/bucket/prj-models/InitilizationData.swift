@@ -220,7 +220,7 @@ final class InitializeData {
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
         pic.append("/groups/banktransfer/backgrounds/transfer_bank_account_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("groups/banktransfer/icons/transfer_to_bank_icon.png")
+        pic_icon.append("/groups/banktransfer/icons/transfer_to_bank_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Transfer To Bank Account','Cash out to a bank account of your choice.', \(singapore.id!),'\(pic)','\(pic_icon)',2, true, 'double', null),")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
