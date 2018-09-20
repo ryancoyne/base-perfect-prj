@@ -271,7 +271,7 @@ final class InitializeData {
                 ussql.append("'The VISA prepaid card may be used anywhere online!', ")
                 ussql.append("'Come join the VISA family and use this card worldwide!', ")
                 // Confirmation Description:
-                ussql.append(" '', ")
+                ussql.append(" 'Will be sent to {email}\non a Prepaid Card', ")
                 ussql.append("'\(largeImage)','\(smallImage)', null, ")
                 ussql.append("50.00,0,true, '{ \"vendor\" : \"FIS\" }'),")
                 // card 2
@@ -284,7 +284,7 @@ final class InitializeData {
                 ussql.append("'The MasterCard prepaid card may be used anywhere online!', ")
                 ussql.append("'Come join the MasterCard family and use this card worldwide!', ")
                 // Confirmation Description:
-                ussql.append(" '', ")
+                ussql.append(" 'Will be sent to {email}\non a Prepaid Card', ")
                 ussql.append("'\(largeImage)','\(smallImage)', null, ")
                 ussql.append("50.00,0,true, '{ \"vendor\" : \"FIS\" }'),")
                 break
@@ -526,6 +526,8 @@ final class InitializeData {
                 ussql.append("'https://www.ezetop.com/countries/asia/singapore',")
                 ussql.append("'TopUp',")
                 ussql.append("'TopUp Your Account',")
+                // Confirmation Description:
+                ussql.append("null, ")
                 ussql.append("'','',")
                 ussql.append("50.00,0,true),")
                 break
@@ -536,6 +538,8 @@ final class InitializeData {
                 ussql.append("'',")
                 ussql.append("'Donate to the cause',")
                 ussql.append("'Help make the community strong and tdonate today!',")
+                // Confirmation Description:
+                ussql.append("null, ")
                 ussql.append("'','',")
                 ussql.append("50.00,0,true),")
                 break
