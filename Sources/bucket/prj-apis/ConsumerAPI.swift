@@ -335,6 +335,10 @@ struct ConsumerAPI {
                             optdict["longDescription"] = val
                         }
                         
+                        if let val = i.data.cashoutOptionsDic.confirmationDescription, !val.isEmpty {
+                            optdict["confirmationDescription"] = val
+                        }
+                        
                         if let val = i.data.cashoutOptionsDic.name, !val.isEmpty {
                             optdict["name"] = val
                         }
