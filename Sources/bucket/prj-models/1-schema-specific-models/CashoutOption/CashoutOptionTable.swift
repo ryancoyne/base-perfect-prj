@@ -140,6 +140,7 @@ final class CashoutOptionTable {
         createsql.append("form_id int NOT NULL DEFAULT 0, ")
         createsql.append("name text COLLATE pg_catalog.default, ")
         createsql.append("picture_url text COLLATE pg_catalog.default, ")
+        createsql.append("confirmation_description text COLLATE pg_catalog.default, ")
         createsql.append("sm_picture_url text COLLATE pg_catalog.default, ")
         createsql.append("icon_url text COLLATE pg_catalog.default, ")
         createsql.append("website text COLLATE pg_catalog.default, ")

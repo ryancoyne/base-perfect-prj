@@ -29,6 +29,7 @@ public class CashoutOption: PostgresStORM {
     var website           : String? = nil
     var description       : String? = nil
     var long_description  : String? = nil
+    var confirmation_description  : String? = nil
     var picture_url        : String? = nil
     var sm_picture_url        : String? = nil
     var icon_url        : String? = nil
@@ -98,6 +99,10 @@ public class CashoutOption: PostgresStORM {
         
         if let data = this.data.cashoutOptionsDic.longDescription {
             long_description = data
+        }
+        
+        if let data = this.data.cashoutOptionsDic.confirmationDescription {
+            confirmation_description = data
         }
         
         if let data = this.data.cashoutOptionsDic.pictureURL {
@@ -194,6 +199,11 @@ public class CashoutOption: PostgresStORM {
                     self.picture_url = (value as! String)
                 }
                 
+            case "confirmation_description":
+                if (value as? String).isNotNil {
+                    self.picture_url = (value as! String)
+                }
+                
             case "sm_picture_url":
                 if (value as? String).isNotNil {
                     self.sm_picture_url = (value as! String)
@@ -286,6 +296,10 @@ public class CashoutOption: PostgresStORM {
             dictionary.cashoutOptionsDic.groupId = self.group_id
         }
         
+        if self.confirmation_description.isNotNil {
+            dictionary.cashoutOptionsDic.confirmationDescription = self.confirmation_description
+        }
+        
         if self.form_id.isNotNil {
             dictionary.cashoutOptionsDic.formId = self.form_id
         }
@@ -351,6 +365,10 @@ public class CashoutOption: PostgresStORM {
         }
         
         if diff == true, self.increment != targetItem.increment {
+            diff = false
+        }
+        
+        if diff == true, self.confirmation_description != targetItem.confirmation_description {
             diff = false
         }
         

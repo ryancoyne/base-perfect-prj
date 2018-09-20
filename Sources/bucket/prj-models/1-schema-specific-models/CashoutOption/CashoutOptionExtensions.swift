@@ -46,6 +46,18 @@ struct CashoutOptionsDictionary {
             }
         }
     }
+    var confirmationDescription : String? {
+        get {
+            return self.dic["confirmation_description"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["confirmation_description"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "confirmation_description")
+            }
+        }
+    }
     var increment : Double? {
         get {
             return self.dic["increment"].doubleValue
