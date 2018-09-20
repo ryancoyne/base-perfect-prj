@@ -15,7 +15,8 @@ public class RetailerAll: Retailer {
     var addresses:[Address]? = nil
     var terminals:[Terminal]? = nil
     var terminals_per_address:[Int:[Terminal]]? = nil
-    
+    var terminals_unassigned:[Terminal]? = nil
+
     //MARK: Table name
 //    override public func table() -> String { return "" }
     
@@ -58,14 +59,21 @@ public class RetailerAll: Retailer {
         
         // fill the terminals per address - key is the id of the address
         if terminals_per_address.isNil { self.terminals_per_address = [:] }
+        if terminals_unassigned.isNil { self.terminals_unassigned = [] }
         if self.terminals.isNotNil {
             for i in self.terminals! {
-                if let ts = terminals_per_address![i.address_id!] {
-                    var newts = ts
-                    newts.append(i)
-                    terminals_per_address![i.address_id!] = newts
+                if i.address_id.isNil || i.address_id == 0 {
+                    // process the terminal without an address assigned
+                    terminals_unassigned?.append(i)
                 } else {
-                    terminals_per_address![i.address_id!] = [i]
+                    // process the terminal for the address
+                    if let ts = terminals_per_address![i.address_id!] {
+                        var newts = ts
+                        newts.append(i)
+                        terminals_per_address![i.address_id!] = newts
+                    } else {
+                        terminals_per_address![i.address_id!] = [i]
+                    }
                 }
             }
         }

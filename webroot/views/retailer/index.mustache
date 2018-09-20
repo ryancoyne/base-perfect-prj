@@ -1,13 +1,20 @@
-{{>header}}
+{{>/views/header}}
 
 <!-- <section> -->
 <!--    <div class="jumbotron text-center"> -->
         <div class="container-fluid">
             <div class="row">
                 {{#authenticated}}
+                    {{#retailers}}
                     <div class="col-xs-2">{{>left}}</div>
                     <div class="col-xs-8">&nbsp;</div>
                     <div class="col-xs-2">&nbsp;</div>
+                    {{/retailers}}
+                    {{^retailers}}
+                    <div class="col-xs-2">{{>left}}</div>
+                    <div class="col-xs-8">&nbsp;</div>
+                    <div class="col-xs-2">&nbsp;</div>
+                    {{/retailers}}
                 {{/authenticated}}
                 {{^authenticated}}
                   <div class="col-xs-2">&nbsp;</div>
@@ -19,4 +26,4 @@
 <!--     </div> -->
 <!-- </section> -->
 
-{{>footer}}
+{{>/views/footer}}

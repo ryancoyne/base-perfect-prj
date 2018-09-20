@@ -13,6 +13,7 @@ import PerfectLib
 import PerfectLocalAuthentication
 import PerfectSessionPostgreSQL
 import PerfectSession
+import PerfectMustache
 
 //MARK: - Retailer Web endpoints
 /// This Retailer structure supports all the normal endpoints for a user based login application.
@@ -32,6 +33,28 @@ struct RetailerWEB {
             ]
         }
         
+        //MARK: --
+        //MARK: Retailer Terminal list page
+        struct retailerterminalindexHelper: MustachePageHandler {
+            
+            var values: MustacheEvaluationContext.MapType = [:]
+            
+            func extendValuesForResponse(context contxt: MustacheWebEvaluationContext, collector: MustacheEvaluationOutputCollector) {
+            
+                contxt.extendValues(with: values)
+
+                do {
+                    try contxt.requestCompleted(withCollector: collector)
+                } catch {
+                    let response = contxt.webResponse
+                    response.appendBody(string: "\(error)")
+                    .completed(status: .internalServerError)
+                }
+
+            }
+            
+        }
+        
         public static func retailerterminalindex(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
@@ -44,62 +67,46 @@ struct RetailerWEB {
                 if user.isNil { return }
 
                 // lets pull out the retailers list (if they have any)
-                guard let retailer_dict:[String:Any] = user?.detail["retailers"] as? [String : Any] else { return }
+                guard let retailer_dict:[String:Any] = user?.detail["retailers"] as? [String : Any] else {
+                    response.render(template: "views/retailer/index")
+                    response.completed()
+                    return
+                }
+
+                var values: MustacheEvaluationContext.MapType = [:]
                 
-                var terminals:[String:[Terminal]] = [:]
+                var retailers:[String:[RetailerAll]] = [:]
                 
+                // lets get the retailer information and the unassigned terminals
                 for (key,value) in retailer_dict {
+                    
+                    var ret_array:[RetailerAll] = []
                     
                     let schema = key.lowercased()
                     
-                    var retailers = ""
-                    
                     // get the retailers together
                     for i in (value as! [Int]) {
-                        retailers.append("\(i),")
+                        let r = RetailerAll()
+                        r.get(schema, i)
+                        ret_array.append(r)
                     }
                     
-                    // remove the last comma
-                    retailers.removeLast()
-                    
-                    // now we have the list of retailers for this schema (country)
-                    
-                    // lets get the country ID and look at the retailer groups they are permitted to address
-                    let sql = "SELECT * FROM \(schema).terminal WHERE retailer_id IN (\(retailers))"
-                    let terminal = Terminal()
-                    var terms:[Terminal] = []
-                    
-                    let term_list = try? terminal.sqlRows(sql, params: [])
-                    for t in term_list! {
-                        let trm = Terminal()
-                        trm.to(t)
-                        terms.append(trm)
-                    }
-                    
-                    // done processing this country - loop around to the next
-                    terminals[key] = terms
+                    if ret_array.count > 0 { retailers[schema] = ret_array }
                     
                 }
                 
-                var sortedKeys:[String] = []
-                
-                // now we have the list of terminals.  Lets see what countries we are working with
-                if terminals.count > 1 {
-                    
-                    // sort the dictionary by counter
-                    sortedKeys = terminals.keys.sorted(by: < )
-                    
-                }
-                
-                // now it is time to process..... all countries
-                
-                
-                response.render(template: "views/retailer/index")
-                response.completed()
+                // only send back the retailers if there are any retailers
+                if retailers.count > 0 { values["retailers"] = retailers }
+
+                mustacheRequest(request: request,
+                                response: response,
+                                handler: retailerterminalindexHelper(values: values),
+                                templatePath: "views/retailer/index")
                 
             }
         }
 
+        //MARK: --
         public static func retailerindex(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
@@ -132,7 +139,6 @@ struct RetailerWEB {
                     
                 }
 
-                
                 response.render(template: "views/retailer/index")
                 response.completed()
                 

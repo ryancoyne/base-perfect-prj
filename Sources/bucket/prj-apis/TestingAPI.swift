@@ -123,7 +123,7 @@ struct TestingAPI {
             }
         }
         
-        //MARK: - Close Interval Function
+        //MARK: - Generic Test Function
         public static func testFunction(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
@@ -148,17 +148,17 @@ struct TestingAPI {
                     dt = try? user.detail.jsonEncodedString()
                     print("Retailer Admin: \(dt ?? "")")
                     
-                    user.addRetailerAdmin("us", 2)
-                    dt = try? user.detail.jsonEncodedString()
-                    print("Retailer Admin: \(dt ?? "")")
-
-                    user.deleteRetailerAdmin("us", 2)
-                    dt = try? user.detail.jsonEncodedString()
-                    print("Retailer Admin: \(dt ?? "")")
-
-                    user.deleteRetailerAdmin("us", 1)
-                    dt = try? user.detail.jsonEncodedString()
-                    print("Retailer Admin: \(dt ?? "")")
+//                    user.addRetailerAdmin("us", 2)
+//                    dt = try? user.detail.jsonEncodedString()
+//                    print("Retailer Admin: \(dt ?? "")")
+//
+//                    user.deleteRetailerAdmin("us", 2)
+//                    dt = try? user.detail.jsonEncodedString()
+//                    print("Retailer Admin: \(dt ?? "")")
+//
+//                    user.deleteRetailerAdmin("us", 1)
+//                    dt = try? user.detail.jsonEncodedString()
+//                    print("Retailer Admin: \(dt ?? "")")
 
                 }
 
