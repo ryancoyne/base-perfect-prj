@@ -78,4 +78,60 @@ public class RetailerAll: Retailer {
             }
         }
     }
+    
+    override func asDictionary() -> [String: Any] {
+        
+        var dictionary:[String:Any] = [:]
+        
+        if self.id.isNotNil {
+            dictionary.id = self.id
+        }
+        
+        if self.created.isNotNil {
+            dictionary.created = self.created
+        }
+        
+        if self.createdby.isNotNil {
+            dictionary.createdBy = self.createdby
+        }
+        
+        if self.modified.isNotNil {
+            dictionary.modified = self.modified
+        }
+        
+        if self.modifiedby.isNotNil {
+            dictionary.modifiedBy = self.modifiedby
+        }
+        
+        if self.deleted.isNotNil {
+            dictionary.deleted = self.deleted
+        }
+        
+        if self.deletedby.isNotNil {
+            dictionary.deletedBy = self.deletedby
+        }
+        
+        if self.name.isNotNil {
+            dictionary.retailerDic.name = self.name
+        }
+        
+        if self.retailer_code.isNotNil {
+            dictionary.retailerDic.retailerCode = self.retailer_code
+        }
+        
+        if self.is_suspended.isNotNil {
+            dictionary.retailerDic.isSuspended = self.is_suspended
+        }
+        
+        if self.is_verified.isNotNil {
+            dictionary.retailerDic.isVerified = self.is_verified
+        }
+        
+        if self.ach_transfer_minimum_default.isNotNil {
+            dictionary.retailerDic.ach_transfer_minimum_default = self.ach_transfer_minimum_default
+        }
+        
+        return dictionary
+    }
+
 }

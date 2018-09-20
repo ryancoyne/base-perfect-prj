@@ -6,11 +6,18 @@
             <div class="row">
                 {{#retailers}}
                     <div class="col-xs-2">&nbsp;</div>
-                    {{#retailers}}
-                    {{#bucket.RetailerAll}}
-                    <div class="col-xs-8">{{name}}</div>
-                    {{/bucket.RetailerAll}}
-                    {{/retailers}}
+                    {{#us}}
+                        <div class="row">
+                            <div class="col">{{name}}</div>
+                            <div class="col">{{name}}</div>
+                            <div class="col">{{name}}</div>
+                            <div class="col">{{name}}</div>
+                            <div class="col">{{name}}</div>
+                            <div class="col">{{name}}</div>
+                            <div class="col">{{name}}</div>
+                            <div class="col">{{name}}</div>
+                        </div>
+                    {{/us}}
                     <div class="col-xs-2">&nbsp;</div>
                 {{/retailers}}
                 {{^retailers}}

@@ -75,12 +75,12 @@ struct RetailerWEB {
 
                 var values: MustacheEvaluationContext.MapType = [:]
                 
-                var retailers:[String:[RetailerAll]] = [:]
+                var retailers:[String:[[String:Any]]] = [:]
                 
                 // lets get the retailer information and the unassigned terminals
                 for (key,value) in retailer_dict {
                     
-                    var ret_array:[RetailerAll] = []
+                    var ret_array:[[String:Any]] = []
                     
                     let schema = key.lowercased()
                     
@@ -88,7 +88,7 @@ struct RetailerWEB {
                     for i in (value as! [Int]) {
                         let r = RetailerAll()
                         r.get(schema, i)
-                        ret_array.append(r)
+                        ret_array.append(r.asDictionary())
                     }
                     
                     if ret_array.count > 0 { retailers[schema] = ret_array }
