@@ -359,17 +359,17 @@ final class InitializeData {
                 ussql.append("'\(largeImage)','\(smallImage)', null,")
                 ussql.append("50.00,0,true, , '{\"vendor\" : \"OmniCard\", \"externalId\":924}'),")
                 
-                // card 7
-                imageName = "996-BurgerKing.png"
-                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
-                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
-                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
-                ussql.append("'Burger King',")
-                ussql.append("'bk.com',")
-                ussql.append("'The original HOME OF THE WHOPPER®',")
-                ussql.append("'The original HOME OF THE WHOPPER®, our commitment to premium ingredients, signature recipes, and family-friendly dining experiences is what has defined our brand for more than 50 successful years.',")
-                ussql.append("'\(largeImage)','\(smallImage)', null,")
-                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":996}'),")
+//                // card 7
+//                imageName = "996-BurgerKing.png"
+//                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+//                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
+//                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
+//                ussql.append("'Burger King',")
+//                ussql.append("'bk.com',")
+//                ussql.append("'The original HOME OF THE WHOPPER®',")
+//                ussql.append("'The original HOME OF THE WHOPPER®, our commitment to premium ingredients, signature recipes, and family-friendly dining experiences is what has defined our brand for more than 50 successful years.',")
+//                ussql.append("'\(largeImage)','\(smallImage)', null,")
+//                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":996}'),")
 
                 break
             case "Donate"?:
