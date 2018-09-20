@@ -26,6 +26,17 @@ extension Country {
     }
 }
 
+extension Retailer {
+    static public func exists(withId: String?) -> Bool {
+        if withId.isNil { return false }
+        // Okay lets see:
+        let retailer = Retailer()
+        try? retailer.get(withId!)
+        return retailer.id.isNotNil
+    }
+
+}
+
 enum BucketAPIError: Error {
     case unparceableJSON(String)
 }
@@ -277,7 +288,23 @@ extension HTTPRequest {
             return Country.idWith(sentCountryId)
         }
     }
-    
+
+    var retailerId : Int? {
+        let sentRetailerId = self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
+        // We need to
+        if sentRetailerId?.isNumeric() == true {
+            // It is an integer, lets return the integer value:
+            if Retailer.exists(withId: sentRetailerId!) {
+                return sentRetailerId.intValue
+            } else {
+                return nil
+            }
+        } else {
+            // they did not send in the numeric code
+            return nil
+        }
+    }
+
 }
 
 extension HTTPResponse {
@@ -325,6 +352,11 @@ extension HTTPResponse {
         return try! self.setBody(json: ["errorCode":"InvalidCountryCode", "message": "No such country code found"])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 409, message: "Invalid Country"))
+    }
+    var invalidRetailerCode : Void {
+        return try! self.setBody(json: ["errorCode":"InvalidRetailerCode", "message": "No such retailer found"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 412, message: "Invalid Retailer"))
     }
     var unsupportedCountry : Void {
         try! self.setBody(json: ["errorCode": "UnsupportedCountry", "message": "We currently are not in this country yet.  Please try again later."]).setHeader(.contentType, value: "application/json; charset=UTF-8").completed(status: .custom(code: 411, message: "Unsupported Country"))
