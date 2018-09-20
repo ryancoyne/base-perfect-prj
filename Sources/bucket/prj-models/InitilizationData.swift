@@ -482,7 +482,7 @@ final class InitializeData {
             case "Bucket Coin"?:
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'Bucket Coin',")
-                ussql.append("'https://buckettechnologies.com',")
+                ussql.append("'buckettechnologies.com',")
                 ussql.append("'BUX: Our Crypto Coin',")
                 ussql.append("'Jump into the Crypto world!  Buy you BUX today.',")
                 // Confirmation Description:
@@ -523,7 +523,7 @@ final class InitializeData {
                 // card 1
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'TopUp',")
-                ussql.append("'https://www.ezetop.com/countries/asia/singapore',")
+                ussql.append("'www.ezetop.com/countries/asia/singapore',")
                 ussql.append("'TopUp',")
                 ussql.append("'TopUp Your Account',")
                 // Confirmation Description:
@@ -546,7 +546,7 @@ final class InitializeData {
             case "Bucket Coin":
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'Bucket Coin',")
-                ussql.append("'https://buckettechnologies.com',")
+                ussql.append("'buckettechnologies.com',")
                 ussql.append("'BUX: Our Crypto Coin',")
                 ussql.append("'Jump into the Crypto world!  Buy you BUX today.', ")
                 // Confirmation Description:
