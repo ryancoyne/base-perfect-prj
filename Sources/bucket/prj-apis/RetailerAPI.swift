@@ -113,7 +113,7 @@ struct RetailerAPI {
                     let add_sql = "SELECT * FROM \(schema).\(add.table()) WHERE retailer_id = \(retailerIntegerId)"
                     let addresses = try? add.sqlRows(add_sql, params: [])
                     if let _ = addresses, addresses!.count < 2, let a = addresses!.first {
-                        _ = try? add.get(a.data.id)
+                        _ = try? add.get(a.data.id!)
                     }
  //MARK--
 // CHANGE ME WHEN THE WEBPAGE IS UP
@@ -725,9 +725,9 @@ fileprivate extension Moment {
 fileprivate extension HTTPRequest {
     
 //    @available(*, deprecated, message: "no longer available in version v1.1")
-    var retailerId : String? {
-        return self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
-    }
+//    var retailerId : String? {
+//        return self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
+//    }
     var intervalId : String? {
         return self.urlVariables["intervalId"]
     }

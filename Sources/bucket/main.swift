@@ -274,6 +274,7 @@ routes = routes + InstallationsV1Controller.json.routes
 routes = routes + CCXStatisticsV1Controller.json.routes
 routes = routes + FriendAPI.json.routes
 routes.append(contentsOf: RetailerAPI.json.routes)
+routes.append(contentsOf: RetailerWEB.web.routes)
 routes.append(contentsOf: ConsumerAPI.json.routes)
 routes.append(contentsOf: ConsumerWEB.web.routes)
 
