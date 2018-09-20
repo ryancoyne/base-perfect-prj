@@ -357,7 +357,7 @@ final class InitializeData {
                 ussql.append("'Eat here!',")
                 ussql.append("'Hungry on Tuesday?  Come here and join us for dinner.',")
                 ussql.append("'\(largeImage)','\(smallImage)', null,")
-                ussql.append("50.00,0,true, , '{\"vendor\" : \"OmniCard\", \"vendorId\":924}'),")
+                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"vendorId\":924}'),")
                 
 //                // card 7
 //                imageName = "996-BurgerKing.png"
@@ -383,12 +383,12 @@ final class InitializeData {
                 ussql.append("'heifer.org',")
                 ussql.append("'Heifer International works with communities to create income, empower women, care for the Earth, and ultimately end world hunger and poverty',")
                 ussql.append("'Heifer International’s mission is to end hunger and poverty while caring for the Earth. For more than 70 years, we have provided livestock and environmentally sound agricultural training to improve the lives of those who struggle daily for reliable sources of food and income. We currently work in 25 countries, including the United States, to help families and communities become self-reliant.',")
-                ussql.append("'\(largeImgUrl)', \(smImgUrl), '\(iconImgUrl)',")
+                ussql.append("'\(largeImgUrl)', '\(smImgUrl)', '\(iconImgUrl)',")
                 ussql.append("50.00,0,true, '{ \"vendor\" : \"PureCharity\" }'),")
                 // card 2
                 imageName = "bgca_fayetteville.png"
-                smImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; smImgUrl.append("/options/giftcard/small/\(imageName)")
-                largeImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImgUrl.append("/options/giftcard/large/\(imageName)")
+                smImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; smImgUrl.append("/options/donate/small/\(imageName)")
+                largeImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImgUrl.append("/options/donate/large/\(imageName)")
                 iconImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; iconImgUrl.append("/options/donate/icon/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 2, ")
                 ussql.append("'Boys and Girls Club of Fayetteville',")
@@ -400,8 +400,8 @@ final class InitializeData {
                 
                 // card 3
                 imageName = "casa_image.png"
-                smImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; smImgUrl.append("/options/giftcard/small/\(imageName)")
-                largeImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImgUrl.append("/options/giftcard/large/\(imageName)")
+                smImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; smImgUrl.append("/options/donate/small/\(imageName)")
+                largeImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImgUrl.append("/options/donate/large/\(imageName)")
                 iconImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; iconImgUrl.append("/options/donate/icon/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 3, ")
                 ussql.append("'CASA of Northwest Arkansas',")
@@ -413,8 +413,8 @@ final class InitializeData {
                 
                 // card 4
                 imageName = "dress_for_success_image.png"
-                smImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; smImgUrl.append("/options/giftcard/small/\(imageName)")
-                largeImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImgUrl.append("/options/giftcard/large/\(imageName)")
+                smImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; smImgUrl.append("/options/donate/small/\(imageName)")
+                largeImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImgUrl.append("/options/donate/large/\(imageName)")
                 iconImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; iconImgUrl.append("/options/donate/icon/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 4, ")
                 ussql.append("'Dress for Success of NW Arkansas',")
@@ -426,8 +426,8 @@ final class InitializeData {
                 
                 // card 5
                 imageName = "kuaf_image.png"
-                smImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; smImgUrl.append("/options/giftcard/small/\(imageName)")
-                largeImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImgUrl.append("/options/giftcard/large/\(imageName)")
+                smImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; smImgUrl.append("/options/donate/small/\(imageName)")
+                largeImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImgUrl.append("/options/donate/large/\(imageName)")
                 iconImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; iconImgUrl.append("/options/donate/icon/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 5, ")
                 ussql.append("'KUAF',")
@@ -439,8 +439,8 @@ final class InitializeData {
                 
                 // card 6
                 imageName = "kendrick_fincher_image.png"
-                smImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; smImgUrl.append("/options/giftcard/small/\(imageName)")
-                largeImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImgUrl.append("/options/giftcard/large/\(imageName)")
+                smImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; smImgUrl.append("/options/donate/small/\(imageName)")
+                largeImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImgUrl.append("/options/donate/large/\(imageName)")
                 iconImgUrl = EnvironmentVariables.sharedInstance.ImageBaseURL!; iconImgUrl.append("/options/donate/icon/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
                 ussql.append("'Kendrick Fincher Foundation',")
