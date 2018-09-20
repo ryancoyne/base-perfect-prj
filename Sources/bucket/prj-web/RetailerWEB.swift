@@ -101,8 +101,7 @@ struct RetailerWEB {
                 mustacheRequest(request: request,
                                 response: response,
                                 handler: retailerterminalindexHelper(values: values),
-                                templatePath: (request.documentRoot + "/views/retailer/index"))
-                
+                                templatePath: "\(request.documentRoot)/views/retailer/index.mustache")
             }
         }
 

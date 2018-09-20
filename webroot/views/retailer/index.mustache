@@ -1,29 +1,26 @@
-{{>/views/header}}
+{{>../header}}
 
 <!-- <section> -->
 <!--    <div class="jumbotron text-center"> -->
         <div class="container-fluid">
             <div class="row">
-                {{#authenticated}}
+                {{#retailers}}
+                    <div class="col-xs-2">&nbsp;</div>
                     {{#retailers}}
-                    <div class="col-xs-2">{{>left}}</div>
-                    <div class="col-xs-8">&nbsp;</div>
-                    <div class="col-xs-2">&nbsp;</div>
+                    {{#bucket.RetailerAll}}
+                    <div class="col-xs-8">{{name}}</div>
+                    {{/bucket.RetailerAll}}
                     {{/retailers}}
-                    {{^retailers}}
-                    <div class="col-xs-2">{{>left}}</div>
-                    <div class="col-xs-8">&nbsp;</div>
                     <div class="col-xs-2">&nbsp;</div>
-                    {{/retailers}}
-                {{/authenticated}}
-                {{^authenticated}}
-                  <div class="col-xs-2">&nbsp;</div>
-                  <div class="col-xs-8">{{>login-body}}</div>
-                  <div class="col-xs-2">&nbsp;</div>
-                {{/authenticated}}
+                {{/retailers}}
+                {{^retailers}}
+                    <div class="col-xs-2">&nbsp;</div>
+                    <div class="col-xs-8">Retailers Do Not Exist</div>
+                    <div class="col-xs-2">&nbsp;</div>
+                {{/retailers}}
             </div>
         </div>
 <!--     </div> -->
 <!-- </section> -->
 
-{{>/views/footer}}
+{{>../footer}}
