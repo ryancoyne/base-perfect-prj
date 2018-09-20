@@ -34,7 +34,30 @@ struct CashoutOptionsDictionary {
             }
         }
     }
-    
+    var vendorDetail : [String:Any]? {
+        get {
+            return self.dic["vendor_detail"] as? [String:Any]
+        }
+        set {
+            if newValue != nil {
+                self.dic["vendor_detail"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "vendor_detail")
+            }
+        }
+    }
+    var increment : Double? {
+        get {
+            return self.dic["increment"].doubleValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["increment"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "increment")
+            }
+        }
+    }
     var cashoutSourceId : Int? {
         get {
             return self.dic["cashout_source_id"].intValue

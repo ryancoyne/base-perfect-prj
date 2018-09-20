@@ -135,6 +135,8 @@ final class CashoutOptionTable {
         createsql.append("group_id int NOT NULL DEFAULT 0, ")
         createsql.append("maximum numeric(10,5) NOT NULL DEFAULT 0, ")
         createsql.append("minimum numeric(10,5) NOT NULL DEFAULT 0, ")
+        createsql.append("increment numeric(10,5) NOT NULL DEFAULT 0, ")
+        createsql.append("vendor_detail jsonb NOT NULL DEFAULT '{ }', ")
         createsql.append("form_id int NOT NULL DEFAULT 0, ")
         createsql.append("name text COLLATE pg_catalog.default, ")
         createsql.append("picture_url text COLLATE pg_catalog.default, ")

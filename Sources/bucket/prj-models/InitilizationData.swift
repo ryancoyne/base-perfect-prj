@@ -177,30 +177,30 @@ final class InitializeData {
         checkuser.append("(created, createdby, group_name,description, country_id, picture_url, icon_url, display_order, display, option_layout, long_description, detail_disbursement_reasons) ")
         checkuser.append(" VALUES ")
         var pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/backgrounds/transfer_bank_account_background.png")
+        pic.append("/groups/prepaidcard/backgrounds/transfer_bank_account_background.png")
         var pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/icons/prepaid_card_icon.png")
+        pic_icon.append("/groups/prepaidcard/icons/prepaid_card_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Prepaid Card','This card allows users to purchase anything using the giftcard.', \(usa.id!),'\(pic)','\(pic_icon)', 2, true, 'double', 'Cha-ching!  Shop at your favorite retailers with your prepaid card.  Note that these are virtual cards and cannot be used in physical stores.', \(USDetailDisbursementReasons.closedLoopCard)), ")
         
         // Gift Card Group:
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/backgrounds/gift_card_background.png")
+        pic.append("/groups/giftcard/backgrounds/gift_card_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/icons/gift_card_icon.png")
+        pic_icon.append("/groups/giftcard/icons/gift_card_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Gift Card','This card allows users to purchase from specific retailers using the giftcard.', \(usa.id!),'\(pic)','\(pic_icon)',1, true, 'double', 'Choose from hundreds of gift cards to your favorite stores and restaurants.  Note that these are virtual gift cards and some merchants may not accept them in stores.  Please check with the merchant.', \(USDetailDisbursementReasons.openLoopCard)), ")
         
         // Donate Group:
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/backgrounds/donate_to_charity_background.png")
+        pic.append("/groups/donate/backgrounds/donate_to_charity_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/icons/donate_icon.png")
+        pic_icon.append("/groups/donate/icons/donate_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','This allows the user to donate to a specific cause.', \(usa.id!),'\(pic)','\(pic_icon)',3, true, 'single', 'Choose from hundreds of charities and give back to your community.', \(USDetailDisbursementReasons.donation)), ")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
         pic.append("/")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
         pic_icon.append("/")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),'\(pic)','\(pic_icon)',4, true, 'double', null, \(USDetailDisbursementReasons.crypto))")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),null,null,4, true, 'double', null, \(USDetailDisbursementReasons.crypto))")
 
         print("Adding cashout groups for \(schema): \(checkuser)")
         _ = try? tbl.sqlRows(checkuser, params: [])
@@ -218,21 +218,22 @@ final class InitializeData {
 //        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','TopUp','', \(singapore.id!),'\(pic)','\(pic_icon)',1, true, 'double', null),")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/backgrounds/transfer_bank_account_background.png")
+        pic.append("/groups/banktransfer/backgrounds/transfer_bank_account_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/icons/transfer_to_bank_icon.png")
+        pic_icon.append("/groups/banktransfer/icons/transfer_to_bank_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Transfer To Bank Account','Cash out to a bank account of your choice.', \(singapore.id!),'\(pic)','\(pic_icon)',2, true, 'double', null),")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/backgrounds/")
+        pic.append("/groups/bucketcoin/backgrounds/")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/icons/")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),'\(pic)','\(pic_icon)',3, true, 'double', null), ")
+        pic_icon.append("/groups/bucketcoin/icons/")
+        // The pic and pic_icon are being set to null for now since we do not have any images just yet.
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),null,null,3, true, 'double', null), ")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic.append("/backgrounds/donate_to_charity_background.png")
+        pic.append("/groups/donate/backgrounds/donate_to_charity_background.png")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
-        pic_icon.append("/icons/donate_icon.png")
+        pic_icon.append("/groups/donate/icons/donate_icon.png")
         checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Donate','', \(singapore.id!),'\(pic)','\(pic_icon)',1, true, 'single', 'Choose from hundreds of charities and give back to your community.')")
 
         print("Adding cashout groups for \(schema): \(checkuser)")
@@ -261,106 +262,149 @@ final class InitializeData {
             switch i.data.cashoutGroupDic.group_name {
             case "Prepaid Card"?:
                 // card 1
+                var imageName = "visa_icon.png"
+                var smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/prepaidcard/small/\(imageName)")
+                var largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/prepaidcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'Visa',")
-                ussql.append("'https://visa.com', ")
+                ussql.append("'visa.com', ")
                 ussql.append("'The VISA prepaid card may be used anywhere online!', ")
                 ussql.append("'Come join the VISA family and use this card worldwide!', ")
-                ussql.append("'https://usa.visa.com/content/dam/VCOM/nav-assets/logo.png','', ")
-                ussql.append("50.00,0,true),")
+                ussql.append("'\(largeImage)','\(smallImage)', ")
+                ussql.append("50.00,0,true, '{}'),")
                 // card 2
+                imageName = "mastercard_icon.png"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/prepaidcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/prepaidcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 2, ")
                 ussql.append("'MasterCard',")
-                ussql.append("'https://mastercard.com', ")
+                ussql.append("'mastercard.com', ")
                 ussql.append("'The MasterCard prepaid card may be used anywhere online!', ")
                 ussql.append("'Come join the MasterCard family and use this card worldwide!', ")
-                ussql.append("'https://www.mastercard.us/etc/designs/mccom/en-us/jcr:content/global/logo.img.png/1472151229727.png','', ")
-                ussql.append("50.00,0,true),")
+                ussql.append("'\(largeImage)','\(smallImage)', ")
+                ussql.append("50.00,0,true, '{}'),")
                 break
             case "Gift Card"?:
+                
+                // This is our new imported list for gift cards...  Only charities have the icon image.  Gift cards only have a small and large logo.
                 // card 1
+                var imageName = "810-Amazon.png"
+                var smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                var largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'Amazon',")
-                ussql.append("'https://amazon.com',")
+                ussql.append("'amazon.com',")
                 ussql.append("'Amazon holds the world at your fingertips.',")
                 ussql.append("'Amazon is the largest onine retailer in the world.  Use your Amazon card here!',")
-                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/5360.jpg','',")
-                ussql.append("50.00,0,true),")
+                ussql.append("'\(largeImage)','\(smallImage)',")
+                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":810}'),")
+                
                 // card 2
+                imageName = "678-Target.png"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 2, ")
                 ussql.append("'Target',")
-                ussql.append("'https://target.com',")
+                ussql.append("'target.com',")
                 ussql.append("'Target is the store with the big red dot.',")
                 ussql.append("'Target is a department store with a little bit of everything!',")
-                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/7039.jpg','',")
-                ussql.append("50.00,0,true),")
+                ussql.append("'\(largeImage)','\(smallImage)',")
+                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":678}'),")
+                
                 // card 3
+                imageName = "933-Thinkgeek.png"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 3, ")
                 ussql.append("'ThinkGeek',")
-                ussql.append("'https://thinkgeek.com',")
+                ussql.append("'thinkgeek.com',")
                 ussql.append("'Fun things for geeks',")
                 ussql.append("'Want to buy an amazing gift for a geek?  Get it here!',")
-                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/81112.png','',")
-                ussql.append("50.00,0,true),")
+                ussql.append("'\(largeImage)','\(smallImage)',")
+                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":933}'),")
+                
                 // card 4
+                imageName = "768-WholeFoods.png"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 4, ")
                 ussql.append("'Whole Foods',")
-                ussql.append("'https://wholefoods.com',")
+                ussql.append("'wholefoods.com',")
                 ussql.append("'Want good food?',")
                 ussql.append("'Whole Foods provides a wholistic approach to feed.',")
-                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/82068.png','',")
-                ussql.append("50.00,0,true),")
+                ussql.append("'\(largeImage)','\(smallImage)',")
+                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":768}'),")
+                
                 // card 5
+                imageName = "1044-TheCheeseCakeFactory.jpg"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 5, ")
                 ussql.append("'The Cheesecake Factory',")
-                ussql.append("'https://www.thecheesecakefactory.com',")
+                ussql.append("'thecheesecakefactory.com',")
                 ussql.append("'Want Cheesecake?',")
                 ussql.append("'The Cheesecake Factory creates cheesecake masterpieces!',")
-                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/6230.jpg','',")
-                ussql.append("50.00,0,true),")
+                ussql.append("'\(largeImage)','\(smallImage)',")
+                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":1044}'),")
+                
                 // card 6
+                imageName = "924-RubyTuesday.png"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
                 ussql.append("'Ruby Tuesday',")
-                ussql.append("'https://www.rubytuesday.com',")
+                ussql.append("'rubytuesday.com',")
                 ussql.append("'Eat here!',")
                 ussql.append("'Hungry on Tuesday?  Come here and join us for dinner.',")
-                ussql.append("'https://content.blackhawknetwork.com/gcmimages/product/large/81244.png','',")
-                ussql.append("50.00,0,true),")
+                ussql.append("'\(largeImage)','\(smallImage)',")
+                ussql.append("50.00,0,true, , '{\"vendor\" : \"OmniCard\", \"externalId\":924}'),")
+                
+                // card 7
+                imageName = "996-BurgerKing.png"
+                smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/giftcard/small/\(imageName)")
+                largeImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; largeImage.append("/options/giftcard/large/\(imageName)")
+                ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
+                ussql.append("'Burger King',")
+                ussql.append("'bk.com',")
+                ussql.append("'The original HOME OF THE WHOPPER®',")
+                ussql.append("'The original HOME OF THE WHOPPER®, our commitment to premium ingredients, signature recipes, and family-friendly dining experiences is what has defined our brand for more than 50 successful years.',")
+                ussql.append("'\(largeImage)','\(smallImage)',")
+                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":996}'),")
 
                 break
             case "Donate"?:
                 // card 1
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 1, ")
                 ussql.append("'Heifer International',")
-                ussql.append("'www.heifer.org',")
+                ussql.append("'heifer.org',")
                 ussql.append("'Heifer International works with communities to create income, empower women, care for the Earth, and ultimately end world hunger and poverty',")
                 ussql.append("'Heifer International’s mission is to end hunger and poverty while caring for the Earth. For more than 70 years, we have provided livestock and environmentally sound agricultural training to improve the lives of those who struggle daily for reliable sources of food and income. We currently work in 25 countries, including the United States, to help families and communities become self-reliant.','',")
                 ussql.append("'heifer_small.png',")
-                ussql.append("50.00,0,true),")
+                ussql.append("50.00,0,true, '{ \"vendor\" : \"PureCharity\" }'),")
                 // card 2
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 2, ")
                 ussql.append("'Boys and Girls Club of Fayetteville',")
-                ussql.append("'www.fayettevillekids.org',")
+                ussql.append("'fayettevillekids.org',")
                 ussql.append("'We are a resource for families to improve the quality of their lives through the development of youth in a safe environment.',")
                 ussql.append("'The Donald W. Reynolds Boys & Girls Club is a non-profit 501 (C)(3) organization currently serving over 10,000 community members per year through memberships, special events, facility reservations and drop-in business. Formerly known as the Fayetteville Youth Center, the Club over 75 years of service to youth and families in the local community.',")
                 ussql.append("'bgca-fayetteville_small.png','',")
-                ussql.append("50.00,0,true),")
+                ussql.append("50.00,0,true, '{ \"vendor\" : \"PureCharity\" }'),")
                 // card 3
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 3, ")
                 ussql.append("'CASA of Northwest Arkansas',")
-                ussql.append("'www.nwacasa.org',")
+                ussql.append("'nwacasa.org',")
                 ussql.append("'Court Appointed Special Advocates of Northwest Arkansas provides compassionate volunteers who advocate for abused and neglected children.',")
                 ussql.append("'In essence, Court Appointed Special Advocates of Northwest Arkansas recruits, trains, and supervises volunteers who provide one-on-one advocacy for abused children and their families. Our CASA volunteers assist children by stabilizing their lives and moving them through the foster care system. CASAs are responsible for assessing the needs of the victims, making referrals for services (counseling, speech/occupational/physical therapy, educational interventions, medical and dental care) and making sure the emotional and physical needs of children are being met while in care.',")
                 ussql.append("'casa-small.png','',")
-                ussql.append("50.00,0,true),")
+                ussql.append("50.00,0,true, '{ \"vendor\" : \"PureCharity\" }'),")
                 // card 4
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 4, ")
                 ussql.append("'Dress for Success of NW Arkansas',")
-                ussql.append("'www.dfsnwa.org',")
+                ussql.append("'dfsnwa.org',")
                 ussql.append("'Dress for Success Northwest Arkansas helps empower women toward economic independence by providing a network of support, professional attire, and programs that help them thrive in work and in life.',")
                 ussql.append("'Dress for Success Northwest Arkansas helps empower women toward economic independence by providing a network of support, professional attire, and programs that help her secure employment, retain her job, grow her career, provide for her family and improve their lives.  We offer long-lasting solutions the enable women to break the cycle of poverty.',")
                 ussql.append("'dress%20for%20success_small.png','',")
-                ussql.append("50.00,0,true),")
+                ussql.append("50.00,0,true, '{ \"vendor\" : \"PureCharity\" }'),")
                 // card 5
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 5, ")
                 ussql.append("'KUAF',")
@@ -368,7 +412,7 @@ final class InitializeData {
                 ussql.append("'KUAF 91.3 FM is northwest and Western Arkansas’ NPR affiliate and listener-supported radio station. We serve a 14-county area, with a population of 600,000, with NPR news programming.',")
                 ussql.append("'KUAF is northwest and western Arkansas’ NPR affiliate and listener-supported radio station. Owned by the University of Arkansas, KUAF has grown from “The 10-Watt Wonder” in 1973 to the 100,000-watt station it is today. We’ve been this area’s NPR affiliate for 33 years and have changed and grown along with the region, while also holding tight to our roots. We serve a 14-county area, with a population of 600,000, with NPR news programming - news that is highly-researched and vetted and is presented with insight and civil conversation. In today’s political climate, this kind of news programming is more important now than ever before. But more than just news, KUAF is unique in our area as the sole public radio station – and is unique in the breadth and variety of local programming offered. KUAF produces or airs 10 locally-produced programs! Very few other stations of this size produce this much local content – from the Community Spotlight Series with Pete Hartman to local news casts every morning to our daily, news magazine Ozarks at Large,hosted by Kyle Kellams. With the explosive growth in population of our area, KUAF aims to serve not just as a source for news and entertainment, but also as an anchor and introduction to the culture of our region. From The Pickin’ Post, The Generic Blues Show, and Shades of Jazz, plus the hundreds of local events featured in public service announcements and performances of local favorites in the Firmin-Garner performance studio, KUAF reflects the community it serves. We have heard from many listeners new to the area, that listening to KUAF helped them get a better understanding of their new home – from the local news to cultural coverage to the spirit of philanthropy that makes Northwest Arkansas so outstanding.',")
                 ussql.append("'kuaf-small.png','',")
-                ussql.append("50.00,0,true),")
+                ussql.append("50.00,0,true, '{ \"vendor\" : \"PureCharity\" }'),")
                 // card 6
                 ussql.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)', \(i.data.id!), 1, 6, ")
                 ussql.append("'Kendrick Fincher Foundation',")
@@ -376,7 +420,7 @@ final class InitializeData {
                 ussql.append("'Mission: Promote proper hydration and prevent heat illness through education and supporting activities. Vision: Expand national awareness and education to save lives.',")
                 ussql.append("'Mission: Promote proper hydration and prevent heat illness through  education and supporting activities.  Vision: Expand national awareness and education to save lives.  Education and Supporting Activities: Be Smart. BeeHydrated! - Presentations to school aged children on the importance of proper hydration Beat the Heat - Presentations to athletes, coaches and parents on proper hydration and heat illness prevention Distribution of squeeze bottles and educational pamphlets to support our educational presentations Representation at health fairs to educate the public about our mission and activities Community involvement in support of our mission by providing “cool huts”—misting tents with free ice water—at various outdoor public events. Annual youth run in Rogers, AR, to reinforce our mission and help children and the community learn about the importance of proper hydration and physical fitness in a fun environment. Partnerships with other sports injury prevention and wellness organizations Web presence that allows for regional and national reach Developing education programs for all ages including senior adults and industrial workforce',")
                 ussql.append("'kendrick%20fincher_small.png','',")
-                ussql.append("50.00,0,true),")
+                ussql.append("50.00,0,true, '{ \"vendor\" : \"PureCharity\" }'),")
 
                 break
             case "Bucket Coin"?:
@@ -386,7 +430,7 @@ final class InitializeData {
                 ussql.append("'BUX: Our Crypto Coin',")
                 ussql.append("'Jump into the Crypto world!  Buy you BUX today.',")
                 ussql.append("'','',")
-                ussql.append("50.00,0,true),")
+                ussql.append("50.00,0,true, '{ }'),")
                 break
             default:
                 break
@@ -402,7 +446,7 @@ final class InitializeData {
         var checkuser = "INSERT INTO \(schema).\(tbl.table()) "
         checkuser.append("(created, createdby, group_id, form_id, display_order, ")
         checkuser.append("name, website, description, long_description, picture_url, sm_picture_url, ")
-        checkuser.append("minimum, maximum, display) ")
+        checkuser.append("minimum, maximum, display, vendor_detail) ")
         checkuser.append(" VALUES ")
         checkuser.append(ussql)
         
