@@ -271,7 +271,7 @@ final class InitializeData {
                 ussql.append("'The VISA prepaid card may be used anywhere online!', ")
                 ussql.append("'Come join the VISA family and use this card worldwide!', ")
                 ussql.append("'\(largeImage)','\(smallImage)', null, ")
-                ussql.append("50.00,0,true, '{}'),")
+                ussql.append("50.00,0,true, '{ \"vendor\" : \"FIS\" }'),")
                 // card 2
                 imageName = "mastercard_icon.png"
                 smallImage = EnvironmentVariables.sharedInstance.ImageBaseURL!; smallImage.append("/options/prepaidcard/small/\(imageName)")
@@ -282,7 +282,7 @@ final class InitializeData {
                 ussql.append("'The MasterCard prepaid card may be used anywhere online!', ")
                 ussql.append("'Come join the MasterCard family and use this card worldwide!', ")
                 ussql.append("'\(largeImage)','\(smallImage)', null, ")
-                ussql.append("50.00,0,true, '{}'),")
+                ussql.append("50.00,0,true, '{ \"vendor\" : \"FIS\" }'),")
                 break
             case "Gift Card"?:
                 
@@ -297,7 +297,7 @@ final class InitializeData {
                 ussql.append("'Amazon holds the world at your fingertips.',")
                 ussql.append("'Amazon is the largest onine retailer in the world.  Use your Amazon card here!',")
                 ussql.append("'\(largeImage)','\(smallImage)', null,")
-                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":810}'),")
+                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"vendorId\":810}'),")
                 
                 // card 2
                 imageName = "678-Target.png"
@@ -309,7 +309,7 @@ final class InitializeData {
                 ussql.append("'Target is the store with the big red dot.',")
                 ussql.append("'Target is a department store with a little bit of everything!',")
                 ussql.append("'\(largeImage)','\(smallImage)', null,")
-                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":678}'),")
+                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"vendorId\":678}'),")
                 
                 // card 3
                 imageName = "933-Thinkgeek.png"
@@ -321,7 +321,7 @@ final class InitializeData {
                 ussql.append("'Fun things for geeks',")
                 ussql.append("'Want to buy an amazing gift for a geek?  Get it here!',")
                 ussql.append("'\(largeImage)','\(smallImage)', null,")
-                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":933}'),")
+                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"vendorId\":933}'),")
                 
                 // card 4
                 imageName = "768-WholeFoods.png"
@@ -333,7 +333,7 @@ final class InitializeData {
                 ussql.append("'Want good food?',")
                 ussql.append("'Whole Foods provides a wholistic approach to feed.',")
                 ussql.append("'\(largeImage)','\(smallImage)', null,")
-                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":768}'),")
+                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"vendorId\":768}'),")
                 
                 // card 5
                 imageName = "1044-TheCheeseCakeFactory.jpg"
@@ -345,7 +345,7 @@ final class InitializeData {
                 ussql.append("'Want Cheesecake?',")
                 ussql.append("'The Cheesecake Factory creates cheesecake masterpieces!',")
                 ussql.append("'\(largeImage)','\(smallImage)', null,")
-                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":1044}'),")
+                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"vendorId\":1044}'),")
                 
                 // card 6
                 imageName = "924-RubyTuesday.png"
@@ -357,7 +357,7 @@ final class InitializeData {
                 ussql.append("'Eat here!',")
                 ussql.append("'Hungry on Tuesday?  Come here and join us for dinner.',")
                 ussql.append("'\(largeImage)','\(smallImage)', null,")
-                ussql.append("50.00,0,true, , '{\"vendor\" : \"OmniCard\", \"externalId\":924}'),")
+                ussql.append("50.00,0,true, , '{\"vendor\" : \"OmniCard\", \"vendorId\":924}'),")
                 
 //                // card 7
 //                imageName = "996-BurgerKing.png"
@@ -369,7 +369,7 @@ final class InitializeData {
 //                ussql.append("'The original HOME OF THE WHOPPER®',")
 //                ussql.append("'The original HOME OF THE WHOPPER®, our commitment to premium ingredients, signature recipes, and family-friendly dining experiences is what has defined our brand for more than 50 successful years.',")
 //                ussql.append("'\(largeImage)','\(smallImage)', null,")
-//                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"externalId\":996}'),")
+//                ussql.append("50.00,0,true, '{\"vendor\" : \"OmniCard\", \"vendorId\":996}'),")
 
                 break
             case "Donate"?:
