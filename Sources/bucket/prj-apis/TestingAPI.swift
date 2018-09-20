@@ -29,6 +29,13 @@ struct TestingAPI {
                 ["method":"post",    "uri":"/api/v1/testing/getQRCodes/{countryCode}", "handler":getCodes]
             ]
         }
+        static var retailer_names:[String] {
+            return [
+                "WalMart",
+                "7-11",
+                "Chick-Fil-A"
+            ]
+        }
         //MARK: - Get QR Codes:
         public static func getCodes(_ data: [String:Any]) throws -> RequestHandler {
             return {
@@ -336,6 +343,8 @@ struct TestingAPI {
                     let reup_ct = CodeTransaction()
                     let reup_res = try? reup_ct.sqlRows(reup_sql, params: [])
                     
+                    let number_of_retailers = Double(self.retailer_names.count)
+                    
                     if reup_res.isNotNil {
                         for i in reup_res! {
                             
@@ -351,6 +360,20 @@ struct TestingAPI {
                                 ct.redeemed         = redeemed
                                 ct.redeemedby       = user
                                 ct.status           = CodeTransactionCodes.merchant_pending
+                                
+                                // set the random retailer
+                                // rnd is between 0.0 and 1.0
+                                let rnd = drand48()
+                                var this_retailer_name = ""
+                                if rnd > 0.0 {
+                                    let retailer_raw = rnd * (number_of_retailers - 1)
+                                    let retailer_index = Int(retailer_raw.rounded())
+                                    this_retailer_name = retailer_names[retailer_index]
+                                } else {
+                                    this_retailer_name = retailer_names[0]
+                                }
+                                ct.description = this_retailer_name
+                                
                                 if let _            = try? ct.saveWithCustomType(schemaIn: schema, user) {
                                     
                                     // now archive the record
