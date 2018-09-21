@@ -101,16 +101,24 @@ struct RetailerWEB {
                         retailers[schema] = ret_array
                     }
                     
-                    print(retailers)
-                    
                 }
                 
                 // lets add the array of the countries for this retaiuler so we know which ones to address on the page
+                var countries:[String] = []
+                for (key, _) in retailer_dict {
+                    countries.append(key)
+                }
                 
+                if !countries.isEmpty {
+                    // provides the list of countries the user has assigned to thier user profile
+                    values["countries"] = countries
+                }
                 
                 // only send back the retailers if there are any retailers
                 if retailers.count > 0 { values["retailers"] = retailers }
 
+                print(values)
+                
                 mustacheRequest(request: request,
                                 response: response,
                                 handler: retailerterminalindexHelper(values: values),
