@@ -339,6 +339,7 @@ struct ConsumerAPI {
                         
                         if let name = i.data.cashoutOptionsDic.name, !name.isEmpty {
                             optdict["name"] = name
+                            // Replace the name with the occurance of the string - this is so we dont have to update two columns or any other column that would contain the name of the option.
                             if let cD = i.data.cashoutOptionsDic.confirmationDescription?.replacingOccurrences(of: "{name}", with: name), !cD.isEmpty {
                                 optdict["confirmationDescription"] = cD
                             }
