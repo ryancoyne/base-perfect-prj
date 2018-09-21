@@ -75,12 +75,12 @@ struct RetailerWEB {
 
                 var values: MustacheEvaluationContext.MapType = [:]
                 
-                var retailers:[String:[RetailerAll]] = [:]
+                var retailers:[String:[[String:Any]]] = [:]
                 
                 // lets get the retailer information and the unassigned terminals
                 for (key,value) in retailer_dict {
                     
-                    var ret_array:[RetailerAll] = []
+                    var ret_array:[[String:Any]] = []
                     
                     let schema = key.lowercased()
                     
@@ -88,12 +88,25 @@ struct RetailerWEB {
                     for i in (value as! [Int]) {
                         let r = RetailerAll()
                         r.get(schema, i)
-                        ret_array.append(r)
+                        r.country_code = schema
+                        r.country_id = Country.idWith(schema)
+                        ret_array.append(r.asDictionary())
                     }
                     
-                    if ret_array.count > 0 { retailers[schema] = ret_array }
+                    if ret_array.count > 0 {
+                        ret_array.append(["country_code":key])
+                        if let c_id = Country.idWith(key) {
+                            ret_array.append(["country_id":c_id])
+                        }
+                        retailers[schema] = ret_array
+                    }
+                    
+                    print(retailers)
                     
                 }
+                
+                // lets add the array of the countries for this retaiuler so we know which ones to address on the page
+                
                 
                 // only send back the retailers if there are any retailers
                 if retailers.count > 0 { values["retailers"] = retailers }
@@ -101,8 +114,7 @@ struct RetailerWEB {
                 mustacheRequest(request: request,
                                 response: response,
                                 handler: retailerterminalindexHelper(values: values),
-                                templatePath: (request.documentRoot + "/views/retailer/index"))
-                
+                                templatePath: "\(request.documentRoot)/views/retailer/index.mustache")
             }
         }
 

@@ -101,13 +101,26 @@ struct RetailerAPI {
                     guard !json!.isEmpty else { return response.emptyJSONBody }
                     
                     // This should be the retailerBounce part:
-                    guard let retailerIntegerId = Retailer.retailerBounce(request, response) else { return }
+                    
+                    guard let countryId = request.countryId else {  response.invalidCountryCode; return }
+                    
+                    let schema = Country.getSchema(request)
+                    var retailerIntegerId = 0
+                    
+                    if let retcode = request.header(.custom(name: "retailerId")) {
+                        let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode)'"
+                        let r = Retailer()
+                        let r_ret = try? r.sqlRows(sql, params: [])
+                        for i in r_ret! {
+                            retailerIntegerId = i.data["id"].intValue!
+                        }
+                    }
+                    
+//                    guard let retailerIntegerId = Retailer.retailerBounce(request, response) else { return }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
                     guard let _ = request.countryId else { return response.invalidCountryCode }
                 
-                    let schema = Country.getSchema(request)
-                    
                     // If there is only one location, lets automagically attach it to the one location for this retailer
                     let add = Address()
                     let add_sql = "SELECT * FROM \(schema).\(add.table()) WHERE retailer_id = \(retailerIntegerId)"

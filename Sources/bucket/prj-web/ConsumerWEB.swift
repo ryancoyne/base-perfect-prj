@@ -90,7 +90,9 @@ struct ConsumerWEB {
                 // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
                 guard request.SecurityCheck() else { response.badSecurityToken; return }
 
-                var template = "views/msg" // where it goes to after
+//                var template = "views/msg" // where it goes to after
+                var template = "views/index" // where it goes to after
+                
                 var context: [String : Any] = ["title": "Bucket Technologies", "subtitle":"Goodbye coins, Hello Change"]
 
                 // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
@@ -99,7 +101,6 @@ struct ConsumerWEB {
                     problem = response.badSecurityTokenWeb
                     context["msg_title"] = "Login Error."
                     context["msg_body"] = problem
-                    template = "views/msg"
                     response.render(template: template, context: context)
                     response.completed()
                     return

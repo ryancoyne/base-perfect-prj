@@ -31,9 +31,21 @@ struct TestingAPI {
         }
         static var retailer_names:[String] {
             return [
-                "WalMart",
+                "McDonald's",
+                "Walmart",
                 "7-11",
-                "Chick-Fil-A"
+                "Home Depot",
+                "Smart and Final",
+                "99 Cents Store",
+                "CVS",
+                "Walgreens",
+                "Kroger",
+                "Rite Aid",
+                "Starbucks",
+                "Chick Fil-A",
+                "Dollar General",
+                "ARCO",
+                "Panda Express"
             ]
         }
         //MARK: - Get QR Codes:
@@ -148,10 +160,14 @@ struct TestingAPI {
                     dt = try? user.detail.jsonEncodedString()
                     print("Retailer Admin: \(dt ?? "")")
                     
-//                    user.addRetailerAdmin("us", 2)
-//                    dt = try? user.detail.jsonEncodedString()
-//                    print("Retailer Admin: \(dt ?? "")")
-//
+                    user.addRetailerAdmin("us", 2)
+                    dt = try? user.detail.jsonEncodedString()
+                    print("Retailer Admin: \(dt ?? "")")
+
+                    user.addRetailerAdmin("us", 3)
+                    dt = try? user.detail.jsonEncodedString()
+                    print("Retailer Admin: \(dt ?? "")")
+
 //                    user.deleteRetailerAdmin("us", 2)
 //                    dt = try? user.detail.jsonEncodedString()
 //                    print("Retailer Admin: \(dt ?? "")")

@@ -117,8 +117,10 @@ struct ConsumerAPI {
                     break
                 }
 
-                sql.append("ORDER BY redeemed DESC ")
-                
+                sql.append("ORDER BY cth.redeemed DESC,  ")
+                sql.append("cth.amount DESC,  ")
+                sql.append("cth.description DESC  ")
+
                 if pagination.limitNumber > 0 {
                     sql.append("LIMIT \(pagination.limitNumber) ")
                 }

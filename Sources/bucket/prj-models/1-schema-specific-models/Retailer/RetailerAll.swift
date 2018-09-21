@@ -16,6 +16,9 @@ public class RetailerAll: Retailer {
     var terminals:[Terminal]? = nil
     var terminals_per_address:[Int:[Terminal]]? = nil
     var terminals_unassigned:[Terminal]? = nil
+    
+    var country_code:String? = nil
+    var country_id:Int? = nil
 
     //MARK: Table name
 //    override public func table() -> String { return "" }
@@ -78,4 +81,115 @@ public class RetailerAll: Retailer {
             }
         }
     }
+    
+    override func asDictionary() -> [String: Any] {
+        
+        var dictionary:[String:Any] = [:]
+        
+        if self.id.isNotNil {
+            dictionary.id = self.id
+        }
+        
+        if self.created.isNotNil {
+            dictionary.created = self.created
+        }
+        
+        if self.createdby.isNotNil {
+            dictionary.createdBy = self.createdby
+        }
+        
+        if self.modified.isNotNil {
+            dictionary.modified = self.modified
+        }
+        
+        if self.modifiedby.isNotNil {
+            dictionary.modifiedBy = self.modifiedby
+        }
+        
+        if self.deleted.isNotNil {
+            dictionary.deleted = self.deleted
+        }
+        
+        if self.deletedby.isNotNil {
+            dictionary.deletedBy = self.deletedby
+        }
+        
+        if self.name.isNotNil {
+            dictionary.retailerDic.name = self.name
+        }
+        
+        if self.country_code.isNotNil {
+            dictionary["country_code"] = self.country_code
+        }
+
+        if self.country_id.isNotNil {
+            dictionary["country_id"] = self.country_id
+        }
+
+        if self.retailer_code.isNotNil {
+            dictionary.retailerDic.retailerCode = self.retailer_code
+        }
+        
+        if self.is_suspended.isNotNil {
+            dictionary.retailerDic.isSuspended = self.is_suspended
+        }
+        
+        if self.is_verified.isNotNil {
+            dictionary.retailerDic.isVerified = self.is_verified
+        }
+        
+        if self.ach_transfer_minimum_default.isNotNil {
+            dictionary.retailerDic.ach_transfer_minimum_default = self.ach_transfer_minimum_default
+        }
+        
+        if self.terminals.isNotNil, self.terminals!.count > 0 {
+            
+            var tmp_array:[[String:Any]] = []
+            for i in self.terminals! {
+                tmp_array.append(i.asDictionary())
+            }
+            
+            dictionary["terminals_all"] = tmp_array
+        }
+        
+        if self.terminals_unassigned.isNotNil, (self.terminals_unassigned?.count)! > 0 {
+            
+            var tmp_array:[[String:Any]] = []
+            for i in self.terminals_unassigned! {
+                tmp_array.append(i.asDictionary())
+            }
+            
+            dictionary["terminals_unassigned"] = tmp_array
+            
+        }
+        
+        if self.addresses.isNotNil, (self.addresses?.count)! > 0 {
+            
+            var tmp_terminal_array:[[String:Any]] = []
+            var tmp_address_array:[[String:Any]] = []
+            
+            for a in self.addresses! {
+                var a_dict = a.asDictionary()
+                // add the terminals for the address
+                if self.terminals_per_address.isNotNil, let trm = self.terminals_per_address![a.id!] {
+                    for t in trm {
+                        tmp_terminal_array.append(t.asDictionary())
+                    }
+                    if !tmp_terminal_array.isEmpty {
+                        a_dict["terminals"] = tmp_terminal_array
+                        tmp_terminal_array.removeAll()
+                    }
+                }
+                tmp_address_array.append(a_dict)
+            }
+            
+            if !tmp_address_array.isEmpty {
+                dictionary["addresses"] = tmp_address_array
+            }
+            
+        }
+        
+        return dictionary
+    }
+
 }
