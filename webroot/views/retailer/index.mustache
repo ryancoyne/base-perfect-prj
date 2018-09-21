@@ -4,32 +4,30 @@
 <!--    <div class="jumbotron text-center"> -->
         <div class="container-fluid">
             <div class="row">
-                {{^authenticated}}
-                {{> ../login-body}}
-                {{/authenticated}}
-                {{#authenticated}}
-                    {{#retailers}}
-                        <div class="col-xs-2">&nbsp;</div>
-                        {{#us}}
-                            <div class="row">
-                                <div class="col">{{name}}</div>
-                                <div class="col">{{name}}</div>
-                                <div class="col">{{name}}</div>
-                                <div class="col">{{name}}</div>
-                                <div class="col">{{name}}</div>
-                                <div class="col">{{name}}</div>
-                                <div class="col">{{name}}</div>
-                                <div class="col">{{name}}</div>
-                            </div>
-                        {{/us}}
-                        <div class="col-xs-2">&nbsp;</div>
-                    {{/retailers}}
-                    {{^retailers}}
-                        <div class="col-xs-2">&nbsp;</div>
-                        <div class="col-xs-8">Retailers Do Not Exist</div>
-                        <div class="col-xs-2">&nbsp;</div>
-                    {{/retailers}}
-                {{/authenticated}}
+                {{#retailers}}
+                    <div class="col-xs-2">&nbsp;</div>
+                    <table>
+                    {{#us}}
+                    <tr>
+                        <div class="row">
+                            <td class="col"><a href="/retailer/{{country}}/{{id}}">{{name}}</a></div>
+                            <td class="col">{{name}}</div>
+                            <td class="col">{{name}}</div>
+                            <td class="col">{{name}}</div>
+                            <td class="col">{{name}}</div>
+                            <td class="col">{{name}}</div>
+                            <td class="col">{{name}}</div>
+                            <td class="col">{{name}}</div>
+                        </div>
+                    </tr>
+                    {{/us}}
+                    <div class="col-xs-2">&nbsp;</div>
+                {{/retailers}}
+                {{^retailers}}
+                    <div class="col-xs-2">&nbsp;</div>
+                    <div class="col-xs-8">Retailers Do Not Exist</div>
+                    <div class="col-xs-2">&nbsp;</div>
+                {{/retailers}}
             </div>
         </div>
 <!--     </div> -->

@@ -16,6 +16,9 @@ public class RetailerAll: Retailer {
     var terminals:[Terminal]? = nil
     var terminals_per_address:[Int:[Terminal]]? = nil
     var terminals_unassigned:[Terminal]? = nil
+    
+    var country_code:String? = nil
+    var country_id:Int? = nil
 
     //MARK: Table name
 //    override public func table() -> String { return "" }
@@ -115,6 +118,14 @@ public class RetailerAll: Retailer {
             dictionary.retailerDic.name = self.name
         }
         
+        if self.country_code.isNotNil {
+            dictionary["country_code"] = self.country_code
+        }
+
+        if self.country_id.isNotNil {
+            dictionary["country_id"] = self.country_id
+        }
+
         if self.retailer_code.isNotNil {
             dictionary.retailerDic.retailerCode = self.retailer_code
         }
@@ -129,6 +140,53 @@ public class RetailerAll: Retailer {
         
         if self.ach_transfer_minimum_default.isNotNil {
             dictionary.retailerDic.ach_transfer_minimum_default = self.ach_transfer_minimum_default
+        }
+        
+        if self.terminals.isNotNil, self.terminals!.count > 0 {
+            
+            var tmp_array:[[String:Any]] = []
+            for i in self.terminals! {
+                tmp_array.append(i.asDictionary())
+            }
+            
+            dictionary["terminals_all"] = tmp_array
+        }
+        
+        if self.terminals_unassigned.isNotNil, (self.terminals_unassigned?.count)! > 0 {
+            
+            var tmp_array:[[String:Any]] = []
+            for i in self.terminals_unassigned! {
+                tmp_array.append(i.asDictionary())
+            }
+            
+            dictionary["terminals_unassigned"] = tmp_array
+            
+        }
+        
+        if self.addresses.isNotNil, (self.addresses?.count)! > 0 {
+            
+            var tmp_terminal_array:[[String:Any]] = []
+            var tmp_address_array:[[String:Any]] = []
+            
+            for a in self.addresses! {
+                var a_dict = a.asDictionary()
+                // add the terminals for the address
+                if self.terminals_per_address.isNotNil, let trm = self.terminals_per_address![a.id!] {
+                    for t in trm {
+                        tmp_terminal_array.append(t.asDictionary())
+                    }
+                    if !tmp_terminal_array.isEmpty {
+                        a_dict["terminals"] = tmp_terminal_array
+                        tmp_terminal_array.removeAll()
+                    }
+                }
+                tmp_address_array.append(a_dict)
+            }
+            
+            if !tmp_address_array.isEmpty {
+                dictionary["addresses"] = tmp_address_array
+            }
+            
         }
         
         return dictionary

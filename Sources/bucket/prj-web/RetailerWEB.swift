@@ -88,12 +88,25 @@ struct RetailerWEB {
                     for i in (value as! [Int]) {
                         let r = RetailerAll()
                         r.get(schema, i)
+                        r.country_code = schema
+                        r.country_id = Country.idWith(schema)
                         ret_array.append(r.asDictionary())
                     }
                     
-                    if ret_array.count > 0 { retailers[schema] = ret_array }
+                    if ret_array.count > 0 {
+                        ret_array.append(["country_code":key])
+                        if let c_id = Country.idWith(key) {
+                            ret_array.append(["country_id":c_id])
+                        }
+                        retailers[schema] = ret_array
+                    }
+                    
+                    print(retailers)
                     
                 }
+                
+                // lets add the array of the countries for this retaiuler so we know which ones to address on the page
+                
                 
                 // only send back the retailers if there are any retailers
                 if retailers.count > 0 { values["retailers"] = retailers }
