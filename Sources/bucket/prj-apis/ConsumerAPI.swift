@@ -335,13 +335,16 @@ struct ConsumerAPI {
                             optdict["longDescription"] = val
                         }
                         
-                        if let val = i.data.cashoutOptionsDic.confirmationDescription, !val.isEmpty {
-                            optdict["confirmationDescription"] = val
+                        if let name = i.data.cashoutOptionsDic.name, !name.isEmpty {
+                            optdict["name"] = name
+                            if let cD = i.data.cashoutOptionsDic.confirmationDescription?.replacingOccurrences(of: "{name}", with: name), !cD.isEmpty {
+                                optdict["confirmationDescription"] = cD
+                            }
                         }
                         
-                        if let val = i.data.cashoutOptionsDic.name, !val.isEmpty {
-                            optdict["name"] = val
-                        }
+//                        if let val = i.data.cashoutOptionsDic.name, !val.isEmpty {
+//                            optdict["name"] = val
+//                        }
                         
                         if let val = i.data.shortdescription, !val.isEmpty {
                             optdict["description"] = val
