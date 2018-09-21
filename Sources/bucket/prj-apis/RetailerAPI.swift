@@ -102,21 +102,22 @@ struct RetailerAPI {
                     
                     // This should be the retailerBounce part:
                     
-                    guard let countryId = request.countryId else {  response.invalidCountryCode; return }
+                    guard (request.countryId) != nil else {  response.invalidCountryCode; return }
                     
                     let schema = Country.getSchema(request)
                     var retailerIntegerId = 0
                     
-                    if let retcode = request.header(.custom(name: "retailerId")) {
+                    if let retcode = request.getRetailerCode() {
                         let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode)'"
                         let r = Retailer()
                         let r_ret = try? r.sqlRows(sql, params: [])
                         for i in r_ret! {
                             retailerIntegerId = i.data["id"].intValue!
                         }
+                    } else {
+                        return response.invalidRetailer
                     }
                     
-//                    guard let retailerIntegerId = Retailer.retailerBounce(request, response) else { return }
                     guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
                     guard let _ = request.countryId else { return response.invalidCountryCode }
@@ -493,7 +494,7 @@ struct RetailerAPI {
                         
                         // We need to go and get the integer terminal id:
                         let retailer = Retailer()
-                        var sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(request.retailerId!)' "
+                        var sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(request.getRetailerCode()!)' "
                         let rtlr = try? retailer.sqlRows(sql, params: [])
                         if rtlr.isNotNil, let c = rtlr!.first {
                             retailer.to(c)
@@ -850,12 +851,35 @@ extension Retailer {
         guard request.SecurityCheck() else { response.badSecurityToken; return true }
 
         //Make sure we have the retailer Id and retailer secret:
-        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
+//        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
+        guard let retailerSecret = request.retailerSecret else { response.unauthorizedTerminal; return true }
+
         guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return true }
         guard let _ = request.countryId else { response.invalidCountryCode; return true }
         
+        // lets test for the retailer code (not the retailer ID
         let schema = Country.getSchema(request)
         
+        var retailerId = 0
+        
+        if let retcode = request.getRetailerCode() {
+            let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode)'"
+            let r = Retailer()
+            let r_ret = try? r.sqlRows(sql, params: [])
+            if r_ret.isNotNil, r_ret!.isEmpty {
+                // the code was not found
+                response.invalidRetailer
+                return true
+            } else {
+                // set the retailer id
+                retailerId = r_ret!.first!.data["id"].intValue!
+            }
+        } else {
+            // the retailer code was not sent in
+            response.invalidRetailer
+            return true
+        }
+
         // Get our secret code formatted properly to check what we have in the DB:
         let passwordToCheck = retailerSecret.ourPasswordHash!
         
@@ -883,7 +907,7 @@ extension Retailer {
 
         // Checking the final condition (last condition to minimize the number of queries during error)
         let retailerQuery = Retailer()
-        let sqlr = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(retailerId)'"
+        let sqlr = "SELECT * FROM \(schema).retailer WHERE id = '\(retailerId)'"
         let rtl = try? retailerQuery.sqlRows(sqlr, params: [])
         if rtl.isNotNil, let t = rtl?.first {
             retailerQuery.to(t)

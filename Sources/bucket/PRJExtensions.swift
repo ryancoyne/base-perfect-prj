@@ -289,6 +289,28 @@ extension HTTPRequest {
         }
     }
 
+    func getRetailerCode()->String? {
+        
+        var schema = ""
+        if let country_id = self.countryId {
+            schema = Country.getSchema(country_id)
+        } else {
+            return nil
+        }
+        
+        if let retcode = self.header(.custom(name: "retailerId")) ?? self.header(.custom(name: "retailerCode")) {
+            let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode)'"
+            let r = Retailer()
+            let r_ret = try? r.sqlRows(sql, params: [])
+            if r_ret.isNotNil, (r_ret?.count)! > 0 {
+                return retcode
+            }
+        }
+        
+        return nil
+        
+    }
+    
     var retailerId : Int? {
         let sentRetailerId = self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
         // We need to
