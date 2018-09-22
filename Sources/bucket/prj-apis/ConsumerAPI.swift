@@ -330,7 +330,7 @@ struct ConsumerAPI {
                     
                     var email : String? = nil
                     // If the users email is Dan's, lets add in defaultValues:
-                    if request.account?.email == "hello@buckettechnologies.com" {
+                    if request.account?.email == "mike@clearcodex.com" {
                         email = "hello@buckettechnologies.com"
                     }
 
@@ -395,12 +395,13 @@ struct ConsumerAPI {
                         // We want to check if the user is Dan, and if it is, lets add in a defaultValue for his email address:
                         if email.isNotNil {
                             // We need to add this in as a defaultValue to the email fields:
-                            let newFields = [[String:Any]]()
+                            var newFields = [[String:Any]]()
                             for field in fields {
                                 var theNewField = field as! [String:Any]
                                 if theNewField["fieldType"].stringValue == "E-Mail" {
                                     theNewField["defaultValue"] = email!
                                 }
+                                newFields.append(theNewField)
                             }
                             fields = newFields
                         }
