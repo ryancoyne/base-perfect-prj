@@ -327,6 +327,12 @@ struct ConsumerAPI {
                 if res.isNotNil {
 
                     var retJSONSub:[[String:Any]] = []
+                    
+                    var email : String? = nil
+                    // If the users email is Dan's, lets add in defaultValues:
+                    if request.account?.email == "hello@buckettechnologies.com" {
+                        email = "hello@buckettechnologies.com"
+                    }
 
                     for i in res! {
                         var optdict:[String:Any] = [:]
@@ -385,7 +391,19 @@ struct ConsumerAPI {
                         if !imgdict.isEmpty { optdict["image"] = imgdict }
                         
                         // pull in the form fields and add them
-                        let fields = SupportFunctions.sharedInstance.getFormFields(i.data.cashoutOptionsDic.formId!, schema: schema)
+                        var fields = SupportFunctions.sharedInstance.getFormFields(i.data.cashoutOptionsDic.formId!, schema: schema)
+                        // We want to check if the user is Dan, and if it is, lets add in a defaultValue for his email address:
+                        if email.isNotNil {
+                            // We need to add this in as a defaultValue to the email fields:
+                            let newFields = [[String:Any]]()
+                            for field in fields {
+                                var theNewField = field as! [String:Any]
+                                if theNewField["fieldType"].stringValue == "E-Mail" {
+                                    theNewField["defaultValue"] = email!
+                                }
+                            }
+                            fields = newFields
+                        }
                         optdict["fields"] = fields
 
                         retJSONSub.append(optdict)
