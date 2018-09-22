@@ -330,7 +330,7 @@ struct ConsumerAPI {
                     
                     var email : String? = nil
                     // If the users email is Dan's, lets add in defaultValues:
-                    if request.account?.email == "mike@clearcodex.com" {
+                    if let em = request.account?.email, em == "ryancoyne.ccx@gmail.com" || em  == "daniel@wetinkprinting.com" {
                         email = "hello@buckettechnologies.com"
                     }
 
