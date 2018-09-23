@@ -24,12 +24,13 @@ struct RetailerWEB {
         // POST request for login
         static var routes : [[String:Any]] {
             return [
-                ["method":"post", "uri":"/retailer", "handler":retailerterminalindex],
-                ["method":"post", "uri":"/retailer/{countryId}", "handler":retailerindex],
-                ["method":"post", "uri":"/retailer/{countryId}/{retailerId}", "handler":retailerdetail],
-                ["method":"post", "uri":"/retailer/{countryId}/{retailerId}/location", "handler":retailerlocations],
-                ["method":"post", "uri":"/retailer/{countryId}/{retailerId}/terminals", "handler":retailerterminals],
-                ["method":"post", "uri":"/retailer/{countryId}/{retailerId}/{locationId}/terminals", "handler":retailerterminals],
+                ["method":"get", "uri":"/retailer", "handler":retailerterminalindex],
+                ["method":"get", "uri":"/retailer/{countryId}", "handler":retailerindex],
+                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}", "handler":retailerdetail],
+                ["method":"get", "uri":"/retailer/terminal/{countryId}/{retailerId}/{terminalId}", "handler":retailerterminal],
+                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/location", "handler":retailerlocations],
+                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminals", "handler":retailerterminals],
+                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/{locationId}/terminals", "handler":retailerterminals],
             ]
         }
         
@@ -302,5 +303,53 @@ struct RetailerWEB {
             }
         }
 
+        //MARK: --
+        public static func retailerterminal(data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { response.badSecurityToken; return }
+                
+                var template = "views/msg" // where it goes to after
+                var context: [String : Any] = ["title": "Bucket Technologies", "subtitle":"Goodbye coins, Hello Change"]
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                var problem:String
+                if !request.SecurityCheck() {
+                    problem = response.badSecurityTokenWeb
+                    context["msg_title"] = "Login Error."
+                    context["msg_body"] = problem
+                    template = "views/msg"
+                    response.render(template: template, context: context)
+                    response.completed()
+                    return
+                }
+                
+                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
+                context["csrfToken"] = request.session?.data["csrf"] as? String ?? ""
+                
+                if let email = request.param(name: "email").stringValue, !email.isEmpty,
+                    let password = request.param(name: "password").stringValue, !password.isEmpty {
+                    do {
+                        let account = try Account.loginWithEmail(email, password)
+                        request.session?.userid = account.id
+                        context["msg_title"] = "Login Successful."
+                        context["msg_body"] = ""
+                        response.redirect(path: "/")
+                    } catch {
+                        context["msg_title"] = "Login Error."
+                        context["msg_body"] = "Email or password incorrect"
+                        template = "views/login"
+                    }
+                } else {
+                    context["msg_title"] = "Login Error."
+                    context["msg_body"] = "Email or password not supplied"
+                    template = "views/login"
+                }
+                response.render(template: template, context: context)
+                response.completed()
+            }
+        }
     }
 }
