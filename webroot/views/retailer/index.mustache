@@ -7,25 +7,105 @@
                 {{#retailers}}
                     <div class="col-xs-2">&nbsp;</div>
                     <table>
+                        <tr>
+                            <th>Country</th>
+                            <th>Retailer</th>
+                            <th>Retailer Code</th>
+                            <th>Suspended</th>
+                            <th>Verified</th>
+                        </tr>
                     {{#us}}
-                    <tr>
-                        <div class="row">
-                            <td class="col"><a href="/retailer/{{country}}/{{id}}">{{name}}</a></div>
-                            <td class="col">{{name}}</div>
-                            <td class="col">{{name}}</div>
-                            <td class="col">{{name}}</div>
-                            <td class="col">{{name}}</div>
-                            <td class="col">{{name}}</div>
-                            <td class="col">{{name}}</div>
-                            <td class="col">{{name}}</div>
-                        </div>
-                    </tr>
+                        <tr>
+                            <div class="row">
+                                <td class="col">{{country_code}}</td>
+                                <td class="col"><a href="/retailer/{{country_id}}/{{id}}">{{name}}</a></td>
+                                <td class="col">{{retailer_code}}</td>
+                                <td class="col">{{#is_suspended}}YES{{/is_suspended}}{{^is_suspended}}No{{/is_suspended}}</td>
+                                <td class="col">{{#is_verified}}YES{{/is_verified}}{{^is_verified}}No{{/is_verified}}</td>
+                            </div>
+                        </tr>
+                        <tr><td clss="col" colspan="7">&nbsp;</td></tr>
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>Address Number</th>
+                            <th>Address 1</th>
+                            <th>Address 2</th>
+                            <th>City</th>
+                            <th>State</th>
+                            <th>Postal Code</th>
+                        </tr>
+                        {{#addresses}}
+                            <tr>
+                                <td class="col">&nbsp;</td>
+                                <td class="col">{{id}}</td>
+                                <td class="col">{{address1}}</td>
+                                <td class="col">{{address2}}</td>
+                                <td class="col">{{city}}</td>
+                                <td class="col">{{state}}</td>
+                                <td class="col">{{postal_code}}</td>
+                            </tr>
+                                <tr><td clss="col" colspan="7">&nbsp;</td></tr>
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <th>&nbsp;</th>
+                                    <th>Serial Number</th>
+                                    <th>Approved</th>
+                                </tr>
+                                <tr>
+                                {{#terminals}}
+                                    <td class="col">&nbsp;</td>
+                                    <td class="col">&nbsp;</td>
+                                    <td class="col">{{serial_number}}</td>
+                                    <td class="col">{{#is_approved}}Yes{{/is_approved}}{{^is_approved}}NO{{/is_approved}}</td>
+                                {{/terminals}}
+                                {{^terminals}}
+                                    <td class="col">&nbsp;</td>
+                                    <td class="col">&nbsp;</td>
+                                    <td class="col">No Terminals For This Address</td>
+                                {{/terminals}}
+                                </tr>
+                        {{/addresses}}
+                        {{^addresses}}
+                            <tr>
+                                <td class="col">&nbsp;</td>
+                                <td class="col" colspan="5">No Addresses</td>
+                                <td class="col">&nbsp;</td>
+                            </tr>
+                        {{/addresses}}
+                        <tr>
+                            <th colspan="3">&nbsp;</th>
+                            <th colspan="2">Unassigned Terminals</th>
+                            <th colspan="3">&nbsp;</th>
+                        </tr>
+                        <tr>
+                            <th colspan="3">&nbsp;</th>
+                            <th colspan="2">Serial Number</th>
+                            <th colspan="3">&nbsp;</th>
+                        </tr>
+                        
+                        {{#terminals_unassigned}}
+                        <tr>
+                            <td colspan="3">&nbsp;</td>
+                            <td colspan="2">{{serial_number}}</td>
+                            <td colspan="3">&nbsp;</td>
+                        </tr>
+                        {{/terminals_unassigned}}
+                        {{^terminals_unassigned}}
+                        <tr>
+                            <td colspan="3">&nbsp;</td>
+                            <td colspan="2">No Unassigned Terminals</td>
+                            <td colspan="3">&nbsp;</td>
+                        </tr>
+                        {{/terminals_unassigned}}
+
+                        <tr><td clss="col" colspan="7">&nbsp;</td></tr>
+                        
                     {{/us}}
                     <div class="col-xs-2">&nbsp;</div>
                 {{/retailers}}
                 {{^retailers}}
                     <div class="col-xs-2">&nbsp;</div>
-                    <div class="col-xs-8">Retailers Do Not Exist</div>
+                    <div class="col-xs-8">There are no retailers.</div>
                     <div class="col-xs-2">&nbsp;</div>
                 {{/retailers}}
             </div>

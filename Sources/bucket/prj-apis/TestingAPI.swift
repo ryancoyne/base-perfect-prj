@@ -168,6 +168,10 @@ struct TestingAPI {
                     dt = try? user.detail.jsonEncodedString()
                     print("Retailer Admin: \(dt ?? "")")
 
+//                    user.addRetailerAdmin("sg", 1)
+//                    dt = try? user.detail.jsonEncodedString()
+//                    print("Retailer Admin: \(dt ?? "")")
+
 //                    user.deleteRetailerAdmin("us", 2)
 //                    dt = try? user.detail.jsonEncodedString()
 //                    print("Retailer Admin: \(dt ?? "")")
