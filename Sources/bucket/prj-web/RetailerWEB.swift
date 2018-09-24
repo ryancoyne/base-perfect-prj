@@ -69,7 +69,7 @@ struct RetailerWEB {
 
                 // lets pull out the retailers list (if they have any)
                 guard let retailer_dict:[String:Any] = user?.detail["retailers"] as? [String : Any] else {
-                    response.render(template: "views/retailer/index")
+                    response.render(template: "views/retailer.index")
                     response.completed()
                     return
                 }
@@ -123,7 +123,7 @@ struct RetailerWEB {
                 mustacheRequest(request: request,
                                 response: response,
                                 handler: retailerterminalindexHelper(values: values),
-                                templatePath: "\(request.documentRoot)/views/retailer/index.mustache")
+                                templatePath: "\(request.documentRoot)/views/retailer.index.mustache")
             }
         }
 
@@ -160,7 +160,7 @@ struct RetailerWEB {
                     
                 }
 
-                response.render(template: "views/retailer/index")
+                response.render(template: "views/retailer.index")
                 response.completed()
                 
             }
