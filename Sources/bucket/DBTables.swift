@@ -61,8 +61,8 @@ struct PRJTableLevels {
 struct PRJDBTableDefaults {
     static let title       = "Bucket Technologies"
     static let subTitle    = "Goodbye Coins, Hello Change"
-    static let logo        = "/assets/images/no-logo.png"
-    static let logoSet     = "/assets/images/no-logo.png 1x, /assets/images/no-logo.svg 2x"
+    static let logo        = "/assets/images/Logo-Refresh-RGB_vertical.png"
+    static let logoSet     = "/assets/images/Logo-Refresh-RGB_vertical.png 1x, /assets/images/Logo-Refresh-RGB_vertical.png 2x"
     static let sysinit     = "1"
     static let sampledata  = "1"
 //    static let sampledata  = "0"
