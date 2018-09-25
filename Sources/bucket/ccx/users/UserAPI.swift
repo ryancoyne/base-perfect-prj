@@ -374,8 +374,8 @@ struct UserAPI {
                         user.remoteid = json["id"].stringValue!
                         json.removeValue(forKey: "id")
                     }
-                    if json["email"].isNotNil {
-                        user.email = json["email"].stringValue!
+                    if let em = json["email"].stringValue, !em.isEmpty {
+                        user.email = em
                         json.removeValue(forKey: "email")
                     }
                     
@@ -1325,6 +1325,9 @@ extension Account {
         default:
             if self.detail["isNew"].isNotNil, self.detail["isNew"].boolValue == true {
                 dic["isNew"] = true
+                self.detail.removeValue(forKey: "isNew")
+                dic["detail"].dicValue.removeValue(forKey: "isNew")
+                try! self.save()
             }
         }
         

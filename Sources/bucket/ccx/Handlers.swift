@@ -43,7 +43,17 @@ class Handlers {
 
             var context: [String : Any] = appExtras(request)
 
+            // this allows the conditioning of the user pages based on if they are logged in or not
 			if let i = request.session?.userid, !i.isEmpty { context["authenticated"] = true }
+            
+            // check to see if there are ant retailer thingies in the account
+            if let i = request.session?.userid {
+                let acc = Account()
+                if ((try? acc.get(i)) != nil) {
+                    // lets see if there is a retailer info on the account
+                    if acc.detail["retailer"].isNotNil { context["retailer"] = true }
+                }
+            }
 
 			// add app config vars
 			for i in Handlers.extras(request) { context[i.0] = i.1 }
