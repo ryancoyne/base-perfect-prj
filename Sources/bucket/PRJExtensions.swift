@@ -27,11 +27,22 @@ extension Country {
 }
 
 extension Retailer {
-    static public func exists(withId: String?) -> Bool {
+    static public func exists(schema:String, withId: String?) -> Bool {
         if withId.isNil { return false }
         // Okay lets see:
         let retailer = Retailer()
-        try? retailer.get(withId!)
+        var sql = ""
+        if let theId = withId, theId.isNumeric() {
+            sql = "SELECT id FROM \(schema).retailer WHERE id = \(theId.intValue!)"
+        } else if let theId = withId, !theId.isNumeric()  {
+            sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(theId)'"
+        } else {
+            return false
+        }
+        let res = try? retailer.sqlRows(sql, params: [])
+        if res.isNotNil, let r = res?.first {
+            retailer.to(r)
+        }
         return retailer.id.isNotNil
     }
 
@@ -269,6 +280,11 @@ extension HTTPRequest {
         
         }
         
+        // if they did not pass the country code variable, see if there is a country id and process it
+        if let cid = self.countryId  {
+            return Country.getSchema(cid)
+        }
+        
         // was not passed in correctly
         return nil
         
@@ -313,18 +329,31 @@ extension HTTPRequest {
     
     var retailerId : Int? {
         let sentRetailerId = self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
+        
+        let schema = self.countryCode
+        if schema.isEmptyOrNil { return nil }
+        
         // We need to
         if sentRetailerId?.isNumeric() == true {
             // It is an integer, lets return the integer value:
-            if Retailer.exists(withId: sentRetailerId!) {
+            if let sr = sentRetailerId, sr.isNumeric(), Retailer.exists(schema: schema!, withId: sr) {
                 return sentRetailerId.intValue
             } else {
                 return nil
             }
-        } else {
+        } else if let sr = sentRetailerId.stringValue {
             // they did not send in the numeric code
+            // so check the ID itself
+            let retailer = Retailer()
+            let sql = "SELECT * FROM \(schema!).retailer WHERE retailer_code = '\(sr)'"
+            let rtlr = try? retailer.sqlRows(sql, params: [])
+            if rtlr.isNotNil, let t = rtlr?.first {
+                retailer.to(t)
+                return retailer.id!
+            }
             return nil
         }
+        return nil
     }
 
 }

@@ -200,7 +200,7 @@ final class InitializeData {
         pic.append("/")
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
         pic_icon.append("/")
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(usa.id!),null,null,4, true, 'double', null, \(USDetailDisbursementReasons.crypto))")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for Bucket users.', \(usa.id!),null,null,4, true, 'double', null, \(USDetailDisbursementReasons.crypto))")
 
         print("Adding cashout groups for \(schema): \(checkuser)")
         _ = try? tbl.sqlRows(checkuser, params: [])
@@ -228,7 +228,7 @@ final class InitializeData {
         pic_icon = EnvironmentVariables.sharedInstance.ImageBaseURL!
         pic_icon.append("/groups/bucketcoin/icons/")
         // The pic and pic_icon are being set to null for now since we do not have any images just yet.
-        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for the Bucket users.', \(singapore.id!),null,null,3, true, 'double', null), ")
+        checkuser.append(" ('\(created_time)','\(CCXDefaultUserValues.user_server)','Bucket Coin','This is the cryptocurrency for Bucket users.', \(singapore.id!),null,null,3, true, 'double', null), ")
         
         pic = EnvironmentVariables.sharedInstance.ImageBaseURL!
         pic.append("/groups/donate/backgrounds/donate_to_charity_background.png")

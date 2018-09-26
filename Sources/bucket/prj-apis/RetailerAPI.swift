@@ -603,7 +603,7 @@ struct RetailerAPI {
                     // Return a general error with a different status code that we will know that the retailers are not matching.
                     // We will tell them to go to Bucket for support.  If they report an error of code 454, we know there is an issue with the retailers matching.
                     let retailer = Retailer()
-                    let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(request.retailerId!)' "
+                    let sql = "SELECT * FROM \(schema).retailer WHERE id = '\(request.retailerId!)' "
                     let rtlr = try? retailer.sqlRows(sql, params: [])
                     if rtlr.isNotNil, let c = rtlr!.first {
                         retailer.to(c)
@@ -767,7 +767,7 @@ fileprivate extension HTTPRequest {
         guard let retailerId = retailerId, let countryId = countryId else { return nil }
         let schema = Country.getSchema(countryId)
         let retailer = Retailer()
-        let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(retailerId)'"
+        let sql = "SELECT * FROM \(schema).retailer WHERE id = \(retailerId)"
         if let res = try? retailer.sqlRows(sql, params: []), let row = res.first {
             retailer.to(row)
             return retailer
