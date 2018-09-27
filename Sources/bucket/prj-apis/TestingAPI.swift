@@ -59,7 +59,7 @@ struct TestingAPI {
                 }
                 
                 // Bounce the user... we need a user.
-                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBounce(request, response) else { return }
                 
                 // Okay we have a user.  Lets check if they sent their country code in:
                 guard let countryId = request.countryId else { return response.invalidCountryCode }
@@ -145,7 +145,7 @@ struct TestingAPI {
                     return response.functionNotOn
                 }
                 
-                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBounce(request, response) else { return }
                 
                 // SET TESTING STUFF HERE:
 
@@ -220,7 +220,7 @@ struct TestingAPI {
                     return response.functionNotOn
                 }
                 
-                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBounce(request, response) else { return }
             
                 // get the country code
                 // Here we need to get all the modes, and get all the fields

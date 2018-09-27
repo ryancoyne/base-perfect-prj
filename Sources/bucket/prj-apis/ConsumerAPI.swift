@@ -43,7 +43,7 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check the user:
-                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBounce(request, response) else { return }
                 
                 let buckets = UserBalanceFunctions().getConsumerBalances(request.session!.userid)
                 try? response.setBody(json: ["buckets":buckets])
@@ -57,7 +57,7 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check the user:
-                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBounce(request, response) else { return }
                 guard let countryId = request.countryId else { return response.invalidCountryCode }
                 
                 let amount =
@@ -74,7 +74,7 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBounce(request, response) else { return }
                 
                 guard let countryid = request.countryId, countryid > 0 else { response.invalidCountryCode; return }
                 
@@ -184,7 +184,7 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBounce(request, response) else { return }
                 
                 // Okay, the user is logged in and we have their id!  Lets see if we have the customer code!
                 guard let customerCode = request.customerCode, !customerCode.isEmpty else { return response.invalidCode }
@@ -296,7 +296,7 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBounce(request, response) else { return }
 
                 guard let groupId = request.groupId, groupId != 0 else { return response.invalidGroupCode }
 
@@ -437,7 +437,7 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBounce(request, response) else { return }
 
                 // Here we need to get all the modes, and get all the fields
                 guard let countryCode = request.countryCode else { return response.invalidCountryCode }
@@ -543,7 +543,7 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBounce(request, response) else { return }
                 
                 do {
                     
@@ -802,7 +802,7 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check the user:
-                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBounce(request, response) else { return }
                 
                 // lets get the parms
                 if let json = try? request.postBodyJSON() {

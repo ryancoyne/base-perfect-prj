@@ -477,7 +477,7 @@ struct UserAPI {
                 guard request.SecurityCheck() else { response.badSecurityToken; return }
                 
                 // Check if the user is loged in:
-                guard !Account.userBouce(request, response) else { return }
+                guard !Account.userBounce(request, response) else { return }
                 
                 let user = request.account!
                 
