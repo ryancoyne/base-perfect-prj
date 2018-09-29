@@ -384,7 +384,7 @@ struct TestingAPI {
                     
                     // SECTION 4: Claim the customer codes we just added (to make sure the process is working correctly)
                     
-                    let reup_sql = "SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE client_location LIKE ('TESTING_%') AND country_id = \(countryId)"
+                    let reup_sql = "SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE client_location LIKE ('TESTING_\(user)_%') AND country_id = \(countryId)"
                     let reup_ct = CodeTransaction()
                     let reup_res = try? reup_ct.sqlRows(reup_sql, params: [])
                     
