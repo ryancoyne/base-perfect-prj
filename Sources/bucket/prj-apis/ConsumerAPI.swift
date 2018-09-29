@@ -29,6 +29,8 @@ struct ConsumerAPI {
                 // TRANSACTION ENDPOINTS:
                 ["method":"post",    "uri":"/api/v1/history", "handler":transactionHistory],
                 ["method":"post",    "uri":"/api/v1/redeem/{customerCode}", "handler":redeemCode],
+                // CODE BALANCE
+                ["method":"get",    "uri":"/api/v1/redeem/{customerCode}", "handler":codeBalance],
                 // CASHOUT ENDPOINTS:
                 ["method":"post",    "uri":"/api/v1/cashout/{countryCode}/groups", "handler":cashoutTypes],
                 ["method":"post",    "uri":"/api/v1/cashout/{groupId}/options", "handler":cashoutOptions],
@@ -174,6 +176,97 @@ struct ConsumerAPI {
                 
                 let _ = try? response.setBody(json: mainReturn)
                 response.completed(status: .ok)
+                
+            }
+        }
+
+        //MARK: - Check The Code Balance:
+        public static func codeBalance(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Check if the user is logged in:
+                guard !Account.userBounce(request, response) else { return }
+                
+                // Okay, the user is logged in and we have their id!  Lets see if we have the customer code!
+                guard let customerCode = request.customerCode, !customerCode.isEmpty else { return response.invalidCode }
+                if !customerCode.contains(string: ".") { return response.invalidCode }
+                
+                // grab the schema from the code
+                let index = customerCode.index(of: ".")!
+                var schema = customerCode[...index].lowercased()
+                schema.removeLast()
+                
+                // Awesome.  We have the customer code, and a user.  Now, we need to find the transaction and mark it as redeemed, and add the value to the ledger table!
+                let ct = CodeTransaction()
+                
+                // make sure the schema exists - if not we do not service that country
+                let sqls = "SELECT schema_name FROM information_schema.schemata WHERE schema_name = '\(schema)'"
+                let sct = try? ct.sqlRows(sqls, params: [])
+                guard let _ = sct?.first else { return response.unsupportedCountry }
+                
+                // ok - now we can keep going :)
+                let rsp = try? ct.sqlRows("SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE customer_code = $1", params: ["\(request.customerCode!)"])
+                
+                if rsp?.first.isNil == true {
+                    // if we did not find it, check history to see if we have already redeemed it (we are using the summary table in the public schema
+                    // to avoid performance costly functions looking thru schemas
+                    // (do not use the view deleted no because we want to make sure it was not redeemed and deleted)
+                    let strs = CodeTransactionHistory()
+                    let rsp2 = try? strs.sqlRows("SELECT * FROM \(schema).code_transaction_history WHERE customer_code = $1", params: ["\(request.customerCode!)"])
+                    if let t = rsp2?.first?.data, (t["created"] as! Int) > 0 {
+                        response.invalidCustomerCodeAlreadyRedeemed
+                    } else {
+                        response.invalidCustomerCode
+                    }
+                    return
+                }
+                
+                var retCode:[String:Any] = [:]
+                
+                let userid      = request.session!.userid
+                
+                let sql = "SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE id = \(rsp!.first!.data.id!)"
+                let ctr = try? ct.sqlRows(sql, params: [])
+                if let c = ctr!.first {
+                    ct.to(c)
+                }
+                
+                // if the code is a sample code, see if this is a sample user
+                if ct.isSample() {
+                    
+                    let testA = Account()
+                    _ = try? testA.get(userid)
+                    
+                    if testA.id.isEmpty {
+                        // we did not pull the account - returh the error
+                        return response.unableToGetUser
+                    }
+                    
+                    if !testA.isSample() {
+                        // this is a sample being redeemed on a non-sample account - NO
+                        return response.sampleCodeRedeemError
+                    }
+                    
+                }
+                
+                // prepare the return
+                retCode["amount"] = ct.amount!
+                    
+                
+                //return the correct codes
+                if retCode.count > 0 {
+                    _=try? response.setBody(json: retCode)
+                    response.addHeader(HTTPResponseHeader.Name.cacheControl, value: "no-cache")
+                    response.completed(status: .ok)
+                    return
+                    
+                } else {
+                    // there was a problem....
+                    response.completed(status: .custom(code: 500, message: "There was a problem pulling the data from the tables."))
+                    return
+                }
+                
                 
             }
         }
