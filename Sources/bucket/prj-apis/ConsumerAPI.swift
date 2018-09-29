@@ -186,7 +186,7 @@ struct ConsumerAPI {
                 request, response in
                 
                 // Check if the user is logged in:
-                guard !Account.userBounce(request, response) else { return }
+//                guard !Account.userBounce(request, response) else { return }
                 
                 // Okay, the user is logged in and we have their id!  Lets see if we have the customer code!
                 guard let customerCode = request.customerCode, !customerCode.isEmpty else { return response.invalidCode }
@@ -224,7 +224,7 @@ struct ConsumerAPI {
                 
                 var retCode:[String:Any] = [:]
                 
-                let userid      = request.session!.userid
+                let userid      = request.session?.userid ?? "PUBLIC"
                 
                 let sql = "SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE id = \(rsp!.first!.data.id!)"
                 let ctr = try? ct.sqlRows(sql, params: [])
@@ -266,7 +266,6 @@ struct ConsumerAPI {
                     response.completed(status: .custom(code: 500, message: "There was a problem pulling the data from the tables."))
                     return
                 }
-                
                 
             }
         }
