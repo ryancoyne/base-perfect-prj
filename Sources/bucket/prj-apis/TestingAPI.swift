@@ -14,6 +14,7 @@ import PerfectLocalAuthentication
 import PerfectSessionPostgreSQL
 import PerfectSession
 import SwiftMoment
+import PerfectThread
 
 //MARK: - Retailer API
 /// This Retailer structure supports all the normal endpoints for a user based login application.
@@ -80,56 +81,80 @@ struct TestingAPI {
                     return response.noTerminalsInCountry(countryId: countryId)
                 }
                 
-                // Okay... lets create the codes, and send the email!
-                var theHTML = "<head>\n"
-                 theHTML.append("<style>\n")
-                 theHTML.append("table, th, td { \n")
-                  theHTML.append("   border: 1px solid black; \n")
-                 theHTML.append("    border-collapse: collapse; \n")
-                 theHTML.append("} \n")
-                 theHTML.append("th, td { \n")
-                 theHTML.append("    padding: 40px; \n")
-                 theHTML.append("    text-align: center; \n")
-                 theHTML.append("} \n")
-                theHTML.append(" </style> \n")
-                 theHTML.append("</head> \n")
-                 theHTML.append("<body> \n")
-                    
-                theHTML.append("<p>Hello there!  We have you your QR Codes!!!</p><br /> \n")
-                theHTML.append("<table> \n")
-                
-                var ctr = 0
-                for i in 1...numberOfQrCodes {
-                    
-                    if ctr == 0 {
-                        theHTML.append("<tr> \n")
-                    } else if ctr == 4 {
-                        theHTML.append("</tr> \n")
-                        ctr = 0
-                    }
-                    ctr += 1
-                    
-                    // Create the transaction:
-                    let transaction = CodeTransaction.qrCodeCreate(schema: schema, user: user, terminal: term!, increment: i, minimum: 0.50)
-                    
-                    let theQRCodeURL = transaction?.customer_codeurl ?? ""
-                    let theHTMLQrCodeURL = "https://api.qrserver.com/v1/create-qr-code/?data=\(theQRCodeURL)&size=\(codeSize)x\(codeSize)"
-                    let imageHTML = "<img src='\(theHTMLQrCodeURL)' />"
-                    
-                    theHTML.append("<td >")
-                    theHTML.append(imageHTML)
-                    theHTML.append("</td> \n")
-
-                }
-
-                theHTML.append("</tr></table> \n")
-                theHTML.append("</body> \n")
-
                 let environment = EnvironmentVariables.sharedInstance.Server!
+
+                let queue = Threading.getQueue(name: "code_email", type: .serial)
+                queue.dispatch({
                     
+                    print(" ")
+                    print("//---------//")
+                    print("STARTING 'code_email' queue: \(getNow())")
+                    print("//---------//")
+                    print(" ")
+
+                    // make the variables thread-safe
+                    let t_user = user
+                    let t_term = term!
+                    let t_schema = schema
+                    let t_email = email
+                    let t_environment = environment
+                    
+                    // Okay... lets create the codes, and send the email!
+                    var theHTML = "<head>\n"
+                    theHTML.append("<style>\n")
+                    theHTML.append("table, th, td { \n")
+                    theHTML.append("   border: 1px solid black; \n")
+                    theHTML.append("    border-collapse: collapse; \n")
+                    theHTML.append("} \n")
+                    theHTML.append("th, td { \n")
+                    theHTML.append("    padding: 40px; \n")
+                    theHTML.append("    text-align: center; \n")
+                    theHTML.append("} \n")
+                    theHTML.append(" </style> \n")
+                    theHTML.append("</head> \n")
+                    theHTML.append("<body> \n")
+                    
+                    theHTML.append("<p>Hello there!  We have you your QR Codes!!!</p><br /> \n")
+                    theHTML.append("<table> \n")
+                    
+                    var ctr = 0
+                    for i in 1...numberOfQrCodes {
+                        
+                        if ctr == 0 {
+                            theHTML.append("<tr> \n")
+                        } else if ctr == 4 {
+                            theHTML.append("</tr> \n")
+                            ctr = 0
+                        }
+                        ctr += 1
+                        
+                        // Create the transaction:
+                        let transaction = CodeTransaction.qrCodeCreate(schema: t_schema, user: t_user, terminal: t_term, increment: i, minimum: 0.50)
+                        
+                        let theQRCodeURL = transaction?.customer_codeurl ?? ""
+                        let theHTMLQrCodeURL = "https://api.qrserver.com/v1/create-qr-code/?data=\(theQRCodeURL)&size=\(codeSize)x\(codeSize)"
+                        let imageHTML = "<img src='\(theHTMLQrCodeURL)' />"
+                        
+                        theHTML.append("<td >")
+                        theHTML.append(imageHTML)
+                        theHTML.append("</td> \n")
+                        
+                    }
+                    
+                    theHTML.append("</tr></table> \n")
+                    theHTML.append("</body> \n")
+
+                    Utility.sendMail(name: "Bucket Technologies", address: t_email, subject: "QR Code Generation for \(t_environment)", html: theHTML, text: "Please Enable HTML email to get your codes.")
+
+                    print(" ")
+                    print("//---------//")
+                    print("ENDING 'code_email' queue: \(getNow())")
+                    print("//---------//")
+
+                })
+                
                 // Send the response:
-                try? response.setBody(json: ["message":"Success!  Your QR codes are on their way, by email."]).completed(status: .ok)
-                Utility.sendMail(name: "Bucket Technologies", address: email, subject: "QR Code Generation for \(environment)", html: theHTML, text: "Please Enable HTML email to get your codes.")
+                try? response.setBody(json: ["message":"Success!  Your QR codes are being processed, check your email."]).completed(status: .ok)
                 return
                 
             }
@@ -366,58 +391,83 @@ struct TestingAPI {
                     let number_of_retailers = Double(self.retailer_names.count)
                     
                     if reup_res.isNotNil {
-                        for i in reup_res! {
+
+                        let queue = Threading.getQueue(name: "code_claim", type: .serial)
+                        
+                        queue.dispatch({
                             
-                            // redeem the transactions
+                            let t_schema = schema
+                            let t_countryId = countryId
+                            let t_user = user
+                            let t_redeemed = redeemed
+                            let t_number_of_retailers = number_of_retailers
                             
-                            let ct = CodeTransaction()
-                            let rsp = try? ct.sqlRows("SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE customer_code = $1 AND country_id = $2 ", params: ["\(i.data["customer_code"]!)", countryId])
-                            
-                            if let r = rsp?.first {
+                            print(" ")
+                            print("//---------//")
+                            print("STARTING 'code_claim' queue: \(getNow())")
+                            print("//---------//")
+                            print(" ")
+
+                            for i in reup_res! {
                                 
-                                ct.to(r)
+                                // redeem the transactions
                                 
-                                ct.redeemed         = redeemed
-                                ct.redeemedby       = user
-                                ct.status           = CodeTransactionCodes.merchant_pending
+                                let ct = CodeTransaction()
+                                let rsp = try? ct.sqlRows("SELECT * FROM \(t_schema).code_transaction_view_deleted_no WHERE customer_code = $1 AND country_id = $2 ", params: ["\(i.data["customer_code"]!)", t_countryId])
                                 
-                                // set the random retailer
-                                // rnd is between 0.0 and 1.0
-                                let rnd = drand48()
-                                var this_retailer_name = ""
-                                if rnd > 0.0 {
-                                    let retailer_raw = rnd * (number_of_retailers - 1)
-                                    let retailer_index = Int(retailer_raw.rounded())
-                                    this_retailer_name = retailer_names[retailer_index]
-                                } else {
-                                    this_retailer_name = retailer_names[0]
-                                }
-                                ct.description = this_retailer_name
-                                
-                                if let _            = try? ct.saveWithCustomType(schemaIn: schema, user) {
+                                if let r = rsp?.first {
                                     
-                                    // now archive the record
-                                    ct.archiveRecord()
+                                    ct.to(r)
                                     
-                                    // this means it was saved - audit and archive
-                                    AuditFunctions().redeemCustomerCodeAuditRecord(ct)
+                                    ct.redeemed         = t_redeemed
+                                    ct.redeemedby       = t_user
+                                    ct.status           = CodeTransactionCodes.merchant_pending
                                     
-                                    // update the users record
-                                    UserBalanceFunctions().adjustUserBalance(schemaId: nil ,user, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
+                                    // set the random retailer
+                                    // rnd is between 0.0 and 1.0
+                                    let rnd = drand48()
+                                    var this_retailer_name = ""
+                                    if rnd > 0.0 {
+                                        let retailer_raw = rnd * (t_number_of_retailers - 1)
+                                        let retailer_index = Int(retailer_raw.rounded())
+                                        this_retailer_name = retailer_names[retailer_index]
+                                    } else {
+                                        this_retailer_name = retailer_names[0]
+                                    }
+                                    ct.description = this_retailer_name
                                     
-                                    nbr_added += 1
-                                    
+                                    if let _            = try? ct.saveWithCustomType(schemaIn: t_schema, t_user) {
+                                        
+                                        // now archive the record
+                                        ct.archiveRecord()
+                                        
+                                        // this means it was saved - audit and archive
+                                        AuditFunctions().redeemCustomerCodeAuditRecord(ct)
+                                        
+                                        // update the users record
+                                        UserBalanceFunctions().adjustUserBalance(schemaId: nil ,t_user, countryid: ct.country_id!, increase: ct.amount!, decrease: 0.0)
+                                        
+                                        nbr_added += 1
+                                        
+                                    }
                                 }
                             }
-                        }
-                    }
-                    
-                    let wallet = UserBalanceFunctions().getConsumerBalances(user)
-                    if wallet.count > 0 {
-                        endmessage["buckets"] = wallet
+
+                            let wallet = UserBalanceFunctions().getConsumerBalances(t_user)
+                            if wallet.count > 0 {
+                                endmessage["buckets"] = wallet
+                            }
+
+                            print(" ")
+                            print("//---------//")
+                            print("ENDING 'code_claim' queue: \(getNow())")
+                            print("//---------//")
+
+                        })
+
                     }
 
-                    endmessage["message"] = "Added \(nbr_added) transactions and redeemed them to your account!"
+                    endmessage["message"] = "We are adding transactions and redeemed them to your account!"
                     
                 }
                 
