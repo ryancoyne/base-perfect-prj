@@ -35,28 +35,28 @@ struct AuditRecordDictionary {
         }
     }
     
-    var group : String? {
+    var audit_group : String? {
         get {
-            return self.dic["group"].stringValue
+            return self.dic["audit_group"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["group"] = newValue.stringValue
+                self.dic["audit_group"] = newValue.stringValue
             } else {
-                self.dic.removeValue(forKey: "group")
+                self.dic.removeValue(forKey: "audit_group")
             }
         }
     }
     
-    var action : String? {
+    var audit_action : String? {
         get {
-            return self.dic["action"].stringValue
+            return self.dic["audit_action"].stringValue
         }
         set {
             if newValue != nil {
-                self.dic["action"] = newValue.stringValue
+                self.dic["audit_action"] = newValue.stringValue
             } else {
-                self.dic.removeValue(forKey: "action")
+                self.dic.removeValue(forKey: "audit_action")
             }
         }
     }

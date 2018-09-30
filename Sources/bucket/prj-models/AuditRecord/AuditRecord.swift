@@ -21,8 +21,8 @@ public class AuditRecord: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var group          : String? = nil
-    var action         : String? = nil
+    var audit_group          : String? = nil
+    var audit_action         : String? = nil
     var row_data       : [String:Any]? = nil
     var changed_fields : [String:Any]? = nil
     var description    : String? = nil
@@ -62,12 +62,12 @@ public class AuditRecord: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.auditRecordDic.action {
-            action = data
+        if let data = this.data.auditRecordDic.audit_action {
+            audit_action = data
         }
         
-        if let data = this.data.auditRecordDic.group {
-            group = data
+        if let data = this.data.auditRecordDic.audit_group {
+            audit_group = data
         }
         
         if let data = this.data.auditRecordDic.description {
@@ -100,14 +100,14 @@ public class AuditRecord: PostgresStORM {
             
             switch key.lowercased() {
             
-            case "group":
+            case "audit_group":
                 if (value as? String).isNotNil {
-                    self.group = (value as! String)
+                    self.audit_group = (value as! String)
                 }
 
-            case "action":
+            case "audit_action":
                 if (value as? String).isNotNil {
-                    self.action = (value as! String)
+                    self.audit_action = (value as! String)
                 }
                 
             case "description":
@@ -165,12 +165,12 @@ public class AuditRecord: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
-        if self.group.isNotNil {
-            dictionary.auditRecordDic.group = self.group
+        if self.audit_group.isNotNil {
+            dictionary.auditRecordDic.audit_group = self.audit_group
         }
 
-        if self.action.isNotNil {
-            dictionary.auditRecordDic.action = self.action
+        if self.audit_action.isNotNil {
+            dictionary.auditRecordDic.audit_action = self.audit_action
         }
 
         if self.description.isNotNil {
@@ -193,11 +193,11 @@ public class AuditRecord: PostgresStORM {
         
         var diff = true
         
-        if diff == true, self.group != targetItem.group {
+        if diff == true, self.audit_group != targetItem.audit_group {
             diff = false
         }
         
-        if diff == true, self.action != targetItem.action {
+        if diff == true, self.audit_action != targetItem.audit_action {
             diff = false
         }
 
@@ -205,15 +205,92 @@ public class AuditRecord: PostgresStORM {
             diff = false
         }
         
-        if diff == true, self.row_data != targetItem.row_data {
-            diff = false
+        if diff {
+            
+            if self.row_data.isNotNil, targetItem.row_data.isNotNil,
+                self.row_data?.count == targetItem.row_data?.count {
+                
+                var found = true
+                for (key, value) in self.row_data! {
+                    // if the key is not in the target - then true
+                    if targetItem.row_data.isNotNil, let val = targetItem.row_data![key] {
+                        if !self.checkValuesEqual(source: value, destination: val) { diff = false } else { diff = true; break }
+                    } else {
+                        found = false
+                    }
+                }
+                // this is if we did not find one of the particular fields
+                if !found { diff = true }
+            } else if self.row_data.isNil && targetItem.row_data.isNil {
+                // do nothing
+            } else {
+                // the number of records is different between the two
+                diff = true
+            }
         }
-        
-        if diff == true, self.changed_fields != targetItem.changed_fields {
-            diff = false
+
+        if diff {
+            
+            if self.changed_fields.isNotNil, targetItem.changed_fields.isNotNil,
+                self.changed_fields?.count == targetItem.changed_fields?.count {
+                
+                var found = true
+                for (key, value) in self.changed_fields! {
+                    // if the key is not in the target - then true
+                    if targetItem.changed_fields.isNotNil, let val = targetItem.changed_fields![key] {
+                        if !self.checkValuesEqual(source: value, destination: val) { diff = false } else { diff = true; break }
+                    } else {
+                        found = false
+                    }
+                }
+                // this is if we did not find one of the particular fields
+                if !found { diff = true }
+            } else if self.changed_fields.isNil && targetItem.changed_fields.isNil {
+                // do nothing
+            } else {
+                // the number of records is different between the two
+                diff = true
+            }
         }
 
         return diff
         
+    }
+    
+    private func checkValuesEqual(source: Any?, destination: Any?)->Bool {
+        
+        // if they are both nil, they are equal
+        if source.isNil && destination.isNil { return true }
+        if source.isNil && destination.isNotNil { return false }
+        if source.isNotNil && destination.isNil { return false }
+
+        if (source is String) && !(destination is String) { return false }
+        if (source is Int) && !(destination is Int) { return false }
+        if (source is Double) && !(destination is Double) { return false }
+        if (source is [String:Any]) && !(destination is [String:Any]) { return false }
+
+        switch source {
+            
+        case let o_string as String:
+            let d_string = destination as! String
+            if o_string == d_string { return true }
+
+        case let o_int as Int:
+            let d_int = destination as! Int
+            if o_int == d_int { return true }
+            
+        case let o_double as Double:
+            let d_double = destination as! Double
+            if o_double == d_double { return true }
+            
+        case let o_bool as Bool:
+            let d_bool = destination as! Bool
+            if o_bool == d_bool { return true }
+                        
+        default:
+            print("The type for the comparison in AuditRecord is not found.")
+        }
+        
+        return false
     }
 }

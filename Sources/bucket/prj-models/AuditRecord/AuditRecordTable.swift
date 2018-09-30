@@ -62,7 +62,8 @@ final class AuditRecordTable {
             }
         } else {
             // add the deleted views
-            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsYes(tbl.table()), params: [])
+            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsYes(tbl.table(), tbl.schema()), params: [])
+            
             // new one - set the default 1.00
             thesql = "INSERT INTO config(name,val) VALUES('view_\(tbl.schema())_\(tbl.table())_deleted_yes','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
@@ -77,7 +78,7 @@ final class AuditRecordTable {
                 self.update(currentlevel: testval!)
             }
         } else {
-            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsNo(tbl.table()), params: [])
+            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsNo(tbl.table(), tbl.schema()), params: [])
             // new one - set the default 1.00
             thesql = "INSERT INTO config(name,val) VALUES('view_\(tbl.schema())_\(tbl.table())_deleted_no','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
@@ -99,13 +100,13 @@ final class AuditRecordTable {
         
         // common
         createsql.append("( ")
-        createsql.append("id integer NOT NULL DEFAULT nextval('\(tbl.table())_id_seq'::regclass), ")
+        createsql.append("id integer NOT NULL DEFAULT nextval('\(tbl.schema()).\(tbl.table())_id_seq'::regclass), ")
         
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
-        createsql.append("group text COLLATE pg_catalog.default, ")
-        createsql.append("action text COLLATE pg_catalog.default, ")
+        createsql.append("audit_group text COLLATE pg_catalog.default, ")
+        createsql.append("audit_action text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
         createsql.append("row_data jsonb, ")
         createsql.append("changed_fields jsonb, ")

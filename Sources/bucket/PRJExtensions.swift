@@ -9,6 +9,14 @@ extension String {
     }
 }
 
+extension Dictionary {
+    
+    static func == <K, V>(left: [K:V?], right: [K:V?]) -> Bool {
+        guard let left = left as? [K: V], let right = right as? [K: V] else { return false }
+        return NSDictionary(dictionary: left).isEqual(to: right)
+    }
+}
+
 extension Country {
     static public func idWith(_ alphaCountryCode: String?) -> Int? {
         if alphaCountryCode.isNil { return nil }
