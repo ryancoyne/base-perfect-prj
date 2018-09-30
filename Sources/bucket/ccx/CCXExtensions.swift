@@ -1806,7 +1806,26 @@ extension Account {
             try acc.isUnique()
             //            print("passed unique test")
             try acc.create()
+            
+            AuditRecordActions.userAdd(schema: nil,
+                                       session_id: "NO SESSION ID: \(CCXServiceClass.sharedInstance.getNow())",
+                                       user: acc.id,
+                                       row_data: nil,
+                                       changed_fields: nil,
+                                       description: "New user registered.",
+                                       changedby: nil)
+            
         } catch {
+            
+            AuditRecordActions.addGenericrecord(schema: nil,
+                                                session_id: "NO SESSION ID: \(CCXServiceClass.sharedInstance.getNow())",
+                                                audit_group: "USER",
+                                                audit_action: "ERROR",
+                                                row_data: nil,
+                                                changed_fields: nil,
+                                                description: "Creating user failed. \(error.localizedDescription)",
+                                                user: nil)
+            
             print(error)
             return .registerError
         }
@@ -1915,14 +1934,45 @@ extension Account {
     static func userBounce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {
         
         // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-        guard request.SecurityCheck() else { response.badSecurityToken; return true }
+        guard request.SecurityCheck() else {
+            
+            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
+            AuditRecordActions.securityFailure(schema: request.countryCode,
+                                               session_id: session,
+                                               user: request.session?.userid,
+                                               row_data: nil,
+                                               description: "The security token failed to pass the check.")
+            
+            response.badSecurityToken
+            return true
+        }
         
         // Here we want to check the csrf & the authorization.
         guard let csrf = request.session?.data["csrf"].stringValue, let sendCsrf = request.header(.custom(name: "X-CSRF-Token")) else {
+            
+            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
+            AuditRecordActions.securityFailure(schema: request.countryCode,
+                                               session_id: session,
+                                               user: request.session?.userid,
+                                               row_data: nil,
+                                               description: "The CSRF token failed to pass the check.")
+            
             response.notLoggedIn()
             return true
         }
-        guard request.session?.userid.isEmpty == false && csrf == sendCsrf else {  response.notLoggedIn(); return true  }
+        guard request.session?.userid.isEmpty == false && csrf == sendCsrf else {
+            
+            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
+            AuditRecordActions.securityFailure(schema: request.countryCode,
+                                               session_id: session,
+                                               user: request.session?.userid,
+                                               row_data: nil,
+                                               description: "The user is empty and CSRF is not correct.")
+
+            response.notLoggedIn()
+            return true
+            
+        }
         // Okay they are logged in.  Lets see when the last time, if they have, used any of the API's:
         let user = Account()
         try? user.get(request.session!.userid)
@@ -1965,19 +2015,59 @@ extension Account {
     static func adminBouce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {
         
         // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-        guard request.SecurityCheck() else { response.badSecurityToken; return true }
+        guard request.SecurityCheck() else {
+            
+            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
+            AuditRecordActions.securityFailure(schema: request.countryCode,
+                                               session_id: session,
+                                               user: request.session?.userid,
+                                               row_data: nil,
+                                               description: "The security token failed to pass the check.")
+
+            response.badSecurityToken
+            return true
+            
+        }
 
         // Here we want to check the csrf & the authorization.
         guard let csrf = request.session?.data["csrf"].stringValue, let sendCsrf = request.header(.custom(name: "X-CSRF-Token")) else {
+            
+            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
+            AuditRecordActions.securityFailure(schema: request.countryCode,
+                                               session_id: session,
+                                               user: request.session?.userid,
+                                               row_data: nil,
+                                               description: "The CSRF token failed to pass the check.")
+
             response.notLoggedIn()
             return true
         }
-        guard request.session?.userid.isEmpty == false && csrf == sendCsrf else {  response.notLoggedIn(); return true  }
+        guard request.session?.userid.isEmpty == false && csrf == sendCsrf else {
+            
+            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
+            AuditRecordActions.securityFailure(schema: request.countryCode,
+                                               session_id: session,
+                                               user: request.session?.userid,
+                                               row_data: nil,
+                                               description: "The user is empty and CSRF is not correct.")
+
+            response.notLoggedIn()
+            return true
+            
+        }
         // Okay they are logged in.  Lets see when the last time, if they have, used any of the API's:
         let user = Account()
         try? user.get(request.session!.userid)
 
         if !user.isAdmin() {
+            
+            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
+            AuditRecordActions.securityFailure(schema: request.countryCode,
+                                               session_id: session,
+                                               user: request.session?.userid,
+                                               row_data: nil,
+                                               description: "The user is not an admin and was trying to access an admin area.")
+
             return true
         }
         
