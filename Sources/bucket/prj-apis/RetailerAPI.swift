@@ -541,6 +541,18 @@ struct RetailerAPI {
                         
                         json!["bucketTransactionId"] = transaction.id
                         
+                        var rn:[String:Any] = transaction.asDictionary()
+                        for (key, val) in json! {
+                            rn[key] = val
+                        }
+                        
+                        AuditRecordActions.customerCodeAdd(schema: schema,
+                                                           row_data: rn,
+                                                           changed_fields: nil,
+                                                           description: "Customer Code \(transaction.customer_code!) was created",
+                                                           changedby: nil)
+                        
+                        
                         // if we are here then everything went well
                         try? response.setBody(json: json!)
                             .completed(status: .ok)

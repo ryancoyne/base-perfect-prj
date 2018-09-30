@@ -728,6 +728,14 @@ public class CodeTransaction: PostgresStORM {
             // Save the transaction
             let _ = try? transaction.saveWithCustomType(schemaIn: schema, CCXDefaultUserValues.user_server)
             
+            // audit the record creation
+            let rd = transaction.asDictionary()
+            AuditRecordActions.customerCodeAdd(schema: schema,
+                                               row_data: rd,
+                                               changed_fields: nil,
+                                               description: "Added customer code \(transaction.customer_code!).",
+                                               changedby: "\(transaction.createdby!)")
+
             // and now - lets save the transaction in the Audit table
             AuditFunctions().addCustomerCodeAuditRecord(transaction)
             
