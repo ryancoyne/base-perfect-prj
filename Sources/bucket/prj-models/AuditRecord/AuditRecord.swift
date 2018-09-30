@@ -21,11 +21,12 @@ public class AuditRecord: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var audit_group          : String? = nil
-    var audit_action         : String? = nil
-    var row_data       : [String:Any]? = nil
-    var changed_fields : [String:Any]? = nil
-    var description    : String? = nil
+    var session_id      : String? = nil
+    var audit_group     : String? = nil
+    var audit_action    : String? = nil
+    var row_data        : [String:Any]? = nil
+    var changed_fields  : [String:Any]? = nil
+    var description     : String? = nil
     
     //MARK: Table name
     override public func table() -> String { return "audit_record" }
@@ -60,6 +61,10 @@ public class AuditRecord: PostgresStORM {
         
         if let data = this.data.deletedBy {
             deletedby = data
+        }
+        
+        if let data = this.data.auditRecordDic.session_id {
+            session_id = data
         }
         
         if let data = this.data.auditRecordDic.audit_action {
@@ -100,6 +105,11 @@ public class AuditRecord: PostgresStORM {
             
             switch key.lowercased() {
             
+            case "session_id":
+                if (value as? String).isNotNil {
+                    self.session_id = (value as! String)
+                }
+
             case "audit_group":
                 if (value as? String).isNotNil {
                     self.audit_group = (value as! String)
@@ -164,7 +174,11 @@ public class AuditRecord: PostgresStORM {
         if self.deletedby.isNotNil {
             dictionary.deletedBy = self.deletedby
         }
-        
+
+        if self.session_id.isNotNil {
+            dictionary.auditRecordDic.session_id = self.session_id
+        }
+
         if self.audit_group.isNotNil {
             dictionary.auditRecordDic.audit_group = self.audit_group
         }
@@ -196,7 +210,11 @@ public class AuditRecord: PostgresStORM {
         if diff == true, self.audit_group != targetItem.audit_group {
             diff = false
         }
-        
+
+        if diff == true, self.session_id != targetItem.session_id {
+            diff = false
+        }
+
         if diff == true, self.audit_action != targetItem.audit_action {
             diff = false
         }

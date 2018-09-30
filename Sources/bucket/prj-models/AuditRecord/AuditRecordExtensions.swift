@@ -35,6 +35,19 @@ struct AuditRecordDictionary {
         }
     }
     
+    var session_id : String? {
+        get {
+            return self.dic["session_id"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["session_id"] = newValue.stringValue
+            } else {
+                self.dic.removeValue(forKey: "session_id")
+            }
+        }
+    }
+    
     var audit_group : String? {
         get {
             return self.dic["audit_group"].stringValue

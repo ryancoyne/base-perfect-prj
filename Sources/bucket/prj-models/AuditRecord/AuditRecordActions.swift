@@ -20,6 +20,7 @@ final class AuditRecordActions {
     //MARK:-
     //MARK: Add a generic audit record
     static func addGenericrecord(schema:String? = nil,
+                                 session_id: String? = nil,
                                  audit_group: String,
                                  audit_action: String,
                                  row_data: [String:Any]? = nil,
@@ -40,6 +41,7 @@ final class AuditRecordActions {
         // save using the private function
         self.addAuditRecord(audit_group: audit_group,
                             audit_action: audit_action,
+                            session_id: session_id,
                             row_data: row_data,
                             changed_fields: changed_fields,
                             description: description,
@@ -47,8 +49,38 @@ final class AuditRecordActions {
     }
     
     //MARK: --
+    //MARK: Error In Security
+    static func securityFailure(schema: String? = nil,
+                                session_id: String? = nil,
+                                user:String? = nil,
+                                row_data:[String:Any]? = nil,
+                                description:String? = nil) {
+        
+        // make sure the schema has been added to the row data
+        var rd:[String:Any] = row_data ?? [:]
+        if schema.isNil {
+            rd["schema"] = "public"
+        } else if schema!.isEmpty {
+            rd["schema"] = "public"
+        } else {
+            rd["schema"] = schema
+        }
+        
+        if user.isNotNil {
+            rd["user"] = user!
+        }
+        
+        self.addAuditRecord(audit_group: "SECURITY",
+                            audit_action: "FAILURE",
+                            session_id: session_id,
+                            row_data: rd,
+                            description: description)
+    }
+
+    //MARK: --
     //MARK: User Functions
     static func userAdd(schema: String? = nil,
+                        session_id: String? = nil,
                         user:String? = nil,
                         row_data:[String:Any]? = nil,
                         changed_fields:[String:Any]? = nil,
@@ -71,6 +103,7 @@ final class AuditRecordActions {
 
         self.addAuditRecord(audit_group: "USER",
                             audit_action: "ADD",
+                            session_id: session_id,
                             row_data: rd,
                             changed_fields: changed_fields,
                             description: description,
@@ -78,6 +111,7 @@ final class AuditRecordActions {
     }
     
     static func userChange(schema: String? = nil,
+                           session_id: String? = nil,
                            user:String,
                            row_data:[String:Any]? = nil,
                            changed_fields:[String:Any]? = nil,
@@ -98,6 +132,7 @@ final class AuditRecordActions {
 
         self.addAuditRecord(audit_group: "USER",
                             audit_action: "UPDATE",
+                            session_id: session_id,
                             row_data: rd,
                             changed_fields: changed_fields,
                             description: description,
@@ -105,6 +140,7 @@ final class AuditRecordActions {
     }
 
     static func userDelete(schema: String? = nil,
+                           session_id: String? = nil,
                            user:String,
                            row_data:[String:Any]? = nil,
                            changed_fields:[String:Any]? = nil,
@@ -125,6 +161,7 @@ final class AuditRecordActions {
 
         self.addAuditRecord(audit_group: "USER",
                             audit_action: "DELETE",
+                            session_id: session_id,
                             row_data: rd,
                             changed_fields: changed_fields,
                             description: description,
@@ -134,6 +171,7 @@ final class AuditRecordActions {
     //MARK: --
     //MARK: Customer Code functions
     static func customerCodeAdd(schema: String? = nil,
+                                session_id: String? = nil,
                                 row_data:[String:Any]? = nil,
                                 changed_fields:[String:Any]? = nil,
                                 description:String? = nil,
@@ -151,6 +189,7 @@ final class AuditRecordActions {
 
         self.addAuditRecord(audit_group: "CODE",
                             audit_action: "ADD",
+                            session_id: session_id,
                             row_data: rd,
                             changed_fields: changed_fields,
                             description: description,
@@ -158,6 +197,7 @@ final class AuditRecordActions {
     }
     
     static func customerCodeChange(schema: String? = nil,
+                                   session_id: String? = nil,
                                    row_data:[String:Any]? = nil,
                                    changed_fields:[String:Any]? = nil,
                                    description:String? = nil,
@@ -175,6 +215,7 @@ final class AuditRecordActions {
 
         self.addAuditRecord(audit_group: "CODE",
                             audit_action: "UPDATE",
+                            session_id: session_id,
                             row_data: rd,
                             changed_fields: changed_fields,
                             description: description,
@@ -182,6 +223,7 @@ final class AuditRecordActions {
     }
 
     static func customerCodeRedeemed(schema: String? = nil,
+                                     session_id: String? = nil,
                                      redeemedby: String,
                                      row_data:[String:Any]? = nil,
                                      changed_fields:[String:Any]? = nil,
@@ -202,6 +244,7 @@ final class AuditRecordActions {
         
         self.addAuditRecord(audit_group: "CODE",
                             audit_action: "REDEEMED",
+                            session_id: session_id,
                             row_data: rd,
                             changed_fields: changed_fields,
                             description: description,
@@ -209,6 +252,7 @@ final class AuditRecordActions {
     }
 
     static func customerCodeDelete(schema: String? = nil,
+                                   session_id: String? = nil,
                                    row_data:[String:Any]? = nil,
                                    changed_fields:[String:Any]? = nil,
                                    description:String? = nil,
@@ -226,16 +270,46 @@ final class AuditRecordActions {
 
         self.addAuditRecord(audit_group: "CODE",
                             audit_action: "DELETE",
+                            session_id: session_id,
                             row_data: rd,
                             changed_fields: changed_fields,
                             description: description,
                             user: changedby)
     }
 
-    
+    //MARK: --
+    //MARK: Page Viewing
+    static func pageView(schema: String? = nil,
+                         session_id: String? = nil,
+                         page: String,
+                         row_data:[String:Any]? = nil,
+                         description:String? = nil,
+                         viewedby:String? = nil) {
+
+        // make sure the schema has been added to the row data
+        var rd:[String:Any] = row_data ?? [:]
+        if schema.isNil {
+            rd["schema"] = "public"
+        } else if schema!.isEmpty {
+            rd["schema"] = "public"
+        } else {
+            rd["schema"] = schema
+        }
+        
+        rd["page"] = page
+        
+        self.addAuditRecord(audit_group: "PAGE",
+                            audit_action: "VIEW",
+                            session_id: session_id,
+                            row_data: rd,
+                            description: description,
+                            user: viewedby)
+    }
+
     //MARK: --
     //MARK: Cashout
     static func cashOut(schema: String? = nil,
+                        session_id: String? = nil,
                         total_cashout_amount: Double,
                         code_and_amount: [String:Double],
                         row_data:[String:Any]? = nil,
@@ -265,8 +339,9 @@ final class AuditRecordActions {
             rd["customer_codes"] = codes
         }
         
-        self.addAuditRecord(audit_group: "CODE",
-                            audit_action: "DELETE",
+        self.addAuditRecord(audit_group: "CASHOUT",
+                            audit_action: "ADD",
+                            session_id: session_id,
                             row_data: rd,
                             changed_fields: changed_fields,
                             description: description,
@@ -278,6 +353,7 @@ final class AuditRecordActions {
     //MARK: Private Functions
     private static func addAuditRecord(audit_group: String,
                                        audit_action: String,
+                                       session_id: String? = nil,
                                        row_data: [String:Any]? = nil,
                                        changed_fields: [String:Any]? = nil,
                                        description: String? = nil,
@@ -286,6 +362,7 @@ final class AuditRecordActions {
         // save the record
         let tbl = AuditRecord()
         
+        tbl.session_id = session_id
         tbl.audit_group = audit_group
         tbl.audit_action = audit_action
         tbl.description = description

@@ -105,6 +105,7 @@ final class AuditRecordTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
+        createsql.append("session_id text COLLATE pg_catalog.default, ")
         createsql.append("audit_group text COLLATE pg_catalog.default, ")
         createsql.append("audit_action text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")

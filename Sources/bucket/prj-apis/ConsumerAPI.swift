@@ -47,6 +47,12 @@ struct ConsumerAPI {
                 // Check the user:
                 guard !Account.userBounce(request, response) else { return }
                 
+                AuditRecordActions.pageView(schema: "public",
+                                            page: "/api/v1/balance",
+                                            row_data: nil,
+                                            description: nil,
+                                            viewedby: request.session!.userid)
+                
                 let buckets = UserBalanceFunctions().getConsumerBalances(request.session!.userid)
                 try? response.setBody(json: ["buckets":buckets])
                     .completed(status: .ok)
@@ -62,6 +68,12 @@ struct ConsumerAPI {
                 guard !Account.userBounce(request, response) else { return }
                 guard let countryId = request.countryId else { return response.invalidCountryCode }
                 
+                AuditRecordActions.pageView(schema: "public",
+                                            page: "/api/v1/balance/{countryId}",
+                                            row_data: ["countryId":countryId],
+                                            description: nil,
+                                            viewedby: request.session!.userid)
+
                 let amount =
                     UserBalanceFunctions().getCurrentBalance(request.session!.userid, countryid: countryId)
                 try? response.setBody(json: ["amount":amount])
