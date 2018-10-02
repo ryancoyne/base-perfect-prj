@@ -130,7 +130,11 @@ struct RetailerAPI {
                     let add_sql = "SELECT * FROM \(schema).\(add.table()) WHERE retailer_id = \(r.id!)"
                     let addresses = try? add.sqlRows(add_sql, params: [])
                     if let _ = addresses, addresses!.count < 2, let a = addresses!.first {
-                        _ = try? add.get(a.data.id!)
+                        let a_sql = "SELECT * FROM \(schema).\(add.table()) WHERE id = \(a.data.id!)"
+                        let adr = try? add.sqlRows(a_sql, params: [])
+                        if adr.isNotNil {
+                            add.to(adr!.first!)
+                        }
                     }
  //MARK--
 // CHANGE ME WHEN THE WEBPAGE IS UP
