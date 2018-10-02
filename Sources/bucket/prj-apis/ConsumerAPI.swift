@@ -145,6 +145,13 @@ struct ConsumerAPI {
                 
                 print(sql)
                 
+                var callParms:[String:Any] = [:]
+                callParms["LIMIT"] = "\(pagination.limitNumber)"
+                callParms["OFFSET"] = "\(pagination.offsetNumber)"
+                callParms["country_id"] = "\(countryid)"
+                callParms["redeemedby"] = "\(userId)"
+
+                
                 var substuff:[Any] = []
                 
                 let cth = CodeTransactionHistory()
@@ -184,7 +191,15 @@ struct ConsumerAPI {
                     return response.unsupportedCountry
                 }
 
-                let mainReturn:[String:Any] = ["transactions":substuff]
+                var mainReturn:[String:Any] = ["transactions":substuff]
+                mainReturn["parms"] = callParms
+                
+                AuditRecordActions.pageView(schema: schema,
+                                            session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                            page: "/api/v1/history",
+                                            row_data: mainReturn,
+                                            description: nil,
+                                            viewedby: request.session!.userid)
                 
                 let _ = try? response.setBody(json: mainReturn)
                 response.completed(status: .ok)

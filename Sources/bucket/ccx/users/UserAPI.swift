@@ -92,6 +92,14 @@ struct UserAPI {
 
                 if request.session?.userid.isEmpty == false {
                     
+                    AuditRecordActions.userLogout(schema: nil,
+                                                  session_id: request.session?.token,
+                                                  user: request.session?.userid,
+                                                  row_data: nil,
+                                                  changed_fields: nil,
+                                                  description: nil,
+                                                  changedby: request.session?.userid)
+                    
                     PostgresSessions().destroy(request, response)
                     request.session = PerfectSession()
                     response.request.session = PerfectSession()
@@ -130,6 +138,15 @@ struct UserAPI {
 
                 // If they are already logged in, just send back their information:
                 if let s = request.session, !s.userid.isEmpty, s.data["csrf"].stringValue == request.header(.custom(name: "X-CSRF-Token")) {
+                    
+                    AuditRecordActions.userLogin(schema: nil,
+                                                  session_id: request.session?.token,
+                                                  user: request.session?.userid,
+                                                  row_data: nil,
+                                                  changed_fields: nil,
+                                                  description: "The user was already logged in and tried to login again.",
+                                                  changedby: request.session?.userid)
+                    
                     response.alreadyAuthenticated(request)
                     return
                 }
@@ -144,6 +161,14 @@ struct UserAPI {
                         
                         if let acc = try? Account.login(username, password) {
                             
+                            AuditRecordActions.userLogin(schema: nil,
+                                                         session_id: request.session?.token,
+                                                         user: request.session?.userid,
+                                                         row_data: nil,
+                                                         changed_fields: nil,
+                                                         description: "The user logged in.",
+                                                         changedby: acc.id)
+
                             request.session?.userid = acc.id
                             try? response.setBody(json: acc.asDictionary)
                                 .setHeader(.contentType, value: "application/json")
@@ -151,6 +176,15 @@ struct UserAPI {
                             
                         } else {
                             // Failed on login
+
+                            AuditRecordActions.userLogin(schema: nil,
+                                                         session_id: request.session?.token,
+                                                         user: request.session?.userid,
+                                                         row_data: nil,
+                                                         changed_fields: nil,
+                                                         description: "The user \(username) tried to log in.  FAILURE",
+                                                         changedby: nil)
+
                             response.invalidCredentials
                             return
                             
@@ -159,7 +193,15 @@ struct UserAPI {
                         // Okay they are attempting an email/password login:
                         
                         if let acc = try? Account.loginWithEmail(email, password) {
-                            
+
+                            AuditRecordActions.userLogin(schema: nil,
+                                                         session_id: request.session?.token,
+                                                         user: request.session?.userid,
+                                                         row_data: nil,
+                                                         changed_fields: nil,
+                                                         description: "The user logged in.",
+                                                         changedby: acc.id)
+
                             request.session?.userid = acc.id
                             
                             try? response.setBody(json: acc.asDictionary)
@@ -168,6 +210,15 @@ struct UserAPI {
                             
                         } else {
                             // Failed on login
+                            
+                            AuditRecordActions.userLogin(schema: nil,
+                                                         session_id: request.session?.token,
+                                                         user: request.session?.userid,
+                                                         row_data: nil,
+                                                         changed_fields: nil,
+                                                         description: "The user \(email) tried to log in.  FAILURE",
+                                changedby: nil)
+
                             response.invalidCredentials
                             return
                         }
@@ -204,6 +255,15 @@ struct UserAPI {
                     let err = Account.registerWithEmail(username.lowercased(), email, .provisional, baseURL: EnvironmentVariables.sharedInstance.Public_URL_Full_Domain ?? "")
                     
                     if err != .noError {
+                        
+                        AuditRecordActions.userRegistration(schema: nil,
+                                                            session_id: request.session?.token ,
+                                                            user: nil,
+                                                            row_data: ["email":email, "username": username],
+                                                            changed_fields: nil,
+                                                            description: "Registration failed. Email address already in use.",
+                                                            changedby: nil)
+                        
                         try? response.setBody(json: ["errorCode":"RegistrationIssue", "message":"The email attempting to be registered already exists."])
                             .completed(status: .custom(code: 409, message: "Email Exists"))
                         return
@@ -224,6 +284,14 @@ struct UserAPI {
                             retDict[key] = value
                         }
                         
+                        AuditRecordActions.userRegistration(schema: nil,
+                                                            session_id: request.session?.token ,
+                                                            user: thenewuser.id,
+                                                            row_data: ["email":email, "username": username],
+                                                            changed_fields: nil,
+                                                            description: "Registration successful. New user needs to verify the registration.",
+                                                            changedby: nil)
+
                         _ = try response.setBody(json: retDict)
                         response.completed(status: .ok)
                         return
@@ -259,10 +327,28 @@ struct UserAPI {
                             if let password = postBodyJSON["password"], !password.isEmpty {
                                 acc.makePassword(password)
                                 try acc.save()
+                                
+                                AuditRecordActions.userChange(schema: nil,
+                                                              session_id: request.session?.token,
+                                                              user: acc.id,
+                                                              row_data: nil,
+                                                              changed_fields: ["password":"change"],
+                                                              description: "User changed their password successfully",
+                                                              changedby: acc.id)
+                                
                                 _ = try response.setBody(json: ["result":"success", "message":"Congratulations!  You are amazing!  You changed your password!"])
                                 response.completed(status: .ok)
                                 return
                             } else {
+
+                                AuditRecordActions.userChange(schema: nil,
+                                                              session_id: request.session?.token,
+                                                              user: acc.id,
+                                                              row_data: nil,
+                                                              changed_fields: ["password":"change"],
+                                                              description: "User tried their password - an incorrect password was supplied.",
+                                                              changedby: acc.id)
+
                                 LocalAuthHandlers.error(request, response, error: "Please supply a vaid password",
                                                         code: .badRequest)
                                 return
@@ -308,6 +394,16 @@ struct UserAPI {
                         responseDic["usernameAvailable"] = Account.exists.with.username(username)
                     }
                     
+                    AuditRecordActions.userChange(schema: nil,
+                                                  session_id: request.session?.token,
+                                                  user: request.session?.userid ?? "NO USER",
+                                                  row_data: ["username": json??["username"].stringValue?.lowercased() ?? "NO USERNAME",
+                                                             "email": json??["email"].stringValue ?? "NO EMAIL"],
+                                                  changed_fields: nil,
+                                                  description: "User checked to see if email and password were available",
+                                                  changedby: nil)
+                    
+                    
                     try? response.setBody(json: responseDic)
                         .setHeader(.contentType, value: "application/json")
                         .completed(status: .ok)
@@ -325,8 +421,13 @@ struct UserAPI {
             static let google : GoogleOAuth = GoogleOAuth()
             static let twitter : TwitterOAuth = TwitterOAuth()
             
-            public static func createOrLoginUser(_ json : [String:Any] /*, _ request : HTTPRequest*/, _ type: String) throws -> Account {
+            public static func createOrLoginUser(_ json : [String:Any] /*, _ request : HTTPRequest*/, _ type: String, _ request: HTTPRequest? = nil) throws -> Account {
                 
+                var req_session = ""
+                if let req = request?.session {
+                    req_session = req.token
+                }
+
                 let user = Account()
                 var json = json
                 let findDic:[String:Any] = ["source": type, "remoteid": json["id"].stringValue!]
@@ -356,11 +457,28 @@ struct UserAPI {
                             user.source = type
                             user.detail = json
                             
+                            AuditRecordActions.userAdd(schema: nil,
+                                                       session_id: req_session,
+                                                       user: user.id,
+                                                       row_data: ["remote_id": user.remoteid, "type":type, "email":json["email"] ?? "none"],
+                                                       changed_fields: nil,
+                                                       description: "Used an oauth request to create or update a user.",
+                                                       changedby: user.id)
+                            
                             // no need for the GIS save function - the location info is saved in the detail (and another table)
                             try user.save()
                             return user
                             
                         } else {
+                            
+                            AuditRecordActions.userLogin(schema: nil,
+                                                         session_id: request?.session?.token ?? "NO SESSION TOKEN",
+                                                         user: user.id,
+                                                         row_data: nil,
+                                                         changed_fields: nil,
+                                                         description: "The user already exists as a \(user.source) (id: \(user.remoteid)) user.",
+                                                         changedby: user.id)
+
                             return user
                         }
                     }
@@ -383,6 +501,15 @@ struct UserAPI {
                     user.detail["created"] = CCXServiceClass.sharedInstance.getNow()
                     user.detail["createdby"] = user.id
                     
+                    AuditRecordActions.userAdd(schema: nil,
+                                               session_id: req_session,
+                                               user: user.id,
+                                               row_data: ["remote_id": user.remoteid, "type":type, "email":json["email"] ?? "none"],
+                                               changed_fields: nil,
+                                               description: "Used an oauth request to create or update a user.",
+                                               changedby: user.id)
+
+                    
                     // no need for the GIS save function - the location info is saved in the detail (and another table)
                     try user.create()
                     
@@ -393,6 +520,15 @@ struct UserAPI {
                     user.detail["isNew"] = true
                     
                 } else {
+                    
+                    AuditRecordActions.userLogin(schema: nil,
+                                                 session_id: request?.session?.token ?? "NO SESSION TOKEN",
+                                                 user: user.id,
+                                                 row_data: nil,
+                                                 changed_fields: nil,
+                                                 description: "The user already exists as a \(user.source) user.",
+                                                 changedby: user.id)
+
                     return user
                 }
                 return user
@@ -423,8 +559,17 @@ struct UserAPI {
                             if let theTest = try? facebook.verifyCredentials(json) {
                                 if theTest.passed {
                                     // Now we need to either log the user in or create the user, and log them in.
-                                    let account = try! self.createOrLoginUser(theTest.data, key)
+                                    let account = try! self.createOrLoginUser(theTest.data, key, request)
                                     request.session?.userid = account.id
+                                    
+                                    AuditRecordActions.userLogin(schema: nil,
+                                                                 session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                                 user: account.id,
+                                                                 row_data: nil,
+                                                                 changed_fields: nil,
+                                                                 description: "User login: \(account.source).",
+                                                                 changedby: account.id)
+
                                     
                                     try? response.setBody(json: account.asDictionary)
                                         .setHeader(.contentType, value: "application/json")
@@ -440,8 +585,16 @@ struct UserAPI {
                             if let theTest = try? google.verifyCredentials(json) {
                                 if theTest.passed {
                                     
-                                    let account = try! self.createOrLoginUser(theTest.data, key)
+                                    let account = try! self.createOrLoginUser(theTest.data, key, request)
                                     request.session?.userid = account.id
+                                    
+                                    AuditRecordActions.userLogin(schema: nil,
+                                                                 session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                                 user: account.id,
+                                                                 row_data: nil,
+                                                                 changed_fields: nil,
+                                                                 description: "User login: \(account.source).",
+                                        changedby: account.id)
                                     
                                     try? response.setBody(json: account.asDictionary)
                                         .setHeader(.contentType, value: "application/json")
@@ -479,6 +632,8 @@ struct UserAPI {
                 // Check if the user is loged in:
                 guard !Account.userBounce(request, response) else { return }
                 
+                var oldvalue:[String:Any] = [:]
+                
                 let user = request.account!
                 
                 do {
@@ -487,28 +642,41 @@ struct UserAPI {
                     guard !json.isEmpty else { return response.emptyJSONBody }
                     
                     if json["username"].stringValue.isNotNil {
+                        oldvalue["username"] = user.username
                         user.username = json["username"].stringValue!.lowercased()
                     }
                     
                     if json["lastname"].stringValue.isNotNil {
+                        oldvalue["lastname"] = user.detail["lastname"]
                         user.detail["lastname"] = json["lastname"].stringValue!
                     }
                     
                     if json["firstname"].stringValue.isNotNil {
+                        oldvalue["firstname"] = user.detail["firstname"]
                         user.detail["firstname"] = json["firstname"].stringValue!
                     }
                     
                     if let emailNot = json["emailNotifications"].boolValue {
+                        oldvalue["emailNotifications"] = user.detail["emailNotifications"]
                         user.detail["emailNotifications"] = emailNot
                     }
                     
                     if let appNotif = json["appNotifications"].boolValue {
+                        oldvalue["appNotifications"] = user.detail["appNotifications"]
                         user.detail["appNotifications"] = appNotif
                     }
                     
                     user.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
                     user.detail["modifiedby"] = user.id
                     
+                    AuditRecordActions.userChange(schema: nil,
+                                                  session_id: request.session?.token,
+                                                  user: user.id,
+                                                  row_data: nil,
+                                                  changed_fields: oldvalue,
+                                                  description: "User changed their profile.",
+                                                  changedby: user.id)
+
                     // no need for the GIS save as the location is not saved nin a geo field (it is in detail)
                     try! user.save()
                     
@@ -705,6 +873,8 @@ struct UserAPI {
             var picturesource = EnvironmentVariables.sharedInstance.AWSfileURLProfilePics!
             picturesource.append(newfilename)
             
+            var changed_fields:[String:Any] = [:]
+                
             // lets update the user
             let c = Account()
             
@@ -715,10 +885,12 @@ struct UserAPI {
                     .completed(status: .badRequest)
             }
             c.detail["\(imagetype)_picture"] = picturesource
+            changed_fields["\(imagetype)_picture"] = picturesource
             c.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
             
             if newfilenameadjustedimage.count > 0 {
                 // we have the small image!
+                changed_fields["small_picture"] = "\(EnvironmentVariables.sharedInstance.AWSfileURLProfilePics!)\(newfilenameadjustedimage)"
                 c.detail["small_picture"] = "\(EnvironmentVariables.sharedInstance.AWSfileURLProfilePics!)\(newfilenameadjustedimage)"
             }
 
@@ -726,6 +898,15 @@ struct UserAPI {
 
             // update the user
             do {
+                
+                AuditRecordActions.userChange(schema: nil,
+                                              session_id: session.token,
+                                              user: session.userid,
+                                              row_data: nil,
+                                              changed_fields: changed_fields,
+                                              description: "User changed their profile picture.",
+                                              changedby: session.userid)
+                
                 try c.saveWithCustomType(schemaIn: "public",session.userid)
                 
                 retd["id"] = c.id
@@ -733,14 +914,23 @@ struct UserAPI {
                 retd["small_picture"] = c.detail["small_picture"]
 
             } catch {
-       
+
+                AuditRecordActions.userChange(schema: nil,
+                                              session_id: session.token,
+                                              user: session.userid,
+                                              row_data: nil,
+                                              changed_fields: changed_fields,
+                                              description: "User attempted to change their profile. FAILED.",
+                                              changedby: session.userid)
+
                 try? response.setBody(json: ["error":"The picture was not uploaded"])
                     .setHeader(.contentType, value: "application/json")
                     .completed(status: .badRequest)
             }
-                try? response.setBody(json: retd)
-                    .setHeader(.contentType, value: "application/json")
-                    .completed(status: .ok)
+                
+            try? response.setBody(json: retd)
+                .setHeader(.contentType, value: "application/json")
+                .completed(status: .ok)
 
             }
         }
@@ -765,12 +955,30 @@ struct UserAPI {
                             account.passreset = AccessToken.generate()
                         }
                         
-                        if account.id.isEmpty { try? response.setBody(json: ["errorCode":"EmailDNE","message":"You are not registered on Bucket."])
+                        if account.id.isEmpty {
+                            
+                            AuditRecordActions.userChange(schema: nil,
+                                                          session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                          user: request.session?.userid ?? "NO USER",
+                                                          row_data: ["email":email.lowercased()],
+                                                          changed_fields: nil,
+                                                          description: "Unknown User attempted to reset their password.",
+                                                          changedby: request.session?.userid)
+
+                            try? response.setBody(json: ["errorCode":"EmailDNE","message":"You are not registered on Bucket."])
                             .setHeader(.contentType, value: "application/json")
                             .completed(status: .forbidden) }
                     
                         if (try? account.save()).isNotNil {
                             
+                            AuditRecordActions.userChange(schema: nil,
+                                                          session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                          user: request.session?.userid ?? "NO USER",
+                                                          row_data: ["email":email.lowercased()],
+                                                          changed_fields: nil,
+                                                          description: "User requested forgot password.  Email sent.",
+                                                          changedby: request.session?.userid)
+
                             // Lets send out the email to reset the password:
                             let h = "<p>To reset your password for your account, please <a href=\"\(AuthenticationVariables.baseURL)/verifyAccount/forgotpassword/\(account.passreset)\">click here</a></p>"
                             
@@ -840,16 +1048,43 @@ struct UserAPI {
                     let acc = Account(validation: v)
                     
                     if acc.id.isEmpty {
+                        
+                        AuditRecordActions.userRegistration(schema: nil,
+                                                            session_id: request.session?.token,
+                                                            user: request.session?.userid,
+                                                            row_data: nil,
+                                                            changed_fields: nil,
+                                                            description: "Registration NOT complete.  Account verification failed.",
+                                                            changedby: nil)
+                        
                         context["msg_title"] = "Account Validation Error."
                         context["msg_body"] = ""
                         response.render(template: "views/msg", context: context)
                         return
                     } else {
+                        
+                        AuditRecordActions.userRegistration(schema: nil,
+                                                            session_id: request.session?.token,
+                                                            user: request.session?.userid,
+                                                            row_data: nil,
+                                                            changed_fields: nil,
+                                                            description: "Registration complete.  Account verified.",
+                                                            changedby: nil)
+                        
                         context["passvalidation"] = v
                         context["csrfToken"] = t
                         response.render(template: "views/registerComplete", context: context)
                     }
                 } else {
+                    
+                    AuditRecordActions.userRegistration(schema: nil,
+                                                        session_id: request.session?.token,
+                                                        user: request.session?.userid,
+                                                        row_data: nil,
+                                                        changed_fields: nil,
+                                                        description: "Registration NOT complete.  Account verification failed.  Code not found.",
+                                                        changedby: nil)
+
                     context["msg_title"] = "Account Validation Error."
                     context["msg_body"] = "Code not found."
                     response.render(template: "views/msg", context: context)

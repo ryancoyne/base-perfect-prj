@@ -109,7 +109,100 @@ final class AuditRecordActions {
                             description: description,
                             user: changedby)
     }
-    
+
+    static func userLogin(schema: String? = nil,
+                        session_id: String? = nil,
+                        user:String? = nil,
+                        row_data:[String:Any]? = nil,
+                        changed_fields:[String:Any]? = nil,
+                        description:String? = nil,
+                        changedby: String? = nil) {
+        
+        // make sure the schema has been added to the row data
+        var rd:[String:Any] = row_data ?? [:]
+        if schema.isNil {
+            rd["schema"] = "public"
+        } else if schema!.isEmpty {
+            rd["schema"] = "public"
+        } else {
+            rd["schema"] = schema
+        }
+        
+        if user.isNotNil {
+            rd["user"] = user!
+        }
+        
+        self.addAuditRecord(audit_group: "USER",
+                            audit_action: "LOGIN",
+                            session_id: session_id,
+                            row_data: rd,
+                            changed_fields: changed_fields,
+                            description: description,
+                            user: changedby)
+    }
+
+    static func userLogout(schema: String? = nil,
+                        session_id: String? = nil,
+                        user:String? = nil,
+                        row_data:[String:Any]? = nil,
+                        changed_fields:[String:Any]? = nil,
+                        description:String? = nil,
+                        changedby: String? = nil) {
+        
+        // make sure the schema has been added to the row data
+        var rd:[String:Any] = row_data ?? [:]
+        if schema.isNil {
+            rd["schema"] = "public"
+        } else if schema!.isEmpty {
+            rd["schema"] = "public"
+        } else {
+            rd["schema"] = schema
+        }
+        
+        if user.isNotNil {
+            rd["user"] = user!
+        }
+        
+        self.addAuditRecord(audit_group: "USER",
+                            audit_action: "LOGOUT",
+                            session_id: session_id,
+                            row_data: rd,
+                            changed_fields: changed_fields,
+                            description: description,
+                            user: changedby)
+    }
+
+    static func userRegistration(schema: String? = nil,
+                           session_id: String? = nil,
+                           user:String? = nil,
+                           row_data:[String:Any]? = nil,
+                           changed_fields:[String:Any]? = nil,
+                           description:String? = nil,
+                           changedby: String? = nil) {
+        
+        // make sure the schema has been added to the row data
+        var rd:[String:Any] = row_data ?? [:]
+        if schema.isNil {
+            rd["schema"] = "public"
+        } else if schema!.isEmpty {
+            rd["schema"] = "public"
+        } else {
+            rd["schema"] = schema
+        }
+        
+        if user.isNotNil {
+            rd["user"] = user!
+        }
+        
+        self.addAuditRecord(audit_group: "USER",
+                            audit_action: "REGISTRATION",
+                            session_id: session_id,
+                            row_data: rd,
+                            changed_fields: changed_fields,
+                            description: description,
+                            user: changedby)
+    }
+
     static func userChange(schema: String? = nil,
                            session_id: String? = nil,
                            user:String,
