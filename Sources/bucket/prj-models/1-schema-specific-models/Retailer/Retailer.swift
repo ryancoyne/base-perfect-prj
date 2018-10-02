@@ -67,7 +67,7 @@ public class Retailer: PostgresStORM {
         }
         
         if let data = this.data.retailerDic.retailerCode {
-            retailer_code = data
+            retailer_code = data.lowercased()
         }
         
         if let data = this.data.retailerDic.isVerified {
@@ -112,7 +112,7 @@ public class Retailer: PostgresStORM {
                 
             case "retailer_code":
                 if (value as? String).isNotNil {
-                    self.retailer_code = (value as! String)
+                    self.retailer_code = (value as! String).lowercased()
                 }
                 
             case "is_suspended":
@@ -176,7 +176,7 @@ public class Retailer: PostgresStORM {
         }
         
         if self.retailer_code.isNotNil {
-            dictionary.retailerDic.retailerCode = self.retailer_code
+            dictionary.retailerDic.retailerCode = self.retailer_code?.lowercased()
         }
         
         if self.is_suspended.isNotNil {
@@ -234,7 +234,12 @@ public class Retailer: PostgresStORM {
         
         // lets make sure the correct parameters were passed in..
         
-        let customerCode = self.createCustomerCodeRaw(schema)
+        var customerCode = self.createCustomerCodeRaw(schema)
+        
+        // add sample to the end, if appropriate
+        if let sample = data["sample"].boolValue, sample == true {
+            customerCode.append(".SAMPLE")
+        }
         
         // Make sure a transaction does not exist with this customer code already:
         let trans = CodeTransaction()
@@ -246,7 +251,7 @@ public class Retailer: PostgresStORM {
         
         if trans.id.isNotNil {
             
-            return (false, "Code exists and was not redeemed")
+            return (false, "Code exists and was not redeemed yet")
             
         } else {
 

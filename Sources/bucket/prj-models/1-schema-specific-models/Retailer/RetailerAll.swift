@@ -127,7 +127,7 @@ public class RetailerAll: Retailer {
         }
 
         if self.retailer_code.isNotNil {
-            dictionary.retailerDic.retailerCode = self.retailer_code
+            dictionary.retailerDic.retailerCode = self.retailer_code?.lowercased()
         }
         
         if self.is_suspended.isNotNil {

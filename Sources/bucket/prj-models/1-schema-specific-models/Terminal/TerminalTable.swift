@@ -138,7 +138,8 @@ final class TerminalTable {
         createsql.append("terminal_key text COLLATE pg_catalog.default, ")
         createsql.append("name text COLLATE pg_catalog.default, ")
         createsql.append("is_approved bool NOT NULL DEFAULT false, ")
-        
+        createsql.append("is_sample_only bool NOT NULL DEFAULT false, ")
+
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
         createsql.append("); ")

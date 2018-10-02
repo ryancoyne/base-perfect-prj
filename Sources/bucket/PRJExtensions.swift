@@ -43,7 +43,7 @@ extension Retailer {
         if let theId = withId, theId.isNumeric() {
             sql = "SELECT id FROM \(schema).retailer WHERE id = \(theId.intValue!)"
         } else if let theId = withId, !theId.isNumeric()  {
-            sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(theId)'"
+            sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(theId.lowercased())'"
         } else {
             return false
         }
@@ -323,7 +323,7 @@ extension HTTPRequest {
         }
         
         if let retcode = self.header(.custom(name: "retailerId")) ?? self.header(.custom(name: "retailerCode")) {
-            let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode)'"
+            let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode.lowercased())'"
             let r = Retailer()
             let r_ret = try? r.sqlRows(sql, params: [])
             if r_ret.isNotNil, (r_ret?.count)! > 0 {
@@ -353,7 +353,7 @@ extension HTTPRequest {
             // they did not send in the numeric code
             // so check the ID itself
             let retailer = Retailer()
-            let sql = "SELECT * FROM \(schema!).retailer WHERE retailer_code = '\(sr)'"
+            let sql = "SELECT * FROM \(schema!).retailer WHERE retailer_code = '\(sr.lowercased())'"
             let rtlr = try? retailer.sqlRows(sql, params: [])
             if rtlr.isNotNil, let t = rtlr?.first {
                 retailer.to(t)

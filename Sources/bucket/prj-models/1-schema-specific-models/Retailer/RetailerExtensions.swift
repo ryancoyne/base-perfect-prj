@@ -37,11 +37,11 @@ struct RetailerDictionary {
     
     var retailerCode : String? {
         get {
-            return self.dic["retailer_code"].stringValue
+            return self.dic["retailer_code"].stringValue?.lowercased()
         }
         set {
             if newValue != nil {
-                self.dic["retailer_code"] = newValue!
+                self.dic["retailer_code"] = newValue!.lowercased()
             } else {
                 self.dic.removeValue(forKey: "retailer_code")
             }

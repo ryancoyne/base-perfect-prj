@@ -667,7 +667,7 @@ final class InitializeData {
         retailer.is_suspended = false
         retailer.is_verified = true
         retailer.name = "Bucket Technologies Retailer"
-        retailer.retailer_code = "BUCKET1"
+        retailer.retailer_code = "BUCKET1".lowercased()
         retailer.send_settlement_confirmation = true
         
         let ret = try? retailer.saveWithCustomType(schemaIn: "us", nil)
@@ -704,13 +704,33 @@ final class InitializeData {
         // now lets geocode the address
         add2.geocodeAddress()
 
+        // create the US Sample retailer for Bucket
+        let retailer_s = Retailer()
+        retailer_s.is_suspended = false
+        retailer_s.is_verified = true
+        retailer_s.name = "Bucket Technologies Retailer"
+        retailer_s.retailer_code = "BUCKET-S".lowercased()
+        retailer_s.send_settlement_confirmation = true
+        
+        let ret_s = try? retailer_s.saveWithCustomType(schemaIn: "us", nil)
+        if let r = ret_s?.first, let r_id = r.data.id {
+            retailer_s.id = r_id
+        }
+        
+        // create the first address for the bucket retailer
+        let add1_s = Address()
+        add1_s.address1 = "2303 14th St NW"
+        add1_s.city = "Washington"
+        add1_s.state = "District Of Columbia"
+        add1_s.postal_code = "20009"
+        add1_s.country_id = Country.idWith("us")
+        add1_s.retailer_id = retailer_s.id
+        _ = try? add1_s.saveWithCustomType(schemaIn: "us", nil)
+        
+        // now lets geocode the address
+        add1_s.geocodeAddress()
+
     }
-    
-    
-    
-    
-    
-    
     
     func addCountryCodes() {
         let tbl = Country()

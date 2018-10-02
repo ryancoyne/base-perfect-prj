@@ -67,7 +67,7 @@ struct RetailerAPI {
                 request, response in
             
                 // Take care of checking the retailer & terminal:
-                guard !Retailer.retailerTerminalBounce(request, response) else { return }
+                guard let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
                 
                 // Okay.. they are good to go.  Here we need to query for all the transactions for right now (minus one day), sum them up, list them, and send them out.
                 
@@ -105,14 +105,17 @@ struct RetailerAPI {
                     guard (request.countryId) != nil else {  response.invalidCountryCode; return }
                     
                     let schema = Country.getSchema(request)
-                    var retailerIntegerId = 0
-                    
+//                    var retailerIntegerId = 0
+
+                    let r = Retailer()
+
                     if let retcode = request.getRetailerCode() {
-                        let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode)'"
-                        let r = Retailer()
+                        // there is only one retailer code per schema (one retailer per retailer_code)
+                        let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(retcode.lowercased())'"
                         let r_ret = try? r.sqlRows(sql, params: [])
                         for i in r_ret! {
-                            retailerIntegerId = i.data["id"].intValue!
+                            r.to(i)
+//                            retailerIntegerId = r.id!
                         }
                     } else {
                         return response.invalidRetailer
@@ -124,7 +127,7 @@ struct RetailerAPI {
                 
                     // If there is only one location, lets automagically attach it to the one location for this retailer
                     let add = Address()
-                    let add_sql = "SELECT * FROM \(schema).\(add.table()) WHERE retailer_id = \(retailerIntegerId)"
+                    let add_sql = "SELECT * FROM \(schema).\(add.table()) WHERE retailer_id = \(r.id!)"
                     let addresses = try? add.sqlRows(add_sql, params: [])
                     if let _ = addresses, addresses!.count < 2, let a = addresses!.first {
                         _ = try? add.get(a.data.id!)
@@ -158,7 +161,7 @@ struct RetailerAPI {
 
                             let apiKey = UUID().uuidString
                             term.serial_number = serialNumber
-                            term.retailer_id = retailerIntegerId
+                            term.retailer_id = r.id!
                             term.terminal_key = apiKey.ourPasswordHash
                             
                             do {
@@ -168,8 +171,13 @@ struct RetailerAPI {
                                     term.address_id = add.id
                                 }
                                 
+                                if let rc_s = r.retailer_code, rc_s == "bucket-s" {
+                                    term.is_sample_only = true
+                                    term.is_approved    = true
+                                }
+                                
                                 try term.saveWithCustomType(schemaIn: schema)
-                                try? response.setBody(json: ["isApproved":false, "apiKey":apiKey])
+                                try? response.setBody(json: ["isApproved":term.is_approved, "isSample": term.is_sample_only, "apiKey":apiKey])
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
                                 
@@ -182,7 +190,7 @@ struct RetailerAPI {
                         } else {
                             
                             // The terminal does exist.  Lets see if we retailer id is the same as what they are saying, if so.. send them a password:
-                            guard retailerIntegerId == terminal.retailer_id else { return response.alreadyRegistered(serialNumber) }
+                            guard r.id! == terminal.retailer_id else { return response.alreadyRegistered(serialNumber) }
                             
                             // Save the new password, and return the response:
                             let thePassword = UUID().uuidString
@@ -190,6 +198,7 @@ struct RetailerAPI {
                             // Build the response:
                             var responseDictionary = [String:Any]()
                             responseDictionary["isApproved"] = terminal.is_approved
+                            responseDictionary["isSample"] = terminal.is_sample_only
                             responseDictionary["apiKey"] = thePassword
                             
                             // Create and assign the hashed password:
@@ -228,25 +237,31 @@ struct RetailerAPI {
                             let apiKey = UUID().uuidString
                             term.is_approved = true
                             term.serial_number = serialNumber
-                            term.retailer_id = retailerIntegerId
+                            term.retailer_id = r.id!
                             term.terminal_key = apiKey.ourPasswordHash
                             
                             // we will take the first address on file for this retailer and add the location here for them
                             let add = Address()
-                            let a_sql = "SELECT * FROM \(schema).address WHERE retailer_id = '\(retailerIntegerId)'"
+                            let a_sql = "SELECT * FROM \(schema).address WHERE retailer_id = '\(r.id!)'"
                             let a_res = try? add.sqlRows(a_sql, params: [])
                             if let a = a_res?.first {
                                 add.to(a)
                             }
                             
-                            if add.id.isNotNil, add.retailer_id == retailerIntegerId {
+                            if add.id.isNotNil, add.retailer_id == r.id! {
                                 term.address_id = add.id
                             }
+                            
+                            if let rc_s = r.retailer_code, rc_s == "bucket-s" {
+                                term.is_sample_only = true
+                                term.is_approved    = true
+                            }
+
                             
                             do {
                                 
                                 try term.saveWithCustomType(schemaIn: schema)
-                                try? response.setBody(json: ["isApproved":true, "apiKey":apiKey])
+                                try? response.setBody(json: ["isApproved":term.is_approved, "isSample": term.is_sample_only, "apiKey":apiKey])
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
                                 
@@ -258,14 +273,15 @@ struct RetailerAPI {
                             
                         } else if terminal.retailer_id.isNotNil && terminal.is_approved {
                             // The terminal does exist.  Lets see if we retailer id is the same as what they are saying, if so.. send them a password:
-                            guard retailerIntegerId == terminal.retailer_id else { /* Send back an error indicating this device is on another account */  return response.alreadyRegistered(serialNumber) }
+                            guard r.id! == terminal.retailer_id else { /* Send back an error indicating this device is on another account */  return response.alreadyRegistered(serialNumber) }
                             
                             // Save the new password, and return the response:
                             let thePassword = UUID().uuidString
                             
                             // Build the response:
                             var responseDictionary = [String:Any]()
-                            responseDictionary["isApproved"] = true
+                            responseDictionary["isApproved"] = terminal.is_approved
+                            responseDictionary["isSample"] = terminal.is_sample_only
                             responseDictionary["apiKey"] = thePassword
                             
                             // Create and assign the hashed password:
@@ -454,7 +470,7 @@ struct RetailerAPI {
                 request, response in
             
                 // We should first bouce the retailer (takes care of all the general retailer errors):
-                guard !Retailer.retailerTerminalBounce(request, response) else { return }
+                guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
                 
                 guard let _ = request.countryId else { return response.invalidCountryCode }
                 
@@ -466,6 +482,9 @@ struct RetailerAPI {
                     var json = try request.postBodyJSON()
                     
                     // get the code
+                    if let t = rt.terminal, t.is_sample_only {
+                        json!["sample"] = true
+                    }
                     var ccode = Retailer().createCustomerCode(schemaId: schema, json!)
                     
                     // loop until we get a customer code that is unique
@@ -473,16 +492,16 @@ struct RetailerAPI {
                         ccode = Retailer().createCustomerCode(schemaId: schema, json!)
                     }
                     
-                    var itsASample = false
-                    if let sample = json!["sample"].boolValue {
-                        itsASample = sample
-                    }
+//                    var itsASample = false
+//                    if let sample = json!["sample"].boolValue {
+//                        itsASample = sample
+//                    }
                     
                     // put together the return dictionary
                     if ccode.success {
                         
-                        var thecode: String = ccode.message
-                        if itsASample { thecode.append(".SAMPLE") }
+                        let thecode: String = ccode.message
+//                        if itsASample { thecode.append(".SAMPLE") }
                     
                         json!["customerCode"] = thecode
                         
@@ -500,11 +519,16 @@ struct RetailerAPI {
                             retailer.to(c)
                         }
                         
-                        let terminal = Terminal()
-                        sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(request.terminalId!)' "
-                        let trmn = try? terminal.sqlRows(sql, params: [])
-                        if trmn.isNotNil, let c = trmn!.first {
-                            terminal.to(c)
+                        var terminal:Terminal
+                        if let t = rt.terminal {
+                            terminal = t
+                        } else {
+                            terminal = Terminal()
+                            sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(request.terminalId!)' "
+                            let trmn = try? terminal.sqlRows(sql, params: [])
+                            if trmn.isNotNil, let c = trmn!.first {
+                                terminal.to(c)
+                            }
                         }
                         
                         // lets get the country id for this transaction
@@ -582,7 +606,7 @@ struct RetailerAPI {
                 request, response in
                 
                 // We should first bouce the retailer (takes care of all the general retailer errors):
-                guard !Retailer.retailerTerminalBounce(request, response) else { return }
+                guard let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
                 
                 guard let code = request.customerCode else { response.invalidCustomerCode; return }
                 guard let _ = request.countryId else { response.invalidCountryCode; return }
@@ -818,7 +842,7 @@ extension Retailer {
         
         // Find the terminal
         let retailer = Retailer()
-        let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(with)'"
+        let sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(with.lowercased())'"
         let rtlr = try? retailer.sqlRows(sql, params: [])
         if rtlr.isNotNil, let t = rtlr?.first {
             retailer.to(t)
@@ -857,17 +881,17 @@ extension Retailer {
         
     }
 
-    public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> Bool {
+    public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> (bounced:Bool?, terminal:Terminal?)? {
         
         // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-        guard request.SecurityCheck() else { response.badSecurityToken; return true }
+        guard request.SecurityCheck() else { response.badSecurityToken; return (true, nil) }
 
         //Make sure we have the retailer Id and retailer secret:
 //        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
-        guard let retailerSecret = request.retailerSecret else { response.unauthorizedTerminal; return true }
+        guard let retailerSecret = request.retailerSecret else { response.unauthorizedTerminal; return (true, nil) }
 
-        guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return true }
-        guard let _ = request.countryId else { response.invalidCountryCode; return true }
+        guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return (true, nil) }
+        guard let _ = request.countryId else { response.invalidCountryCode; return (true, nil) }
         
         // lets test for the retailer code (not the retailer ID
         let schema = Country.getSchema(request)
@@ -875,13 +899,13 @@ extension Retailer {
         var retailerId = 0
         
         if let retcode = request.getRetailerCode() {
-            let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode)'"
+            let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode.lowercased())'"
             let r = Retailer()
             let r_ret = try? r.sqlRows(sql, params: [])
             if r_ret.isNotNil, r_ret!.isEmpty {
                 // the code was not found
                 response.invalidRetailer
-                return true
+                return (true, nil)
             } else {
                 // set the retailer id
                 retailerId = r_ret!.first!.data["id"].intValue!
@@ -889,7 +913,7 @@ extension Retailer {
         } else {
             // the retailer code was not sent in
             response.invalidRetailer
-            return true
+            return (true, nil)
         }
 
         // Get our secret code formatted properly to check what we have in the DB:
@@ -909,13 +933,13 @@ extension Retailer {
         //  4. The terminal is not assigned to an address
         
         // this means the terminal number is invalid - RETURN the appropriate error code
-        if terminalQuery.id.isNil { response.unauthorizedTerminal; return true }
+        if terminalQuery.id.isNil { response.unauthorizedTerminal; return (true, nil) }
         
         // this means the terminal is not approved
-        if !terminalQuery.is_approved { response.unauthorizedTerminal; return true }
+        if !terminalQuery.is_approved { response.unauthorizedTerminal; return (true, nil) }
         
         // and finally - make sure there is an address assigned to this terminal
-        if terminalQuery.address_id.isNil || terminalQuery.address_id == 0 { response.noLocationTerminal; return true }
+        if terminalQuery.address_id.isNil || terminalQuery.address_id == 0 { response.noLocationTerminal; return (true, nil) }
 
         // Checking the final condition (last condition to minimize the number of queries during error)
         let retailerQuery = Retailer()
@@ -926,9 +950,9 @@ extension Retailer {
         }
 
         // now lets look to make sure the serial number is to the current retailer
-        if retailerQuery.id != terminalQuery.retailer_id { response.alreadyRegistered(terminalSerialNumber); return true }
+        if retailerQuery.id != terminalQuery.retailer_id { response.alreadyRegistered(terminalSerialNumber); return (true, nil) }
         
-        return false
+        return (false, terminalQuery)
     }
 
 }

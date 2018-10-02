@@ -119,4 +119,16 @@ struct TerminalDictionary {
             }
         }
     }
+    var isSampleOnly : Bool? {
+        get {
+            return self.dic["is_sample_only"].boolValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["is_sample_only"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "is_sample_only")
+            }
+        }
+    }
 }

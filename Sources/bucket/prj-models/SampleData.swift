@@ -107,9 +107,9 @@ final class SampleData {
         
         sqlstatement.append("(created, createdby, name, is_verified, retailer_code) ")
         sqlstatement.append(" VALUES ")
-        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Bucket Coffee Shop', TRUE, 'BCKT-1'), ")
-        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Ryans Bike Shop', TRUE, 'BCKT-2'), ")
-        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','M&R Corner Market', TRUE, 'BCKT-3') ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Bucket Coffee Shop', TRUE, 'bckt-1'), ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Ryans Bike Shop', TRUE, 'bckt-2'), ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','M&R Corner Market', TRUE, 'bckt-3') ")
 
         print("Adding retailers: \(sqlstatement)")
         let _ = try? tbl.sqlRows(sqlstatement, params: [])
@@ -125,9 +125,9 @@ final class SampleData {
         
         sqlstatement.append("(created, createdby, name, is_verified, retailer_code) ")
         sqlstatement.append(" VALUES ")
-        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Bucket Coffee Shop', TRUE, 'BCKT-1'), ")
-        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Ryans Bike Shop', TRUE, 'BCKT-2'), ")
-        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','M&R Corner Market', TRUE, 'BCKT-3') ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Bucket Coffee Shop', TRUE, 'bckt-1'), ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','Ryans Bike Shop', TRUE, 'bckt-2'), ")
+        sqlstatement.append(" (\(created_time), '\(CCXDefaultUserValues.user_server)','M&R Corner Market', TRUE, 'bckt-3') ")
         
         print("Adding retailers: \(sqlstatement)")
         let _ = try? tbl.sqlRows(sqlstatement, params: [])

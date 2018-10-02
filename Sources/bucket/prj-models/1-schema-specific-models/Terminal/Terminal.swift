@@ -21,13 +21,14 @@ public class Terminal: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var pos_id     : Int? = nil
-    var retailer_id     : Int? = nil
-    var serial_number     : String? = nil
+    var pos_id         : Int? = nil
+    var retailer_id    : Int? = nil
+    var serial_number  : String? = nil
     var address_id     : Int? = nil
-    var name     : String? = nil
-    var is_approved     : Bool = false
-    var terminal_key : String? = nil
+    var name           : String? = nil
+    var is_approved    : Bool = false
+    var is_sample_only : Bool = false
+    var terminal_key   : String? = nil
     
     //MARK: Table name
     override public func table() -> String { return "terminal" }
@@ -86,7 +87,11 @@ public class Terminal: PostgresStORM {
         if let data = this.data.terminalDic.isApproved {
             is_approved = data
         }
-        
+
+        if let data = this.data.terminalDic.isSampleOnly {
+            is_sample_only = data
+        }
+
         if let data = this.data.terminalDic.terminalKey {
             terminal_key = data
         }
@@ -143,7 +148,12 @@ public class Terminal: PostgresStORM {
                 if (value as? Bool).isNotNil {
                     self.is_approved = value as? Bool ?? false
                 }
-                
+
+            case "is_sample_only":
+                if (value as? Bool).isNotNil {
+                    self.is_sample_only = value as? Bool ?? false
+                }
+
             default:
                 print("This should not occur")
             }
@@ -210,7 +220,9 @@ public class Terminal: PostgresStORM {
         }
         
         dictionary.terminalDic.isApproved = self.is_approved
-        
+
+        dictionary.terminalDic.isSampleOnly = self.is_sample_only
+
         return dictionary
     }
     
@@ -246,7 +258,11 @@ public class Terminal: PostgresStORM {
         if diff == true, self.is_approved != targetItem.is_approved {
             diff = false
         }
-        
+
+        if diff == true, self.is_sample_only != targetItem.is_sample_only {
+            diff = false
+        }
+
         return diff
         
     }
