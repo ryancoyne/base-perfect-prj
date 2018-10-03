@@ -1934,18 +1934,7 @@ extension Account {
     static func userBounce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {
         
         // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-        guard request.SecurityCheck() else {
-            
-            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
-            AuditRecordActions.securityFailure(schema: request.countryCode,
-                                               session_id: session,
-                                               user: request.session?.userid,
-                                               row_data: nil,
-                                               description: "The security token failed to pass the check.")
-            
-            response.badSecurityToken
-            return true
-        }
+        guard request.SecurityCheck() else { response.badSecurityToken; return true }
         
         // Here we want to check the csrf & the authorization.
         guard let csrf = request.session?.data["csrf"].stringValue, let sendCsrf = request.header(.custom(name: "X-CSRF-Token")) else {
@@ -2015,19 +2004,7 @@ extension Account {
     static func adminBouce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {
         
         // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-        guard request.SecurityCheck() else {
-            
-            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
-            AuditRecordActions.securityFailure(schema: request.countryCode,
-                                               session_id: session,
-                                               user: request.session?.userid,
-                                               row_data: nil,
-                                               description: "The security token failed to pass the check.")
-
-            response.badSecurityToken
-            return true
-            
-        }
+        guard request.SecurityCheck() else { response.badSecurityToken; return true }
 
         // Here we want to check the csrf & the authorization.
         guard let csrf = request.session?.data["csrf"].stringValue, let sendCsrf = request.header(.custom(name: "X-CSRF-Token")) else {

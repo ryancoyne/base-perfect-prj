@@ -262,6 +262,31 @@ extension HTTPRequest {
             break
         }
         
+        if !passedCheck {
+            
+            var audit:[String:Any] = [:]
+            
+            audit["remote_host"] = self.remoteAddress.host
+            audit["remote_port"] = self.remoteAddress.port
+
+            // put the headers in the audit
+            for (key,value) in self.headers {
+                audit["\(key)"] = value
+            }
+            
+            // put the sessions in the audit
+            for (key,value) in (self.session?.data)! {
+                audit["\(key)"] = value
+            }
+            
+            AuditRecordActions.securityFailure(schema: nil,
+                                               session_id: self.session?.token ??  "NO TOKEN",
+                                               user: self.session?.userid ?? "NO USER",
+                                               row_data: audit,
+                                               description: "Security Check Failed.")
+            
+        }
+        
         // let them know if you pass the security check
         return passedCheck
     }
