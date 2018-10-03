@@ -370,6 +370,32 @@ final class AuditRecordActions {
                             user: changedby)
     }
 
+    static func customerCodeCheck(schema: String? = nil,
+                                  session_id: String? = nil,
+                                  row_data:[String:Any]? = nil,
+                                  changed_fields:[String:Any]? = nil,
+                                  description:String? = nil,
+                                  changedby:String? = nil) {
+        
+        // make sure the schema has been added to the row data
+        var rd:[String:Any] = row_data ?? [:]
+        if schema.isNil {
+            rd["schema"] = "public"
+        } else if schema!.isEmpty {
+            rd["schema"] = "public"
+        } else {
+            rd["schema"] = schema
+        }
+        
+        self.addAuditRecord(audit_group: "CODE",
+                            audit_action: "CHECK",
+                            session_id: session_id,
+                            row_data: rd,
+                            changed_fields: changed_fields,
+                            description: description,
+                            user: changedby)
+    }
+
     //MARK: --
     //MARK: Page Viewing
     static func pageView(schema: String? = nil,
@@ -434,6 +460,46 @@ final class AuditRecordActions {
         
         self.addAuditRecord(audit_group: "CASHOUT",
                             audit_action: "ADD",
+                            session_id: session_id,
+                            row_data: rd,
+                            changed_fields: changed_fields,
+                            description: description,
+                            user: changedby)
+    }
+
+    static func cashOutError(schema: String? = nil,
+                        session_id: String? = nil,
+                        total_cashout_amount: Double,
+                        code_and_amount: [String:Double],
+                        row_data:[String:Any]? = nil,
+                        changed_fields:[String:Any]? = nil,
+                        description:String? = nil,
+                        changedby:String? = nil) {
+        
+        // make sure the schema has been added to the row data
+        var rd:[String:Any] = row_data ?? [:]
+        if schema.isNil {
+            rd["schema"] = "public"
+        } else if schema!.isEmpty {
+            rd["schema"] = "public"
+        } else {
+            rd["schema"] = schema
+        }
+        
+        rd["cashout_total"]      = total_cashout_amount
+        
+        // loop thru the codes and amounts
+        var codes:[String:Double] = [:]
+        for (key, val) in code_and_amount {
+            codes[key] = (val as Double)
+        }
+        
+        if codes.count > 0 {
+            rd["customer_codes"] = codes
+        }
+        
+        self.addAuditRecord(audit_group: "CASHOUT",
+                            audit_action: "ERROR",
                             session_id: session_id,
                             row_data: rd,
                             changed_fields: changed_fields,
