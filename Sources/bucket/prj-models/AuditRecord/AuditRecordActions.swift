@@ -9,7 +9,6 @@ import Foundation
 
 final class AuditRecordActions {
     
-    //MARK:-
     //MARK: Create the Singleton
     private init() {
         
@@ -17,7 +16,6 @@ final class AuditRecordActions {
     
     static let sharedInstance = AuditRecordActions()
 
-    //MARK:-
     //MARK: Add a generic audit record
     static func addGenericrecord(schema:String? = nil,
                                  session_id: String? = nil,
@@ -48,7 +46,6 @@ final class AuditRecordActions {
                             user: user)
     }
     
-    //MARK: --
     //MARK: Error In Security
     static func securityFailure(schema: String? = nil,
                                 session_id: String? = nil,
@@ -77,7 +74,39 @@ final class AuditRecordActions {
                             description: description)
     }
 
-    //MARK: --
+    //MARK: Terminal Functions
+    static func terminalAdd(schema: String? = nil,
+                        session_id: String? = nil,
+                        user:String? = nil,
+                        row_data:[String:Any]? = nil,
+                        changed_fields:[String:Any]? = nil,
+                        description:String? = nil,
+                        changedby: String? = nil) {
+        
+        // make sure the schema has been added to the row data
+        var rd:[String:Any] = row_data ?? [:]
+        
+        if schema.isNil {
+            rd["schema"] = "public"
+        } else if schema!.isEmpty {
+            rd["schema"] = "public"
+        } else {
+            rd["schema"] = schema
+        }
+        
+        if user.isNotNil {
+            rd["user"] = user!
+        }
+        
+        self.addAuditRecord(audit_group: "TERMINAL",
+                            audit_action: "ADD",
+                            session_id: session_id,
+                            row_data: rd,
+                            changed_fields: changed_fields,
+                            description: description,
+                            user: changedby)
+    }
+
     //MARK: User Functions
     static func userAdd(schema: String? = nil,
                         session_id: String? = nil,
@@ -261,7 +290,6 @@ final class AuditRecordActions {
                             user: changedby)
     }
 
-    //MARK: --
     //MARK: Customer Code functions
     static func customerCodeAdd(schema: String? = nil,
                                 session_id: String? = nil,
@@ -396,7 +424,6 @@ final class AuditRecordActions {
                             user: changedby)
     }
 
-    //MARK: --
     //MARK: Page Viewing
     static func pageView(schema: String? = nil,
                          session_id: String? = nil,
@@ -425,7 +452,6 @@ final class AuditRecordActions {
                             user: viewedby)
     }
 
-    //MARK: --
     //MARK: Cashout
     static func cashOut(schema: String? = nil,
                         session_id: String? = nil,
@@ -509,8 +535,6 @@ final class AuditRecordActions {
                             user: changedby)
     }
 
-    
-    //MARK: --
     //MARK: Private Functions
     private static func addAuditRecord(audit_group: String,
                                        audit_action: String,

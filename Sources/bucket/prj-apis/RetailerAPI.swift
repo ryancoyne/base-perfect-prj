@@ -24,9 +24,7 @@ struct RetailerAPI {
     struct json {
         static var routes : [[String:Any]] {
             return [
-                ["method":"get",    "uri":"/api/v1/closeInterval/{intervalId}", "handler":closeInterval],
                 ["method":"post",    "uri":"/api/v1/billDenoms", "handler":billDenoms],
-                ["method":"get",    "uri":"/api/v1/closeInterval", "handler":closeInterval],
                 ["method":"post",   "uri":"/api/v1/registerterminal", "handler":registerTerminal],
                 ["method":"post",   "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],
                 ["method":"post",   "uri":"/api/v1/transaction", "handler":createTransaction],
@@ -47,39 +45,31 @@ struct RetailerAPI {
                 
                 let schema = Country.getSchema(request)
                 
+                var bodyReturn:[String:Any]? = nil
+                
                 switch schema {
                 case "us":
                 // Return the US denominations:
-                    _=try? response.setBody(json: ["usesNaturalChangeFunction":false]).setHeader(.custom(name: "Content-Type"), value: "application/json; charset=UTF-8").completed(status: .ok)
+                    bodyReturn = ["usesNaturalChangeFunction":false]
                     break
                 case "sg":
                 // Return the SG Denominations:
-                    _=try? response.setBody(json: ["usesNaturalChangeFunction":true, "denominations":[100.00, 50.00, 20.00, 10.00, 5.00, 2.00]]).setHeader(.custom(name: "Content-Type"), value: "application/json; charset=UTF-8").completed(status: .ok)
+                    bodyReturn = ["usesNaturalChangeFunction":true, "denominations":[100.00, 50.00, 20.00, 10.00, 5.00, 2.00]]
                     break
-                default: return response.unsupportedCountry
+                default:
+                    return response.unsupportedCountry
                 }
-            }
-        }
-        
-        //MARK: - Close Interval Function
-        public static func closeInterval(_ data: [String:Any]) throws -> RequestHandler {
-            return {
-                request, response in
-            
-                // Take care of checking the retailer & terminal:
-                guard let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
                 
-                // Okay.. they are good to go.  Here we need to query for all the transactions for right now (minus one day), sum them up, list them, and send them out.
+                AuditRecordActions.pageView(schema: schema,
+                                            session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                            page: "/api/v1/billDenoms",
+                                            row_data: bodyReturn,
+                                            description: nil,
+                                            viewedby: request.session?.userid ?? "NO SESSION USER")
                 
-                // Lets see if they passed in an intervalId (the yyyyMMdd string):
-                let intervalId = request.intervalId ?? moment().intervalString
-            
-                guard var startDate = moment(intervalId, dateFormat: "yyyyMMdd") else { return }
-                startDate = startDate - 4.hours
-//                let endDate = startDate + (1.days - 1.seconds)
-                
-//                return response.completed(status: .ok)
-                
+                if bodyReturn.isNotNil {
+                    _ = try? response.setBody(json: bodyReturn).setHeader(.custom(name: "Content-Type"), value: "application/json; charset=UTF-8").completed(status: .ok)
+                }
             }
         }
         
@@ -180,6 +170,14 @@ struct RetailerAPI {
                                     term.is_approved    = true
                                 }
                                 
+                                AuditRecordActions.terminalAdd(schema: schema,
+                                                               session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                               user: request.session?.userid ?? "NO SESSION USER",
+                                                               row_data: term.asDictionary(),
+                                                               changed_fields: nil,
+                                                               description: nil,
+                                                               changedby: nil)
+                                
                                 try term.saveWithCustomType(schemaIn: schema)
                                 try? response.setBody(json: ["isApproved":term.is_approved, "isSample": term.is_sample_only, "apiKey":apiKey])
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
@@ -261,11 +259,23 @@ struct RetailerAPI {
                                 term.is_approved    = true
                             }
 
+                            let respDict:[String:Any] = ["isApproved":term.is_approved, "isSample": term.is_sample_only, "apiKey":apiKey]
+                            
+                            var audit = respDict
+                            audit["terminal"] = term.asDictionary()
+
+                            AuditRecordActions.terminalAdd(schema: schema,
+                                                           session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                           user: request.session?.userid ?? "NO SESSION USER",
+                                                           row_data: audit,
+                                                           changed_fields: nil,
+                                                           description: nil,
+                                                           changedby: nil)
                             
                             do {
                                 
                                 try term.saveWithCustomType(schemaIn: schema)
-                                try? response.setBody(json: ["isApproved":term.is_approved, "isSample": term.is_sample_only, "apiKey":apiKey])
+                                try? response.setBody(json: respDict )
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
                                 
@@ -290,6 +300,17 @@ struct RetailerAPI {
                             
                             // Create and assign the hashed password:
                             terminal.terminal_key = thePassword.ourPasswordHash
+                            
+                            var audit = responseDictionary
+                            audit["terminal"] = terminal.asDictionary()
+                            
+                            AuditRecordActions.terminalAdd(schema: schema,
+                                                           session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                           user: request.session?.userid ?? "NO SESSION USER",
+                                                           row_data: audit,
+                                                           changed_fields: nil,
+                                                           description: nil,
+                                                           changedby: nil)
                             
                             // Save:
                             try terminal.saveWithCustomType(schemaIn: schema)
@@ -672,6 +693,13 @@ struct RetailerAPI {
                     // audit the delete
                     AuditFunctions().deleteCustomerCodeAuditRecord(thecode)
                     
+                    AuditRecordActions.customerCodeDelete(schema: schema,
+                                                          session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                          row_data: ["deleted_code": thecode],
+                                                          changed_fields: nil,
+                                                          description: nil,
+                                                          changedby: request.session?.token ?? "NO SESSION USER")
+                    
                     // all OK - returned at the bottom
                     _=try? response.setBody(json: ["result":"Successfully deleted the transaction."])
                     response.completed(status: .ok)
@@ -687,7 +715,21 @@ struct RetailerAPI {
                     }
 
                     if theCode.id.isNotNil {
-                        let _ = try? response.setBody(json: ["errorCode":"CodeRedeemed","message":"The code was redeemed already.  Please Contact Bucket Support."])
+                        
+                        let responseD:[String:Any] = ["errorCode":"CodeRedeemed","message":"The code was redeemed already.  Please Contact Bucket Support."]
+                        var audit:[String:Any] = responseD
+                        audit["code"]    = theCode.customer_code
+                        audit["code_id"] = theCode.id
+                        
+                        AuditRecordActions.customerCodeDelete(schema: schema,
+                                                              session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                              row_data: audit,
+                                                              changed_fields: nil,
+                                                              description: nil,
+                                                              changedby: request.session?.token ?? "NO SESSION USER")
+
+                        
+                        let _ = try? response.setBody(json: responseD)
                         response.completed(status: .custom(code: 452, message: "Code Redeemed Already"))
                         return
                     }
