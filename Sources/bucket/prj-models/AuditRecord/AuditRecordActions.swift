@@ -446,12 +446,13 @@ final class AuditRecordActions {
             rd["schema"] = schema
         }
         
-        rd["cashout_total"]      = total_cashout_amount
+        rd["cashout_total"]      = (total_cashout_amount*100).rounded()/100
         
         // loop thru the codes and amounts
         var codes:[String:Double] = [:]
         for (key, val) in code_and_amount {
-            codes[key] = (val as Double)
+            let valD = (val as Double)
+            codes[key] = (valD*100).rounded()/100
         }
         
         if codes.count > 0 {
@@ -486,12 +487,13 @@ final class AuditRecordActions {
             rd["schema"] = schema
         }
         
-        rd["cashout_total"]      = total_cashout_amount
+        rd["cashout_total"] = (total_cashout_amount*100).rounded()/100
         
         // loop thru the codes and amounts
         var codes:[String:Double] = [:]
         for (key, val) in code_and_amount {
-            codes[key] = (val as Double)
+            let valD = (val as Double)
+            codes[key] = (valD*100).rounded()/100
         }
         
         if codes.count > 0 {
