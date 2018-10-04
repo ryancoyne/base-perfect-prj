@@ -1800,7 +1800,7 @@ extension Int {
 extension Account {
     
     // Register User
-    public static func registerWithEmail(_ u: String, _ e: String, _ ut: AccountType = .provisional, baseURL: String) -> OAuth2ServerError {
+    public static func registerWithEmail(_ session: String,_ u: String, _ e: String, _ ut: AccountType = .provisional, baseURL: String) -> OAuth2ServerError {
         let acc = Account(AccessToken.generate(), u, "", e, ut)
         do {
             try acc.isUnique()
@@ -1808,7 +1808,7 @@ extension Account {
             try acc.create()
             
             AuditRecordActions.userAdd(schema: nil,
-                                       session_id: "NO SESSION ID: \(CCXServiceClass.sharedInstance.getNow())",
+                                       session_id: session,
                                        user: acc.id,
                                        row_data: nil,
                                        changed_fields: nil,
@@ -1818,7 +1818,7 @@ extension Account {
         } catch {
             
             AuditRecordActions.addGenericrecord(schema: nil,
-                                                session_id: "NO SESSION ID: \(CCXServiceClass.sharedInstance.getNow())",
+                                                session_id: session,
                                                 audit_group: "USER",
                                                 audit_action: "ERROR",
                                                 row_data: nil,

@@ -575,6 +575,7 @@ struct RetailerAPI {
                         }
                         
                         AuditRecordActions.customerCodeAdd(schema: schema,
+                                                           session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                            row_data: rn,
                                                            changed_fields: nil,
                                                            description: "Customer Code \(transaction.customer_code!) was created",

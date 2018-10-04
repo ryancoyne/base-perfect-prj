@@ -676,7 +676,7 @@ public class CodeTransaction: PostgresStORM {
     }
     
     @discardableResult
-    static func qrCodeCreate(schema : String, user : String, terminal : Terminal, increment : Int, minimum : Double?) -> CodeTransaction? {
+    static func qrCodeCreate(schema : String, session:String, user : String, terminal : Terminal, increment : Int, minimum : Double?) -> CodeTransaction? {
         
         var minimum_amount = 0.0
         if minimum.isNotNil { minimum_amount = minimum! }
@@ -731,6 +731,7 @@ public class CodeTransaction: PostgresStORM {
             // audit the record creation
             let rd = transaction.asDictionary()
             AuditRecordActions.customerCodeAdd(schema: schema,
+                                               session_id: session,
                                                row_data: rd,
                                                changed_fields: nil,
                                                description: "Added customer code \(transaction.customer_code!).",

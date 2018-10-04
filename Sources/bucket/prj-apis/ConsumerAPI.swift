@@ -48,6 +48,7 @@ struct ConsumerAPI {
                 guard !Account.userBounce(request, response) else { return }
                 
                 AuditRecordActions.pageView(schema: "public",
+                                            session_id: request.session?.token ?? "NO SESSION TOKEN",
                                             page: "/api/v1/balance",
                                             row_data: nil,
                                             description: nil,
@@ -69,6 +70,7 @@ struct ConsumerAPI {
                 guard let countryId = request.countryId else { return response.invalidCountryCode }
                 
                 AuditRecordActions.pageView(schema: "public",
+                                            session_id: request.session?.token ?? "NO SESSION TOKEN",
                                             page: "/api/v1/balance/{countryId}",
                                             row_data: ["countryId":countryId],
                                             description: nil,
@@ -246,7 +248,7 @@ struct ConsumerAPI {
                     if let t = rsp2?.first?.data, (t["created"] as! Int) > 0 {
                         
                         AuditRecordActions.customerCodeCheck(schema: schema,
-                                                             session_id: request.session?.token,
+                                                             session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                              row_data: ["customer_code":request.customerCode ?? "NO CODE"],
                                                              changed_fields: nil,
                                                              description: "Code already redeemed.",
@@ -256,7 +258,7 @@ struct ConsumerAPI {
                     } else {
                         
                         AuditRecordActions.customerCodeCheck(schema: schema,
-                                                             session_id: request.session?.token,
+                                                             session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                              row_data: ["customer_code":request.customerCode ?? "NO CODE"],
                                                              changed_fields: nil,
                                                              description: "Code does not exist.",
@@ -286,7 +288,7 @@ struct ConsumerAPI {
                     if testA.id.isEmpty {
                         
                         AuditRecordActions.customerCodeCheck(schema: schema,
-                                                             session_id: request.session?.token,
+                                                             session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                              row_data: ["customer_code":request.customerCode ?? "NO CODE","user_id":userid],
                                                              changed_fields: nil,
                                                              description: "Code is a SAMPLE code.  We could not find the user account.",
@@ -299,7 +301,7 @@ struct ConsumerAPI {
                     if !testA.isSample() {
                         
                         AuditRecordActions.customerCodeCheck(schema: schema,
-                                                             session_id: request.session?.token,
+                                                             session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                              row_data: ["customer_code":request.customerCode ?? "NO CODE","user_id":userid],
                                                              changed_fields: nil,
                                                              description: "Code is a SAMPLE code.  The user is not a SAMPLE user.",
@@ -319,7 +321,7 @@ struct ConsumerAPI {
                 if retCode.count > 0 {
                     
                     AuditRecordActions.customerCodeCheck(schema: schema,
-                                                         session_id: request.session?.token,
+                                                         session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                          row_data: ["customer_code":request.customerCode ?? "NO CODE",
                                                                     "user_id":userid,
                                                                     "amount": ct.amount!],
@@ -378,7 +380,7 @@ struct ConsumerAPI {
                     if let t = rsp2?.first?.data, (t["created"] as! Int) > 0 {
                         
                         AuditRecordActions.customerCodeRedeemed(schema: schema,
-                                                             session_id: request.session?.token,
+                                                             session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                              redeemedby: request.session?.userid ?? "NO USER, SESSION nil",
                                                              row_data: ["customer_code":request.customerCode ?? "NO CODE"],
                                                              changed_fields: nil,
@@ -389,7 +391,7 @@ struct ConsumerAPI {
                     } else {
                         
                         AuditRecordActions.customerCodeRedeemed(schema: schema,
-                                                             session_id: request.session?.token,
+                                                             session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                              redeemedby: request.session?.userid ?? "NO USER, SESSION nil",
                                                              row_data: ["customer_code":request.customerCode ?? "NO CODE"],
                                                              changed_fields: nil,
@@ -422,7 +424,7 @@ struct ConsumerAPI {
                     if testA.id.isEmpty {
                         
                         AuditRecordActions.customerCodeRedeemed(schema: schema,
-                                                             session_id: request.session?.token,
+                                                             session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                              redeemedby: request.session?.userid ?? "NO USER, SESSION nil",
                                                              row_data: ["customer_code":request.customerCode ?? "NO CODE","user_id":redeemedby],
                                                              changed_fields: nil,
@@ -436,7 +438,7 @@ struct ConsumerAPI {
                     if !testA.isSample() {
                         
                         AuditRecordActions.customerCodeRedeemed(schema: schema,
-                                                             session_id: request.session?.token,
+                                                             session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                              redeemedby: request.session?.userid ?? "NO USER, SESSION nil",
                                                              row_data: ["customer_code":request.customerCode ?? "NO CODE","user_id":redeemedby],
                                                              changed_fields: nil,
@@ -478,7 +480,7 @@ struct ConsumerAPI {
                 if retCode.count > 0 {
                     
                     AuditRecordActions.customerCodeRedeemed(schema: schema,
-                                                         session_id: request.session?.token,
+                                                         session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                          redeemedby: request.session?.userid ?? "NO USER, SESSION nil",
                                                          row_data: retCode,
                                                          changed_fields: nil,
@@ -632,7 +634,7 @@ struct ConsumerAPI {
                     audit["offset"] = qp.offsetNumber
 
                     AuditRecordActions.pageView(schema: schema,
-                                                session_id: request.session?.token ?? "NO TOKEN",
+                                                session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                 page: "/api/v1/cashout/{groupId}/options",
                                                 row_data: audit,
                                                 description: "Unsupported Country for this request.",
@@ -648,7 +650,7 @@ struct ConsumerAPI {
                 audit["offset"] = qp.offsetNumber
 
                 AuditRecordActions.pageView(schema: schema,
-                                            session_id: request.session?.token ?? "NO TOKEN",
+                                            session_id: request.session?.token ?? "NO SESSION TOKEN",
                                             page: "/api/v1/cashout/{groupId}/options",
                                             row_data: audit,
                                             description: "Unsupported Country for this request.",
@@ -760,7 +762,7 @@ struct ConsumerAPI {
                     audit["offset"] = qp.offsetNumber
                     
                     AuditRecordActions.pageView(schema: schema,
-                                                session_id: request.session?.token ?? "NO TOKEN",
+                                                session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                 page: "/api/v1/cashout/{groupId}/options",
                                                 row_data: audit,
                                                 description: nil,
@@ -776,7 +778,7 @@ struct ConsumerAPI {
                     audit["offset"] = qp.offsetNumber
                     
                     AuditRecordActions.pageView(schema: schema,
-                                                session_id: request.session?.token ?? "NO TOKEN",
+                                                session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                 page: "/api/v1/cashout/{groupId}/options",
                                                 row_data: audit,
                                                 description: "Unsupported Country for this request.",
@@ -946,7 +948,7 @@ struct ConsumerAPI {
                         audit["amount_to_cashout"] = amount_to_cashout
 
                         AuditRecordActions.addGenericrecord(schema: schema,
-                                                            session_id: request.session?.token ?? "NO TOKEN",
+                                                            session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                             audit_group: "CASHOUT",
                                                             audit_action: "ERROR",
                                                             row_data: audit,
@@ -1061,7 +1063,7 @@ struct ConsumerAPI {
                         audit["codes_used"] = codes_used
                         
                         AuditRecordActions.customerCodeAdd(schema: schema,
-                                                           session_id: request.session?.token ?? "NO TOKEN",
+                                                           session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                            row_data: audit,
                                                            changed_fields: nil,
                                                            description: nil,
@@ -1187,7 +1189,7 @@ struct ConsumerAPI {
                                      text: t)
                     
                     AuditRecordActions.addGenericrecord(schema: schema,
-                                                        session_id: request.session?.token ?? "NO TOKEN",
+                                                        session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                         audit_group: "RECOMMEND",
                                                         audit_action: "ADD",
                                                         row_data: rr.asDictionary(),

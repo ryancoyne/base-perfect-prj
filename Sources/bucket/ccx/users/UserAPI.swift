@@ -93,7 +93,7 @@ struct UserAPI {
                 if request.session?.userid.isEmpty == false {
                     
                     AuditRecordActions.userLogout(schema: nil,
-                                                  session_id: request.session?.token,
+                                                  session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                   user: request.session?.userid,
                                                   row_data: nil,
                                                   changed_fields: nil,
@@ -140,7 +140,7 @@ struct UserAPI {
                 if let s = request.session, !s.userid.isEmpty, s.data["csrf"].stringValue == request.header(.custom(name: "X-CSRF-Token")) {
                     
                     AuditRecordActions.userLogin(schema: nil,
-                                                  session_id: request.session?.token,
+                                                  session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                   user: request.session?.userid,
                                                   row_data: nil,
                                                   changed_fields: nil,
@@ -162,7 +162,7 @@ struct UserAPI {
                         if let acc = try? Account.login(username, password) {
                             
                             AuditRecordActions.userLogin(schema: nil,
-                                                         session_id: request.session?.token,
+                                                         session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                          user: request.session?.userid,
                                                          row_data: nil,
                                                          changed_fields: nil,
@@ -178,7 +178,7 @@ struct UserAPI {
                             // Failed on login
 
                             AuditRecordActions.userLogin(schema: nil,
-                                                         session_id: request.session?.token,
+                                                         session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                          user: request.session?.userid,
                                                          row_data: nil,
                                                          changed_fields: nil,
@@ -195,7 +195,7 @@ struct UserAPI {
                         if let acc = try? Account.loginWithEmail(email, password) {
 
                             AuditRecordActions.userLogin(schema: nil,
-                                                         session_id: request.session?.token,
+                                                         session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                          user: request.session?.userid,
                                                          row_data: nil,
                                                          changed_fields: nil,
@@ -212,7 +212,7 @@ struct UserAPI {
                             // Failed on login
                             
                             AuditRecordActions.userLogin(schema: nil,
-                                                         session_id: request.session?.token,
+                                                         session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                          user: request.session?.userid,
                                                          row_data: nil,
                                                          changed_fields: nil,
@@ -252,12 +252,12 @@ struct UserAPI {
                     guard let email = json["email"].stringValue else { return try! response.setBody(json: ["errorCode":"RequiredJSON","message":"You need to send at least an email to register."]).completed(status: .badRequest) }
                     let username = json["username"].stringValue ?? ""
                     
-                    let err = Account.registerWithEmail(username.lowercased(), email, .provisional, baseURL: EnvironmentVariables.sharedInstance.Public_URL_Full_Domain ?? "")
+                    let err = Account.registerWithEmail(request.session?.token ?? "NO SESSION TOKEN",username.lowercased(), email, .provisional, baseURL: EnvironmentVariables.sharedInstance.Public_URL_Full_Domain ?? "")
                     
                     if err != .noError {
                         
                         AuditRecordActions.userRegistration(schema: nil,
-                                                            session_id: request.session?.token ,
+                                                            session_id: request.session?.token ?? "NO SESSION TOKEN" ,
                                                             user: nil,
                                                             row_data: ["email":email, "username": username],
                                                             changed_fields: nil,
@@ -285,7 +285,7 @@ struct UserAPI {
                         }
                         
                         AuditRecordActions.userRegistration(schema: nil,
-                                                            session_id: request.session?.token ,
+                                                            session_id: request.session?.token ?? "NO SESSION TOKEN" ,
                                                             user: thenewuser.id,
                                                             row_data: ["email":email, "username": username],
                                                             changed_fields: nil,
@@ -329,7 +329,7 @@ struct UserAPI {
                                 try acc.save()
                                 
                                 AuditRecordActions.userChange(schema: nil,
-                                                              session_id: request.session?.token,
+                                                              session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                               user: acc.id,
                                                               row_data: nil,
                                                               changed_fields: ["password":"change"],
@@ -342,7 +342,7 @@ struct UserAPI {
                             } else {
 
                                 AuditRecordActions.userChange(schema: nil,
-                                                              session_id: request.session?.token,
+                                                              session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                               user: acc.id,
                                                               row_data: nil,
                                                               changed_fields: ["password":"change"],
@@ -395,7 +395,7 @@ struct UserAPI {
                     }
                     
                     AuditRecordActions.userChange(schema: nil,
-                                                  session_id: request.session?.token,
+                                                  session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                   user: request.session?.userid ?? "NO USER",
                                                   row_data: ["username": json??["username"].stringValue?.lowercased() ?? "NO USERNAME",
                                                              "email": json??["email"].stringValue ?? "NO EMAIL"],
@@ -670,7 +670,7 @@ struct UserAPI {
                     user.detail["modifiedby"] = user.id
                     
                     AuditRecordActions.userChange(schema: nil,
-                                                  session_id: request.session?.token,
+                                                  session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                   user: user.id,
                                                   row_data: nil,
                                                   changed_fields: oldvalue,
@@ -1050,7 +1050,7 @@ struct UserAPI {
                     if acc.id.isEmpty {
                         
                         AuditRecordActions.userRegistration(schema: nil,
-                                                            session_id: request.session?.token,
+                                                            session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                             user: request.session?.userid,
                                                             row_data: nil,
                                                             changed_fields: nil,
@@ -1064,7 +1064,7 @@ struct UserAPI {
                     } else {
                         
                         AuditRecordActions.userRegistration(schema: nil,
-                                                            session_id: request.session?.token,
+                                                            session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                             user: request.session?.userid,
                                                             row_data: nil,
                                                             changed_fields: nil,
@@ -1078,7 +1078,7 @@ struct UserAPI {
                 } else {
                     
                     AuditRecordActions.userRegistration(schema: nil,
-                                                        session_id: request.session?.token,
+                                                        session_id: request.session?.token ?? "NO SESSION TOKEN",
                                                         user: request.session?.userid,
                                                         row_data: nil,
                                                         changed_fields: nil,
