@@ -484,7 +484,7 @@ struct ConsumerAPI {
                                                          redeemedby: request.session?.userid ?? "NO USER, SESSION nil",
                                                          row_data: retCode,
                                                          changed_fields: nil,
-                                                         description: "Code is a SAMPLE code.  The user is not a SAMPLE user.",
+                                                         description: "Code is a SAMPLE code.  The user is a SAMPLE user.",
                                                          changedby: nil)
 
                     _=try? response.setBody(json: retCode)
