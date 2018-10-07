@@ -402,9 +402,12 @@ struct TestingAPI {
                     
                     if reup_res.isNotNil {
 
-                        let queue = Threading.getQueue(name: "code_claim", type: .serial)
+// we removed the threading for this response.  The problem is tha tthe front end is execting the wallet amounts and they are not getting it
+// because of the threading.  This makes the frnt end have problems getting off the page and showing the correct waller amounts.
+// back to non-threaded responses.
+//                        let queue = Threading.getQueue(name: "code_claim", type: .serial)
                         
-                        queue.dispatch({
+//                        queue.dispatch({
                             
                             let t_schema = schema
                             let t_countryId = countryId
@@ -473,7 +476,7 @@ struct TestingAPI {
                             print("ENDING 'code_claim' queue: \(getNow())")
                             print("//---------//")
 
-                        })
+//                        })
 
                     }
 
