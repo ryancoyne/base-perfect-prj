@@ -30,6 +30,9 @@
 // i. Upload the program to the server
 // ii. Copy the config/main.json file and adjust the settings
 //
+// Create the bucketbackup user:
+// a. Create the bucketbackup superuser: CREATE USER bucketbackup WITH ENCRYPTED PASSWORD 'a3d9323ac9ec5a6935fb8096';
+// b. Set the role to superuser: ALTER ROLE bucketbackup superuser;
 // Now you are ready to start the bucket service!
 
 import PerfectLib
