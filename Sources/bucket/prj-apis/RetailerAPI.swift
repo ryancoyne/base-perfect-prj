@@ -119,7 +119,7 @@ struct RetailerAPI {
                     let add = Address()
                     let add_sql = "SELECT * FROM \(schema).\(add.table()) WHERE retailer_id = \(r.id!)"
                     let addresses = try? add.sqlRows(add_sql, params: [])
-                    if let _ = addresses, addresses!.count < 2, let a = addresses!.first {
+                    if let _ = addresses, addresses!.count == 1, let a = addresses!.first {
                         let a_sql = "SELECT * FROM \(schema).\(add.table()) WHERE id = \(a.data.id!)"
                         let adr = try? add.sqlRows(a_sql, params: [])
                         if adr.isNotNil {
@@ -145,38 +145,41 @@ struct RetailerAPI {
                         
                         // Check and make sure the terminal is approved or not:
                         if terminal.id.isNil {
+                            
                             // The terminal does not exist for this retailer.  Lets create the terminal & password and send it back to the client:
+                            
                             let term = Terminal()
-                            let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(serialNumber)' "
-                            let trm = try? term.sqlRows(sql, params: [])
-                            if let t = trm?.first {
-                                term.to(t)
-                            }
+                            
+//                            let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(serialNumber)' "
+//                            let trm = try? term.sqlRows(sql, params: [])
+//                            if let t = trm?.first {
+//                                term.to(t)
+//                            }
 
                             let apiKey = UUID().uuidString
                             term.serial_number = serialNumber
                             term.retailer_id = r.id!
                             term.terminal_key = apiKey.ourPasswordHash
-                            
+
+                            // there is only one address for this company
+                            if add.id.isNotNil {
+                                term.address_id = add.id
+                            }
+
+                            if let rc_s = r.retailer_code, rc_s == "bucket-s" {
+                                term.is_sample_only = true
+                                term.is_approved    = true
+                            }
+
+                            AuditRecordActions.terminalAdd(schema: schema,
+                                                           session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                           user: request.session?.userid ?? "NO SESSION USER",
+                                                           row_data: term.asDictionary(),
+                                                           changed_fields: nil,
+                                                           description: nil,
+                                                           changedby: nil)
+
                             do {
-                                
-                                // there is only one address for this company
-                                if add.id.isNotNil {
-                                    term.address_id = add.id
-                                }
-                                
-                                if let rc_s = r.retailer_code, rc_s == "bucket-s" {
-                                    term.is_sample_only = true
-                                    term.is_approved    = true
-                                }
-                                
-                                AuditRecordActions.terminalAdd(schema: schema,
-                                                               session_id: request.session?.token ?? "NO SESSION TOKEN",
-                                                               user: request.session?.userid ?? "NO SESSION USER",
-                                                               row_data: term.asDictionary(),
-                                                               changed_fields: nil,
-                                                               description: nil,
-                                                               changedby: nil)
                                 
                                 try term.saveWithCustomType(schemaIn: schema)
                                 try? response.setBody(json: ["isApproved":term.is_approved, "isSample": term.is_sample_only, "apiKey":apiKey])
@@ -231,25 +234,27 @@ struct RetailerAPI {
                             terminal.to(t)
                         }
                         
+                        // we will take the first address on file for this retailer and add the location here for them
+                        let add = Address()
+                        let a_sql = "SELECT * FROM \(schema).address WHERE retailer_id = '\(r.id!)'"
+                        let a_res = try? add.sqlRows(a_sql, params: [])
+                        if let a = a_res?.first {
+                            add.to(a)
+                        }
+                        
                         // Check and make sure the terminal is approved or not:
                         if terminal.id.isNil {
                             // The terminal does not exist for this retailer.  Lets create the terminal & password and send it back to the client:
                             let term = Terminal()
                             
                             let apiKey = UUID().uuidString
-                            term.is_approved = true
                             term.serial_number = serialNumber
                             term.retailer_id = r.id!
                             term.terminal_key = apiKey.ourPasswordHash
-                            
-                            // we will take the first address on file for this retailer and add the location here for them
-                            let add = Address()
-                            let a_sql = "SELECT * FROM \(schema).address WHERE retailer_id = '\(r.id!)'"
-                            let a_res = try? add.sqlRows(a_sql, params: [])
-                            if let a = a_res?.first {
-                                add.to(a)
-                            }
-                            
+
+                            // auto approval:
+                            term.is_approved = true
+
                             if add.id.isNotNil, add.retailer_id == r.id! {
                                 term.address_id = add.id
                             }
@@ -292,6 +297,11 @@ struct RetailerAPI {
                             // Save the new password, and return the response:
                             let thePassword = UUID().uuidString
                             
+                            // if the address has nnot ben set, and there is only one address, set it to that address
+                            if let ta = terminal.address_id, ta == 0, add.id.isNotNil {
+                                terminal.address_id = add.id
+                            }
+                            
                             // Build the response:
                             var responseDictionary = [String:Any]()
                             responseDictionary["isApproved"] = terminal.is_approved
@@ -313,7 +323,7 @@ struct RetailerAPI {
                                                            changedby: nil)
                             
                             // Save:
-                            try terminal.saveWithCustomType(schemaIn: schema)
+                            let _ = try? terminal.saveWithCustomType(schemaIn: schema)
                             
                             // Return the response:
                             try? response.setBody(json: responseDictionary)

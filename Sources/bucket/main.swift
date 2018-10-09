@@ -86,7 +86,8 @@ if let logfile = EnvironmentVariables.sharedInstance.filesDirectoryLogs {
             itexists = true
         }
     }
-    
+
+//    SuttonFunctions().testMountUmount()
     
     let formatter = DateFormatter()
 //    formatter.dateFormat = "yyyy/MM/dd HH:mm"

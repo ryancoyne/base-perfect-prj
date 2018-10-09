@@ -4,14 +4,77 @@ import PostgresStORM
 import PerfectHTTP
 import PerfectLib
 
+@available(OSX 10.13, *)
 public class SuttonFunctions {
 
     struct SuttonDefaults {
         static let schema = "us"
         static let mainFileDirectory = Dir("transferfiles")
         static let usFileDirectory = Dir("transferfiles/us")
+        static let workFileDirectory = Dir("transferfiles/tmp")
+        static let workUsFileDirectory = Dir("transferfiles/tmp/us")
     }
     
+    func testMountUmount() {
+        
+        let tester = SuttonFunctions()
+        tester.mountFileDirectory()
+        tester.umountFileDirectory()
+    }
+    
+    private func mountFileDirectory() {
+    
+        let task = Process()
+        
+        #if os(macOS)
+            task.launchPath = "/sbin/mount"
+        #elseif os(Linux)
+            task.launchPath = "/bin/mount"
+        #endif
+
+        print("Mounting the main directory \(SuttonDefaults.mainFileDirectory.name)")
+        
+        task.arguments = ["sudo", "\(SuttonDefaults.mainFileDirectory.name)"]
+        
+        let pipe = Pipe()
+        task.standardOutput = pipe
+
+        var data = pipe.fileHandleForReading.readDataToEndOfFile()
+        var output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
+
+        task.launch()
+        
+        print("Main directory mount output: \(output!)")
+
+        print("Mounting the work directory \(SuttonDefaults.workFileDirectory.name)")
+
+        task.arguments = ["sudo", "mount", "\(SuttonDefaults.workUsFileDirectory.name)"]
+        task.launch()
+
+        data = pipe.fileHandleForReading.readDataToEndOfFile()
+        output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
+        
+        print("Work directory mount output: \(output!)")
+
+    }
+
+    private func umountFileDirectory() {
+        
+        let task = Process()
+        task.launchPath = "/"
+        task.arguments = ["sudo umount \(SuttonDefaults.mainFileDirectory.name)"]
+        
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        
+        task.launch()
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
+        
+        print("umount output: \(output!)")
+        
+    }
+
     private func checkFileDirectory() {
 
         let main_file_dir = SuttonDefaults.mainFileDirectory
