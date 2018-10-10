@@ -33,6 +33,9 @@ public class CodeTransaction: PostgresStORM {
     var archived    : Int?    = nil
     var archivedby  : String? = nil
 
+    var processed    : Int?    = nil
+    var processedby  : String? = nil
+    
     var retailer_id     : Int? = nil
     var country_id     : Int? = nil
     var customer_code     : String? = nil
@@ -96,11 +99,11 @@ public class CodeTransaction: PostgresStORM {
             cashedoutby = data
         }
 
-        if let data = this.data.codeTransactionHistoryDic.deletedReason {
+        if let data = this.data.codeTransactionDic.deletedReason {
             deleted_reason = data
         }
         
-        if let data = this.data.codeTransactionHistoryDic.disputedReason {
+        if let data = this.data.codeTransactionDic.disputedReason {
             disputed_reason = data
         }
         
@@ -115,14 +118,22 @@ public class CodeTransaction: PostgresStORM {
             cashedout_total = data
         }
 
-        if let data = this.data.codeTransactionHistoryDic.archived.intValue {
+        if let data = this.data.codeTransactionDic.archived.intValue {
             archived = data
         }
         
-        if let data = this.data.codeTransactionHistoryDic.archivedBy {
+        if let data = this.data.codeTransactionDic.archivedBy {
             archivedby = data
         }
 
+        if let data = this.data.codeTransactionDic.processed.intValue {
+            processed = data
+        }
+        
+        if let data = this.data.codeTransactionDic.processedBy {
+            processedby = data
+        }
+        
         if let data = this.data.codeTransactionDic.countryId {
             country_id = data
         }
@@ -328,6 +339,16 @@ public class CodeTransaction: PostgresStORM {
                     self.archived = (value as! Int)
                 }
                 
+            case "processedby":
+                if (value as? String).isNotNil {
+                    self.processedby = (value as! String)
+                }
+                
+            case "processed":
+                if (value as? Int).isNotNil {
+                    self.processed = (value as! Int)
+                }
+                
             case "description":
                 if (value as? String).isNotNil {
                     self.description = (value as! String)
@@ -374,11 +395,19 @@ public class CodeTransaction: PostgresStORM {
         }
         
         if self.archived.isNotNil {
-            dictionary.codeTransactionHistoryDic.archived = self.archived
+            dictionary.codeTransactionDic.archived = self.archived
         }
         
         if self.archivedby.isNotNil {
-            dictionary.codeTransactionHistoryDic.archivedBy = self.archivedby
+            dictionary.codeTransactionDic.archivedBy = self.archivedby
+        }
+        
+        if self.processed.isNotNil {
+            dictionary.codeTransactionDic.processed = self.processed
+        }
+        
+        if self.processedby.isNotNil {
+            dictionary.codeTransactionDic.processedBy = self.processedby
         }
         
         if self.disputed_reason.isNotNil {
@@ -390,7 +419,7 @@ public class CodeTransaction: PostgresStORM {
         }
         
         if self.deleted_reason.isNotNil {
-            dictionary.codeTransactionHistoryDic.deletedReason = self.deleted_reason
+            dictionary.codeTransactionDic.deletedReason = self.deleted_reason
         }
         
         if self.cashedoutby.isNotNil {

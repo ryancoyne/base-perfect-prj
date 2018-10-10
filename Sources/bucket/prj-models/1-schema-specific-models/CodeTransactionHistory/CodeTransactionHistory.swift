@@ -24,6 +24,9 @@ public class CodeTransactionHistory: PostgresStORM {
     var archived    : Int?    = nil
     var archivedby  : String? = nil
 
+    var processed    : Int?    = nil
+    var processedby  : String? = nil
+    
     var retailer_id           : Int? = nil
     var country_id            : Int? = nil
     var customer_code         : String? = nil
@@ -112,6 +115,14 @@ public class CodeTransactionHistory: PostgresStORM {
             archivedby = data
         }
 
+        if let data = this.data.codeTransactionHistoryDic.processed.intValue {
+            processed = data
+        }
+        
+        if let data = this.data.codeTransactionHistoryDic.processedBy {
+            processedby = data
+        }
+        
         if let data = this.data.codeTransactionHistoryDic.countryId {
             country_id = data
         }
@@ -172,11 +183,11 @@ public class CodeTransactionHistory: PostgresStORM {
             total_amount = data
         }
         
-        if let data = this.data.codeTransactionDic.status.stringValue {
+        if let data = this.data.codeTransactionHistoryDic.status.stringValue {
             status = data
         }
 
-        if let data = this.data.codeTransactionDic.description.stringValue {
+        if let data = this.data.codeTransactionHistoryDic.description.stringValue {
             description = data
         }
 
@@ -327,6 +338,16 @@ public class CodeTransactionHistory: PostgresStORM {
                     self.archived = (value as! Int)
                 }
 
+            case "processedby":
+                if (value as? String).isNotNil {
+                    self.processedby = (value as! String)
+                }
+                
+            case "processed":
+                if (value as? Int).isNotNil {
+                    self.processed = (value as! Int)
+                }
+                
             case "modifiedby":
                 if (value as? String).isNotNil {
                     self.modifiedby = (value as! String)
@@ -402,7 +423,7 @@ public class CodeTransactionHistory: PostgresStORM {
         }
         
         if self.disputed_reason.isNotNil {
-            dictionary.codeTransactionDic.disputedReason = self.disputed_reason
+            dictionary.codeTransactionHistoryDic.disputedReason = self.disputed_reason
         }
         
         if self.cashedoutby.isNotNil {
@@ -440,7 +461,15 @@ public class CodeTransactionHistory: PostgresStORM {
         if self.redeemed.isNotNil {
             dictionary.codeTransactionHistoryDic.redeemed = self.redeemed
         }
+
+        if self.processedby.isNotNil {
+            dictionary.codeTransactionHistoryDic.processedBy = self.processedby
+        }
         
+        if self.processed.isNotNil {
+            dictionary.codeTransactionHistoryDic.processed = self.processed
+        }
+
         if self.disputedby.isNotNil {
             dictionary.codeTransactionHistoryDic.disputedBy = self.disputedby
         }
@@ -470,19 +499,19 @@ public class CodeTransactionHistory: PostgresStORM {
         }
         
         if self.amount.isNotNil {
-            dictionary.codeTransactionDic.amount = self.amount
+            dictionary.codeTransactionHistoryDic.amount = self.amount
         }
 
         if self.amount_available.isNotNil {
-            dictionary.codeTransactionDic.amountAvailable = self.amount_available
+            dictionary.codeTransactionHistoryDic.amountAvailable = self.amount_available
         }
 
         if self.total_amount.isNotNil {
-            dictionary.codeTransactionDic.totalAmount = self.total_amount
+            dictionary.codeTransactionHistoryDic.totalAmount = self.total_amount
         }
 
         if self.description.isNotNil {
-            dictionary.codeTransactionDic.description = self.description
+            dictionary.codeTransactionHistoryDic.description = self.description
         }
 
         return dictionary
@@ -552,7 +581,15 @@ public class CodeTransactionHistory: PostgresStORM {
         if diff == true, self.disputedby != targetItem.disputedby {
             diff = false
         }
+
+        if diff == true, self.processed != targetItem.processed {
+            diff = false
+        }
         
+        if diff == true, self.processedby != targetItem.processedby {
+            diff = false
+        }
+
         if diff == true, self.batch_id != targetItem.batch_id {
             diff = false
         }

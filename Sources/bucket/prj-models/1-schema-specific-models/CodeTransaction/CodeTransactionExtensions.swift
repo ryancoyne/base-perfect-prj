@@ -195,6 +195,31 @@ struct CodeTransactionDictionary {
         }
     }
 
+    var processed : Int? {
+        get {
+            return self.dic["processed"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["processed"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "processed")
+            }
+        }
+    }
+    var processedBy : String? {
+        get {
+            return self.dic["processedby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["processedby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "processedby")
+            }
+        }
+    }
+
     var redeemed : Int? {
         get {
             return self.dic["redeemed"].intValue

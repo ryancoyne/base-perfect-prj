@@ -170,6 +170,8 @@ final class CodeTransactionTable {
         createsql.append("redeemedby text COLLATE pg_catalog.default, ")
         createsql.append("archived int NOT NULL DEFAULT 0, ")
         createsql.append("archivedby text COLLATE pg_catalog.default, ")
+        createsql.append("processed int NOT NULL DEFAULT 0, ")
+        createsql.append("processedby text COLLATE pg_catalog.default, ")
         createsql.append("cashedout int NOT NULL DEFAULT 0, ")
         createsql.append("cashedoutby text COLLATE pg_catalog.default, ")
         createsql.append("cashedout_total numeric(10,5) NOT NULL DEFAULT 0, ")
