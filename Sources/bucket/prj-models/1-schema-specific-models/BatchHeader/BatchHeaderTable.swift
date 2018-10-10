@@ -128,6 +128,7 @@ final class BatchHeaderTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
+        createsql.append("batch_type text COLLATE pg_catalog.default, ")
         createsql.append("batch_identifier text COLLATE pg_catalog.default, ")
         createsql.append("description text COLLATE pg_catalog.default, ")
         createsql.append("country_id int default 0, ")

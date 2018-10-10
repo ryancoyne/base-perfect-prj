@@ -27,6 +27,7 @@ public class BatchHeader: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
+    var batch_type  : String? = nil
     var batch_identifier  : String? = nil
     var description       : String? = nil
     var current_status    : String? = nil
@@ -71,6 +72,10 @@ public class BatchHeader: PostgresStORM {
         
         if let data = this.data.deletedBy {
             deletedby = data
+        }
+        
+        if let data = this.data.batchHeaderDic.batch_type {
+            batch_type = data
         }
         
         if let data = this.data.batchHeaderDic.batch_identifier {
@@ -135,10 +140,14 @@ public class BatchHeader: PostgresStORM {
             
             switch key.lowercased() {
                 
+            case "batch_type":
+                if (value as? String).isNotNil {
+                    self.batch_type = (value as! String)
+                }
+
             case "batch_identifier":
                 if (value as? String).isNotNil {
-                    self.batch_identifier = (value as!
-                    String)
+                    self.batch_identifier = (value as! String)
                 }
                 
             case "description":
@@ -231,6 +240,10 @@ public class BatchHeader: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
+        if self.batch_type.isNotNil {
+            dictionary.batchHeaderDic.batch_type = self.batch_type
+        }
+        
         if self.description.isNotNil {
             dictionary.batchHeaderDic.description = self.description
         }
@@ -282,6 +295,10 @@ public class BatchHeader: PostgresStORM {
     func compare(targetItem: BatchHeader)-> Bool {
         
         var diff = true
+        
+        if diff == true, self.batch_type != targetItem.batch_type {
+            diff = false
+        }
         
         if diff == true, self.current_status != targetItem.current_status {
             diff = false

@@ -179,4 +179,24 @@ final class SupportFunctions {
         return (retInt, retString)
     }
     
+    static func yesterday(_ epoch:Int) -> (start:Int, end:Int) {
+        
+        let timeZone = TimeZone(secondsFromGMT: 0)!
+        let locale = Locale(identifier: "en_US_POSIX")
+        
+        let now = moment(Date(timeIntervalSince1970: TimeInterval(epoch)), timeZone: timeZone, locale: locale)
+        
+        let hour = now.hour
+        let min = now.minute
+        let sec = now.second
+        
+        let daysec_calc = (hour*60*60) + (min*60) + sec
+        
+        let day_end = (epoch - daysec_calc) - 1
+        let day_start = (day_end - now.dayInSeconds)
+        
+        return (day_start,day_end)
+        
+    }
+    
 }

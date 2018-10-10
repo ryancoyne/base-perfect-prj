@@ -35,6 +35,19 @@ struct BatchHeaderDictionary {
         }
     }
     
+    var batch_type : String? {
+        get {
+            return self.dic["batch_type"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["batch_type"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "batch_type")
+            }
+        }
+    }
+    
     var description : String? {
         get {
             return self.dic["description"].stringValue
