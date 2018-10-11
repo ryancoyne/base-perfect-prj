@@ -16,6 +16,7 @@ struct BatchHeaderStatus {
     static let completed     = "completed"
 }
 
+/// This is the class that we will save that defines the export of the file. 
 public class BatchHeader: PostgresStORM {
 
     // NOTE: First param in class should be the ID.

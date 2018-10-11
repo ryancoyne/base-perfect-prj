@@ -10,6 +10,7 @@ import PerfectHTTP
 import StORM
 import PostgresStORM
 
+/// This is the class that defines the order, by line, of which Sutton requires us to upload details.
 public class BatchDetail: PostgresStORM {
     
     // NOTE: First param in class should be the ID.
@@ -22,7 +23,9 @@ public class BatchDetail: PostgresStORM {
     var deletedby  : String? = nil
     
     var batch_header_id : Int? = nil
+    /// This can be fh(file header), fc, bh(batch header), bc, bd (batch detail).
     var batch_group     : String? = nil
+    /// This is the line of the file.  The file header being 1, the batch header being 2, and so on.
     var batch_order     : Int? = nil
 
     var detail_line_length : Int? = nil
