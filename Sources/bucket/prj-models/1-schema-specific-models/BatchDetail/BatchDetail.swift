@@ -25,6 +25,7 @@ public class BatchDetail: PostgresStORM {
     var batch_group     : String? = nil
     var batch_order     : Int? = nil
 
+    var detail_line_length : Int? = nil
     var detail_line     : String? = nil
 
     //MARK: Table name

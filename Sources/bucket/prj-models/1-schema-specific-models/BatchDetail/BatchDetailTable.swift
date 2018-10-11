@@ -132,6 +132,7 @@ final class BatchDetailTable {
         createsql.append("batch_group text COLLATE pg_catalog.default, ")
         createsql.append("batch_order int default 0, ")
         createsql.append("detail_line text COLLATE pg_catalog.default, ")
+        createsql.append("detail_line_length int default 0, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

@@ -86,5 +86,18 @@ struct BatchDetailDictionary {
             }
         }
     }
+    
+    var detail_line_length : Int? {
+        get {
+            return self.dic["detail_line_length"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["detail_line_length"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "detail_line_length")
+            }
+        }
+    }
 
 }
