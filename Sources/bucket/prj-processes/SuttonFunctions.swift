@@ -3,6 +3,7 @@ import StORM
 import PostgresStORM
 import PerfectHTTP
 import PerfectLib
+import SwiftMoment
 
 public class SuttonFunctions {
 
@@ -20,6 +21,30 @@ public class SuttonFunctions {
         tester.mountFileDirectory()
         tester.umountFileDirectory()
     }
+    
+//    static func batchTables(to : Int, from : Int) {
+//        //  String date format:       yyyyMMdd      ->
+//        let locale = Locale(identifier: "en_US")
+//        if let tz = TimeZone(identifier: "GMT"),
+//            let toMoment = moment(to, dateFormat: "yyyyMMdd", timeZone: tz, locale: locale),
+//            let fromMoment = moment(from, dateFormat: "yyyyMMdd", timeZone: tz, locale: locale) {
+//
+//            let toInt = Int(toMoment.epoch())
+//            let fromInt = Int(fromMoment.epoch())
+//
+//            // Okay, now we need to query through each of the US audit tables for the accounts and codes:
+//            let codeDetails = USAccountCodeDetail()
+//
+//            // We need to form the SQL statement to find the data for the input dates:
+//
+//            let sqlStatement = "SELECT * from public.us_account_code_detail where created "
+//
+//
+//        } else {
+//
+//        }
+//
+//    }
     
     private func mountFileDirectory() {
     
@@ -99,7 +124,7 @@ public class SuttonFunctions {
         
     }
     
-    private func createFileHeader(_ fileNumber:Int? = 1, _ fileDate:Date? = nil, _ repeatFile:Bool? = false) -> (file_name: String, main_file_name:String, batch_number:Int, file_date:Date?, reference_code: String?) {
+    private func createFileHeader(_ fileNumber:Int? = 1, _ fileDate:Date? = nil, _ repeatFile:Bool? = false, forSchema: String) -> (file_name: String, main_file_name:String, batch_number:Int, file_date:Date?, reference_code: String?) {
         
         // make sure the driectory is there
         self.checkFileDirectory()
@@ -156,10 +181,9 @@ public class SuttonFunctions {
         file_contents.append(thefilenumber!) // positions 17 to 25
         file_contents.append("            Sutton Bank")  // positions 26 to 48
         file_contents.append("    Bucket Technologies")  // position 49 to 71
+        
         // Create the reference code:
-        let chars = "abcdefghijklmnopqrstuvwxyz0123456789"
-        var len = UInt16(chars.length)
-        let refCode = NSString(characters: &len, length: 8) as String
+        let refCode = String.referenceCode(forSchema: forSchema)
         
         file_contents.append("        ")   // position 72 to 79
         if !repeatFile.isNil, repeatFile! {
@@ -280,7 +304,7 @@ public class SuttonFunctions {
 //        self.addFooter(runningUser, runningBatchId)
     }
     
-    func createTransferFile () {
+    func createTransferFile (schema : String) {
 
         // order by number.
         // 1 = file header
@@ -294,7 +318,7 @@ public class SuttonFunctions {
         let date_count = Date(timeIntervalSince1970: Double(CCXServiceClass.sharedInstance.getNow()))
         
         
-        let header = self.createFileHeader(nil, date_count, false)
+        let header = self.createFileHeader(nil, date_count, false, forSchema: schema)
         files[1] = header.file_name
         
         var batch_count = 0
@@ -334,5 +358,7 @@ public class SuttonFunctions {
     private func createBucketAccountDetailBatch(_ batch_number:Int) {
         
     }
+    
+    
 
 }

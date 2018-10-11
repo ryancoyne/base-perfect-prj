@@ -48,6 +48,19 @@ struct BatchHeaderDictionary {
         }
     }
     
+    var fileName : String? {
+        get {
+            return self.dic["file_name"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["file_name"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "file_name")
+            }
+        }
+    }
+    
     var description : String? {
         get {
             return self.dic["description"].stringValue

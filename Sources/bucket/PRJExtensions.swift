@@ -4,9 +4,42 @@ import PerfectLocalAuthentication
 
 extension String {
     
+    enum s {
+        static let c = [Character("a"), Character("b"), Character("c"), Character("d"), Character("e"), Character("f"), Character("g"), Character("h"), Character("i"), Character("j"), Character("k"), Character("l"), Character("m"), Character("n"), Character("o"), Character("p"), Character("q"), Character("r"), Character("s"), Character("t"), Character("u"), Character("v"), Character("w"), Character("x"), Character("y"), Character("z"), Character("1"), Character("2"), Character("3"), Character("4"), Character("5"), Character("6"), Character("7"), Character("8"), Character("9"), Character("0")]
+        static let k = UInt32(c.count)
+    }
     var intValue : Int? {
         return Int(self)
     }
+    
+    /// The count is defaulted to 8.
+    static func referenceCode(_ count : Int?=8, forSchema : String) -> String {
+        
+        let isUnusedReferenceCode = false
+        while !isUnusedReferenceCode {
+            var result = [Character](repeating: "a", count: count!)
+            
+            for i in 0...count! {
+                let r = Int(arc4random_uniform(s.k))
+                result[i] = s.c[r]
+            }
+            
+            let value = String(result)
+            
+            // Here we need to theck if the reference code is being used already:
+            let query = BatchHeader()
+            let sqlStatement = "SELECT * FROM \(forSchema).batch_header WHERE batch_identifier = '\(value)';"
+            if let rows = try? query.sqlRows(sqlStatement, params: []) {
+                if rows.isEmpty {
+                    return value
+                } else {
+                    continue
+                }
+            }
+        }
+        
+    }
+
 }
 
 extension Dictionary {

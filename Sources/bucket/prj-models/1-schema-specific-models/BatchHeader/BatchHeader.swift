@@ -32,6 +32,8 @@ public class BatchHeader: PostgresStORM {
     var batch_type  : String? = nil
     /// This will be the 'referenceCode' as laid out in the Google sheet.
     var batch_identifier  : String? = nil
+    ///  This is the associated file name for the batch.
+    var file_name : String? = nil
     var description       : String? = nil
     var current_status    : String? = nil
     var status            : Int?    = nil
@@ -92,6 +94,10 @@ public class BatchHeader: PostgresStORM {
         if let data = this.data.batchHeaderDic.current_status {
             current_status = data
         }
+        
+        if let data = this.data.batchHeaderDic.fileName {
+            file_name = data
+        }
 
         if let data = this.data.batchHeaderDic.status {
             status = data
@@ -151,6 +157,11 @@ public class BatchHeader: PostgresStORM {
             case "batch_identifier":
                 if (value as? String).isNotNil {
                     self.batch_identifier = (value as! String)
+                }
+                
+            case "file_name":
+                if (value as? String).isNotNil {
+                    self.file_name = (value as! String)
                 }
                 
             case "description":
@@ -247,6 +258,10 @@ public class BatchHeader: PostgresStORM {
             dictionary.batchHeaderDic.batch_type = self.batch_type
         }
         
+        if self.file_name.isNotNil {
+            dictionary.batchHeaderDic.fileName = self.file_name
+        }
+        
         if self.description.isNotNil {
             dictionary.batchHeaderDic.description = self.description
         }
@@ -316,6 +331,10 @@ public class BatchHeader: PostgresStORM {
         }
         
         if diff == true, self.initial_send != targetItem.initial_send {
+            diff = false
+        }
+        
+        if diff == true, self.file_name != targetItem.file_name {
             diff = false
         }
         
