@@ -73,6 +73,10 @@ public class BatchDetail: PostgresStORM {
         if let data = this.data.batchDetailDic.batch_order {
             batch_order = data
         }
+        
+        if let data = this.data.batchDetailDic.detail_line_length {
+            detail_line_length = data
+        }
 
         if let data = this.data.batchDetailDic.detail_line {
             detail_line = data
@@ -109,6 +113,11 @@ public class BatchDetail: PostgresStORM {
             case "batch_order":
                 if (value as? Int).isNotNil {
                     self.batch_order = (value as! Int)
+                }
+                
+            case "detail_line_length":
+                if (value as? Int).isNotNil {
+                    self.detail_line_length = (value as! Int)
                 }
 
             case "detail_line":
@@ -159,6 +168,10 @@ public class BatchDetail: PostgresStORM {
         if self.batch_header_id.isNotNil {
             dictionary.batchDetailDic.batch_header_id = self.batch_header_id
         }
+        
+        if self.detail_line_length.isNotNil {
+            dictionary.batchDetailDic.detail_line_length = self.detail_line_length
+        }
 
         if self.batch_group.isNotNil {
             dictionary.batchDetailDic.batch_group = self.batch_group
@@ -189,6 +202,10 @@ public class BatchDetail: PostgresStORM {
         }
 
         if diff == true, self.batch_order != targetItem.batch_order {
+            diff = false
+        }
+        
+        if diff == true, self.detail_line_length != targetItem.detail_line_length {
             diff = false
         }
 
