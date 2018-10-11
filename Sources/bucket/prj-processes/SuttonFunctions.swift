@@ -99,7 +99,7 @@ public class SuttonFunctions {
         
     }
     
-    private func createFileHeader(_ fileNumber:Int? = 1, _ fileDate:Date? = nil, _ repeatFile:Bool? = false) -> (file_name: String, main_file_name:String, batch_number:Int, file_date:Date?) {
+    private func createFileHeader(_ fileNumber:Int? = 1, _ fileDate:Date? = nil, _ repeatFile:Bool? = false) -> (file_name: String, main_file_name:String, batch_number:Int, file_date:Date?, reference_code: String?) {
         
         // make sure the driectory is there
         self.checkFileDirectory()
@@ -131,7 +131,7 @@ public class SuttonFunctions {
         }
 
         if file.fd == -1 {
-            return ("", "", 0, nil)
+            return ("", "", 0, nil, nil)
         }
         
         let timeFormatter = DateFormatter()
@@ -156,6 +156,11 @@ public class SuttonFunctions {
         file_contents.append(thefilenumber!) // positions 17 to 25
         file_contents.append("            Sutton Bank")  // positions 26 to 48
         file_contents.append("    Bucket Technologies")  // position 49 to 71
+        // Create the reference code:
+        let chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+        var len = UInt16(chars.length)
+        let refCode = NSString(characters: &len, length: 8) as String
+        
         file_contents.append("        ")   // position 72 to 79
         if !repeatFile.isNil, repeatFile! {
             file_contents.append("Y")
@@ -169,7 +174,7 @@ public class SuttonFunctions {
         // and close it...
         file.close()
         
-        return (filename, fileprefix, filenumber, finalFileDate)
+        return (filename, fileprefix, filenumber, finalFileDate, refCode)
         
     }
     

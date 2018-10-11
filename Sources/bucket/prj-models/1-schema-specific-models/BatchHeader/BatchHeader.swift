@@ -27,7 +27,9 @@ public class BatchHeader: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
+    /// Arbitrary field that describes the process and the specific detail of the process.  (i.e.  sutton_codes, sutton_accounts)
     var batch_type  : String? = nil
+    /// This will be the 'referenceCode' as laid out in the Google sheet.
     var batch_identifier  : String? = nil
     var description       : String? = nil
     var current_status    : String? = nil
