@@ -5,8 +5,32 @@ import PerfectHTTP
 import PerfectLib
 import SwiftMoment
 
+/// The select option gives you the functionality of selecting which batch cases you want to write to the database.  Each grouping of batch cases is one file.  This allows you to create a file for each, or a file for two and another file for two.
+enum Batch {
+    case all(BatchOptions), select([[BatchCase]])
+    internal enum BatchCase {
+        case codes, codeStatuses, accountDetail, accountStatuses
+    }
+    internal enum BatchOptions {
+        case singleFileWithOrder(to: Int, from: Int, schema: String, order: [BatchCase]), separateFiles(to: Int, from: Int, schema: String), oneFile(to: Int, from: Int, schema: String, isRepeat: Bool)
+    }
+}
+
 public class SuttonFunctions {
 
+    static var numberFormatter : NumberFormatter = {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.maximumIntegerDigits = 4
+        numberFormatter.maximumFractionDigits = 2
+        numberFormatter.minimumIntegerDigits = 4
+        numberFormatter.minimumFractionDigits = 2
+        return numberFormatter
+    }()
+    
+    internal enum BatchExeption : Error {
+        case invalidDates
+    }
+    
     struct SuttonDefaults {
         static let schema = "us"
         static let mainFileDirectory = Dir("/transferfiles")
@@ -20,6 +44,374 @@ public class SuttonFunctions {
         let tester = SuttonFunctions()
         tester.mountFileDirectory()
         tester.umountFileDirectory()
+    }
+    
+    static func batch(in: Batch) throws {
+        switch `in` {
+        case .all(let option):
+            switch option {
+            case .oneFile(let to, let from, let schema, let isRepeat):
+                
+                if to <= from { throw BatchExeption.invalidDates }
+                
+                // Okay, lets go and create the reference code:
+                let referenceCode = String.referenceCode(forSchema: schema)
+                
+                // The current batch date:
+                let momen = moment(TimeZone(abbreviation: "GMT")!, locale: Locale(identifier: "en_US"))
+                let fileName = "\(SuttonDefaults.mainFileDirectory.path)sutton_batch_\(referenceCode)_\(momen.format("yyyyMMdd_hhmmss"))"
+                
+                let header = BatchHeader()
+                header.batch_identifier = referenceCode
+                header.batch_type = "sutton_all"
+                header.current_status = BatchHeaderStatus.working_on_it
+                header.file_name = fileName
+                
+                // Okay, we should save the header for now.
+                _ = try? header.saveWithCustomType(schemaIn: schema)
+                
+                // Order starts by one:
+                var order = 1
+                
+                // Okay, we need to write out two detail records first before we write out the details:
+                let fileHeader = BatchDetail()
+                fileHeader.batch_header_id = header.id
+                fileHeader.batch_group = "fh"
+                fileHeader.batch_order = order; /* Increment the order:*/ order += 1
+                
+                // Create the detail & save:
+                var theDet = "FH"
+                // File Creation Date:
+                theDet.append(momen.format("yyyyMMdd"))
+                // File Creation Time:
+                theDet.append(momen.format("hhmmss"))
+                // File Number:
+                theDet.append("\(000000001)")
+                theDet.append("            Sutton Bank")
+                theDet.append("    Bucket Technologies")
+                theDet.append(referenceCode)
+                
+                if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                
+                fileHeader.detail_line = theDet
+                fileHeader.detail_line_length = theDet.count
+                
+                _ = try? fileHeader.saveWithCustomType(schemaIn: schema)
+                
+                // Now we need to create the batch header:
+                let batchHeader = BatchDetail()
+                batchHeader.batch_header_id = header.id
+                batchHeader.batch_group = "bh"
+                batchHeader.batch_order = order; /* Increment the order:*/ order += 1
+                
+                theDet = "BH"
+                theDet.append(momen.format("yyyyMMdd"))
+                theDet.append(momen.format("hhmmss"))
+                theDet.append("\(000000001)")
+                let toMoment = moment(to)
+                // Batch effective date:
+                theDet.append("               " + toMoment.format("yyyyMMdd"))
+                theDet.append(referenceCode)
+                
+                if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                
+                batchHeader.detail_line = theDet
+                batchHeader.detail_line_length = theDet.count
+                
+                _ = try? batchHeader.saveWithCustomType(schemaIn: schema)
+                
+                // Okay, here we are writing one file.  So this is one batch for all the different items we are reporting.
+                let query = USAccountCodeDetail()
+                var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail WHERE created BETWEEN \(to) AND \(from);"
+                if let res = try? query.sqlRows(sqlStatement, params: []) {
+                    // HANDLE THE ACCOUNT CODE DETAIL RECORDS:
+                    
+                    // Update the status of the header:
+                    header.current_status = BatchHeaderStatus.in_progress
+                    _ = try? header.saveWithCustomType(schemaIn: schema)
+                    
+                    for row in res {
+                        // Okay.  We need to go and write a bunch of Batch Detail Records.
+                        let detail = BatchDetail()
+                        detail.batch_header_id = header.id
+                        detail.batch_group = "bd"
+                        detail.batch_order = order
+                        
+                        // Okay we need to write out the detail.
+                        var theDetail = "CS"
+                        if let changeDate = row.data.usAccountDetailDic.change_date {
+                            theDetail.append("\(changeDate)")
+                        } else {
+                            theDetail.append("        ")
+                        }
+                        
+                        if let changeTime = row.data.usAccountDetailDic.change_time {
+                            theDetail.append("\(changeTime)")
+                        } else {
+                            theDetail.append("      ")
+                        }
+                        
+                        if let code = row.data.usAccountDetailDic.code_number {
+                            theDetail.append("\(code)")
+                        } else {
+                            theDetail.append("              ")
+                        }
+                    
+                        if let originalValue = row.data.usAccountDetailDic.value_original {
+                            theDetail.append("\(originalValue)")
+                        } else {
+                            theDetail.append(" ")
+                        }
+                        
+                        if let newValue = row.data.usAccountDetailDic.value_new {
+                            theDetail.append("\(newValue)")
+                        } else {
+                            theDetail.append(" ")
+                        }
+                        
+                        if let amount = row.data.usAccountDetailDic.amount {
+                            
+                            let amountString = numberFormatter.string(from: amount as NSNumber)!
+                            theDetail.append(amountString)
+                            
+                        } else {
+                            theDetail.append("       ")
+                        }
+                        
+                        // Okay we have written out the details for this record.  We have to set and save the batch detail:
+                        detail.detail_line = theDetail
+                        detail.detail_line_length = theDetail.count
+                        
+                        // Save the Batch detail record:
+                        _=try? detail.saveWithCustomType(schemaIn: schema)
+                        
+                        // Append the order for the next record:
+                        order += 1
+                        
+                    }
+                }
+                
+                // Okay, now the next table:
+                let query2 = USAccountCodeStatus()
+                sqlStatement = "SELECT * FROM \(schema).us_account_code_status WHERE created BETWEEN \(to) AND \(from);"
+                if let res = try? query2.sqlRows(sqlStatement, params: []) {
+                    for row in res {
+                        
+                        let detail = BatchDetail()
+                        detail.batch_header_id = header.id
+                        detail.batch_group = "bd"
+                        detail.batch_order = order
+                        
+                        // Okay... start writing out the details:
+                        var theDetail = "BS"
+                        if let changeDate = row.data.usAccountStatusDic.change_date {
+                            theDetail.append(changeDate)
+                        } else {
+                            theDetail.append("        ")
+                        }
+                        
+                        if let changeTime = row.data.usAccountStatusDic.change_time {
+                            theDetail.append(changeTime)
+                        } else {
+                            theDetail.append("      ")
+                        }
+                        
+                        if let code = row.data.usAccountStatusDic.code_number {
+                            theDetail.append(code)
+                        } else {
+                            theDetail.append("      ")
+                        }
+                        
+                        if let originalValue = row.data.usAccountStatusDic.value_original {
+                            theDetail.append("\(originalValue)")
+                        } else {
+                            theDetail.append("      ")
+                        }
+                        
+                        if let newValue = row.data.usAccountStatusDic.value_new {
+                            theDetail.append("\(newValue)")
+                        } else {
+                            theDetail.append("      ")
+                        }
+                        
+                        // Okay we have written out the details for this record.  We have to set and save the batch detail:
+                        detail.detail_line = theDetail
+                        detail.detail_line_length = theDetail.count
+                        
+                        // Save the Batch detail record:
+                        _=try? detail.saveWithCustomType(schemaIn: schema)
+                        
+                        order += 1
+                    }
+                }
+                
+                // Okay, now the third table:
+                
+                let query3 = USBucketAccountDetail()
+                sqlStatement = "SELECT * from \(schema).us_bucket_account_detail where created BETWEEN \(to) AND \(from);"
+                if let res = try? query3.sqlRows(sqlStatement, params: []) {
+                    
+                    for row in res {
+                        
+                        let detail = BatchDetail()
+                        detail.batch_header_id = header.id
+                        detail.batch_group = "bd"
+                        detail.batch_order = order
+                        
+                        var theDetail = "BS"
+                        if let changeDate = row.data.usBucketAccountDetailDic.change_date {
+                            theDetail.append(changeDate)
+                        } else {
+                            theDetail.append("        ")
+                        }
+                        
+                        if let changeTime = row.data.usBucketAccountDetailDic.change_time {
+                            theDetail.append(changeTime)
+                        } else {
+                            theDetail.append("      ")
+                        }
+                        
+                        if let acN = row.data.usBucketAccountDetailDic.account_number {
+                            theDetail.append(acN)
+                        } else {
+                            theDetail.append("              ")
+                        }
+                        
+                        if let newValue = row.data.usBucketAccountDetailDic.value_new {
+                            theDetail.append("\(newValue)")
+                        } else {
+                            theDetail.append(" ")
+                        }
+                        
+                        if let newValue = row.data.usBucketAccountDetailDic.code_number {
+                            theDetail.append("\(newValue)")
+                        } else {
+                            theDetail.append("              ")
+                        }
+                        
+                        if let newValue = row.data.usBucketAccountDetailDic.amount {
+                            theDetail.append(numberFormatter.string(from: newValue as NSNumber)!)
+                        } else {
+                            theDetail.append("       ")
+                        }
+                        
+                        if let newValue = row.data.usBucketAccountDetailDic.adjustment_reason {
+                            numberFormatter.minimumIntegerDigits = 2
+                            numberFormatter.maximumIntegerDigits = 2
+                            theDetail.append(numberFormatter.string(from: newValue as NSNumber)!)
+                            numberFormatter.minimumIntegerDigits = 4
+                            numberFormatter.maximumIntegerDigits = 4
+                        } else {
+                            theDetail.append("  ")
+                        }
+                        
+                        if let newValue = row.data.usBucketAccountDetailDic.disbursement_reason {
+                            numberFormatter.minimumIntegerDigits = 2
+                            numberFormatter.maximumIntegerDigits = 2
+                            theDetail.append(numberFormatter.string(from: newValue as NSNumber)!)
+                            // Now we need to set back the number formatter for the amount:
+                            numberFormatter.minimumIntegerDigits = 4
+                            numberFormatter.maximumIntegerDigits = 4
+                        } else {
+                            theDetail.append("  ")
+                        }
+                        
+                        // Okay we have written out the details for this record.  We have to set and save the batch detail:
+                        detail.detail_line = theDetail
+                        detail.detail_line_length = theDetail.count
+                        
+                        // Save the Batch detail record:
+                        _=try? detail.saveWithCustomType(schemaIn: schema)
+                        
+                    }
+            
+                }
+                
+                let query4 = USBucketAccountStatus()
+                sqlStatement = "SELECT * from \(schema).us_bucket_account_status where created BETWEEN \(to) AND \(from);"
+                if let res = try? query4.sqlRows(sqlStatement, params: []) {
+                    
+                    for row in res {
+                        
+                        let detail = BatchDetail()
+                        detail.batch_header_id = header.id
+                        detail.batch_group = "bd"
+                        detail.batch_order = order
+                        
+                        var theDetail = "BS"
+                        if let changeDate = row.data.usBucketAccountStatusDic.change_date {
+                            theDetail.append(changeDate)
+                        } else {
+                            theDetail.append("        ")
+                        }
+                        
+                        if let changeTime = row.data.usBucketAccountStatusDic.change_time {
+                            theDetail.append(changeTime)
+                        } else {
+                            theDetail.append("      ")
+                        }
+                        
+                        if let acN = row.data.usBucketAccountStatusDic.account_number {
+                            theDetail.append(acN)
+                        } else {
+                            theDetail.append("              ")
+                        }
+                        
+                        if let originalValue = row.data.usBucketAccountStatusDic.value_original {
+                            theDetail.append("\(originalValue)")
+                        } else {
+                            theDetail.append("      ")
+                        }
+                        
+                        if let newValue = row.data.usBucketAccountStatusDic.value_new {
+                            theDetail.append("\(newValue)")
+                        } else {
+                            theDetail.append("      ")
+                        }
+                        
+                        // Okay we have written out the details for this record.  We have to set and save the batch detail:
+                        detail.detail_line = theDetail
+                        detail.detail_line_length = theDetail.count
+                        
+                        // Save the Batch detail record:
+                        _=try? detail.saveWithCustomType(schemaIn: schema)
+                        
+                    }
+                    
+                }
+                
+                // Okay... now.. we need to go and write in the header stuff things:
+                let batchControl = BatchDetail()
+                batchControl.batch_header_id = header.id
+                batchControl.batch_group = "bc"
+                batchControl.batch_order = order;  /* Increment the order:*/ order += 1
+                
+                // Create the detail & save:
+                
+                break
+            case .separateFiles:
+                break
+            case .singleFileWithOrder(let to, let from, let schema, let order):
+                break
+            }
+        case .select(let batches):
+            for batchFile in batches {
+                // We are creating a new batch here:
+                for option in batchFile {
+                    switch option {
+                    case .accountDetail:
+                        break
+                    case .accountStatuses:
+                        break
+                    case .codes:
+                        break
+                    case .codeStatuses:
+                        break
+                    }
+                }
+            }
+            break
+        }
     }
     
 //    static func batchTables(to : Int, from : Int) {
