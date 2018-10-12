@@ -443,6 +443,7 @@ public class SuttonFunctions {
                 batchControl.detail_line = theDet
                 batchControl.detail_line_length = theDet.count
                 
+                // Save the batch control:
                 _ = try? batchControl.saveWithCustomType(schemaIn: schema)
                 
                 // Now the file control:
@@ -459,6 +460,7 @@ public class SuttonFunctions {
                 fileControl.detail_line = theDet
                 fileControl.detail_line_length = theDet.count
                 
+                // Save the file control:
                 _ = try? fileControl.saveWithCustomType(schemaIn: schema)
                 
                 // Okay, we wrote everything successfully, lets update the batch header record:
