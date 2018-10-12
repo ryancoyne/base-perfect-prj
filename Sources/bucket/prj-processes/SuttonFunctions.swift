@@ -268,6 +268,7 @@ public class SuttonFunctions {
                         // Save the Batch detail record:
                         _=try? detail.saveWithCustomType(schemaIn: schema)
                         
+                        // Append the order of the batch detail records.
                         order += 1
                     }
                 }
@@ -348,6 +349,8 @@ public class SuttonFunctions {
                         // Save the Batch detail record:
                         _=try? detail.saveWithCustomType(schemaIn: schema)
                         
+                        // Append the order of the batch detail records.
+                        order += 1
                     }
             
                 }
@@ -403,6 +406,9 @@ public class SuttonFunctions {
                         
                         // Save the Batch detail record:
                         _=try? detail.saveWithCustomType(schemaIn: schema)
+                        
+                        // Append the order of the batch detail records.
+                        order += 1
                         
                     }
                     
