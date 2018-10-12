@@ -82,8 +82,8 @@ public class SuttonFunctions {
                 header.batch_type = "sutton_onefile_onebatch_alldata"
                 header.current_status = BatchHeaderStatus.working_on_it
                 header.description = theDescription
-                header.record_start_date = to
-                header.record_end_date = from
+                header.record_start_date = from
+                header.record_end_date = to
                 header.file_name = fileName
                 
                 // Okay, we should save the header for now.
