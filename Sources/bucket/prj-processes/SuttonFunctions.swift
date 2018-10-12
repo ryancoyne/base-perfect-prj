@@ -16,6 +16,21 @@ enum Batch {
     }
 }
 
+extension NumberFormatter {
+    func format(_ value : Int, buffingCharacters: Int) -> String? {
+        self.minimumIntegerDigits = buffingCharacters
+        self.maximumIntegerDigits = buffingCharacters
+        return self.string(from: value as NSNumber)
+    }
+    func format(_ value : Double, buffingCharacters: Int, decimalLimit: Int) -> String? {
+        self.minimumIntegerDigits = buffingCharacters
+        self.maximumIntegerDigits = buffingCharacters
+        self.minimumFractionDigits = decimalLimit
+        self.maximumFractionDigits = decimalLimit
+        return self.string(from: value as NSNumber)
+    }
+}
+
 public class SuttonFunctions {
 
     static var numberFormatter : NumberFormatter = {
@@ -28,7 +43,7 @@ public class SuttonFunctions {
     }()
     
     internal enum BatchExeption : Error {
-        case invalidDates
+        case invalidDates, invalidBatchDetailCount(_ theCount: Int, message: String)
     }
     
     struct SuttonDefaults {
@@ -96,6 +111,7 @@ public class SuttonFunctions {
                 fileHeader.detail_line = theDet
                 fileHeader.detail_line_length = theDet.count
                 
+                // Save the file header:
                 _ = try? fileHeader.saveWithCustomType(schemaIn: schema)
                 
                 // Now we need to create the batch header:
@@ -118,13 +134,20 @@ public class SuttonFunctions {
                 batchHeader.detail_line = theDet
                 batchHeader.detail_line_length = theDet.count
                 
+                // Save the batch header:
                 _ = try? batchHeader.saveWithCustomType(schemaIn: schema)
+                
+                // For the batch control file, we need the count of detail records.
+                var detailRecordsCount = 0
                 
                 // Okay, here we are writing one file.  So this is one batch for all the different items we are reporting.
                 let query = USAccountCodeDetail()
                 var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail WHERE created BETWEEN \(to) AND \(from);"
                 if let res = try? query.sqlRows(sqlStatement, params: []) {
                     // HANDLE THE ACCOUNT CODE DETAIL RECORDS:
+                    
+                    // Add in the number of records to detailRecordsCount from this table - remember - we are lumping everything together here.
+                    detailRecordsCount += res.count
                     
                     // Update the status of the header:
                     header.current_status = BatchHeaderStatus.in_progress
@@ -171,7 +194,7 @@ public class SuttonFunctions {
                         
                         if let amount = row.data.usAccountDetailDic.amount {
                             
-                            let amountString = numberFormatter.string(from: amount as NSNumber)!
+                            let amountString = numberFormatter.format(amount, buffingCharacters: 4, decimalLimit: 2)!
                             theDetail.append(amountString)
                             
                         } else {
@@ -195,6 +218,10 @@ public class SuttonFunctions {
                 let query2 = USAccountCodeStatus()
                 sqlStatement = "SELECT * FROM \(schema).us_account_code_status WHERE created BETWEEN \(to) AND \(from);"
                 if let res = try? query2.sqlRows(sqlStatement, params: []) {
+                    
+                    // Add in the number of records to detailRecordsCount from this table - remember - we are lumping everything together here.
+                    detailRecordsCount += res.count
+                    
                     for row in res {
                         
                         let detail = BatchDetail()
@@ -251,6 +278,9 @@ public class SuttonFunctions {
                 sqlStatement = "SELECT * from \(schema).us_bucket_account_detail where created BETWEEN \(to) AND \(from);"
                 if let res = try? query3.sqlRows(sqlStatement, params: []) {
                     
+                    // Add in the number of records to detailRecordsCount from this table - remember - we are lumping everything together here.
+                    detailRecordsCount += res.count
+                    
                     for row in res {
                         
                         let detail = BatchDetail()
@@ -290,28 +320,23 @@ public class SuttonFunctions {
                         }
                         
                         if let newValue = row.data.usBucketAccountDetailDic.amount {
-                            theDetail.append(numberFormatter.string(from: newValue as NSNumber)!)
+                            theDetail.append(numberFormatter.format(newValue, buffingCharacters: 4, decimalLimit: 2)!)
                         } else {
                             theDetail.append("       ")
                         }
                         
                         if let newValue = row.data.usBucketAccountDetailDic.adjustment_reason {
-                            numberFormatter.minimumIntegerDigits = 2
-                            numberFormatter.maximumIntegerDigits = 2
-                            theDetail.append(numberFormatter.string(from: newValue as NSNumber)!)
-                            numberFormatter.minimumIntegerDigits = 4
-                            numberFormatter.maximumIntegerDigits = 4
+                            
+                            theDetail.append(numberFormatter.format(newValue, buffingCharacters: 2)!)
+                            
                         } else {
                             theDetail.append("  ")
                         }
                         
                         if let newValue = row.data.usBucketAccountDetailDic.disbursement_reason {
-                            numberFormatter.minimumIntegerDigits = 2
-                            numberFormatter.maximumIntegerDigits = 2
-                            theDetail.append(numberFormatter.string(from: newValue as NSNumber)!)
-                            // Now we need to set back the number formatter for the amount:
-                            numberFormatter.minimumIntegerDigits = 4
-                            numberFormatter.maximumIntegerDigits = 4
+                            
+                            theDetail.append(numberFormatter.format(newValue, buffingCharacters: 2)!)
+                            
                         } else {
                             theDetail.append("  ")
                         }
@@ -330,6 +355,9 @@ public class SuttonFunctions {
                 let query4 = USBucketAccountStatus()
                 sqlStatement = "SELECT * from \(schema).us_bucket_account_status where created BETWEEN \(to) AND \(from);"
                 if let res = try? query4.sqlRows(sqlStatement, params: []) {
+                    
+                    // Add in the number of records to detailRecordsCount from this table - remember - we are lumping everything together here.
+                    detailRecordsCount += res.count
                     
                     for row in res {
                         
@@ -380,13 +408,49 @@ public class SuttonFunctions {
                     
                 }
                 
-                // Okay... now.. we need to go and write in the header stuff things:
+                // Okay... now.. we need to go and write in the batch control file:
                 let batchControl = BatchDetail()
                 batchControl.batch_header_id = header.id
                 batchControl.batch_group = "bc"
                 batchControl.batch_order = order;  /* Increment the order:*/ order += 1
                 
                 // Create the detail & save:
+                theDet = "BC"
+                // We are limited to 999 records here by the documentation, which is why we set to min & max integer digits of 3, then back to 4 for the expected usuage.
+                if detailRecordsCount >= 1000 {
+                    // TODO: We need to throw an error & then delete out the BatchHeader and any of the detail records saved for that header.
+                    throw BatchExeption.invalidBatchDetailCount(detailRecordsCount, message: "This may be due to the single file, single batch configuration here.  Try separating out in multiple files and batches.")
+                    
+                } else {
+                    
+                    theDet.append(numberFormatter.format(detailRecordsCount, buffingCharacters: 3)!)
+                
+                }
+                
+                // Batch Number:
+                theDet.append("000000001")
+                
+                // Finish up the batch control:
+                batchControl.detail_line = theDet
+                batchControl.detail_line_length = theDet.count
+                
+                _ = try? batchControl.saveWithCustomType(schemaIn: schema)
+                
+                // Now the file control:
+                let fileControl  = BatchDetail()
+                fileControl.batch_header_id = header.id
+                fileControl.batch_group = "fc"
+                fileControl.batch_order = order;  /* Increment the order:*/ order += 1
+                
+                theDet = "FC"
+                // The number of batches in this file, in this case it is one:
+                theDet.append("001")
+                theDet.append("000000001")
+                
+                fileControl.detail_line = theDet
+                fileControl.detail_line_length = theDet.count
+                
+                _ = try? fileControl.saveWithCustomType(schemaIn: schema)
                 
                 break
             case .separateFiles:
