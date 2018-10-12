@@ -12,7 +12,7 @@ enum Batch {
         case codes, codeStatuses, accountDetail, accountStatuses
     }
     internal enum BatchOptions {
-        case singleFileWithOrder(to: Int, from: Int, schema: String, order: [BatchCase]), separateFiles(to: Int, from: Int, schema: String), oneFile(to: Int, from: Int, schema: String, isRepeat: Bool)
+        case singleFileWithOrder(to: Int, from: Int, schema: String, order: [BatchCase]), separateFiles(to: Int, from: Int, schema: String), oneFile(to: Int, from: Int, schema: String, isRepeat: Bool, description : String)
     }
 }
 
@@ -65,7 +65,7 @@ public class SuttonFunctions {
         switch `in` {
         case .all(let option):
             switch option {
-            case .oneFile(let to, let from, let schema, let isRepeat):
+            case .oneFile(let to, let from, let schema, let isRepeat, let theDescription):
                 
                 if to <= from { throw BatchExeption.invalidDates }
                 
@@ -78,8 +78,11 @@ public class SuttonFunctions {
                 
                 let header = BatchHeader()
                 header.batch_identifier = referenceCode
-                header.batch_type = "sutton_all"
+                header.batch_type = "sutton_onefile_onebatch_alldata"
                 header.current_status = BatchHeaderStatus.working_on_it
+                header.description = theDescription
+                header.record_start_date = to
+                header.record_end_date = from
                 header.file_name = fileName
                 
                 // Okay, we should save the header for now.
@@ -246,19 +249,19 @@ public class SuttonFunctions {
                         if let code = row.data.usAccountStatusDic.code_number {
                             theDetail.append(code)
                         } else {
-                            theDetail.append("      ")
+                            theDetail.append("              ")
                         }
                         
                         if let originalValue = row.data.usAccountStatusDic.value_original {
                             theDetail.append("\(originalValue)")
                         } else {
-                            theDetail.append("      ")
+                            theDetail.append(" ")
                         }
                         
                         if let newValue = row.data.usAccountStatusDic.value_new {
                             theDetail.append("\(newValue)")
                         } else {
-                            theDetail.append("      ")
+                            theDetail.append(" ")
                         }
                         
                         // Okay we have written out the details for this record.  We have to set and save the batch detail:
@@ -457,6 +460,10 @@ public class SuttonFunctions {
                 fileControl.detail_line_length = theDet.count
                 
                 _ = try? fileControl.saveWithCustomType(schemaIn: schema)
+                
+                // Okay, we wrote everything successfully, lets update the batch header record:
+                header.current_status = BatchHeaderStatus.completed
+                _ = try? header.saveWithCustomType(schemaIn: schema)
                 
                 break
             case .separateFiles:
