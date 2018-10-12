@@ -108,9 +108,6 @@ public class SuttonFunctions {
                 let bucketAccountStatusResults = (try? query4.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += bucketAccountStatusResults.count
                 
-                // If we dont have any records, we do not want to continue.
-                guard totalDetailRecordsCount >= 1 else { throw BatchExeption.noDetailRecords(to: to, from: from) }
-                
                 let header = BatchHeader()
                 header.batch_identifier = referenceCode
                 header.country_id = countryId
@@ -156,38 +153,46 @@ public class SuttonFunctions {
                 // Save the file header:
                 _ = try? fileHeader.saveWithCustomType(schemaIn: schema)
                 
-                // Now we need to create the batch header:
-                let batchHeader = BatchDetail()
-                batchHeader.batch_header_id = header.id
-                batchHeader.batch_group = "bh"
-                batchHeader.batch_order = order; /* Increment the order:*/ order += 1
-                
-                theDet = "BH"
-                theDet.append(momen.format("yyyyMMdd"))
-                theDet.append(momen.format("hhmmss"))
-                theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
-                // Batch effective date:
-                theDet.append(to.dateString(format: "yyyyMMdd"))
-                theDet.append(referenceCode)
-                
-                if isRepeat { theDet.append("Y") } else { theDet.append("N") }
-                
-                batchHeader.detail_line = theDet
-                batchHeader.detail_line_length = theDet.count
-                
-                // Save the batch header:
-                _ = try? batchHeader.saveWithCustomType(schemaIn: schema)
-                
                 // For the batch control file, we need the count of detail records.
                 var currentDetailRecordsCount = 0
-                // We can default the batch count to 1:
-                var batchCount = 1
+                // The batch count:
+                var batchCount = 0
                 
                 // Okay, here we are writing one file.  So this is one batch for all the different items we are reporting.  First lets update our header file.
                 header.current_status = BatchHeaderStatus.in_progress
                 _ = try? header.saveWithCustomType(schemaIn: schema)
                 
                 for row in accountCodeResults {
+                    
+                    // If this is the first record, we need to create the initial batch header
+                    if accountCodeResults.first?.data.id == row.data.id {
+                        // Apend the batch count:
+                        batchCount += 1
+                        // Now we need to create the batch header:
+                        let batchHeader = BatchDetail()
+                        batchHeader.batch_header_id = header.id
+                        batchHeader.batch_group = "bh"
+                        batchHeader.batch_order = order; /* Increment the order:*/ order += 1
+                        
+                        theDet = "BH"
+                        theDet.append(momen.format("yyyyMMdd"))
+                        theDet.append(momen.format("hhmmss"))
+                        // Batch Count:
+                        theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
+                        // Batch effective date:
+                        theDet.append(to.dateString(format: "yyyyMMdd"))
+                        theDet.append(referenceCode)
+                        
+                        if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                        
+                        batchHeader.detail_line = theDet
+                        batchHeader.detail_line_length = theDet.length
+                        
+                        // Save the batch header:
+                        _ = try? batchHeader.saveWithCustomType(schemaIn: schema)
+
+                    }
+                    
                     // Okay.  We need to go and write a bunch of Batch Detail Records.
                     let detail = BatchDetail()
                     detail.batch_header_id = header.id
@@ -246,8 +251,8 @@ public class SuttonFunctions {
                     order += 1
                     currentDetailRecordsCount += 1
                     
-                    // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
-                    if currentDetailRecordsCount == 999 {
+                    // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control, or if it is the LAST object:
+                    if currentDetailRecordsCount == 999 || accountCodeResults.last?.data.id == row.data.id {
                         let batchControl = BatchDetail()
                         batchControl.batch_header_id = header.id
                         batchControl.batch_group = "bc"
@@ -293,6 +298,35 @@ public class SuttonFunctions {
                 
                 // Okay, now the next table:
                 for row in accountCodeStatusResults {
+                    
+                    // If this is the first record, we need to create the initial batch header
+                    if accountCodeStatusResults.first?.data.id == row.data.id {
+                        // Apend the batch count:
+                        batchCount += 1
+                        // Now we need to create the batch header:
+                        let batchHeader = BatchDetail()
+                        batchHeader.batch_header_id = header.id
+                        batchHeader.batch_group = "bh"
+                        batchHeader.batch_order = order; /* Increment the order:*/ order += 1
+                        
+                        theDet = "BH"
+                        theDet.append(momen.format("yyyyMMdd"))
+                        theDet.append(momen.format("hhmmss"))
+                        // Batch Count:
+                        theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
+                        // Batch effective date:
+                        theDet.append(to.dateString(format: "yyyyMMdd"))
+                        theDet.append(referenceCode)
+                        
+                        if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                        
+                        batchHeader.detail_line = theDet
+                        batchHeader.detail_line_length = theDet.length
+                        
+                        // Save the batch header:
+                        _ = try? batchHeader.saveWithCustomType(schemaIn: schema)
+                        
+                    }
                     
                     let detail = BatchDetail()
                     detail.batch_header_id = header.id
@@ -343,7 +377,7 @@ public class SuttonFunctions {
                     currentDetailRecordsCount += 1
                     
                     // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
-                    if currentDetailRecordsCount == 999 {
+                    if currentDetailRecordsCount == 999 || accountCodeStatusResults.last?.data.id == row.data.id {
                         let batchControl = BatchDetail()
                         batchControl.batch_header_id = header.id
                         batchControl.batch_group = "bc"
@@ -389,6 +423,35 @@ public class SuttonFunctions {
                 
                 // Now the third table:
                 for row in bucketAccountDetailResults {
+                    
+                    // If this is the first record, we need to create the initial batch header
+                    if bucketAccountDetailResults.first?.data.id == row.data.id {
+                        // Apend the batch count:
+                        batchCount += 1
+                        // Now we need to create the batch header:
+                        let batchHeader = BatchDetail()
+                        batchHeader.batch_header_id = header.id
+                        batchHeader.batch_group = "bh"
+                        batchHeader.batch_order = order; /* Increment the order:*/ order += 1
+                        
+                        theDet = "BH"
+                        theDet.append(momen.format("yyyyMMdd"))
+                        theDet.append(momen.format("hhmmss"))
+                        // Batch Count:
+                        theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
+                        // Batch effective date:
+                        theDet.append(to.dateString(format: "yyyyMMdd"))
+                        theDet.append(referenceCode)
+                        
+                        if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                        
+                        batchHeader.detail_line = theDet
+                        batchHeader.detail_line_length = theDet.length
+                        
+                        // Save the batch header:
+                        _ = try? batchHeader.saveWithCustomType(schemaIn: schema)
+                        
+                    }
                     
                     let detail = BatchDetail()
                     detail.batch_header_id = header.id
@@ -460,7 +523,7 @@ public class SuttonFunctions {
                     currentDetailRecordsCount += 1
                     
                     // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
-                    if currentDetailRecordsCount == 999 {
+                    if currentDetailRecordsCount == 999 || bucketAccountDetailResults.last?.data.id == row.data.id {
                         let batchControl = BatchDetail()
                         batchControl.batch_header_id = header.id
                         batchControl.batch_group = "bc"
@@ -508,6 +571,35 @@ public class SuttonFunctions {
                 
                 // Now last, but not least:
                 for row in bucketAccountStatusResults {
+                    
+                    // If this is the first record, we need to create the initial batch header
+                    if bucketAccountStatusResults.first?.data.id == row.data.id {
+                        // Apend the batch count:
+                        batchCount += 1
+                        // Now we need to create the batch header:
+                        let batchHeader = BatchDetail()
+                        batchHeader.batch_header_id = header.id
+                        batchHeader.batch_group = "bh"
+                        batchHeader.batch_order = order; /* Increment the order:*/ order += 1
+                        
+                        theDet = "BH"
+                        theDet.append(momen.format("yyyyMMdd"))
+                        theDet.append(momen.format("hhmmss"))
+                        // Batch Count:
+                        theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
+                        // Batch effective date:
+                        theDet.append(to.dateString(format: "yyyyMMdd"))
+                        theDet.append(referenceCode)
+                        
+                        if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                        
+                        batchHeader.detail_line = theDet
+                        batchHeader.detail_line_length = theDet.length
+                        
+                        // Save the batch header:
+                        _ = try? batchHeader.saveWithCustomType(schemaIn: schema)
+                        
+                    }
                     
                     let detail = BatchDetail()
                     detail.batch_header_id = header.id
@@ -557,7 +649,7 @@ public class SuttonFunctions {
                     currentDetailRecordsCount += 1
                     
                     // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
-                    if currentDetailRecordsCount == 999 {
+                    if currentDetailRecordsCount == 999 || bucketAccountStatusResults.last?.data.id == row.data.id {
                         let batchControl = BatchDetail()
                         batchControl.batch_header_id = header.id
                         batchControl.batch_group = "bc"
@@ -601,26 +693,6 @@ public class SuttonFunctions {
                     }
                     
                 }
-                
-                // Okay... now.. we need to go and write in the batch control file:
-                let batchControl = BatchDetail()
-                batchControl.batch_header_id = header.id
-                batchControl.batch_group = "bc"
-                batchControl.batch_order = order;  /* Increment the order:*/ order += 1
-                
-                // Create the detail & save:
-                theDet = "BC"
-                // Entry Count:
-                theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
-                // Batch Number:
-                theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
-                
-                // Finish up the batch control:
-                batchControl.detail_line = theDet
-                batchControl.detail_line_length = theDet.count
-                
-                // Save the batch control:
-                _ = try? batchControl.saveWithCustomType(schemaIn: schema)
                 
                 // Now the file control:
                 let fileControl  = BatchDetail()
