@@ -642,16 +642,19 @@ public class SuttonFunctions {
             case .singleFileWithOrder(let input):
                 
                 // Do the normal setup here.
-                
                 for type in input.order {
                     switch type {
                     case .accountCodeDetails:
+                        // Perform all the normal operations for the account code details:
                         break
                     case .accountCodeStatuses:
+                        // Perform all the normal operations for the account code statuses:
                         break
                     case .bucketAccountDetail:
+                        // Perform all the normal operations for the bucket account details:
                         break
                     case .bucketAccountStatuses:
+                        // Perform all the normal operations for the bucket account statuses:
                         break
                     }
                 }
