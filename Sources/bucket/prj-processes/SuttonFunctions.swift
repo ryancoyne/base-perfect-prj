@@ -269,6 +269,7 @@ public class SuttonFunctions {
                         newBatchHeader.batch_group = "bh"
                         newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
                         
+                        theDet = "BH"
                         theDet.append(momen.format("yyyyMMdd"))
                         theDet.append(momen.format("hhmmss"))
                         theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
@@ -364,6 +365,7 @@ public class SuttonFunctions {
                         newBatchHeader.batch_group = "bc"
                         newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
                         
+                        theDet = "BH"
                         theDet.append(momen.format("yyyyMMdd"))
                         theDet.append(momen.format("hhmmss"))
                         theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
@@ -480,6 +482,7 @@ public class SuttonFunctions {
                         newBatchHeader.batch_group = "bh"
                         newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
                         
+                        theDet = "BH"
                         theDet.append(momen.format("yyyyMMdd"))
                         theDet.append(momen.format("hhmmss"))
                         theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
@@ -575,6 +578,7 @@ public class SuttonFunctions {
                         newBatchHeader.batch_group = "bh"
                         newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
                         
+                        theDet = "BH"
                         theDet.append(momen.format("yyyyMMdd"))
                         theDet.append(momen.format("hhmmss"))
                         theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
