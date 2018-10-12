@@ -366,7 +366,7 @@ public class SuttonFunctions {
                         
                         let newBatchHeader = BatchDetail()
                         newBatchHeader.batch_header_id = header.id
-                        newBatchHeader.batch_group = "bc"
+                        newBatchHeader.batch_group = "bh"
                         newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
                         
                         theDet = "BH"
