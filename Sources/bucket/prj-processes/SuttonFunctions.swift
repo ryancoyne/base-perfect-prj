@@ -135,9 +135,8 @@ public class SuttonFunctions {
                 theDet.append(momen.format("yyyyMMdd"))
                 theDet.append(momen.format("hhmmss"))
                 theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
-                let toMoment = moment(to)
                 // Batch effective date:
-                theDet.append("               " + toMoment.format("yyyyMMdd"))
+                theDet.append("               " + to.dateString(format: "yyyyMMdd"))
                 theDet.append(referenceCode)
                 
                 if isRepeat { theDet.append("Y") } else { theDet.append("N") }
@@ -155,7 +154,7 @@ public class SuttonFunctions {
                 
                 // Okay, here we are writing one file.  So this is one batch for all the different items we are reporting.
                 let query = USAccountCodeDetail()
-                var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail WHERE created BETWEEN \(to) AND \(from);"
+                var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail WHERE created BETWEEN \(from) AND \(to);"
                 if let res = try? query.sqlRows(sqlStatement, params: []) {
                     // HANDLE THE ACCOUNT CODE DETAIL RECORDS:
                     
@@ -237,6 +236,27 @@ public class SuttonFunctions {
                             
                             batchControl.detail_line = theDet
                             batchControl.detail_line_length = theDet.count
+                            _ = try? batchControl.saveWithCustomType(schemaIn: schema)
+                            
+                            // Okay, now we need to create the new batchHeader record:
+                            let newBatchHeader = BatchDetail()
+                            newBatchHeader.batch_header_id = header.id
+                            newBatchHeader.batch_group = "bc"
+                            newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
+                            
+                            theDet.append(momen.format("yyyyMMdd"))
+                            theDet.append(momen.format("hhmmss"))
+                            theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
+                            // Batch effective date:
+                            theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                            theDet.append(referenceCode)
+                            
+                            if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                            
+                            newBatchHeader.detail_line = theDet
+                            newBatchHeader.detail_line_length = theDet.length
+                            
+                            _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
                             
                             // Set the detail records to zero, and append the batch number:
                             detailRecordsCount = 0
@@ -248,7 +268,7 @@ public class SuttonFunctions {
                 
                 // Okay, now the next table:
                 let query2 = USAccountCodeStatus()
-                sqlStatement = "SELECT * FROM \(schema).us_account_code_status WHERE created BETWEEN \(to) AND \(from);"
+                sqlStatement = "SELECT * FROM \(schema).us_account_code_status WHERE created BETWEEN \(from) AND \(to);"
                 if let res = try? query2.sqlRows(sqlStatement, params: []) {
                     
                     for row in res {
@@ -316,6 +336,27 @@ public class SuttonFunctions {
                             
                             batchControl.detail_line = theDet
                             batchControl.detail_line_length = theDet.count
+                            _ = try? batchControl.saveWithCustomType(schemaIn: schema)
+                            
+                            // Okay, now we need to create the new batchHeader record:
+                            let newBatchHeader = BatchDetail()
+                            newBatchHeader.batch_header_id = header.id
+                            newBatchHeader.batch_group = "bc"
+                            newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
+                            
+                            theDet.append(momen.format("yyyyMMdd"))
+                            theDet.append(momen.format("hhmmss"))
+                            theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
+                            // Batch effective date:
+                            theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                            theDet.append(referenceCode)
+                            
+                            if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                            
+                            newBatchHeader.detail_line = theDet
+                            newBatchHeader.detail_line_length = theDet.length
+                            
+                            _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
                             
                             // Set the detail records to zero, and append the batch number:
                             detailRecordsCount = 0
@@ -328,7 +369,7 @@ public class SuttonFunctions {
                 // Okay, now the third table:
                 
                 let query3 = USBucketAccountDetail()
-                sqlStatement = "SELECT * from \(schema).us_bucket_account_detail where created BETWEEN \(to) AND \(from);"
+                sqlStatement = "SELECT * from \(schema).us_bucket_account_detail where created BETWEEN \(from) AND \(to);"
                 if let res = try? query3.sqlRows(sqlStatement, params: []) {
                     
                     for row in res {
@@ -417,6 +458,27 @@ public class SuttonFunctions {
                             
                             batchControl.detail_line = theDet
                             batchControl.detail_line_length = theDet.count
+                            _ = try? batchControl.saveWithCustomType(schemaIn: schema)
+                            
+                            // Okay, now we need to create the new batchHeader record:
+                            let newBatchHeader = BatchDetail()
+                            newBatchHeader.batch_header_id = header.id
+                            newBatchHeader.batch_group = "bc"
+                            newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
+                            
+                            theDet.append(momen.format("yyyyMMdd"))
+                            theDet.append(momen.format("hhmmss"))
+                            theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
+                            // Batch effective date:
+                            theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                            theDet.append(referenceCode)
+                            
+                            if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                            
+                            newBatchHeader.detail_line = theDet
+                            newBatchHeader.detail_line_length = theDet.length
+                            
+                            _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
                             
                             // Set the detail records to zero, and append the batch number:
                             detailRecordsCount = 0
@@ -429,7 +491,7 @@ public class SuttonFunctions {
                 }
                 
                 let query4 = USBucketAccountStatus()
-                sqlStatement = "SELECT * from \(schema).us_bucket_account_status where created BETWEEN \(to) AND \(from);"
+                sqlStatement = "SELECT * from \(schema).us_bucket_account_status where created BETWEEN \(from) AND \(to);"
                 if let res = try? query4.sqlRows(sqlStatement, params: []) {
                     
                     for row in res {
@@ -496,6 +558,27 @@ public class SuttonFunctions {
                             
                             batchControl.detail_line = theDet
                             batchControl.detail_line_length = theDet.count
+                            _ = try? batchControl.saveWithCustomType(schemaIn: schema)
+                            
+                            // Okay, now we need to create the new batchHeader record:
+                            let newBatchHeader = BatchDetail()
+                            newBatchHeader.batch_header_id = header.id
+                            newBatchHeader.batch_group = "bc"
+                            newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
+                            
+                            theDet.append(momen.format("yyyyMMdd"))
+                            theDet.append(momen.format("hhmmss"))
+                            theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
+                            // Batch effective date:
+                            theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                            theDet.append(referenceCode)
+                            
+                            if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                            
+                            newBatchHeader.detail_line = theDet
+                            newBatchHeader.detail_line_length = theDet.length
+                            
+                            _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
                             
                             // Set the detail records to zero, and append the batch number:
                             detailRecordsCount = 0
