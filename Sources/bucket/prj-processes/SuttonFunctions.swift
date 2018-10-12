@@ -7,7 +7,7 @@ import SwiftMoment
 
 /// The select option gives you the functionality of selecting which batch cases you want to write to the database.  Each grouping of batch cases is one file.  This allows you to create a file for each, or a file for two and another file for two.
 enum Batch {
-    case all(BatchOptions), select([[BatchCase]])
+    case all(BatchOptions, user_id: String?), select([[BatchCase]])
     internal enum BatchCase {
         case codes, codeStatuses, accountDetail, accountStatuses
     }
@@ -68,7 +68,7 @@ public class SuttonFunctions {
     @discardableResult
     static func batch(in: Batch) throws -> BatchResult {
         switch `in` {
-        case .all(let option):
+        case .all(let option, let user_id):
             switch option {
             case .oneFile(let to, let from, let schema, let isRepeat, let theDescription):
                 
@@ -119,6 +119,8 @@ public class SuttonFunctions {
                 header.description = theDescription
                 header.record_start_date = from
                 header.record_end_date = to
+                header.status = CCXServiceClass.sharedInstance.getNow()
+                header.statusby = user_id ?? CCXDefaultUserValues.user_server
                 header.file_name = fileName
                 
                 // Okay, we should save the header for now.
@@ -634,7 +636,7 @@ public class SuttonFunctions {
                 _ = try? fileControl.saveWithCustomType(schemaIn: schema)
                 
                 // Okay, we wrote everything successfully, lets update the batch header record:
-                header.current_status = BatchHeaderStatus.completed
+                header.current_status = BatchHeaderStatus.pendingTransfer
                 _ = try? header.saveWithCustomType(schemaIn: schema)
                 
                 return (batchCount, totalDetailRecordsCount)

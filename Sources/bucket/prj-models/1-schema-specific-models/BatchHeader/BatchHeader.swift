@@ -11,6 +11,7 @@ import StORM
 import PostgresStORM
 
 struct BatchHeaderStatus {
+    static let pendingTransfer = "pending transfer"
     static let working_on_it = "creation"
     static let in_progress   = "in progress"
     static let completed     = "completed"
