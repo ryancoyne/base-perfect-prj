@@ -264,7 +264,7 @@ public class SuttonFunctions {
                         // Okay, now we need to create the new batchHeader record:
                         let newBatchHeader = BatchDetail()
                         newBatchHeader.batch_header_id = header.id
-                        newBatchHeader.batch_group = "bc"
+                        newBatchHeader.batch_group = "bh"
                         newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
                         
                         theDet.append(momen.format("yyyyMMdd"))
@@ -475,7 +475,7 @@ public class SuttonFunctions {
                         // Okay, now we need to create the new batchHeader record:
                         let newBatchHeader = BatchDetail()
                         newBatchHeader.batch_header_id = header.id
-                        newBatchHeader.batch_group = "bc"
+                        newBatchHeader.batch_group = "bh"
                         newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
                         
                         theDet.append(momen.format("yyyyMMdd"))
@@ -570,7 +570,7 @@ public class SuttonFunctions {
                         // Okay, now we need to create the new batchHeader record:
                         let newBatchHeader = BatchDetail()
                         newBatchHeader.batch_header_id = header.id
-                        newBatchHeader.batch_group = "bc"
+                        newBatchHeader.batch_group = "bh"
                         newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
                         
                         theDet.append(momen.format("yyyyMMdd"))
