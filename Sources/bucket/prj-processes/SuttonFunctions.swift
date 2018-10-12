@@ -632,6 +632,8 @@ public class SuttonFunctions {
                 header.current_status = BatchHeaderStatus.completed
                 _ = try? header.saveWithCustomType(schemaIn: schema)
                 
+                return batchCount
+                
                 break
             case .separateFiles:
                 break
