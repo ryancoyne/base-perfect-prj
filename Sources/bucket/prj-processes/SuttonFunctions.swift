@@ -167,7 +167,7 @@ public class SuttonFunctions {
                 theDet.append(momen.format("hhmmss"))
                 theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
                 // Batch effective date:
-                theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                theDet.append(to.dateString(format: "yyyyMMdd"))
                 theDet.append(referenceCode)
                 
                 if isRepeat { theDet.append("Y") } else { theDet.append("N") }
@@ -278,7 +278,7 @@ public class SuttonFunctions {
                         theDet.append(momen.format("hhmmss"))
                         theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         // Batch effective date:
-                        theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                        theDet.append(to.dateString(format: "yyyyMMdd"))
                         theDet.append(referenceCode)
                         
                         if isRepeat { theDet.append("Y") } else { theDet.append("N") }
@@ -374,7 +374,7 @@ public class SuttonFunctions {
                         theDet.append(momen.format("hhmmss"))
                         theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         // Batch effective date:
-                        theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                        theDet.append(to.dateString(format: "yyyyMMdd"))
                         theDet.append(referenceCode)
                         
                         if isRepeat { theDet.append("Y") } else { theDet.append("N") }
@@ -492,7 +492,7 @@ public class SuttonFunctions {
                         // Batch Number
                         theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         // Batch effective date:
-                        theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                        theDet.append(to.dateString(format: "yyyyMMdd"))
                         theDet.append(referenceCode)
                         
                         if isRepeat { theDet.append("Y") } else { theDet.append("N") }
@@ -588,7 +588,7 @@ public class SuttonFunctions {
                         theDet.append(momen.format("hhmmss"))
                         theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         // Batch effective date:
-                        theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                        theDet.append(to.dateString(format: "yyyyMMdd"))
                         theDet.append(referenceCode)
                         
                         if isRepeat { theDet.append("Y") } else { theDet.append("N") }
