@@ -30,6 +30,9 @@ public class USAccountCodeDetail: PostgresStORM {
     var value_new       : Int? = nil
     var amount          : Double? = nil
     var note            : String? = nil
+    
+    var processed : Int? = nil
+    var processedby : String? = nil
 
     //MARK: Table name
     override public func table() -> String { return "us_account_code_detail" }
@@ -67,6 +70,14 @@ public class USAccountCodeDetail: PostgresStORM {
         
         if let data = this.data.usAccountDetailDic.record_type {
            record_type  = data
+        }
+        
+        if let data = this.data.usAccountDetailDic.processed {
+            processed  = data
+        }
+        
+        if let data = this.data.usAccountDetailDic.processedby {
+            processedby  = data
         }
         
         if let data = this.data.usAccountDetailDic.change_date {
@@ -133,6 +144,16 @@ public class USAccountCodeDetail: PostgresStORM {
             case "code_number":
                 if (value as? String).isNotNil {
                     self.code_number = (value as! String)
+                }
+                
+            case "processedby":
+                if (value as? String).isNotNil {
+                    self.processedby = (value as! String)
+                }
+                
+            case "processed":
+                if (value as? Int).isNotNil {
+                    self.processed = (value as! Int)
                 }
                 
             case "value_original":

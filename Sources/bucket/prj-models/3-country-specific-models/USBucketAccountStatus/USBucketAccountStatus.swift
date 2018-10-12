@@ -28,6 +28,9 @@ public class USBucketAccountStatus: PostgresStORM {
     var value_original  : Int? = nil
     var value_new       : Int? = nil
     var note            : String? = nil
+    
+    var processed : Int? = nil
+    var processedby : String? = nil
 
     //MARK: Table name
     override public func table() -> String { return "us_bucket_account_status" }
@@ -61,6 +64,14 @@ public class USBucketAccountStatus: PostgresStORM {
         
         if let data = this.data.deletedBy {
             deletedby = data
+        }
+        
+        if let data = this.data.usAccountDetailDic.processed {
+            processed  = data
+        }
+        
+        if let data = this.data.usAccountDetailDic.processedby {
+            processedby  = data
         }
         
         if let data = this.data.usBucketAccountStatusDic.record_type {
@@ -132,6 +143,16 @@ public class USBucketAccountStatus: PostgresStORM {
             case "value_original":
                 if (value as? Int).isNotNil {
                     self.value_original = (value as! Int)
+                }
+                
+            case "processedby":
+                if (value as? String).isNotNil {
+                    self.processedby = (value as! String)
+                }
+                
+            case "processed":
+                if (value as? Int).isNotNil {
+                    self.processed = (value as! Int)
                 }
                 
             case "value_new":

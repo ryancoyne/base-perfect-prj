@@ -32,6 +32,9 @@ public class USBucketAccountDetail: PostgresStORM {
     var adjustment_reason   : Int? = nil
     var disbursement_reason : Int? = nil
     var note                : String? = nil
+    
+    var processed : Int? = nil
+    var processedby : String? = nil
 
     //MARK: Table name
     override public func table() -> String { return "us_bucket_account_detail" }
@@ -65,6 +68,14 @@ public class USBucketAccountDetail: PostgresStORM {
         
         if let data = this.data.deletedBy {
             deletedby = data
+        }
+        
+        if let data = this.data.usAccountDetailDic.processed {
+            processed  = data
+        }
+        
+        if let data = this.data.usAccountDetailDic.processedby {
+            processedby  = data
         }
         
         if let data = this.data.usBucketAccountDetailDic.record_type {
@@ -137,6 +148,16 @@ public class USBucketAccountDetail: PostgresStORM {
             case "change_date":
                 if (value as? String).isNotNil {
                     self.change_date = (value as! String)
+                }
+                
+            case "processedby":
+                if (value as? String).isNotNil {
+                    self.processedby = (value as! String)
+                }
+                
+            case "processed":
+                if (value as? Int).isNotNil {
+                    self.processed = (value as! Int)
                 }
                 
             case "change_time":

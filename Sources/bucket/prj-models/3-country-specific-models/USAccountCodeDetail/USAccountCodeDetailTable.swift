@@ -124,6 +124,8 @@ final class USAccountCodeDetailTable {
         createsql.append("change_time text COLLATE pg_catalog.default, ")
         createsql.append("code_number text COLLATE pg_catalog.default, ")
         createsql.append("value_original int NOT NULL DEFAULT 0, ")
+        createsql.append("processedby text COLLATE pg_catalog.default, ")
+        createsql.append("processed int NOT NULL DEFAULT 0, ")
         createsql.append("value_new int NOT NULL DEFAULT 0, ")
         createsql.append("amount numeric(10,5) NOT NULL DEFAULT 0, ")
         createsql.append("note text COLLATE pg_catalog.default, ")

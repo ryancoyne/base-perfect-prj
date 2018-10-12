@@ -34,6 +34,30 @@ struct USBucketAccountDetailDictionary {
             }
         }
     }
+    var processed : Int? {
+        get {
+            return self.dic["processed"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["processed"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "processed")
+            }
+        }
+    }
+    var processedby : String? {
+        get {
+            return self.dic["processedby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["processedby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "processedby")
+            }
+        }
+    }
     var record_type : String? {
         get {
             return self.dic["record_type"].stringValue
