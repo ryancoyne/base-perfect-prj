@@ -6,13 +6,13 @@ import PerfectLib
 import SwiftMoment
 
 /// The select option gives you the functionality of selecting which batch cases you want to write to the database.  Each grouping of batch cases is one file.  This allows you to create a file for each, or a file for two and another file for two.
-enum Batch {
+public enum Batch {
     case all(BatchOptions, user_id: String?), select([[BatchCase]])
-    internal enum BatchCase {
-        case codes, codeStatuses, accountDetail, accountStatuses
+    public enum BatchCase {
+        case accountCodeDetails, accountCodeStatuses, bucketAccountDetail, bucketAccountStatuses
     }
-    internal enum BatchOptions {
-        case singleFileWithOrder(to: Int, from: Int, schema: String, order: [BatchCase]), separateFiles(to: Int, from: Int, schema: String), oneFile(to: Int, from: Int, schema: String, isRepeat: Bool, description : String)
+    public enum BatchOptions {
+        case singleFileWithOrder(to: Int, from: Int, schema: String, order: [BatchCase], description : String), separateFiles(to: Int, from: Int, schema: String), oneFile(to: Int, from: Int, schema: String, isRepeat: Bool, description : String)
     }
 }
 
@@ -70,41 +70,41 @@ public class SuttonFunctions {
         switch `in` {
         case .all(let option, let user_id):
             switch option {
-            case .oneFile(let to, let from, let schema, let isRepeat, let theDescription):
+            case .oneFile(let input):
                 
-                if to <= from { throw BatchExeption.invalidDates }
+                if input.to <= input.from { throw BatchExeption.invalidDates }
                 
                 // Okay, lets go and create the reference code:
-                let referenceCode = String.referenceCode(forSchema: schema)
+                let referenceCode = String.referenceCode(forSchema: input.schema)
                 
                 // The batch date for the file name: (this is from the input dates:)
                 let momen = moment(TimeZone(abbreviation: "GMT")!, locale: Locale(identifier: "en_US"))
-                let fileName = "sutton_accounts_\(from.dateString(format: "yyyyMMdd"))"
+                let fileName = "sutton_accounts_\(input.from.dateString(format: "yyyyMMdd"))"
                 
                 // We need the country id for the batch header, for whatever reason:
-                guard let countryId = Country.idWith(schema) else { throw BatchExeption.invalidSchema(schema) }
+                guard let countryId = Country.idWith(input.schema) else { throw BatchExeption.invalidSchema(input.schema) }
                 
                 // If we have no detail records to process, we dont want to write ANYTHING.
                 var totalDetailRecordsCount = 0
                 
                 // Before writing anything, lets check if we have records for the following queries:
                 let query = USAccountCodeDetail()
-                var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail WHERE created BETWEEN \(from) AND \(to);"
+                var sqlStatement = "SELECT * FROM \(input.schema).us_account_code_detail WHERE created BETWEEN \(input.from) AND \(input.to);"
                 let accountCodeResults = (try? query.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += accountCodeResults.count
                 
                 let query2 = USAccountCodeStatus()
-                sqlStatement = "SELECT * FROM \(schema).us_account_code_status WHERE created BETWEEN \(from) AND \(to);"
+                sqlStatement = "SELECT * FROM \(input.schema).us_account_code_status WHERE created BETWEEN \(input.from) AND \(input.to);"
                 let accountCodeStatusResults = (try? query2.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += accountCodeStatusResults.count
                 
                 let query3 = USBucketAccountDetail()
-                sqlStatement = "SELECT * from \(schema).us_bucket_account_detail where created BETWEEN \(from) AND \(to);"
+                sqlStatement = "SELECT * from \(input.schema).us_bucket_account_detail where created BETWEEN \(input.from) AND \(input.to);"
                 let bucketAccountDetailResults = (try? query3.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += bucketAccountDetailResults.count
                 
                 let query4 = USBucketAccountStatus()
-                sqlStatement = "SELECT * from \(schema).us_bucket_account_status where created BETWEEN \(from) AND \(to);"
+                sqlStatement = "SELECT * from \(input.schema).us_bucket_account_status where created BETWEEN \(input.from) AND \(input.to);"
                 let bucketAccountStatusResults = (try? query4.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += bucketAccountStatusResults.count
                 
@@ -113,15 +113,15 @@ public class SuttonFunctions {
                 header.country_id = countryId
                 header.batch_type = "sutton_all"
                 header.current_status = BatchHeaderStatus.working_on_it
-                header.description = theDescription
-                header.record_start_date = from
-                header.record_end_date = to
+                header.description = input.description
+                header.record_start_date = input.from
+                header.record_end_date = input.to
                 header.status = CCXServiceClass.sharedInstance.getNow()
                 header.statusby = user_id ?? CCXDefaultUserValues.user_server
                 header.file_name = fileName
                 
                 // Okay, we should save the header for now.
-                let result = try? header.saveWithCustomType(schemaIn: schema)
+                let result = try? header.saveWithCustomType(schemaIn: input.schema)
                 header.id = result?.first?.data.id
                 
                 // Order starts by one:
@@ -145,13 +145,13 @@ public class SuttonFunctions {
                 theDet.append("    Bucket Technologies")
                 theDet.append(referenceCode)
                 
-                if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                if input.isRepeat { theDet.append("Y") } else { theDet.append("N") }
                 
                 fileHeader.detail_line = theDet
                 fileHeader.detail_line_length = theDet.length
                 
                 // Save the file header:
-                _ = try? fileHeader.saveWithCustomType(schemaIn: schema)
+                _ = try? fileHeader.saveWithCustomType(schemaIn: input.schema)
                 
                 // For the batch control file, we need the count of detail records.
                 var currentDetailRecordsCount = 0
@@ -160,7 +160,7 @@ public class SuttonFunctions {
                 
                 // Okay, here we are writing one file.  So this is one batch for all the different items we are reporting.  First lets update our header file.
                 header.current_status = BatchHeaderStatus.in_progress
-                _ = try? header.saveWithCustomType(schemaIn: schema)
+                _ = try? header.saveWithCustomType(schemaIn: input.schema)
                 
                 for row in accountCodeResults {
                     
@@ -180,16 +180,16 @@ public class SuttonFunctions {
                         // Batch Count:
                         theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         // Batch effective date:
-                        theDet.append(to.dateString(format: "yyyyMMdd"))
+                        theDet.append(input.to.dateString(format: "yyyyMMdd"))
                         theDet.append(referenceCode)
                         
-                        if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                        if input.isRepeat { theDet.append("Y") } else { theDet.append("N") }
                         
                         batchHeader.detail_line = theDet
                         batchHeader.detail_line_length = theDet.length
                         
                         // Save the batch header:
-                        _ = try? batchHeader.saveWithCustomType(schemaIn: schema)
+                        _ = try? batchHeader.saveWithCustomType(schemaIn: input.schema)
 
                     }
                     
@@ -245,7 +245,7 @@ public class SuttonFunctions {
                     detail.detail_line_length = theDetail.count
                     
                     // Save the Batch detail record:
-                    _=try? detail.saveWithCustomType(schemaIn: schema)
+                    _=try? detail.saveWithCustomType(schemaIn: input.schema)
                     
                     // Append the order for the next record:
                     order += 1
@@ -267,7 +267,7 @@ public class SuttonFunctions {
                         
                         batchControl.detail_line = theDet
                         batchControl.detail_line_length = theDet.count
-                        _ = try? batchControl.saveWithCustomType(schemaIn: schema)
+                        _ = try? batchControl.saveWithCustomType(schemaIn: input.schema)
                         
                         // Okay, now we need to create the new batchHeader record:
                         // Set the detail records to zero, and append the batch number:
@@ -295,16 +295,16 @@ public class SuttonFunctions {
                         // Batch Count:
                         theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         // Batch effective date:
-                        theDet.append(to.dateString(format: "yyyyMMdd"))
+                        theDet.append(input.to.dateString(format: "yyyyMMdd"))
                         theDet.append(referenceCode)
                         
-                        if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                        if input.isRepeat { theDet.append("Y") } else { theDet.append("N") }
                         
                         batchHeader.detail_line = theDet
                         batchHeader.detail_line_length = theDet.length
                         
                         // Save the batch header:
-                        _ = try? batchHeader.saveWithCustomType(schemaIn: schema)
+                        _ = try? batchHeader.saveWithCustomType(schemaIn: input.schema)
                         
                     }
                     
@@ -350,7 +350,7 @@ public class SuttonFunctions {
                     detail.detail_line_length = theDetail.count
                     
                     // Save the Batch detail record:
-                    _=try? detail.saveWithCustomType(schemaIn: schema)
+                    _=try? detail.saveWithCustomType(schemaIn: input.schema)
                     
                     // Append the order of the batch detail records.
                     order += 1
@@ -372,7 +372,7 @@ public class SuttonFunctions {
                         
                         batchControl.detail_line = theDet
                         batchControl.detail_line_length = theDet.count
-                        _ = try? batchControl.saveWithCustomType(schemaIn: schema)
+                        _ = try? batchControl.saveWithCustomType(schemaIn: input.schema)
                         
                         // Okay, now we need to create the new batchHeader record:
                         // Set the detail records to zero, and append the batch number:
@@ -400,16 +400,16 @@ public class SuttonFunctions {
                         // Batch Count:
                         theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         // Batch effective date:
-                        theDet.append(to.dateString(format: "yyyyMMdd"))
+                        theDet.append(input.to.dateString(format: "yyyyMMdd"))
                         theDet.append(referenceCode)
                         
-                        if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                        if input.isRepeat { theDet.append("Y") } else { theDet.append("N") }
                         
                         batchHeader.detail_line = theDet
                         batchHeader.detail_line_length = theDet.length
                         
                         // Save the batch header:
-                        _ = try? batchHeader.saveWithCustomType(schemaIn: schema)
+                        _ = try? batchHeader.saveWithCustomType(schemaIn: input.schema)
                         
                     }
                     
@@ -476,7 +476,7 @@ public class SuttonFunctions {
                     detail.detail_line_length = theDetail.count
                     
                     // Save the Batch detail record:
-                    _=try? detail.saveWithCustomType(schemaIn: schema)
+                    _=try? detail.saveWithCustomType(schemaIn: input.schema)
                     
                     // Append the order of the batch detail records.
                     order += 1
@@ -498,7 +498,7 @@ public class SuttonFunctions {
                         
                         batchControl.detail_line = theDet
                         batchControl.detail_line_length = theDet.count
-                        _ = try? batchControl.saveWithCustomType(schemaIn: schema)
+                        _ = try? batchControl.saveWithCustomType(schemaIn: input.schema)
                         
                         // Okay, now we need to create the new batchHeader record:
                         // Set the detail records to zero, and append the batch number:
@@ -527,16 +527,16 @@ public class SuttonFunctions {
                         // Batch Count:
                         theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         // Batch effective date:
-                        theDet.append(to.dateString(format: "yyyyMMdd"))
+                        theDet.append(input.to.dateString(format: "yyyyMMdd"))
                         theDet.append(referenceCode)
                         
-                        if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                        if input.isRepeat { theDet.append("Y") } else { theDet.append("N") }
                         
                         batchHeader.detail_line = theDet
                         batchHeader.detail_line_length = theDet.length
                         
                         // Save the batch header:
-                        _ = try? batchHeader.saveWithCustomType(schemaIn: schema)
+                        _ = try? batchHeader.saveWithCustomType(schemaIn: input.schema)
                         
                     }
                     
@@ -581,7 +581,7 @@ public class SuttonFunctions {
                     detail.detail_line_length = theDetail.count
                     
                     // Save the Batch detail record:
-                    _=try? detail.saveWithCustomType(schemaIn: schema)
+                    _=try? detail.saveWithCustomType(schemaIn: input.schema)
                     
                     // Append the order of the batch detail records.
                     order += 1
@@ -603,7 +603,7 @@ public class SuttonFunctions {
                         
                         batchControl.detail_line = theDet
                         batchControl.detail_line_length = theDet.count
-                        _ = try? batchControl.saveWithCustomType(schemaIn: schema)
+                        _ = try? batchControl.saveWithCustomType(schemaIn: input.schema)
                         
                         // Okay, now we need to create the new batchHeader record:
                         // Set the detail records to zero, and append the batch number:
@@ -629,17 +629,32 @@ public class SuttonFunctions {
                 fileControl.detail_line_length = theDet.count
                 
                 // Save the file control:
-                _ = try? fileControl.saveWithCustomType(schemaIn: schema)
+                _ = try? fileControl.saveWithCustomType(schemaIn: input.schema)
                 
                 // Okay, we wrote everything successfully, lets update the batch header record:
                 header.current_status = BatchHeaderStatus.pendingTransfer
-                _ = try? header.saveWithCustomType(schemaIn: schema)
+                _ = try? header.saveWithCustomType(schemaIn: input.schema)
                 
                 return (batchCount, totalDetailRecordsCount)
         
             case .separateFiles:
                 break
-            case .singleFileWithOrder(let _, let _, let _, let _):
+            case .singleFileWithOrder(let input):
+                
+                // Do the normal setup here.
+                
+                for type in input.order {
+                    switch type {
+                    case .accountCodeDetails:
+                        break
+                    case .accountCodeStatuses:
+                        break
+                    case .bucketAccountDetail:
+                        break
+                    case .bucketAccountStatuses:
+                        break
+                    }
+                }
                 break
             }
         case .select(let batches):
@@ -647,13 +662,13 @@ public class SuttonFunctions {
                 // We are creating a new batch here:
                 for option in batchFile {
                     switch option {
-                    case .accountDetail:
+                    case .accountCodeDetails:
                         break
-                    case .accountStatuses:
+                    case .accountCodeStatuses:
                         break
-                    case .codes:
+                    case .bucketAccountDetail:
                         break
-                    case .codeStatuses:
+                    case .bucketAccountStatuses:
                         break
                     }
                 }
