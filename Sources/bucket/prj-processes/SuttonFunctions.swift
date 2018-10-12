@@ -20,6 +20,8 @@ extension NumberFormatter {
     func format(_ value : Int, buffingCharacters: Int) -> String? {
         self.minimumIntegerDigits = buffingCharacters
         self.maximumIntegerDigits = buffingCharacters
+        self.maximumFractionDigits = 0
+        self.minimumFractionDigits = 0
         return self.string(from: value as NSNumber)
     }
     func format(_ value : Double, buffingCharacters: Int, decimalLimit: Int) -> String? {
@@ -91,7 +93,8 @@ public class SuttonFunctions {
                 header.file_name = fileName
                 
                 // Okay, we should save the header for now.
-                _ = try? header.saveWithCustomType(schemaIn: schema)
+                let result = try? header.saveWithCustomType(schemaIn: schema)
+                header.id = result?.first?.data.id
                 
                 // Order starts by one:
                 var order = 1
