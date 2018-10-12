@@ -264,6 +264,10 @@ public class SuttonFunctions {
                         _ = try? batchControl.saveWithCustomType(schemaIn: schema)
                         
                         // Okay, now we need to create the new batchHeader record:
+                        // Set the detail records to zero, and append the batch number:
+                        currentDetailRecordsCount = 0
+                        batchCount += 1
+                        
                         let newBatchHeader = BatchDetail()
                         newBatchHeader.batch_header_id = header.id
                         newBatchHeader.batch_group = "bh"
@@ -283,10 +287,6 @@ public class SuttonFunctions {
                         newBatchHeader.detail_line_length = theDet.length
                         
                         _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
-                        
-                        // Set the detail records to zero, and append the batch number:
-                        currentDetailRecordsCount = 0
-                        batchCount += 1
                         
                     }
                 }
@@ -360,6 +360,10 @@ public class SuttonFunctions {
                         _ = try? batchControl.saveWithCustomType(schemaIn: schema)
                         
                         // Okay, now we need to create the new batchHeader record:
+                        // Set the detail records to zero, and append the batch number:
+                        currentDetailRecordsCount = 0
+                        batchCount += 1
+                        
                         let newBatchHeader = BatchDetail()
                         newBatchHeader.batch_header_id = header.id
                         newBatchHeader.batch_group = "bc"
@@ -379,10 +383,6 @@ public class SuttonFunctions {
                         newBatchHeader.detail_line_length = theDet.length
                         
                         _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
-                        
-                        // Set the detail records to zero, and append the batch number:
-                        currentDetailRecordsCount = 0
-                        batchCount += 1
                         
                     }
                 }
@@ -477,6 +477,10 @@ public class SuttonFunctions {
                         _ = try? batchControl.saveWithCustomType(schemaIn: schema)
                         
                         // Okay, now we need to create the new batchHeader record:
+                        // Set the detail records to zero, and append the batch number:
+                        currentDetailRecordsCount = 0
+                        batchCount += 1
+                        
                         let newBatchHeader = BatchDetail()
                         newBatchHeader.batch_header_id = header.id
                         newBatchHeader.batch_group = "bh"
@@ -497,10 +501,6 @@ public class SuttonFunctions {
                         newBatchHeader.detail_line_length = theDet.length
                         
                         _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
-                        
-                        // Set the detail records to zero, and append the batch number:
-                        currentDetailRecordsCount = 0
-                        batchCount += 1
                         
                     }
                     
@@ -574,6 +574,10 @@ public class SuttonFunctions {
                         _ = try? batchControl.saveWithCustomType(schemaIn: schema)
                         
                         // Okay, now we need to create the new batchHeader record:
+                        // Set the detail records to zero, and append the batch number:
+                        currentDetailRecordsCount = 0
+                        batchCount += 1
+                        
                         let newBatchHeader = BatchDetail()
                         newBatchHeader.batch_header_id = header.id
                         newBatchHeader.batch_group = "bh"
@@ -593,11 +597,7 @@ public class SuttonFunctions {
                         newBatchHeader.detail_line_length = theDet.length
                         
                         _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
-                        
-                        // Set the detail records to zero, and append the batch number:
-                        currentDetailRecordsCount = 0
-                        batchCount += 1
-                        
+                    
                     }
                     
                 }
