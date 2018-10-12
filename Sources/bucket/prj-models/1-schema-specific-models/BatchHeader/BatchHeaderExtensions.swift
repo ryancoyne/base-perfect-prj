@@ -113,6 +113,19 @@ struct BatchHeaderDictionary {
         }
     }
     
+    var countryId : Int? {
+        get {
+            return self.dic["country_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["country_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "country_id")
+            }
+        }
+    }
+    
     var statusby : String? {
         get {
             return self.dic["status"].stringValue

@@ -77,9 +77,11 @@ public class SuttonFunctions {
                 let momen = moment(TimeZone(abbreviation: "GMT")!, locale: Locale(identifier: "en_US"))
                 let fileName = "sutton_accounts_\(from.dateString(format: "yyyyMMdd"))"
                 
+                let countryId = Country.idWith(schema)
+                
                 let header = BatchHeader()
                 header.batch_identifier = referenceCode
-                header.batch_type = "sutton_onefile_onebatch_alldata"
+                header.batch_type = "sutton_all"
                 header.current_status = BatchHeaderStatus.working_on_it
                 header.description = theDescription
                 header.record_start_date = from

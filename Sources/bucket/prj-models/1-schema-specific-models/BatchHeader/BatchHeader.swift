@@ -35,6 +35,7 @@ public class BatchHeader: PostgresStORM {
     ///  This is the associated file name for the batch.
     var file_name : String? = nil
     var description       : String? = nil
+    var country_id : Int? = nil
     var current_status    : String? = nil
     var status            : Int?    = nil
     var statusby          : String? = nil
@@ -81,6 +82,10 @@ public class BatchHeader: PostgresStORM {
         
         if let data = this.data.batchHeaderDic.batch_type {
             batch_type = data
+        }
+        
+        if let data = this.data.batchHeaderDic.countryId {
+            country_id = data
         }
         
         if let data = this.data.batchHeaderDic.batch_identifier {
@@ -179,6 +184,11 @@ public class BatchHeader: PostgresStORM {
                     self.status = (value as! Int)
                 }
                 
+            case "country_id":
+                if (value as? Int).isNotNil {
+                    self.country_id = (value as! Int)
+                }
+                
             case "statusby":
                 if (value as? String).isNotNil {
                     self.statusby = (value as! String)
@@ -258,6 +268,10 @@ public class BatchHeader: PostgresStORM {
             dictionary.batchHeaderDic.batch_type = self.batch_type
         }
         
+        if self.country_id.isNotNil {
+            dictionary.batchHeaderDic.countryId = self.country_id
+        }
+        
         if self.file_name.isNotNil {
             dictionary.batchHeaderDic.fileName = self.file_name
         }
@@ -331,6 +345,10 @@ public class BatchHeader: PostgresStORM {
         }
         
         if diff == true, self.initial_send != targetItem.initial_send {
+            diff = false
+        }
+        
+        if diff == true, self.country_id != targetItem.country_id {
             diff = false
         }
         
