@@ -66,7 +66,7 @@ public class SuttonFunctions {
     }
     
     @discardableResult
-    static func batch(in: Batch) throws -> BatchResult {
+    static func batch(_ in: Batch) throws -> BatchResult {
         switch `in` {
         case .all(let option, let user_id):
             switch option {
