@@ -164,7 +164,7 @@ public class SuttonFunctions {
                         detail.batch_order = order
                         
                         // Okay we need to write out the detail.
-                        var theDetail = "CS"
+                        var theDetail = "CD"
                         if let changeDate = row.data.usAccountDetailDic.change_date {
                             theDetail.append("\(changeDate)")
                         } else {
@@ -233,7 +233,7 @@ public class SuttonFunctions {
                         detail.batch_order = order
                         
                         // Okay... start writing out the details:
-                        var theDetail = "BS"
+                        var theDetail = "CS"
                         if let changeDate = row.data.usAccountStatusDic.change_date {
                             theDetail.append(changeDate)
                         } else {
@@ -292,7 +292,7 @@ public class SuttonFunctions {
                         detail.batch_group = "bd"
                         detail.batch_order = order
                         
-                        var theDetail = "BS"
+                        var theDetail = "BD"
                         if let changeDate = row.data.usBucketAccountDetailDic.change_date {
                             theDetail.append(changeDate)
                         } else {
