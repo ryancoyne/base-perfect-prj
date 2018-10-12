@@ -32,7 +32,7 @@ extension NumberFormatter {
 }
 
 public enum BatchExeption : Error {
-    case invalidDates, invalidBatchDetailCount(_ theCount: Int, message: String)
+    case invalidDates, invalidSchema(String)
 }
 
 public class SuttonFunctions {
@@ -77,10 +77,12 @@ public class SuttonFunctions {
                 let momen = moment(TimeZone(abbreviation: "GMT")!, locale: Locale(identifier: "en_US"))
                 let fileName = "sutton_accounts_\(from.dateString(format: "yyyyMMdd"))"
                 
-                let countryId = Country.idWith(schema)
+                // We need the country id for the batch header, for whatever reason:
+                guard let countryId = Country.idWith(schema) else { throw BatchExeption.invalidSchema(schema) }
                 
                 let header = BatchHeader()
                 header.batch_identifier = referenceCode
+                header.country_id = countryId
                 header.batch_type = "sutton_all"
                 header.current_status = BatchHeaderStatus.working_on_it
                 header.description = theDescription
@@ -107,7 +109,7 @@ public class SuttonFunctions {
                 // File Creation Time:
                 theDet.append(momen.format("hhmmss"))
                 // File Number:
-                theDet.append("\(000000001)")
+                theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
                 theDet.append("            Sutton Bank")
                 theDet.append("    Bucket Technologies")
                 theDet.append(referenceCode)
@@ -129,7 +131,7 @@ public class SuttonFunctions {
                 theDet = "BH"
                 theDet.append(momen.format("yyyyMMdd"))
                 theDet.append(momen.format("hhmmss"))
-                theDet.append("\(000000001)")
+                theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
                 let toMoment = moment(to)
                 // Batch effective date:
                 theDet.append("               " + toMoment.format("yyyyMMdd"))
@@ -530,9 +532,9 @@ public class SuttonFunctions {
                 
                 theDet = "FC"
                 // Batch Count:
-                theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
+                theDet.append(numberFormatter.format(batchCount, buffingCharacters: 3)!)
                 // File Number:  (This should always be one for now.)
-                theDet.append("000000001")
+                theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
                 
                 fileControl.detail_line = theDet
                 fileControl.detail_line_length = theDet.count
