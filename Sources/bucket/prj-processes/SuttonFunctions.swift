@@ -272,7 +272,7 @@ public class SuttonFunctions {
                         theDet = "BH"
                         theDet.append(momen.format("yyyyMMdd"))
                         theDet.append(momen.format("hhmmss"))
-                        theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
+                        theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         // Batch effective date:
                         theDet.append("               " + to.dateString(format: "yyyyMMdd"))
                         theDet.append(referenceCode)
@@ -368,7 +368,7 @@ public class SuttonFunctions {
                         theDet = "BH"
                         theDet.append(momen.format("yyyyMMdd"))
                         theDet.append(momen.format("hhmmss"))
-                        theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
+                        theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         // Batch effective date:
                         theDet.append("               " + to.dateString(format: "yyyyMMdd"))
                         theDet.append(referenceCode)
@@ -485,7 +485,8 @@ public class SuttonFunctions {
                         theDet = "BH"
                         theDet.append(momen.format("yyyyMMdd"))
                         theDet.append(momen.format("hhmmss"))
-                        theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
+                        // Batch Number
+                        theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         // Batch effective date:
                         theDet.append("               " + to.dateString(format: "yyyyMMdd"))
                         theDet.append(referenceCode)
@@ -581,7 +582,7 @@ public class SuttonFunctions {
                         theDet = "BH"
                         theDet.append(momen.format("yyyyMMdd"))
                         theDet.append(momen.format("hhmmss"))
-                        theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
+                        theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         // Batch effective date:
                         theDet.append("               " + to.dateString(format: "yyyyMMdd"))
                         theDet.append(referenceCode)

@@ -176,7 +176,7 @@ PostgresConnector.password = EnvironmentVariables.sharedInstance.DB_PASSWORD!
 
 // FROM: Sept 26, 12AM........ TO Sept 26, 11:59PM
 do {
-    let numberOfBatches = try SuttonFunctions.batch(in: .all(.oneFile(to: 1538006399,from: 1537920000, schema: "us", isRepeat: false, description: "The Description for this batch.")))
+    let numberOfBatches = try SuttonFunctions.batch(in: .all(.oneFile(to: 1538006399,from: 1537920000, schema: "us", isRepeat: false, description: "The Description for this batch."), user_id: nil))
     print(numberOfBatches)
 } catch {
     print(error)
