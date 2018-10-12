@@ -37,6 +37,8 @@ public enum BatchExeption : Error {
     case invalidDates, invalidSchema(String)
 }
 
+typealias BatchResult = (batchCount : Int, totalDetailRecords : Int)
+
 public class SuttonFunctions {
     
     static var numberFormatter : NumberFormatter = {
@@ -64,7 +66,7 @@ public class SuttonFunctions {
     }
     
     @discardableResult
-    static func batch(in: Batch) throws -> Int {
+    static func batch(in: Batch) throws -> BatchResult {
         switch `in` {
         case .all(let option):
             switch option {
@@ -148,7 +150,8 @@ public class SuttonFunctions {
                 _ = try? batchHeader.saveWithCustomType(schemaIn: schema)
                 
                 // For the batch control file, we need the count of detail records.
-                var detailRecordsCount = 0
+                var currentDetailRecordsCount = 0
+                var totalDetailRecordsCount = 0
                 // We can default the batch count to 1:
                 var batchCount = 1
                 
@@ -156,8 +159,8 @@ public class SuttonFunctions {
                 let query = USAccountCodeDetail()
                 var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail WHERE created BETWEEN \(from) AND \(to);"
                 if let res = try? query.sqlRows(sqlStatement, params: []) {
-                    // HANDLE THE ACCOUNT CODE DETAIL RECORDS:
-                    
+                    // Add in to the total detail record count returned for this functions result.
+                    totalDetailRecordsCount += res.count
                     // Update the status of the header:
                     header.current_status = BatchHeaderStatus.in_progress
                     _ = try? header.saveWithCustomType(schemaIn: schema)
@@ -219,10 +222,10 @@ public class SuttonFunctions {
                         
                         // Append the order for the next record:
                         order += 1
-                        detailRecordsCount += 1
+                        currentDetailRecordsCount += 1
                         
                         // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
-                        if detailRecordsCount == 999 {
+                        if currentDetailRecordsCount == 999 {
                             let batchControl = BatchDetail()
                             batchControl.batch_header_id = header.id
                             batchControl.batch_group = "bc"
@@ -230,7 +233,7 @@ public class SuttonFunctions {
                             
                             theDet = "BC"
                             // Entry Count:
-                            theDet.append(numberFormatter.format(detailRecordsCount, buffingCharacters: 3)!)
+                            theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
                             // Batch Number:
                             theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                             
@@ -259,7 +262,7 @@ public class SuttonFunctions {
                             _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
                             
                             // Set the detail records to zero, and append the batch number:
-                            detailRecordsCount = 0
+                            currentDetailRecordsCount = 0
                             batchCount += 1
                             
                         }
@@ -270,7 +273,8 @@ public class SuttonFunctions {
                 let query2 = USAccountCodeStatus()
                 sqlStatement = "SELECT * FROM \(schema).us_account_code_status WHERE created BETWEEN \(from) AND \(to);"
                 if let res = try? query2.sqlRows(sqlStatement, params: []) {
-                    
+                    // Add in to the total detail record count returned for this functions result.
+                    totalDetailRecordsCount += res.count
                     for row in res {
                         
                         let detail = BatchDetail()
@@ -319,10 +323,10 @@ public class SuttonFunctions {
                         
                         // Append the order of the batch detail records.
                         order += 1
-                        detailRecordsCount += 1
+                        currentDetailRecordsCount += 1
                         
                         // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
-                        if detailRecordsCount == 999 {
+                        if currentDetailRecordsCount == 999 {
                             let batchControl = BatchDetail()
                             batchControl.batch_header_id = header.id
                             batchControl.batch_group = "bc"
@@ -330,7 +334,7 @@ public class SuttonFunctions {
                             
                             theDet = "BC"
                             // Entry Count:
-                            theDet.append(numberFormatter.format(detailRecordsCount, buffingCharacters: 3)!)
+                            theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
                             // Batch Number:
                             theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                             
@@ -359,7 +363,7 @@ public class SuttonFunctions {
                             _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
                             
                             // Set the detail records to zero, and append the batch number:
-                            detailRecordsCount = 0
+                            currentDetailRecordsCount = 0
                             batchCount += 1
                             
                         }
@@ -371,7 +375,8 @@ public class SuttonFunctions {
                 let query3 = USBucketAccountDetail()
                 sqlStatement = "SELECT * from \(schema).us_bucket_account_detail where created BETWEEN \(from) AND \(to);"
                 if let res = try? query3.sqlRows(sqlStatement, params: []) {
-                    
+                    // Add in to the total detail record count returned for this functions result.
+                    totalDetailRecordsCount += res.count
                     for row in res {
                         
                         let detail = BatchDetail()
@@ -441,10 +446,10 @@ public class SuttonFunctions {
                         
                         // Append the order of the batch detail records.
                         order += 1
-                        detailRecordsCount += 1
+                        currentDetailRecordsCount += 1
                         
                         // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
-                        if detailRecordsCount == 999 {
+                        if currentDetailRecordsCount == 999 {
                             let batchControl = BatchDetail()
                             batchControl.batch_header_id = header.id
                             batchControl.batch_group = "bc"
@@ -452,7 +457,7 @@ public class SuttonFunctions {
                             
                             theDet = "BC"
                             // Entry Count:
-                            theDet.append(numberFormatter.format(detailRecordsCount, buffingCharacters: 3)!)
+                            theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
                             // Batch Number:
                             theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                             
@@ -481,7 +486,7 @@ public class SuttonFunctions {
                             _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
                             
                             // Set the detail records to zero, and append the batch number:
-                            detailRecordsCount = 0
+                            currentDetailRecordsCount = 0
                             batchCount += 1
                             
                         }
@@ -493,7 +498,8 @@ public class SuttonFunctions {
                 let query4 = USBucketAccountStatus()
                 sqlStatement = "SELECT * from \(schema).us_bucket_account_status where created BETWEEN \(from) AND \(to);"
                 if let res = try? query4.sqlRows(sqlStatement, params: []) {
-                    
+                    // Add in to the total detail record count returned for this functions result.
+                    totalDetailRecordsCount += res.count
                     for row in res {
                         
                         let detail = BatchDetail()
@@ -541,10 +547,10 @@ public class SuttonFunctions {
                         
                         // Append the order of the batch detail records.
                         order += 1
-                        detailRecordsCount += 1
+                        currentDetailRecordsCount += 1
                         
                         // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
-                        if detailRecordsCount == 999 {
+                        if currentDetailRecordsCount == 999 {
                             let batchControl = BatchDetail()
                             batchControl.batch_header_id = header.id
                             batchControl.batch_group = "bc"
@@ -552,7 +558,7 @@ public class SuttonFunctions {
                             
                             theDet = "BC"
                             // Entry Count:
-                            theDet.append(numberFormatter.format(detailRecordsCount, buffingCharacters: 3)!)
+                            theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
                             // Batch Number:
                             theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                             
@@ -581,7 +587,7 @@ public class SuttonFunctions {
                             _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
                             
                             // Set the detail records to zero, and append the batch number:
-                            detailRecordsCount = 0
+                            currentDetailRecordsCount = 0
                             batchCount += 1
                             
                         }
@@ -599,7 +605,7 @@ public class SuttonFunctions {
                 // Create the detail & save:
                 theDet = "BC"
                 // Entry Count:
-                theDet.append(numberFormatter.format(detailRecordsCount, buffingCharacters: 3)!)
+                theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
                 // Batch Number:
                 theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                 
@@ -632,12 +638,11 @@ public class SuttonFunctions {
                 header.current_status = BatchHeaderStatus.completed
                 _ = try? header.saveWithCustomType(schemaIn: schema)
                 
-                return batchCount
-                
-                break
+                return (batchCount, totalDetailRecordsCount)
+        
             case .separateFiles:
                 break
-            case .singleFileWithOrder(let to, let from, let schema, let order):
+            case .singleFileWithOrder(let _, let _, let _, let _):
                 break
             }
         case .select(let batches):
@@ -658,7 +663,7 @@ public class SuttonFunctions {
             }
             break
         }
-        return 0
+        return (0,0)
     }
     
 //    static func batchTables(to : Int, from : Int) {
