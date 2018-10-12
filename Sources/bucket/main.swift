@@ -98,7 +98,6 @@ if let logfile = EnvironmentVariables.sharedInstance.filesDirectoryLogs {
     formatter.dateFormat = "yyyy-MM-dd HH:mm:ss z"
     let currentdatetime = formatter.string(from: Date())
     
-    
     if itexists {
         // check for the files
         let defaultlogFile = File(logDir.path + logFileName)
@@ -171,9 +170,17 @@ if notesettings.IOS_APPID != nil {
 
 PostgresConnector.port     = EnvironmentVariables.sharedInstance.DB_PORT!
 PostgresConnector.host     = EnvironmentVariables.sharedInstance.DB_HOSTNAME!
-PostgresConnector.database = EnvironmentVariables.sharedInstance.DB_USERNAME!
+PostgresConnector.database = EnvironmentVariables.sharedInstance.DB_DATABASE!
 PostgresConnector.username = EnvironmentVariables.sharedInstance.DB_USERNAME!
 PostgresConnector.password = EnvironmentVariables.sharedInstance.DB_PASSWORD!
+
+// FROM: Sept 26, 12AM........ TO Sept 26, 11:59PM
+do {
+    let numberOfBatches = try SuttonFunctions.batch(in: .all(.oneFile(to: 1538006399,from: 1537920000, schema: "us", isRepeat: false, description: "The Description for this batch.")))
+    print(numberOfBatches)
+} catch {
+    print(error)
+}
 
 if EnvironmentVariables.sharedInstance.URL_PORT != 80 || EnvironmentVariables.sharedInstance.URL_PORT != 443 {
     // non standard port
@@ -388,4 +395,3 @@ do {
     // fatal error launching one of the servers
     fatalError("\(error)")
 }
-

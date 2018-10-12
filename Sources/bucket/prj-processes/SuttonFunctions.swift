@@ -31,6 +31,10 @@ extension NumberFormatter {
     }
 }
 
+public enum BatchExeption : Error {
+    case invalidDates, invalidBatchDetailCount(_ theCount: Int, message: String)
+}
+
 public class SuttonFunctions {
     
     static var numberFormatter : NumberFormatter = {
@@ -41,10 +45,6 @@ public class SuttonFunctions {
         numberFormatter.minimumFractionDigits = 2
         return numberFormatter
     }()
-    
-    internal enum BatchExeption : Error {
-        case invalidDates, invalidBatchDetailCount(_ theCount: Int, message: String)
-    }
     
     struct SuttonDefaults {
         static let schema = "us"
@@ -75,7 +75,7 @@ public class SuttonFunctions {
                 
                 // The current batch date:
                 let momen = moment(TimeZone(abbreviation: "GMT")!, locale: Locale(identifier: "en_US"))
-                let fileName = "\(SuttonDefaults.mainFileDirectory.path)sutton_batch_\(referenceCode)_\(momen.format("yyyyMMdd_hhmmss"))"
+                let fileName = "sutton_accounts_\(momen.format("yyyyMMdd"))"
                 
                 let header = BatchHeader()
                 header.batch_identifier = referenceCode

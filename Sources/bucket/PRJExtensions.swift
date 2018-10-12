@@ -19,7 +19,7 @@ extension String {
         while !isUnusedReferenceCode {
             var result = [Character](repeating: "a", count: count!)
             
-            for i in 0...count! {
+            for i in 0...count!-1 {
                 let r = Int(arc4random_uniform(s.k))
                 result[i] = s.c[r]
             }
