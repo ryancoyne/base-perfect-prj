@@ -33,6 +33,7 @@ final class CCXServiceClass {
     public let dateStampFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        formatter.timeZone = TimeZone.gmt
         return formatter
     }()
     

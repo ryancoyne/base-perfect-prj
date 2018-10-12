@@ -73,9 +73,9 @@ public class SuttonFunctions {
                 // Okay, lets go and create the reference code:
                 let referenceCode = String.referenceCode(forSchema: schema)
                 
-                // The current batch date:
+                // The batch date for the file name: (this is from the input dates:)
                 let momen = moment(TimeZone(abbreviation: "GMT")!, locale: Locale(identifier: "en_US"))
-                let fileName = "sutton_accounts_\(momen.format("yyyyMMdd"))"
+                let fileName = "sutton_accounts_\(from.dateString(format: "yyyyMMdd"))"
                 
                 let header = BatchHeader()
                 header.batch_identifier = referenceCode

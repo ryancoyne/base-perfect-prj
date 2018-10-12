@@ -24,6 +24,12 @@ struct CCXGeographyPoint {
     var longitude   : Double = 0.0
 }
 
+extension TimeZone {
+    static var gmt : TimeZone {
+        return TimeZone(abbreviation: "GMT")!
+    }
+}
+
 extension Optional {
     var isNil : Bool {
         return self == nil
@@ -1794,6 +1800,13 @@ extension Moment {
 extension Int {
     var dateString : String {
         return CCXServiceClass.sharedInstance.dateStampFormatter.string(from: Date(timeIntervalSince1970: Double(exactly: self)!))
+    }
+    func dateString(format : String) -> String {
+        let lastFormat = CCXServiceClass.sharedInstance.dateStampFormatter.dateFormat
+        CCXServiceClass.sharedInstance.dateStampFormatter.dateFormat = format
+        let value = CCXServiceClass.sharedInstance.dateStampFormatter.string(from: Date(timeIntervalSince1970: Double(exactly: self)!))
+        CCXServiceClass.sharedInstance.dateStampFormatter.dateFormat = lastFormat
+        return value
     }
 }
 //MARK: - Account Extensions
