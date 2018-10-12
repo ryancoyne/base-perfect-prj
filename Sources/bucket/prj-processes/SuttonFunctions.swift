@@ -34,7 +34,7 @@ extension NumberFormatter {
 }
 
 public enum BatchExeption : Error {
-    case invalidDates, invalidSchema(String)
+    case invalidDates, invalidSchema(String), noDetailRecords(to: Int, from: Int)
 }
 
 typealias BatchResult = (batchCount : Int, totalDetailRecords : Int)
@@ -83,6 +83,33 @@ public class SuttonFunctions {
                 
                 // We need the country id for the batch header, for whatever reason:
                 guard let countryId = Country.idWith(schema) else { throw BatchExeption.invalidSchema(schema) }
+                
+                // If we have no detail records to process, we dont want to write ANYTHING.
+                var totalDetailRecordsCount = 0
+                
+                // Before writing anything, lets check if we have records for the following queries:
+                let query = USAccountCodeDetail()
+                var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail WHERE created BETWEEN \(from) AND \(to);"
+                let accountCodeResults = (try? query.sqlRows(sqlStatement, params: [])) ?? []
+                totalDetailRecordsCount += accountCodeResults.count
+                
+                let query2 = USAccountCodeStatus()
+                sqlStatement = "SELECT * FROM \(schema).us_account_code_status WHERE created BETWEEN \(from) AND \(to);"
+                let accountCodeStatusResults = (try? query2.sqlRows(sqlStatement, params: [])) ?? []
+                totalDetailRecordsCount += accountCodeStatusResults.count
+                
+                let query3 = USBucketAccountDetail()
+                sqlStatement = "SELECT * from \(schema).us_bucket_account_detail where created BETWEEN \(from) AND \(to);"
+                let bucketAccountDetailResults = (try? query3.sqlRows(sqlStatement, params: [])) ?? []
+                totalDetailRecordsCount += bucketAccountDetailResults.count
+                
+                let query4 = USBucketAccountStatus()
+                sqlStatement = "SELECT * from \(schema).us_bucket_account_status where created BETWEEN \(from) AND \(to);"
+                let bucketAccountStatusResults = (try? query4.sqlRows(sqlStatement, params: [])) ?? []
+                totalDetailRecordsCount += bucketAccountStatusResults.count
+                
+                // If we dont have any records, we do not want to continue.
+                guard totalDetailRecordsCount >= 1 else { throw BatchExeption.noDetailRecords(to: to, from: from) }
                 
                 let header = BatchHeader()
                 header.batch_identifier = referenceCode
@@ -151,446 +178,418 @@ public class SuttonFunctions {
                 
                 // For the batch control file, we need the count of detail records.
                 var currentDetailRecordsCount = 0
-                var totalDetailRecordsCount = 0
                 // We can default the batch count to 1:
                 var batchCount = 1
                 
-                // Okay, here we are writing one file.  So this is one batch for all the different items we are reporting.
-                let query = USAccountCodeDetail()
-                var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail WHERE created BETWEEN \(from) AND \(to);"
-                if let res = try? query.sqlRows(sqlStatement, params: []) {
-                    // Add in to the total detail record count returned for this functions result.
-                    totalDetailRecordsCount += res.count
-                    // Update the status of the header:
-                    header.current_status = BatchHeaderStatus.in_progress
-                    _ = try? header.saveWithCustomType(schemaIn: schema)
+                // Okay, here we are writing one file.  So this is one batch for all the different items we are reporting.  First lets update our header file.
+                header.current_status = BatchHeaderStatus.in_progress
+                _ = try? header.saveWithCustomType(schemaIn: schema)
+                
+                for row in accountCodeResults {
+                    // Okay.  We need to go and write a bunch of Batch Detail Records.
+                    let detail = BatchDetail()
+                    detail.batch_header_id = header.id
+                    detail.batch_group = "bd"
+                    detail.batch_order = order
                     
-                    for row in res {
-                        // Okay.  We need to go and write a bunch of Batch Detail Records.
-                        let detail = BatchDetail()
-                        detail.batch_header_id = header.id
-                        detail.batch_group = "bd"
-                        detail.batch_order = order
-                        
-                        // Okay we need to write out the detail.
-                        var theDetail = "CD"
-                        if let changeDate = row.data.usAccountDetailDic.change_date {
-                            theDetail.append("\(changeDate)")
-                        } else {
-                            theDetail.append("        ")
-                        }
-                        
-                        if let changeTime = row.data.usAccountDetailDic.change_time {
-                            theDetail.append("\(changeTime)")
-                        } else {
-                            theDetail.append("      ")
-                        }
-                        
-                        if let code = row.data.usAccountDetailDic.code_number {
-                            theDetail.append("\(code)")
-                        } else {
-                            theDetail.append("              ")
-                        }
+                    // Okay we need to write out the detail.
+                    var theDetail = "CD"
+                    if let changeDate = row.data.usAccountDetailDic.change_date {
+                        theDetail.append("\(changeDate)")
+                    } else {
+                        theDetail.append("        ")
+                    }
                     
-                        if let originalValue = row.data.usAccountDetailDic.value_original {
-                            theDetail.append("\(originalValue)")
-                        } else {
-                            theDetail.append(" ")
-                        }
+                    if let changeTime = row.data.usAccountDetailDic.change_time {
+                        theDetail.append("\(changeTime)")
+                    } else {
+                        theDetail.append("      ")
+                    }
+                    
+                    if let code = row.data.usAccountDetailDic.code_number {
+                        theDetail.append("\(code)")
+                    } else {
+                        theDetail.append("              ")
+                    }
+                    
+                    if let originalValue = row.data.usAccountDetailDic.value_original {
+                        theDetail.append("\(originalValue)")
+                    } else {
+                        theDetail.append(" ")
+                    }
+                    
+                    if let newValue = row.data.usAccountDetailDic.value_new {
+                        theDetail.append("\(newValue)")
+                    } else {
+                        theDetail.append(" ")
+                    }
+                    
+                    if let amount = row.data.usAccountDetailDic.amount {
                         
-                        if let newValue = row.data.usAccountDetailDic.value_new {
-                            theDetail.append("\(newValue)")
-                        } else {
-                            theDetail.append(" ")
-                        }
+                        let amountString = numberFormatter.format(amount, buffingCharacters: 4, decimalLimit: 2)!
+                        theDetail.append(amountString)
                         
-                        if let amount = row.data.usAccountDetailDic.amount {
-                            
-                            let amountString = numberFormatter.format(amount, buffingCharacters: 4, decimalLimit: 2)!
-                            theDetail.append(amountString)
-                            
-                        } else {
-                            theDetail.append("       ")
-                        }
+                    } else {
+                        theDetail.append("       ")
+                    }
+                    
+                    // Okay we have written out the details for this record.  We have to set and save the batch detail:
+                    detail.detail_line = theDetail
+                    detail.detail_line_length = theDetail.count
+                    
+                    // Save the Batch detail record:
+                    _=try? detail.saveWithCustomType(schemaIn: schema)
+                    
+                    // Append the order for the next record:
+                    order += 1
+                    currentDetailRecordsCount += 1
+                    
+                    // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
+                    if currentDetailRecordsCount == 999 {
+                        let batchControl = BatchDetail()
+                        batchControl.batch_header_id = header.id
+                        batchControl.batch_group = "bc"
+                        batchControl.batch_order = order;  /* Increment the order:*/ order += 1
                         
-                        // Okay we have written out the details for this record.  We have to set and save the batch detail:
-                        detail.detail_line = theDetail
-                        detail.detail_line_length = theDetail.count
+                        theDet = "BC"
+                        // Entry Count:
+                        theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
+                        // Batch Number:
+                        theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         
-                        // Save the Batch detail record:
-                        _=try? detail.saveWithCustomType(schemaIn: schema)
+                        batchControl.detail_line = theDet
+                        batchControl.detail_line_length = theDet.count
+                        _ = try? batchControl.saveWithCustomType(schemaIn: schema)
                         
-                        // Append the order for the next record:
-                        order += 1
-                        currentDetailRecordsCount += 1
+                        // Okay, now we need to create the new batchHeader record:
+                        let newBatchHeader = BatchDetail()
+                        newBatchHeader.batch_header_id = header.id
+                        newBatchHeader.batch_group = "bc"
+                        newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
                         
-                        // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
-                        if currentDetailRecordsCount == 999 {
-                            let batchControl = BatchDetail()
-                            batchControl.batch_header_id = header.id
-                            batchControl.batch_group = "bc"
-                            batchControl.batch_order = order;  /* Increment the order:*/ order += 1
-                            
-                            theDet = "BC"
-                            // Entry Count:
-                            theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
-                            // Batch Number:
-                            theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
-                            
-                            batchControl.detail_line = theDet
-                            batchControl.detail_line_length = theDet.count
-                            _ = try? batchControl.saveWithCustomType(schemaIn: schema)
-                            
-                            // Okay, now we need to create the new batchHeader record:
-                            let newBatchHeader = BatchDetail()
-                            newBatchHeader.batch_header_id = header.id
-                            newBatchHeader.batch_group = "bc"
-                            newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
-                            
-                            theDet.append(momen.format("yyyyMMdd"))
-                            theDet.append(momen.format("hhmmss"))
-                            theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
-                            // Batch effective date:
-                            theDet.append("               " + to.dateString(format: "yyyyMMdd"))
-                            theDet.append(referenceCode)
-                            
-                            if isRepeat { theDet.append("Y") } else { theDet.append("N") }
-                            
-                            newBatchHeader.detail_line = theDet
-                            newBatchHeader.detail_line_length = theDet.length
-                            
-                            _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
-                            
-                            // Set the detail records to zero, and append the batch number:
-                            currentDetailRecordsCount = 0
-                            batchCount += 1
-                            
-                        }
+                        theDet.append(momen.format("yyyyMMdd"))
+                        theDet.append(momen.format("hhmmss"))
+                        theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
+                        // Batch effective date:
+                        theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                        theDet.append(referenceCode)
+                        
+                        if isRepeat { theDet.append("Y") } else { theDet.append("N") }
+                        
+                        newBatchHeader.detail_line = theDet
+                        newBatchHeader.detail_line_length = theDet.length
+                        
+                        _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
+                        
+                        // Set the detail records to zero, and append the batch number:
+                        currentDetailRecordsCount = 0
+                        batchCount += 1
+                        
                     }
                 }
                 
                 // Okay, now the next table:
-                let query2 = USAccountCodeStatus()
-                sqlStatement = "SELECT * FROM \(schema).us_account_code_status WHERE created BETWEEN \(from) AND \(to);"
-                if let res = try? query2.sqlRows(sqlStatement, params: []) {
-                    // Add in to the total detail record count returned for this functions result.
-                    totalDetailRecordsCount += res.count
-                    for row in res {
+                for row in accountCodeStatusResults {
+                    
+                    let detail = BatchDetail()
+                    detail.batch_header_id = header.id
+                    detail.batch_group = "bd"
+                    detail.batch_order = order
+                    
+                    // Okay... start writing out the details:
+                    var theDetail = "CS"
+                    if let changeDate = row.data.usAccountStatusDic.change_date {
+                        theDetail.append(changeDate)
+                    } else {
+                        theDetail.append("        ")
+                    }
+                    
+                    if let changeTime = row.data.usAccountStatusDic.change_time {
+                        theDetail.append(changeTime)
+                    } else {
+                        theDetail.append("      ")
+                    }
+                    
+                    if let code = row.data.usAccountStatusDic.code_number {
+                        theDetail.append(code)
+                    } else {
+                        theDetail.append("              ")
+                    }
+                    
+                    if let originalValue = row.data.usAccountStatusDic.value_original {
+                        theDetail.append("\(originalValue)")
+                    } else {
+                        theDetail.append(" ")
+                    }
+                    
+                    if let newValue = row.data.usAccountStatusDic.value_new {
+                        theDetail.append("\(newValue)")
+                    } else {
+                        theDetail.append(" ")
+                    }
+                    
+                    // Okay we have written out the details for this record.  We have to set and save the batch detail:
+                    detail.detail_line = theDetail
+                    detail.detail_line_length = theDetail.count
+                    
+                    // Save the Batch detail record:
+                    _=try? detail.saveWithCustomType(schemaIn: schema)
+                    
+                    // Append the order of the batch detail records.
+                    order += 1
+                    currentDetailRecordsCount += 1
+                    
+                    // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
+                    if currentDetailRecordsCount == 999 {
+                        let batchControl = BatchDetail()
+                        batchControl.batch_header_id = header.id
+                        batchControl.batch_group = "bc"
+                        batchControl.batch_order = order;  /* Increment the order:*/ order += 1
                         
-                        let detail = BatchDetail()
-                        detail.batch_header_id = header.id
-                        detail.batch_group = "bd"
-                        detail.batch_order = order
+                        theDet = "BC"
+                        // Entry Count:
+                        theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
+                        // Batch Number:
+                        theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         
-                        // Okay... start writing out the details:
-                        var theDetail = "CS"
-                        if let changeDate = row.data.usAccountStatusDic.change_date {
-                            theDetail.append(changeDate)
-                        } else {
-                            theDetail.append("        ")
-                        }
+                        batchControl.detail_line = theDet
+                        batchControl.detail_line_length = theDet.count
+                        _ = try? batchControl.saveWithCustomType(schemaIn: schema)
                         
-                        if let changeTime = row.data.usAccountStatusDic.change_time {
-                            theDetail.append(changeTime)
-                        } else {
-                            theDetail.append("      ")
-                        }
+                        // Okay, now we need to create the new batchHeader record:
+                        let newBatchHeader = BatchDetail()
+                        newBatchHeader.batch_header_id = header.id
+                        newBatchHeader.batch_group = "bc"
+                        newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
                         
-                        if let code = row.data.usAccountStatusDic.code_number {
-                            theDetail.append(code)
-                        } else {
-                            theDetail.append("              ")
-                        }
+                        theDet.append(momen.format("yyyyMMdd"))
+                        theDet.append(momen.format("hhmmss"))
+                        theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
+                        // Batch effective date:
+                        theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                        theDet.append(referenceCode)
                         
-                        if let originalValue = row.data.usAccountStatusDic.value_original {
-                            theDetail.append("\(originalValue)")
-                        } else {
-                            theDetail.append(" ")
-                        }
+                        if isRepeat { theDet.append("Y") } else { theDet.append("N") }
                         
-                        if let newValue = row.data.usAccountStatusDic.value_new {
-                            theDetail.append("\(newValue)")
-                        } else {
-                            theDetail.append(" ")
-                        }
+                        newBatchHeader.detail_line = theDet
+                        newBatchHeader.detail_line_length = theDet.length
                         
-                        // Okay we have written out the details for this record.  We have to set and save the batch detail:
-                        detail.detail_line = theDetail
-                        detail.detail_line_length = theDetail.count
+                        _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
                         
-                        // Save the Batch detail record:
-                        _=try? detail.saveWithCustomType(schemaIn: schema)
+                        // Set the detail records to zero, and append the batch number:
+                        currentDetailRecordsCount = 0
+                        batchCount += 1
                         
-                        // Append the order of the batch detail records.
-                        order += 1
-                        currentDetailRecordsCount += 1
-                        
-                        // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
-                        if currentDetailRecordsCount == 999 {
-                            let batchControl = BatchDetail()
-                            batchControl.batch_header_id = header.id
-                            batchControl.batch_group = "bc"
-                            batchControl.batch_order = order;  /* Increment the order:*/ order += 1
-                            
-                            theDet = "BC"
-                            // Entry Count:
-                            theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
-                            // Batch Number:
-                            theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
-                            
-                            batchControl.detail_line = theDet
-                            batchControl.detail_line_length = theDet.count
-                            _ = try? batchControl.saveWithCustomType(schemaIn: schema)
-                            
-                            // Okay, now we need to create the new batchHeader record:
-                            let newBatchHeader = BatchDetail()
-                            newBatchHeader.batch_header_id = header.id
-                            newBatchHeader.batch_group = "bc"
-                            newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
-                            
-                            theDet.append(momen.format("yyyyMMdd"))
-                            theDet.append(momen.format("hhmmss"))
-                            theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
-                            // Batch effective date:
-                            theDet.append("               " + to.dateString(format: "yyyyMMdd"))
-                            theDet.append(referenceCode)
-                            
-                            if isRepeat { theDet.append("Y") } else { theDet.append("N") }
-                            
-                            newBatchHeader.detail_line = theDet
-                            newBatchHeader.detail_line_length = theDet.length
-                            
-                            _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
-                            
-                            // Set the detail records to zero, and append the batch number:
-                            currentDetailRecordsCount = 0
-                            batchCount += 1
-                            
-                        }
                     }
                 }
                 
-                // Okay, now the third table:
-                
-                let query3 = USBucketAccountDetail()
-                sqlStatement = "SELECT * from \(schema).us_bucket_account_detail where created BETWEEN \(from) AND \(to);"
-                if let res = try? query3.sqlRows(sqlStatement, params: []) {
-                    // Add in to the total detail record count returned for this functions result.
-                    totalDetailRecordsCount += res.count
-                    for row in res {
+                // Now the third table:
+                for row in bucketAccountDetailResults {
+                    
+                    let detail = BatchDetail()
+                    detail.batch_header_id = header.id
+                    detail.batch_group = "bd"
+                    detail.batch_order = order
+                    
+                    var theDetail = "BD"
+                    if let changeDate = row.data.usBucketAccountDetailDic.change_date {
+                        theDetail.append(changeDate)
+                    } else {
+                        theDetail.append("        ")
+                    }
+                    
+                    if let changeTime = row.data.usBucketAccountDetailDic.change_time {
+                        theDetail.append(changeTime)
+                    } else {
+                        theDetail.append("      ")
+                    }
+                    
+                    if let acN = row.data.usBucketAccountDetailDic.account_number {
+                        theDetail.append(acN)
+                    } else {
+                        theDetail.append("              ")
+                    }
+                    
+                    if let newValue = row.data.usBucketAccountDetailDic.value_new {
+                        theDetail.append("\(newValue)")
+                    } else {
+                        theDetail.append(" ")
+                    }
+                    
+                    if let newValue = row.data.usBucketAccountDetailDic.code_number {
+                        theDetail.append("\(newValue)")
+                    } else {
+                        theDetail.append("              ")
+                    }
+                    
+                    if let newValue = row.data.usBucketAccountDetailDic.amount {
+                        theDetail.append(numberFormatter.format(newValue, buffingCharacters: 4, decimalLimit: 2)!)
+                    } else {
+                        theDetail.append("       ")
+                    }
+                    
+                    if let newValue = row.data.usBucketAccountDetailDic.adjustment_reason {
                         
-                        let detail = BatchDetail()
-                        detail.batch_header_id = header.id
-                        detail.batch_group = "bd"
-                        detail.batch_order = order
+                        theDetail.append(numberFormatter.format(newValue, buffingCharacters: 2)!)
                         
-                        var theDetail = "BD"
-                        if let changeDate = row.data.usBucketAccountDetailDic.change_date {
-                            theDetail.append(changeDate)
-                        } else {
-                            theDetail.append("        ")
-                        }
+                    } else {
+                        theDetail.append("  ")
+                    }
+                    
+                    if let newValue = row.data.usBucketAccountDetailDic.disbursement_reason {
                         
-                        if let changeTime = row.data.usBucketAccountDetailDic.change_time {
-                            theDetail.append(changeTime)
-                        } else {
-                            theDetail.append("      ")
-                        }
+                        theDetail.append(numberFormatter.format(newValue, buffingCharacters: 2)!)
                         
-                        if let acN = row.data.usBucketAccountDetailDic.account_number {
-                            theDetail.append(acN)
-                        } else {
-                            theDetail.append("              ")
-                        }
+                    } else {
+                        theDetail.append("  ")
+                    }
+                    
+                    // Okay we have written out the details for this record.  We have to set and save the batch detail:
+                    detail.detail_line = theDetail
+                    detail.detail_line_length = theDetail.count
+                    
+                    // Save the Batch detail record:
+                    _=try? detail.saveWithCustomType(schemaIn: schema)
+                    
+                    // Append the order of the batch detail records.
+                    order += 1
+                    currentDetailRecordsCount += 1
+                    
+                    // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
+                    if currentDetailRecordsCount == 999 {
+                        let batchControl = BatchDetail()
+                        batchControl.batch_header_id = header.id
+                        batchControl.batch_group = "bc"
+                        batchControl.batch_order = order;  /* Increment the order:*/ order += 1
                         
-                        if let newValue = row.data.usBucketAccountDetailDic.value_new {
-                            theDetail.append("\(newValue)")
-                        } else {
-                            theDetail.append(" ")
-                        }
+                        theDet = "BC"
+                        // Entry Count:
+                        theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
+                        // Batch Number:
+                        theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         
-                        if let newValue = row.data.usBucketAccountDetailDic.code_number {
-                            theDetail.append("\(newValue)")
-                        } else {
-                            theDetail.append("              ")
-                        }
+                        batchControl.detail_line = theDet
+                        batchControl.detail_line_length = theDet.count
+                        _ = try? batchControl.saveWithCustomType(schemaIn: schema)
                         
-                        if let newValue = row.data.usBucketAccountDetailDic.amount {
-                            theDetail.append(numberFormatter.format(newValue, buffingCharacters: 4, decimalLimit: 2)!)
-                        } else {
-                            theDetail.append("       ")
-                        }
+                        // Okay, now we need to create the new batchHeader record:
+                        let newBatchHeader = BatchDetail()
+                        newBatchHeader.batch_header_id = header.id
+                        newBatchHeader.batch_group = "bc"
+                        newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
                         
-                        if let newValue = row.data.usBucketAccountDetailDic.adjustment_reason {
-                            
-                            theDetail.append(numberFormatter.format(newValue, buffingCharacters: 2)!)
-                            
-                        } else {
-                            theDetail.append("  ")
-                        }
+                        theDet.append(momen.format("yyyyMMdd"))
+                        theDet.append(momen.format("hhmmss"))
+                        theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
+                        // Batch effective date:
+                        theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                        theDet.append(referenceCode)
                         
-                        if let newValue = row.data.usBucketAccountDetailDic.disbursement_reason {
-                            
-                            theDetail.append(numberFormatter.format(newValue, buffingCharacters: 2)!)
-                            
-                        } else {
-                            theDetail.append("  ")
-                        }
+                        if isRepeat { theDet.append("Y") } else { theDet.append("N") }
                         
-                        // Okay we have written out the details for this record.  We have to set and save the batch detail:
-                        detail.detail_line = theDetail
-                        detail.detail_line_length = theDetail.count
+                        newBatchHeader.detail_line = theDet
+                        newBatchHeader.detail_line_length = theDet.length
                         
-                        // Save the Batch detail record:
-                        _=try? detail.saveWithCustomType(schemaIn: schema)
+                        _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
                         
-                        // Append the order of the batch detail records.
-                        order += 1
-                        currentDetailRecordsCount += 1
-                        
-                        // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
-                        if currentDetailRecordsCount == 999 {
-                            let batchControl = BatchDetail()
-                            batchControl.batch_header_id = header.id
-                            batchControl.batch_group = "bc"
-                            batchControl.batch_order = order;  /* Increment the order:*/ order += 1
-                            
-                            theDet = "BC"
-                            // Entry Count:
-                            theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
-                            // Batch Number:
-                            theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
-                            
-                            batchControl.detail_line = theDet
-                            batchControl.detail_line_length = theDet.count
-                            _ = try? batchControl.saveWithCustomType(schemaIn: schema)
-                            
-                            // Okay, now we need to create the new batchHeader record:
-                            let newBatchHeader = BatchDetail()
-                            newBatchHeader.batch_header_id = header.id
-                            newBatchHeader.batch_group = "bc"
-                            newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
-                            
-                            theDet.append(momen.format("yyyyMMdd"))
-                            theDet.append(momen.format("hhmmss"))
-                            theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
-                            // Batch effective date:
-                            theDet.append("               " + to.dateString(format: "yyyyMMdd"))
-                            theDet.append(referenceCode)
-                            
-                            if isRepeat { theDet.append("Y") } else { theDet.append("N") }
-                            
-                            newBatchHeader.detail_line = theDet
-                            newBatchHeader.detail_line_length = theDet.length
-                            
-                            _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
-                            
-                            // Set the detail records to zero, and append the batch number:
-                            currentDetailRecordsCount = 0
-                            batchCount += 1
-                            
-                        }
+                        // Set the detail records to zero, and append the batch number:
+                        currentDetailRecordsCount = 0
+                        batchCount += 1
                         
                     }
-            
+                    
                 }
                 
-                let query4 = USBucketAccountStatus()
-                sqlStatement = "SELECT * from \(schema).us_bucket_account_status where created BETWEEN \(from) AND \(to);"
-                if let res = try? query4.sqlRows(sqlStatement, params: []) {
-                    // Add in to the total detail record count returned for this functions result.
-                    totalDetailRecordsCount += res.count
-                    for row in res {
+                // Now last, but not least:
+                for row in bucketAccountStatusResults {
+                    
+                    let detail = BatchDetail()
+                    detail.batch_header_id = header.id
+                    detail.batch_group = "bd"
+                    detail.batch_order = order
+                    
+                    var theDetail = "BS"
+                    if let changeDate = row.data.usBucketAccountStatusDic.change_date {
+                        theDetail.append(changeDate)
+                    } else {
+                        theDetail.append("        ")
+                    }
+                    
+                    if let changeTime = row.data.usBucketAccountStatusDic.change_time {
+                        theDetail.append(changeTime)
+                    } else {
+                        theDetail.append("      ")
+                    }
+                    
+                    if let acN = row.data.usBucketAccountStatusDic.account_number {
+                        theDetail.append(acN)
+                    } else {
+                        theDetail.append("              ")
+                    }
+                    
+                    if let originalValue = row.data.usBucketAccountStatusDic.value_original {
+                        theDetail.append("\(originalValue)")
+                    } else {
+                        theDetail.append("      ")
+                    }
+                    
+                    if let newValue = row.data.usBucketAccountStatusDic.value_new {
+                        theDetail.append("\(newValue)")
+                    } else {
+                        theDetail.append("      ")
+                    }
+                    
+                    // Okay we have written out the details for this record.  We have to set and save the batch detail:
+                    detail.detail_line = theDetail
+                    detail.detail_line_length = theDetail.count
+                    
+                    // Save the Batch detail record:
+                    _=try? detail.saveWithCustomType(schemaIn: schema)
+                    
+                    // Append the order of the batch detail records.
+                    order += 1
+                    currentDetailRecordsCount += 1
+                    
+                    // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
+                    if currentDetailRecordsCount == 999 {
+                        let batchControl = BatchDetail()
+                        batchControl.batch_header_id = header.id
+                        batchControl.batch_group = "bc"
+                        batchControl.batch_order = order;  /* Increment the order:*/ order += 1
                         
-                        let detail = BatchDetail()
-                        detail.batch_header_id = header.id
-                        detail.batch_group = "bd"
-                        detail.batch_order = order
+                        theDet = "BC"
+                        // Entry Count:
+                        theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
+                        // Batch Number:
+                        theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
                         
-                        var theDetail = "BS"
-                        if let changeDate = row.data.usBucketAccountStatusDic.change_date {
-                            theDetail.append(changeDate)
-                        } else {
-                            theDetail.append("        ")
-                        }
+                        batchControl.detail_line = theDet
+                        batchControl.detail_line_length = theDet.count
+                        _ = try? batchControl.saveWithCustomType(schemaIn: schema)
                         
-                        if let changeTime = row.data.usBucketAccountStatusDic.change_time {
-                            theDetail.append(changeTime)
-                        } else {
-                            theDetail.append("      ")
-                        }
+                        // Okay, now we need to create the new batchHeader record:
+                        let newBatchHeader = BatchDetail()
+                        newBatchHeader.batch_header_id = header.id
+                        newBatchHeader.batch_group = "bc"
+                        newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
                         
-                        if let acN = row.data.usBucketAccountStatusDic.account_number {
-                            theDetail.append(acN)
-                        } else {
-                            theDetail.append("              ")
-                        }
+                        theDet.append(momen.format("yyyyMMdd"))
+                        theDet.append(momen.format("hhmmss"))
+                        theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
+                        // Batch effective date:
+                        theDet.append("               " + to.dateString(format: "yyyyMMdd"))
+                        theDet.append(referenceCode)
                         
-                        if let originalValue = row.data.usBucketAccountStatusDic.value_original {
-                            theDetail.append("\(originalValue)")
-                        } else {
-                            theDetail.append("      ")
-                        }
+                        if isRepeat { theDet.append("Y") } else { theDet.append("N") }
                         
-                        if let newValue = row.data.usBucketAccountStatusDic.value_new {
-                            theDetail.append("\(newValue)")
-                        } else {
-                            theDetail.append("      ")
-                        }
+                        newBatchHeader.detail_line = theDet
+                        newBatchHeader.detail_line_length = theDet.length
                         
-                        // Okay we have written out the details for this record.  We have to set and save the batch detail:
-                        detail.detail_line = theDetail
-                        detail.detail_line_length = theDetail.count
+                        _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
                         
-                        // Save the Batch detail record:
-                        _=try? detail.saveWithCustomType(schemaIn: schema)
-                        
-                        // Append the order of the batch detail records.
-                        order += 1
-                        currentDetailRecordsCount += 1
-                        
-                        // If the count is equal to 999, we need to go and start another batch header/control file and set back the detail record count to zero, and finish out the batch control
-                        if currentDetailRecordsCount == 999 {
-                            let batchControl = BatchDetail()
-                            batchControl.batch_header_id = header.id
-                            batchControl.batch_group = "bc"
-                            batchControl.batch_order = order;  /* Increment the order:*/ order += 1
-                            
-                            theDet = "BC"
-                            // Entry Count:
-                            theDet.append(numberFormatter.format(currentDetailRecordsCount, buffingCharacters: 3)!)
-                            // Batch Number:
-                            theDet.append(numberFormatter.format(batchCount, buffingCharacters: 9)!)
-                            
-                            batchControl.detail_line = theDet
-                            batchControl.detail_line_length = theDet.count
-                            _ = try? batchControl.saveWithCustomType(schemaIn: schema)
-                            
-                            // Okay, now we need to create the new batchHeader record:
-                            let newBatchHeader = BatchDetail()
-                            newBatchHeader.batch_header_id = header.id
-                            newBatchHeader.batch_group = "bc"
-                            newBatchHeader.batch_order = order;  /* Increment the order:*/ order += 1
-                            
-                            theDet.append(momen.format("yyyyMMdd"))
-                            theDet.append(momen.format("hhmmss"))
-                            theDet.append(numberFormatter.format(1, buffingCharacters: 9)!)
-                            // Batch effective date:
-                            theDet.append("               " + to.dateString(format: "yyyyMMdd"))
-                            theDet.append(referenceCode)
-                            
-                            if isRepeat { theDet.append("Y") } else { theDet.append("N") }
-                            
-                            newBatchHeader.detail_line = theDet
-                            newBatchHeader.detail_line_length = theDet.length
-                            
-                            _ = try? newBatchHeader.saveWithCustomType(schemaIn: schema)
-                            
-                            // Set the detail records to zero, and append the batch number:
-                            currentDetailRecordsCount = 0
-                            batchCount += 1
-                            
-                        }
+                        // Set the detail records to zero, and append the batch number:
+                        currentDetailRecordsCount = 0
+                        batchCount += 1
                         
                     }
                     
