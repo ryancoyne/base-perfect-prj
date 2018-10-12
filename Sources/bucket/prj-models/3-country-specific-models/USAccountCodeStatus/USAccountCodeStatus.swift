@@ -70,11 +70,11 @@ public class USAccountCodeStatus: PostgresStORM {
            record_type  = data
         }
         
-        if let data = this.data.usAccountDetailDic.processed {
+        if let data = this.data.usAccountStatusDic.processed {
             processed  = data
         }
         
-        if let data = this.data.usAccountDetailDic.processedby {
+        if let data = this.data.usAccountStatusDic.processedby {
             processedby  = data
         }
         
@@ -206,6 +206,14 @@ public class USAccountCodeStatus: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
+        if self.processedby.isNotNil {
+            dictionary.usAccountStatusDic.processedby = self.processedby
+        }
+        
+        if self.processed.isNotNil {
+            dictionary.usAccountStatusDic.processed = self.processed
+        }
+        
         if self.record_type.isNotNil {
             dictionary.usAccountStatusDic.record_type = self.record_type
         }
@@ -247,6 +255,14 @@ public class USAccountCodeStatus: PostgresStORM {
         }
         
         if diff == true, self.change_date != targetItem.change_date {
+            diff = false
+        }
+        
+        if diff == true, self.processed != targetItem.processed {
+            diff = false
+        }
+        
+        if diff == true, self.processedby != targetItem.processedby {
             diff = false
         }
         

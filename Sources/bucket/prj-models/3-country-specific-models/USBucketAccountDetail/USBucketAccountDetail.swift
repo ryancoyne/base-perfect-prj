@@ -246,6 +246,14 @@ public class USBucketAccountDetail: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
+        if self.processedby.isNotNil {
+            dictionary.usBucketAccountDetailDic.processedby = self.processedby
+        }
+        
+        if self.processed.isNotNil {
+            dictionary.usBucketAccountDetailDic.processed = self.processed
+        }
+        
         if self.record_type.isNotNil {
             dictionary.usBucketAccountDetailDic.record_type = self.record_type
         }
@@ -311,6 +319,14 @@ public class USBucketAccountDetail: PostgresStORM {
         }
         
         if diff == true, self.account_number != targetItem.account_number {
+            diff = false
+        }
+        
+        if diff == true, self.processed != targetItem.processed {
+            diff = false
+        }
+        
+        if diff == true, self.processedby != targetItem.processedby {
             diff = false
         }
         

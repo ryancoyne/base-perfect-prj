@@ -225,6 +225,14 @@ public class USAccountCodeDetail: PostgresStORM {
             dictionary.usAccountDetailDic.change_date = self.change_date
         }
         
+        if self.processedby.isNotNil {
+            dictionary.usAccountDetailDic.processedby = self.processedby
+        }
+        
+        if self.processed.isNotNil {
+            dictionary.usAccountDetailDic.processed = self.processed
+        }
+        
         if self.change_time.isNotNil {
             dictionary.usAccountDetailDic.change_time = self.change_time
         }
@@ -270,6 +278,14 @@ public class USAccountCodeDetail: PostgresStORM {
         }
         
         if diff == true, self.code_number != targetItem.code_number {
+            diff = false
+        }
+        
+        if diff == true, self.processed != targetItem.processed {
+            diff = false
+        }
+        
+        if diff == true, self.processedby != targetItem.processedby {
             diff = false
         }
         

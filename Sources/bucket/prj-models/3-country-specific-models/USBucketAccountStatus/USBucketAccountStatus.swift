@@ -66,11 +66,11 @@ public class USBucketAccountStatus: PostgresStORM {
             deletedby = data
         }
         
-        if let data = this.data.usAccountDetailDic.processed {
+        if let data = this.data.usBucketAccountStatusDic.processed {
             processed  = data
         }
         
-        if let data = this.data.usAccountDetailDic.processedby {
+        if let data = this.data.usBucketAccountStatusDic.processedby {
             processedby  = data
         }
         
@@ -206,6 +206,14 @@ public class USBucketAccountStatus: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
+        if self.processedby.isNotNil {
+            dictionary.usBucketAccountStatusDic.processedby = self.processedby
+        }
+        
+        if self.processed.isNotNil {
+            dictionary.usBucketAccountStatusDic.processed = self.processed
+        }
+        
         if self.record_type.isNotNil {
             dictionary.usBucketAccountStatusDic.record_type = self.record_type
         }
@@ -247,6 +255,14 @@ public class USBucketAccountStatus: PostgresStORM {
         }
         
         if diff == true, self.change_date != targetItem.change_date {
+            diff = false
+        }
+        
+        if diff == true, self.processed != targetItem.processed {
+            diff = false
+        }
+        
+        if diff == true, self.processedby != targetItem.processedby {
             diff = false
         }
         
