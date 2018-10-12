@@ -272,7 +272,6 @@ public class SuttonFunctions {
                         // Okay, now we need to create the new batchHeader record:
                         // Set the detail records to zero, and append the batch number:
                         currentDetailRecordsCount = 0
-                        batchCount += 1
                     
                     }
                 }
@@ -378,7 +377,6 @@ public class SuttonFunctions {
                         // Okay, now we need to create the new batchHeader record:
                         // Set the detail records to zero, and append the batch number:
                         currentDetailRecordsCount = 0
-                        batchCount += 1
                         
                     }
                 }
@@ -505,7 +503,6 @@ public class SuttonFunctions {
                         // Okay, now we need to create the new batchHeader record:
                         // Set the detail records to zero, and append the batch number:
                         currentDetailRecordsCount = 0
-                        batchCount += 1
                         
                     }
                     
@@ -611,7 +608,6 @@ public class SuttonFunctions {
                         // Okay, now we need to create the new batchHeader record:
                         // Set the detail records to zero, and append the batch number:
                         currentDetailRecordsCount = 0
-                        batchCount += 1
                         
                     }
                     
