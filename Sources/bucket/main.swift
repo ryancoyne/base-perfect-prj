@@ -91,7 +91,7 @@ if let logfile = EnvironmentVariables.sharedInstance.filesDirectoryLogs {
         SuttonFunctions().testMountUmount()
     #endif
     
-    SupportFunctions.yesterday(Int(Date().timeIntervalSince1970))
+//    SupportFunctions.yesterday(Int(Date().timeIntervalSince1970))
     
     let formatter = DateFormatter()
 //    formatter.dateFormat = "yyyy/MM/dd HH:mm"

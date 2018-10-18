@@ -52,17 +52,9 @@ public class SuttonFunctions {
     
     struct SuttonDefaults {
         static let schema = "us"
-        static let mainFileDirectory = Dir("/transferfiles")
-        static let usFileDirectory = Dir("/transferfiles/us")
-        static let workFileDirectory = Dir("/transferfiles/tmp")
-        static let workUsFileDirectory = Dir("/transferfiles/tmp/us")
-    }
-    
-    func testMountUmount() {
-        
-        let tester = SuttonFunctions()
-        tester.mountFileDirectory()
-        tester.umountFileDirectory()
+        static let mainFileDirectory = Dir("transfer")
+        static let usFileDirectory = Dir("transfer/tosend")
+        static let workFileDirectory = Dir("transfer/tmp")
     }
     
     @discardableResult
@@ -686,88 +678,11 @@ public class SuttonFunctions {
 //        }
 //
 //    }
-    
-    private func mountFileDirectory() {
-    
-        let task = Process()
         
-        var place = ""
-        
-        #if os(macOS)
-            place = "/sbin/mount"
-        #elseif os(Linux)
-            place = "/bin/mount"
-        #endif
-
-        print("Mounting the main directory \(SuttonDefaults.mainFileDirectory.name)")
-        
-        task.launchPath = "/usr/bin/sudo"
-        task.arguments = [place,"\(SuttonDefaults.mainFileDirectory.name)"]
-        
-        let pipe = Pipe()
-        task.standardOutput = pipe
-
-        task.launch()
-
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
-
-        print("Main directory mount output: \(output!)")
-        
-        print("Complete with the mounting")
-
-    }
-
-    private func umountFileDirectory() {
-        
-        let task = Process()
-        
-        var place = ""
-        
-        #if os(macOS)
-        place = "/sbin/umount"
-        #elseif os(Linux)
-        place = "/bin/umount"
-        #endif
-        
-        print("Unmounting the main directory \(SuttonDefaults.mainFileDirectory.name)")
-        
-        task.launchPath = "/usr/bin/sudo"
-        task.arguments = [place,"\(SuttonDefaults.mainFileDirectory.name)"]
-        
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        
-        task.launch()
-        
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
-        
-        print("Main directory umount output: \(output!)")
-        
-        print("Complete with the mounting")
-
-    }
-
-    private func checkFileDirectory() {
-
-        let main_file_dir = SuttonDefaults.mainFileDirectory
-        if !main_file_dir.exists {
-            let _ = try? main_file_dir.create()
-        }
-
-        if main_file_dir.exists {
-            let us_file_dir = SuttonDefaults.usFileDirectory
-            if !us_file_dir.exists {
-                let _ = try? us_file_dir.create()
-            }
-        }
-        
-    }
-    
     private func createFileHeader(_ fileNumber:Int? = 1, _ fileDate:Date? = nil, _ repeatFile:Bool? = false, forSchema: String) -> (file_name: String, main_file_name:String, batch_number:Int, file_date:Date?, reference_code: String?) {
         
         // make sure the driectory is there
+        
         self.checkFileDirectory()
         
         var finalFileDate:Date? = nil
@@ -975,31 +890,20 @@ public class SuttonFunctions {
             print("Sorted: \(key): \(value)")
         }
     }
-
-    private func createBatchHeader(_ batch_number:Int) {
-        
-    }
-
-    private func createBatchFooter(_ batch_number:Int) {
-        
-    }
-
-    private func createCodeAccountStatusBatch(_ batch_number:Int) {
-        
-    }
-
-    private func createBucketAccountStatusBatch(_ batch_number:Int) {
-        
-    }
-
-    private func createCodeAccountDetailBatch(_ batch_number:Int) {
-        
-    }
-
-    private func createBucketAccountDetailBatch(_ batch_number:Int) {
-        
-    }
     
-    
-
+    private func checkFileDirectory() {
+        
+        let main_file_dir = SuttonFunctions.SuttonDefaults.mainFileDirectory
+        if !main_file_dir.exists {
+            let _ = try? main_file_dir.create()
+        }
+        
+        if main_file_dir.exists {
+            let us_file_dir = SuttonFunctions.SuttonDefaults.usFileDirectory
+            if !us_file_dir.exists {
+                let _ = try? us_file_dir.create()
+            }
+        }
+        
+    }
 }
