@@ -89,22 +89,22 @@ public class SuttonFunctions {
                 
                 // Before writing anything, lets check if we have records for the following queries:
                 let query = USAccountCodeDetail()
-                var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail WHERE created BETWEEN \(from) AND \(to);"
+                var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail_status_view_processed_no WHERE created BETWEEN \(from) AND \(to);"
                 let accountCodeResults = (try? query.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += accountCodeResults.count
                 
                 let query2 = USAccountCodeStatus()
-                sqlStatement = "SELECT * FROM \(schema).us_account_code_status WHERE created BETWEEN \(from) AND \(to);"
+                sqlStatement = "SELECT * FROM \(schema).us_account_code_status_status_view_processed_no WHERE created BETWEEN \(from) AND \(to);"
                 let accountCodeStatusResults = (try? query2.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += accountCodeStatusResults.count
                 
                 let query3 = USBucketAccountDetail()
-                sqlStatement = "SELECT * from \(schema).us_bucket_account_detail where created BETWEEN \(from) AND \(to);"
+                sqlStatement = "SELECT * from \(schema).us_bucket_account_detail_status_view_processed_no where created BETWEEN \(from) AND \(to);"
                 let bucketAccountDetailResults = (try? query3.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += bucketAccountDetailResults.count
                 
                 let query4 = USBucketAccountStatus()
-                sqlStatement = "SELECT * from \(schema).us_bucket_account_status where created BETWEEN \(from) AND \(to);"
+                sqlStatement = "SELECT * from \(schema).us_bucket_account_status_view_processed_no where created BETWEEN \(from) AND \(to);"
                 let bucketAccountStatusResults = (try? query4.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += bucketAccountStatusResults.count
                 

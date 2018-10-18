@@ -285,15 +285,23 @@ final class CCXDBTables {
     
     public func addDeletedViewsYes(_ tablename: String, _ schema:String? = "public")-> String {
         
-        var deleteviewsql = "CREATE VIEW \(schema!).\(tablename)_view_deleted_yes AS "
+        var deleteviewsql = "CREATE OR REPLACE VIEW \(schema!).\(tablename)_view_deleted_yes AS "
         deleteviewsql.append("SELECT * FROM \(schema!).\(tablename) WHERE deleted > 0; ")
 
         return deleteviewsql
     }
     
+    public func addProcessedViewsNo(_ tablename: String, _ schema:String? = "public")-> String {
+        
+        var deleteviewsql = "CREATE OR REPLACE VIEW \(schema!).\(tablename)_view_processed_no AS "
+        deleteviewsql.append("SELECT * FROM \(schema!).\(tablename) WHERE deleted = 0 AND processed = 0; ")
+        
+        return deleteviewsql
+    }
+
     public func addDeletedViewsNo(_ tablename: String, _ schema:String? = "public")-> String {
         
-        var deleteviewsql = "CREATE VIEW \(schema!).\(tablename)_view_deleted_no AS "
+        var deleteviewsql = "CREATE OR REPLACE VIEW \(schema!).\(tablename)_view_deleted_no AS "
         deleteviewsql.append("SELECT * FROM \(schema!).\(tablename) WHERE deleted = 0; ")
         
         return deleteviewsql
