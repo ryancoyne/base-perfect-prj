@@ -21,7 +21,7 @@ struct TransferMount {
 
 public class BatchProcessing {
 
-    func processSutton(_ days:Int? = 1,_ start:Int? = 0,_ processuser:String?) {
+    func processSutton(_ days:Int? = 1,_ start:Int? = 0,_ processuser:String? = nil) {
         
         var user_id = ""
         if processuser.isNil {
@@ -50,8 +50,8 @@ public class BatchProcessing {
         
         // grab the header records
         var sel_h = "SELECT * FROM \(schema).batch_header_view_deleted_no "
-        sel_h.append("WHERE (record_start_date >= start) ")
-        sel_h.append("AND (record_end_date <= end) ")
+        sel_h.append("WHERE (record_start_date >= \(start)) ")
+        sel_h.append("AND (record_end_date <= \(end)) ")
         sel_h.append("AND (current_status = 'pending transfer') ")
         sel_h.append("ORDER BY id ASC; ")
         

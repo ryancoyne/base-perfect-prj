@@ -59,6 +59,9 @@ public class SuttonFunctions {
     
     @discardableResult
     static func batch(in: Batch) throws -> BatchResult {
+        
+        let processing_time = Int(Date().timeIntervalSince1970)
+        
         switch `in` {
         case .all(let option, let user_id):
             switch option {
@@ -81,17 +84,17 @@ public class SuttonFunctions {
                 
                 // Before writing anything, lets check if we have records for the following queries:
                 let query = USAccountCodeDetail()
-                var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail_status_view_processed_no WHERE created BETWEEN \(from) AND \(to);"
+                var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail_view_processed_no WHERE created BETWEEN \(from) AND \(to);"
                 let accountCodeResults = (try? query.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += accountCodeResults.count
                 
                 let query2 = USAccountCodeStatus()
-                sqlStatement = "SELECT * FROM \(schema).us_account_code_status_status_view_processed_no WHERE created BETWEEN \(from) AND \(to);"
+                sqlStatement = "SELECT * FROM \(schema).us_account_code_status_view_processed_no WHERE created BETWEEN \(from) AND \(to);"
                 let accountCodeStatusResults = (try? query2.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += accountCodeStatusResults.count
                 
                 let query3 = USBucketAccountDetail()
-                sqlStatement = "SELECT * from \(schema).us_bucket_account_detail_status_view_processed_no where created BETWEEN \(from) AND \(to);"
+                sqlStatement = "SELECT * from \(schema).us_bucket_account_detail_view_processed_no where created BETWEEN \(from) AND \(to);"
                 let bucketAccountDetailResults = (try? query3.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += bucketAccountDetailResults.count
                 
@@ -266,6 +269,15 @@ public class SuttonFunctions {
                         currentDetailRecordsCount = 0
                     
                     }
+                    
+                    // update to processed since we are complete with this row
+                    let upd = USAccountCodeDetail()
+                    upd.to(row)
+                    upd.processed   = processing_time
+                    upd.processedby = CCXDefaultUserValues.user_server
+                    
+                    _ = try? upd.saveWithCustomType(schemaIn: schema)
+                    
                 }
                 
                 // Okay, now the next table:
@@ -371,6 +383,15 @@ public class SuttonFunctions {
                         currentDetailRecordsCount = 0
                         
                     }
+                    
+                    // update to processed since we are complete with this row
+                    let upd = USAccountCodeStatus()
+                    upd.to(row)
+                    upd.processed   = processing_time
+                    upd.processedby = CCXDefaultUserValues.user_server
+                    
+                    _ = try? upd.saveWithCustomType(schemaIn: schema)
+
                 }
                 
                 // Now the third table:
@@ -498,6 +519,14 @@ public class SuttonFunctions {
                         
                     }
                     
+                    // update to processed since we are complete with this row
+                    let upd = USBucketAccountDetail()
+                    upd.to(row)
+                    upd.processed   = processing_time
+                    upd.processedby = CCXDefaultUserValues.user_server
+                    
+                    _ = try? upd.saveWithCustomType(schemaIn: schema)
+
                 }
                 
                 // Now last, but not least:
@@ -603,6 +632,14 @@ public class SuttonFunctions {
                         
                     }
                     
+                    // update to processed since we are complete with this row
+                    let upd = USBucketAccountStatus()
+                    upd.to(row)
+                    upd.processed   = processing_time
+                    upd.processedby = CCXDefaultUserValues.user_server
+                    
+                    _ = try? upd.saveWithCustomType(schemaIn: schema)
+
                 }
                 
                 // Now the file control:

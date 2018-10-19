@@ -86,12 +86,6 @@ if let logfile = EnvironmentVariables.sharedInstance.filesDirectoryLogs {
             itexists = true
         }
     }
-
-    #if os(Linux)
-        SuttonFunctions().testMountUmount()
-    #endif
-    
-//    SupportFunctions.yesterday(Int(Date().timeIntervalSince1970))
     
     let formatter = DateFormatter()
 //    formatter.dateFormat = "yyyy/MM/dd HH:mm"
@@ -181,6 +175,8 @@ do {
 } catch {
     print(error)
 }
+
+BatchProcessing().processSutton()
 
 if EnvironmentVariables.sharedInstance.URL_PORT != 80 || EnvironmentVariables.sharedInstance.URL_PORT != 443 {
     // non standard port
