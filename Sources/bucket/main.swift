@@ -288,6 +288,7 @@ routes.append(contentsOf: RetailerAPI.json.routes)
 routes.append(contentsOf: RetailerWEB.web.routes)
 routes.append(contentsOf: ConsumerAPI.json.routes)
 routes.append(contentsOf: ConsumerWEB.web.routes)
+routes.append(contentsOf: AdminAPI.json.routes)
 
 // only if we are not in production
 if EnvironmentVariables.sharedInstance.Server.stringValue != "PROD" {

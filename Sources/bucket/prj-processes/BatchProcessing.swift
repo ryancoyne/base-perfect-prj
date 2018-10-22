@@ -10,10 +10,14 @@ import PerfectLib
 import PostgresStORM
 
 struct TransferMount {
-    static let mainMountPoint       = Dir("/transfer")
-    static let mainMountPointTmp    = Dir("/transfer/tmp")
-    static let mainMountPointToSend = Dir("/transfer/tosend")
-    static let mainMountLockFile    = File("\(TransferMount.mainMountPoint).lock")
+    static let mainMountPoint          = Dir("/transfer")
+    static let mainMountPointTmp       = Dir("/transfer/tmp")
+    static let mainMountPointToSend    = Dir("/transfer/tosend")
+    static let mainMountLockFile       = File("\(TransferMount.mainMountPoint).lock")
+    static let mainMountPointOSX       = Dir("transfer")
+    static let mainMountPointTmpOSX    = Dir("transfer/tmp")
+    static let mainMountPointToSendOSX = Dir("transfer/tosend")
+    static let mainMountLockFileOSX    = File("\(TransferMount.mainMountPointOSX).lock")
     static let ubuntuMount  = "/bin/mount"
     static let ubuntuUMount = "/bin/umount"
     static let ubuntuSudo   = "/usr/bin/sudo"
@@ -55,6 +59,10 @@ public class BatchProcessing {
         sel_h.append("AND (current_status = 'pending transfer') ")
         sel_h.append("ORDER BY id ASC; ")
         
+        var locked: File
+        self.mountFileDirectory()
+
+        
         // lets loop thru and process the records
         let bch_h = BatchHeader()
         let bch_r = try? bch_h.sqlRows(sel_h, params: [])
@@ -62,25 +70,37 @@ public class BatchProcessing {
             
             let processing_time = Int(Date().timeIntervalSince1970)
             
-            // if we are on linux, lets mount this thingie
             #if os(Linux)
-                self.mountFileDirectory()
             
                 // check to see if we are locked - if so - we do not proceed
-                let locked = TransferMount.mainMountLockFile
-                if locked.exists {
-                    // this is already running
-                    return
-                }
-                // let them know we are locking
-                if let f_id = locked.open(.readWrite, permissions: File.PermissionMode.rwUserGroup) {
-                    var dateformatter = DateFormatter()
-                    dateformatter.dateFormat = "+%Y-%m-%d %H:%M:%S %Z"
-                    locked.write(string: dateformatter.string(from: Date()))
-                    locked.close()
-                }
+                locked = TransferMount.mainMountLockFile
+            
+            #else
+            
+                locked = TransferMount.mainMountLockFileOSX
             
             #endif
+            
+            if locked.exists {
+                // this is already running
+                return
+            }
+            
+            // let them know we are locking
+            let dateformatter = DateFormatter()
+            dateformatter.dateFormat = "+%Y-%m-%d %H:%M:%S %Z"
+            
+            do {
+                try locked.open(File.OpenMode.readWrite, permissions: File.PermissionMode.rwUserGroup)
+            } catch {
+                print("File error: \(error)")
+            }
+            
+            let fd_o = try? locked.open(File.OpenMode.readWrite, permissions: File.PermissionMode.rwUserGroup)
+            if fd_o != nil {
+                _ = try? locked.write(string: dateformatter.string(from: Date()))
+                locked.close()
+            }
             
             for r in bch_r! {
                 
@@ -119,25 +139,48 @@ public class BatchProcessing {
     
     private func mountFileDirectory() {
         
-        let task = Process()
+        #if os(Linux)
         
-        print("Mounting the main directory \(TransferMount.mainMountPoint.name)")
+            // Mount the directory in Linux
+            let task = Process()
         
-        task.launchPath = TransferMount.ubuntuSudo
-        task.arguments = [TransferMount.ubuntuMount,"\(TransferMount.mainMountPoint.name)"]
+            print("Mounting the main directory \(TransferMount.mainMountPoint.name)")
         
-        let pipe = Pipe()
-        task.standardOutput = pipe
+            task.launchPath = TransferMount.ubuntuSudo
+            task.arguments = [TransferMount.ubuntuMount,"\(TransferMount.mainMountPoint.name)"]
         
-        task.launch()
+            let pipe = Pipe()
+            task.standardOutput = pipe
         
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
+            task.launch()
         
-        print("Main directory mount output: \(output!)")
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
         
-        print("Complete with the mounting")
+            print("Main directory mount output: \(output!)")
         
+            print("Complete with the mounting")
+        
+        #else
+        
+            // Make sure the directory exists in OSX
+        let the_d  = TransferMount.mainMountPointOSX
+        let the_dt = TransferMount.mainMountPointTmpOSX
+        let the_ds = TransferMount.mainMountPointToSendOSX
+
+        if !the_d.exists {
+            _ = try? the_d.create(perms: .rwUserGroup)
+        }
+        
+        if !the_dt.exists {
+            _ = try? the_dt.create(perms: .rwUserGroup)
+        }
+        
+        if !the_ds.exists {
+            _ = try? the_ds.create(perms: .rwUserGroup)
+        }
+        
+        #endif
     }
     
     private func umountFileDirectory() {
