@@ -52,9 +52,12 @@ public class SuttonFunctions {
     
     struct SuttonDefaults {
         static let schema = "us"
-        static let mainFileDirectory = Dir("transfer")
-        static let usFileDirectory = Dir("transfer/tosend")
-        static let workFileDirectory = Dir("transfer/tmp")
+        static let mainFileDirectory    = Dir("/transfer")
+        static let usFileDirectory      = Dir("/transfer/tosend")
+        static let workFileDirectory    = Dir("/transfer/tmp")
+        static let mainFileDirectoryOSX = Dir("transfer")
+        static let usFileDirectoryOSX   = Dir("transfer/tosend")
+        static let workFileDirectoryOSX = Dir("transfer/tmp")
     }
     
     @discardableResult
@@ -930,13 +933,27 @@ public class SuttonFunctions {
     
     private func checkFileDirectory() {
         
-        let main_file_dir = SuttonFunctions.SuttonDefaults.mainFileDirectory
+        var main_file_dir:Dir
+        
+        #if os(Linux)
+            main_file_dir = SuttonFunctions.SuttonDefaults.mainFileDirectory
+        #else
+            main_file_dir = SuttonFunctions.SuttonDefaults.mainFileDirectoryOSX
+        #endif
+        
         if !main_file_dir.exists {
             let _ = try? main_file_dir.create()
         }
         
+        var us_file_dir:Dir
+        
+        #if os(Linux)
+            us_file_dir = SuttonFunctions.SuttonDefaults.usFileDirectory
+        #else
+            us_file_dir = SuttonFunctions.SuttonDefaults.usFileDirectoryOSX
+        #endif
+        
         if main_file_dir.exists {
-            let us_file_dir = SuttonFunctions.SuttonDefaults.usFileDirectory
             if !us_file_dir.exists {
                 let _ = try? us_file_dir.create()
             }

@@ -98,17 +98,17 @@ if let logfile = EnvironmentVariables.sharedInstance.filesDirectoryLogs {
         let requestlogFile = File(logDir.path + requestFileName)
         let stormlogFile = File(logDir.path + stormFileName)
         
-        if let _ = try? defaultlogFile.open(.readWrite, permissions: .rwUserGroup) {
+        if let _ = try? defaultlogFile.open(.append, permissions: .rwUserGroup) {
             let _ = try? defaultlogFile.write(string: "LOGGING START: \(currentdatetime)")
             defaultlogFile.close()
         }
         
-        if let _ = try? requestlogFile.open(.readWrite, permissions: .rwUserGroup) {
+        if let _ = try? requestlogFile.open(.append, permissions: .rwUserGroup) {
             let _ = try? requestlogFile.write(string: "LOGGING START: \(currentdatetime)")
             requestlogFile.close()
         }
         
-        if let _ = try? stormlogFile.open(.readWrite, permissions: .rwUserGroup) {
+        if let _ = try? stormlogFile.open(.append, permissions: .rwUserGroup) {
             let _ = try? stormlogFile.write(string: "LOGGING START: \(currentdatetime)")
             stormlogFile.close()
         }
