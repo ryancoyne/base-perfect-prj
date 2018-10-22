@@ -62,7 +62,6 @@ public class BatchProcessing {
         var locked: File
         self.mountFileDirectory()
 
-        
         // lets loop thru and process the records
         let bch_h = BatchHeader()
         let bch_r = try? bch_h.sqlRows(sel_h, params: [])
@@ -91,13 +90,13 @@ public class BatchProcessing {
             dateformatter.dateFormat = "+%Y-%m-%d %H:%M:%S %Z"
             
             do {
-                try locked.open(File.OpenMode.readWrite, permissions: File.PermissionMode.rwUserGroup)
+                try locked.open(.readWrite, permissions: .rwUserGroup)
             } catch {
                 print("File error: \(error)")
             }
             
-            let fd_o = try? locked.open(File.OpenMode.readWrite, permissions: File.PermissionMode.rwUserGroup)
-            if fd_o != nil {
+            // create the file and write the date to ut
+            if let _ = try? locked.open(File.OpenMode.readWrite, permissions: File.PermissionMode.rwUserGroup) {
                 _ = try? locked.write(string: dateformatter.string(from: Date()))
                 locked.close()
             }
@@ -111,7 +110,7 @@ public class BatchProcessing {
                 if bh.file_name.isNotNil { filename = bh.file_name! }
                 
                 // process the detail records
-                self.processBatchDetail(bh.id!, processing_time, user_id, filename)
+                self.processBatchDetail(schema, bh.id!, processing_time, user_id, filename)
                 
                 // update the current record
                 bh.last_send   = processing_time
@@ -132,8 +131,42 @@ public class BatchProcessing {
         }
     }
     
-    private func processBatchDetail(_ header_id:Int, _ processing_time:Int, _ processed_by:String,_ filename:String) {
+    private func processBatchDetail(_ schema:String, _ header_id:Int, _ processing_time:Int, _ processed_by:String,_ filename:String) {
         
+        let bd = BatchDetail()
+        let sql = "SELECT * FROM \(schema).batch_header_view_deleted_no WHERE batch_header_id=\(header_id) ORDER BY batch_order ASC; "
+        let bd_r = try? bd.sqlRows(sql, params: [])
+        
+        if bd_r.isNotNil {
+            
+            var filepath = ""
+            
+            // make sure the file is there
+            #if os(Linux)
+                filepath.append(TransferMount.mainMountPointToSend.name)
+                filepath.append(filename)
+            #else
+                filepath.append(TransferMount.mainMountPointToSend.name)
+                filepath.append(filename)
+            #endif
+            
+            let detail_file = File(filepath)
+            _ = try? detail_file.open(.readWrite, permissions: .rwUserGroup)
+            
+            // loop thru the records for the header
+            for r in bd_r! {
+                
+                let bdt = BatchDetail()
+                bdt.to(r)
+
+                // write the records
+                if bdt.detail_line.isNotNil { _ = try? detail_file.write(string: bdt.detail_line!) }
+                
+            }
+            
+            // now close the file
+            _ = try? detail_file.close()
+        }
         
     }
     
@@ -164,45 +197,48 @@ public class BatchProcessing {
         #else
         
             // Make sure the directory exists in OSX
-        let the_d  = TransferMount.mainMountPointOSX
-        let the_dt = TransferMount.mainMountPointTmpOSX
-        let the_ds = TransferMount.mainMountPointToSendOSX
+            let the_d  = TransferMount.mainMountPointOSX
+            let the_dt = TransferMount.mainMountPointTmpOSX
+            let the_ds = TransferMount.mainMountPointToSendOSX
 
-        if !the_d.exists {
-            _ = try? the_d.create(perms: .rwUserGroup)
-        }
+            if !the_d.exists {
+                _ = try? the_d.create(perms: .rwUserGroup)
+            }
         
-        if !the_dt.exists {
-            _ = try? the_dt.create(perms: .rwUserGroup)
-        }
+            if !the_dt.exists {
+                _ = try? the_dt.create(perms: .rwUserGroup)
+            }
         
-        if !the_ds.exists {
-            _ = try? the_ds.create(perms: .rwUserGroup)
-        }
+            if !the_ds.exists {
+                _ = try? the_ds.create(perms: .rwUserGroup)
+            }
         
         #endif
     }
     
     private func umountFileDirectory() {
         
-        let task = Process()
+        #if os(Linux)
+
+            let task = Process()
         
-        print("Unmounting the main directory \(TransferMount.mainMountPoint.name)")
+            print("Unmounting the main directory \(TransferMount.mainMountPoint.name)")
         
-        task.launchPath = TransferMount.ubuntuSudo
-        task.arguments = [TransferMount.ubuntuSudo,"\(TransferMount.mainMountPoint.name)"]
+            task.launchPath = TransferMount.ubuntuSudo
+            task.arguments = [TransferMount.ubuntuSudo,"\(TransferMount.mainMountPoint.name)"]
         
-        let pipe = Pipe()
-        task.standardOutput = pipe
+            let pipe = Pipe()
+            task.standardOutput = pipe
         
-        task.launch()
+            task.launch()
         
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
         
-        print("Main directory umount output: \(output!)")
+            print("Main directory umount output: \(output!)")
         
-        print("Complete with the mounting")
-        
+            print("Complete with the mounting")
+
+        #endif
     }
 }
