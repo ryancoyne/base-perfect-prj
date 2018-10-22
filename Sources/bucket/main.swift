@@ -65,6 +65,13 @@ switch EnvironmentVariables.sharedInstance.Server {
         isProduction = false
 }
 
+// seed the random number generator in Linux
+// done here because of a known repeating number issue when used inside a function
+// refer to: https://stackoverflow.com/questions/41035180/swift-arc4random-uniformmax-in-linux  
+#if os(Linux)
+    srandom(UInt32(time(nil)))
+#endif
+
 // make sure the log directory exists
 var logfilelocation = "/"
 let logFileName = "default.txt"

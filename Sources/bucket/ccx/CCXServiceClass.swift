@@ -47,6 +47,18 @@ final class CCXServiceClass {
 //
 //    }()
     
+    func getRandomNum(_ min: Int, _ max: Int) -> Int {
+        // make sure the following is in the main.sqift to seed the random number in Lunix
+        // #if os(Linux)
+        //   srandom(UInt32(time(nil)))
+        // #endif
+        #if os(Linux)
+          return Int(random() % max) + min
+        #else
+          return Int(arc4random_uniform(UInt32(max)) + UInt32(min))
+        #endif
+    }
+    
     public let filesDirectoryProfilePics: String = {
         
         #if os(macOS)
