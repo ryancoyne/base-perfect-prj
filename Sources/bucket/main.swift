@@ -169,14 +169,14 @@ PostgresConnector.username = EnvironmentVariables.sharedInstance.DB_USERNAME!
 PostgresConnector.password = EnvironmentVariables.sharedInstance.DB_PASSWORD!
 
 // FROM: Sept 26, 12AM........ TO Sept 26, 11:59PM
-do {
-    let numberOfBatches = try SuttonFunctions.batch(in: .all(.oneFile(to: 1538006399,from: 1537920000, schema: "us", isRepeat: false, description: "The Description for this batch."), user_id: nil))
-    print(numberOfBatches)
-} catch {
-    print(error)
-}
-
-BatchProcessing().processSutton()
+//do {
+//    let numberOfBatches = try SuttonFunctions.batch(in: .all(.oneFile(to: 1538006399,from: 1537920000, schema: "us", isRepeat: false, description: "The Description for this batch."), user_id: nil))
+//    print(numberOfBatches)
+//} catch {
+//    print(error)
+//}
+//
+//BatchProcessing().processSutton()
 
 if EnvironmentVariables.sharedInstance.URL_PORT != 80 || EnvironmentVariables.sharedInstance.URL_PORT != 443 {
     // non standard port

@@ -546,13 +546,20 @@ struct RetailerAPI {
                         qrCodeURL.append(thecode)
                         json!["qrCodeContent"] = qrCodeURL
                         
+                        var sql = ""
+                        
                         // We need to go and get the integer terminal id:
-                        let retailer = Retailer()
-                        var sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(request.getRetailerCode()!)' "
-                        let rtlr = try? retailer.sqlRows(sql, params: [])
-                        if rtlr.isNotNil, let c = rtlr!.first {
-                            retailer.to(c)
+                        var retailer = Retailer()
+                        if let r = rt.retailer {
+                            retailer = r
+                        } else {
+                            sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(request.getRetailerCode()!)' "
+                            let rtlr = try? retailer.sqlRows(sql, params: [])
+                            if rtlr.isNotNil, let c = rtlr!.first {
+                                retailer.to(c)
+                            }
                         }
+                        
                         
                         var terminal:Terminal
                         if let t = rt.terminal {
@@ -563,6 +570,13 @@ struct RetailerAPI {
                             let trmn = try? terminal.sqlRows(sql, params: [])
                             if trmn.isNotNil, let c = trmn!.first {
                                 terminal.to(c)
+                                
+                                // this means that there was an issue with the retailer ID - lets catch up
+                                sql = "SELECT * FROM \(schema).retailer WHERE id = \(terminal.retailer_id!)"
+                                if let ret_2 = try? terminal.sqlRows(sql, params: []), let rt2 = ret_2.first {
+                                    retailer.to(rt2)
+                                }
+                                
                             }
                         }
                         
@@ -938,17 +952,17 @@ extension Retailer {
         
     }
 
-    public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> (bounced:Bool?, terminal:Terminal?)? {
+    public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> (bounced:Bool?, terminal:Terminal?, retailer:Retailer?)? {
         
         // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-        guard request.SecurityCheck() else { response.badSecurityToken; return (true, nil) }
+        guard request.SecurityCheck() else { response.badSecurityToken; return (true, nil, nil) }
 
         //Make sure we have the retailer Id and retailer secret:
 //        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
-        guard let retailerSecret = request.retailerSecret else { response.unauthorizedTerminal; return (true, nil) }
+        guard let retailerSecret = request.retailerSecret else { response.unauthorizedTerminal; return (true, nil, nil) }
 
-        guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return (true, nil) }
-        guard let _ = request.countryId else { response.invalidCountryCode; return (true, nil) }
+        guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return (true, nil, nil) }
+        guard let _ = request.countryId else { response.invalidCountryCode; return (true, nil, nil) }
         
         // lets test for the retailer code (not the retailer ID
         let schema = Country.getSchema(request)
@@ -962,7 +976,7 @@ extension Retailer {
             if r_ret.isNotNil, r_ret!.isEmpty {
                 // the code was not found
                 response.invalidRetailer
-                return (true, nil)
+                return (true, nil, nil)
             } else {
                 // set the retailer id
                 retailerId = r_ret!.first!.data["id"].intValue!
@@ -970,7 +984,7 @@ extension Retailer {
         } else {
             // the retailer code was not sent in
             response.invalidRetailer
-            return (true, nil)
+            return (true, nil, nil)
         }
 
         // Get our secret code formatted properly to check what we have in the DB:
@@ -990,13 +1004,13 @@ extension Retailer {
         //  4. The terminal is not assigned to an address
         
         // this means the terminal number is invalid - RETURN the appropriate error code
-        if terminalQuery.id.isNil { response.unauthorizedTerminal; return (true, nil) }
+        if terminalQuery.id.isNil { response.unauthorizedTerminal; return (true, nil, nil) }
         
         // this means the terminal is not approved
-        if !terminalQuery.is_approved { response.unauthorizedTerminal; return (true, nil) }
+        if !terminalQuery.is_approved { response.unauthorizedTerminal; return (true, nil, nil) }
         
         // and finally - make sure there is an address assigned to this terminal
-        if terminalQuery.address_id.isNil || terminalQuery.address_id == 0 { response.noLocationTerminal; return (true, nil) }
+        if terminalQuery.address_id.isNil || terminalQuery.address_id == 0 { response.noLocationTerminal; return (true, nil, nil) }
 
         // Checking the final condition (last condition to minimize the number of queries during error)
         let retailerQuery = Retailer()
@@ -1007,9 +1021,9 @@ extension Retailer {
         }
 
         // now lets look to make sure the serial number is to the current retailer
-        if retailerQuery.id != terminalQuery.retailer_id { response.alreadyRegistered(terminalSerialNumber); return (true, nil) }
+        if retailerQuery.id != terminalQuery.retailer_id { response.alreadyRegistered(terminalSerialNumber); return (true, nil, nil) }
         
-        return (false, terminalQuery)
+        return (false, terminalQuery, retailerQuery)
     }
 
 }
