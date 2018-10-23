@@ -45,58 +45,93 @@ final class BatchDetailTable {
 
         // make sure the table level is correct
         var thesql = "SELECT val, name FROM config WHERE name = $1"
-        var tr = try! config.sqlRows(thesql, params: ["\(schema).table_\(tbl.table())"])
-        if tr.count > 0 {
-            let testval = Double(tr[0].data["val"] as! String)
-            if testval != tablelevel {
-                // update to the new installation
-                self.update(currentlevel: testval!, schema)
+        let tr1 = try? config.sqlRows(thesql, params: ["\(schema).table_\(tbl.table())"])
+        if tr1.isNotNil, let tr = tr1 {
+            if tr.count > 0 {
+                let testval = Double(tr[0].data["val"] as! String)
+                if testval != tablelevel {
+                    // update to the new installation
+                    self.update(currentlevel: testval!, schema)
+                }
+            } else {
+            
+                let sequencesql = CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table(), schema)
+            
+                // create the sequence
+                do {
+                    try tbl.sqlRows(sequencesql, params: [])
+                } catch {
+                    print("Error createBatchDetail(): \(error)")
+                }
+                
+                do {
+                    try tbl.sqlRows(self.table(schema), params: [])
+                } catch {
+                    print("Error createBatchDetail(): \(error)")
+                }
+
+                do {
+                    // new one - set the default 1.00
+                    thesql = "INSERT INTO config(name,val) VALUES('\(schema).table_\(tbl.table())','1.00')"
+                    try config.sqlRows(thesql, params: [])
+                } catch {
+                    print("Error createBatchDetail(): \(error)")
+                }
             }
-        } else {
-            
-            let sequencesql = CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table(), schema)
-            
-            // create the sequence
-            let _ = try? tbl.sqlRows(sequencesql, params: [])
-            
-            let _ = try! tbl.sqlRows(self.table(schema), params: [])
-            
-            // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('\(schema).table_\(tbl.table())','1.00')"
-            let _ = try? config.sqlRows(thesql, params: [])
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
-        tr = try! config.sqlRows(thesql, params: ["\(schema).view_\(tbl.table())_deleted_yes"])
-        if tr.count > 0 {
-            let testval = Double(tr[0].data["val"] as! String)
-            if testval != tablelevel {
-                // update to the new installation
-                self.update(currentlevel: testval!, schema)
+        let tr2 = try? config.sqlRows(thesql, params: ["\(schema).view_\(tbl.table())_deleted_yes"])
+        if tr2.isNotNil, let tr = tr2 {
+            if tr.count > 0 {
+                let testval = Double(tr[0].data["val"] as! String)
+                if testval != tablelevel {
+                    // update to the new installation
+                    self.update(currentlevel: testval!, schema)
+                }
+            } else {
+                // add the deleted views
+                do {
+                    try tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsYes(tbl.table(), schema), params: [])
+                } catch {
+                    print("Error createBatchDetail(): \(error)")
+                }
+
+                do {
+                    // new one - set the default 1.00
+                    thesql = "INSERT INTO config(name,val) VALUES('\(schema).view_\(tbl.table())_deleted_yes','1.00')"
+                    try config.sqlRows(thesql, params: [])
+                } catch {
+                    print("Error createBatchDetail(): \(error)")
+                }
             }
-        } else {
-            // add the deleted views
-            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsYes(tbl.table(), schema), params: [])
-            // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('\(schema).view_\(tbl.table())_deleted_yes','1.00')"
-            let _ = try! config.sqlRows(thesql, params: [])
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
-        tr = try! config.sqlRows(thesql, params: ["\(schema).view_\(tbl.table())_deleted_no"])
-        if tr.count > 0 {
-            let testval = Double(tr[0].data["val"] as! String)
-            if testval != tablelevel {
-                // update to the new installation
-                self.update(currentlevel: testval!, schema)
+        let tr3 = try? config.sqlRows(thesql, params: ["\(schema).view_\(tbl.table())_deleted_no"])
+        if tr3.isNotNil, let tr = tr3 {
+            if tr.count > 0 {
+                let testval = Double(tr[0].data["val"] as! String)
+                if testval != tablelevel {
+                    // update to the new installation
+                    self.update(currentlevel: testval!, schema)
+                }
+            } else {
+                do {
+                    try tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsNo(tbl.table(), schema), params: [])
+                } catch {
+                    print("Error createBatchDetail(): \(error)")
+                }
+
+                do {
+                    // new one - set the default 1.00
+                    thesql = "INSERT INTO config(name,val) VALUES('\(schema).view_\(tbl.table())_deleted_no','1.00')"
+                    try config.sqlRows(thesql, params: [])
+                } catch {
+                    print("Error createBatchDetail(): \(error)")
+                }
             }
-        } else {
-            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addDeletedViewsNo(tbl.table(), schema), params: [])
-            // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('\(schema).view_\(tbl.table())_deleted_no','1.00')"
-            let _ = try! config.sqlRows(thesql, params: [])
         }
-        
     }
     
     private func update(currentlevel: Double, _ schemaIn:String? = "public") {
