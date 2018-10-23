@@ -22,14 +22,14 @@ extension NumberFormatter {
         self.maximumIntegerDigits = buffingCharacters
         self.maximumFractionDigits = 0
         self.minimumFractionDigits = 0
-        return self.string(from: value as NSNumber)
+        return self.string(from: NSNumber(value: value))
     }
     func format(_ value : Double, buffingCharacters: Int, decimalLimit: Int) -> String? {
         self.minimumIntegerDigits = buffingCharacters
         self.maximumIntegerDigits = buffingCharacters
         self.minimumFractionDigits = decimalLimit
         self.maximumFractionDigits = decimalLimit
-        return self.string(from: value as NSNumber)
+        return self.string(from: NSNumber(value: value))
     }
 }
 
