@@ -71,65 +71,72 @@ struct InstallationsAPI {
         
         if fields["devicetoken"].isNotNil {
             // lets lookup to see if it exists already
-            let current = try! Installation().sqlRows("SELECT id FROM installations WHERE id = $1 AND user_id = $2", params: [fields["devicetoken"] as! String, fields["user_id"] as! String])
+            let current1 = try? Installation().sqlRows("SELECT id FROM installations WHERE id = $1 AND user_id = $2", params: [fields["devicetoken"] as! String, fields["user_id"] as! String])
             
             var thesqlis = ""
             var thesqlparms = ""
             var theupdatesql = ""
             
-            if current.count > 0 {
-                fields["modified"] = CCXServiceClass.sharedInstance.getNow()
-                fields["modifiedby"] = session.userid
-                updateme = true
-            } else {
-                fields["created"] = CCXServiceClass.sharedInstance.getNow()
-                fields["createdby"] = session.userid
-            }
-            
-            for (field, value) in fields {
-                
-                var thef = field
-                
-                if field == "devicetoken" {
-                    thef = "id"
-                }
-                thesqlis.append(thef)
-                thesqlis.append(",")
-                
-                if thef == "created" || thef == "modified" || thef == "declinedterms" || thef == "acceptedterms" {
-                    thesqlparms.append(String(value as! Int))
-                    thesqlparms.append(",")
-                    
-                    theupdatesql.append("\(thef)=\(value as! Int),")
+            if current1.isNotNil, let current = current1 {
+                if current.count > 0 {
+                    fields["modified"] = CCXServiceClass.getNow()
+                    fields["modifiedby"] = session.userid
+                    updateme = true
                 } else {
-                    thesqlparms.append("'")
-                    thesqlparms.append(value as! String)
-                    thesqlparms.append("',")
+                    fields["created"] = CCXServiceClass.getNow()
+                    fields["createdby"] = session.userid
+                }
+            
+                for (field, value) in fields {
+                
+                    var thef = field
+                
+                    if field == "devicetoken" {
+                        thef = "id"
+                    }
+                    thesqlis.append(thef)
+                    thesqlis.append(",")
+                
+                    if thef == "created" || thef == "modified" || thef == "declinedterms" || thef == "acceptedterms" {
+                        thesqlparms.append(String(value as! Int))
+                        thesqlparms.append(",")
                     
-                    if thef != "id" {
-                        theupdatesql.append("\(thef)='\(value as! String)',")
+                        theupdatesql.append("\(thef)=\(value as! Int),")
+                    } else {
+                        thesqlparms.append("'")
+                        thesqlparms.append(value as! String)
+                        thesqlparms.append("',")
+                    
+                        if thef != "id" {
+                            theupdatesql.append("\(thef)='\(value as! String)',")
+                        }
                     }
                 }
-            }
             
-            // remove the last comma
-            thesqlis.removeLast()
-            thesqlparms.removeLast()
-            theupdatesql.removeLast()
+                // remove the last comma
+                thesqlis.removeLast()
+                thesqlparms.removeLast()
+                theupdatesql.removeLast()
             
-            // setup the SQL
-            var runmesql = ""
+                // setup the SQL
+                var runmesql = ""
             
-            if updateme {
-                runmesql = "UPDATE installations SET \(theupdatesql) WHERE 'id' = '\(fields["devicetoken"] as! String)' "
+                if updateme {
+                    runmesql = "UPDATE installations SET \(theupdatesql) WHERE 'id' = '\(fields["devicetoken"] as! String)' "
+                } else {
+                    runmesql = "INSERT INTO installations (\(thesqlis)) VALUES(\(thesqlparms))"
+                }
+            
+                do {
+                    try Installation().sqlRows(runmesql, params: [])
+            
+                    returndict["id"] = fields["devicetoken"]
+                } catch {
+                    print("Error in InstallationAPI.saveInstallation(): \(error)")
+                }
             } else {
-                runmesql = "INSERT INTO installations (\(thesqlis)) VALUES(\(thesqlparms))"
+                returndict = CCXServiceClass.sharedInstance.ResultFailure
             }
-            
-            _ = try Installation().sqlRows(runmesql, params: [])
-            
-            returndict["id"] = fields["devicetoken"]
-            
         } else {
             returndict = CCXServiceClass.sharedInstance.ResultFailure
         }

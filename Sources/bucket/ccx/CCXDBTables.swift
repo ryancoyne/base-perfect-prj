@@ -55,7 +55,7 @@ final class CCXDBTables {
     var useradminsql : String {
         get {
             
-            let create_time = CCXServiceClass.sharedInstance.getNow()
+            let create_time = CCXServiceClass.getNow()
             
             var u1 = "INSERT INTO account (id,username,email,source,usertype,detail) VALUES("
             u1.append("'\(CCXSystemData.admin)',")
@@ -73,7 +73,7 @@ final class CCXDBTables {
     var usersql : String {
         get {
             
-            let create_time = CCXServiceClass.sharedInstance.getNow()
+            let create_time = CCXServiceClass.getNow()
             
             var u1 = "INSERT INTO account (id,username,email,source,usertype,detail) VALUES("
             u1.append("'\(CCXDefaultUserValues.user_server)',")
@@ -364,7 +364,7 @@ final class CCXDBTables {
             ra = try user.sqlRows(self.usersql, params: [])
 
         } catch {
-            
+            print("Account Table Setup: \(error)")
         }
     }
     

@@ -69,7 +69,7 @@ public class USAuditFunctions {
         let ad = USAccountCodeDetail()
         ad.record_type = USRecordType.codeDetail
         
-        let timenow = CCXServiceClass.sharedInstance.getNow()
+        let timenow = CCXServiceClass.getNow()
         
         switch record {
         case is CodeTransaction:
@@ -208,7 +208,7 @@ public class USAuditFunctions {
         guard (sql_a?.first) != nil else { return }
         
         let changed_date_time = SupportFunctions.sharedInstance.getDateAndTime(changed)
-        let timenow           = CCXServiceClass.sharedInstance.getNow()
+        let timenow           = CCXServiceClass.getNow()
 
         var cas = USBucketAccountStatus()
         
@@ -255,7 +255,7 @@ public class USAuditFunctions {
         guard (sql_a?.first) != nil else { return }
         
         let changed_date_time = SupportFunctions.sharedInstance.getDateAndTime(changed)
-        let timenow           = CCXServiceClass.sharedInstance.getNow()
+        let timenow           = CCXServiceClass.getNow()
 
         // see if we need to add the status record
         if !record.countryExists(schema) {

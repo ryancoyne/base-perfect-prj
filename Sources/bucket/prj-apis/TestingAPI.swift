@@ -272,7 +272,7 @@ struct TestingAPI {
 
                 var endmessage:[String:Any] = [:]
                 // lets redeem the code now
-                let redeemed        = CCXServiceClass.sharedInstance.getNow()
+                let redeemed        = CCXServiceClass.getNow()
                 let user = request.session!.userid
             
                 // SECTION 1: Delete all the existing test records for the user and the country
@@ -313,7 +313,7 @@ struct TestingAPI {
 //                    let _ = try? current_codes.sqlRows(sql, params: [])
 
 
-                    let deletedtime = CCXServiceClass.sharedInstance.getNow()
+                    let deletedtime = CCXServiceClass.getNow()
                     
                     let sql = "SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE client_location LIKE('TESTING_\(user)_%') AND country_id = \(countryId.intValue!) "
                     let current_codes = CodeTransaction()

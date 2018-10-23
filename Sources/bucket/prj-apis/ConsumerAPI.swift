@@ -406,7 +406,7 @@ struct ConsumerAPI {
                 var retCode:[String:Any] = [:]
                 
                 // lets redeem the code now
-                let redeemed        = CCXServiceClass.sharedInstance.getNow()
+                let redeemed        = CCXServiceClass.getNow()
                 let redeemedby      = request.session!.userid
                 
                 let sql = "SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE id = \(rsp!.first!.data.id!)"
@@ -981,7 +981,7 @@ struct ConsumerAPI {
                     }
 
                     // process the records we saved earlier
-                    let cth_cashedout = CCXServiceClass.sharedInstance.getNow()
+                    let cth_cashedout = CCXServiceClass.getNow()
                     if theitems.count > 0 {
                         for working_cth in theitems {
 

@@ -31,129 +31,191 @@ final class FriendsTableViews {
         let config = Config()
 
         var thesql = "SELECT val, name FROM config WHERE name = $1"
-        var tr = try! config.sqlRows(thesql, params: ["view_\(tbl.table())_1"])
-        if tr.count > 0 {
-            let testval = Double(tr[0].data["val"] as! String)
-            if testval != friendView1 {
-                // update to the new installation
-                self.updateFriendView1(currentlevel: testval!)
+        let tr1 = try? config.sqlRows(thesql, params: ["view_\(tbl.table())_1"])
+        if tr1.isNotNil, let tr = tr1 {
+            if tr.count > 0 {
+                let testval = Double(tr[0].data["val"] as! String)
+                if testval != friendView1 {
+                    // update to the new installation
+                    self.updateFriendView1(currentlevel: testval!)
+                }
+            } else {
+            
+                do {
+                    try tbl.sqlRows(self.createFriendView1(), params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
+
+                do {
+                    // new one - set the default 1.00
+                    thesql = "INSERT INTO config(name,val) VALUES('view_\(tbl.table())_1','1.00')"
+                    try config.sqlRows(thesql, params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
             }
-        } else {
-            
-            try! tbl.sqlRows(self.createFriendView1(), params: [])
-            
-            // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('view_\(tbl.table())_1','1.00')"
-            try! config.sqlRows(thesql, params: [])
-            
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
-        tr = try! config.sqlRows(thesql, params: ["function_\(tbl.table())_1"])
-        if tr.count > 0 {
-            let testval = Double(tr[0].data["val"] as! String)
-            if testval != friendFunction1 {
-                // update to the new installation
-                self.updateFriendFunction1(currentlevel: testval!)
+        let tr2 = try? config.sqlRows(thesql, params: ["function_\(tbl.table())_1"])
+        if tr2.isNotNil, let tr = tr2 {
+            if tr.count > 0 {
+                let testval = Double(tr[0].data["val"] as! String)
+                if testval != friendFunction1 {
+                    // update to the new installation
+                    self.updateFriendFunction1(currentlevel: testval!)
+                }
+            } else {
+            
+                do {
+                    try tbl.sqlRows(self.createFriendFunction1(), params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
+
+                do {
+                    // new one - set the default 1.00
+                    thesql = "INSERT INTO config(name,val) VALUES('function_\(tbl.table())_1','1.00')"
+                    try config.sqlRows(thesql, params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
             }
-        } else {
-            
-            try! tbl.sqlRows(self.createFriendFunction1(), params: [])
-            
-            // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('function_\(tbl.table())_1','1.00')"
-            try! config.sqlRows(thesql, params: [])
-            
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
-        tr = try! config.sqlRows(thesql, params: ["function_\(tbl.table())_2"])
-        if tr.count > 0 {
-            let testval = Double(tr[0].data["val"] as! String)
-            if testval != friendFunction2 {
-                // update to the new installation
-                self.updateFriendFunction2(currentlevel: testval!)
+        let tr3 = try? config.sqlRows(thesql, params: ["function_\(tbl.table())_2"])
+        if tr3.isNotNil, let tr = tr3 {
+            if tr.count > 0 {
+                let testval = Double(tr[0].data["val"] as! String)
+                if testval != friendFunction2 {
+                    // update to the new installation
+                    self.updateFriendFunction2(currentlevel: testval!)
+                }
+            } else {
+                do {
+                    try tbl.sqlRows(self.createFriendFunction2(), params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
+
+                do {
+                    // new one - set the default 1.00
+                    thesql = "INSERT INTO config(name,val) VALUES('function_\(tbl.table())_2','1.00')"
+                    try config.sqlRows(thesql, params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
             }
-        } else {
-            
-            try! tbl.sqlRows(self.createFriendFunction2(), params: [])
-            
-            // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('function_\(tbl.table())_2','1.00')"
-            try! config.sqlRows(thesql, params: [])
-            
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
-        tr = try! config.sqlRows(thesql, params: ["function_\(tbl.table())_3"])
-        if tr.count > 0 {
-            let testval = Double(tr[0].data["val"] as! String)
-            if testval != friendFunction3 {
-                // update to the new installation
-                self.updateFriendFunction3(currentlevel: testval!)
+        let tr4 = try? config.sqlRows(thesql, params: ["function_\(tbl.table())_3"])
+        if tr4.isNotNil, let tr = tr4 {
+            if tr.count > 0 {
+                let testval = Double(tr[0].data["val"] as! String)
+                if testval != friendFunction3 {
+                    // update to the new installation
+                    self.updateFriendFunction3(currentlevel: testval!)
+                }
+            } else {
+                
+                do {
+                    try tbl.sqlRows(self.createFriendFunction3(), params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
+
+                do {
+                    // new one - set the default 1.00
+                    thesql = "INSERT INTO config(name,val) VALUES('function_\(tbl.table())_3','1.00')"
+                    try config.sqlRows(thesql, params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
             }
-        } else {
-            
-            try! tbl.sqlRows(self.createFriendFunction3(), params: [])
-            
-            // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('function_\(tbl.table())_3','1.00')"
-            try! config.sqlRows(thesql, params: [])
-            
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
-        tr = try! config.sqlRows(thesql, params: ["function_\(tbl.table())_4"])
-        if tr.count > 0 {
-            let testval = Double(tr[0].data["val"] as! String)
-            if testval != friendFunction4 {
-                // update to the new installation
-                self.updateFriendFunction4(currentlevel: testval!)
+        let tr5 = try? config.sqlRows(thesql, params: ["function_\(tbl.table())_4"])
+        if tr5.isNotNil, let tr = tr5 {
+            if tr.count > 0 {
+                let testval = Double(tr[0].data["val"] as! String)
+                if testval != friendFunction4 {
+                    // update to the new installation
+                    self.updateFriendFunction4(currentlevel: testval!)
+                }
+            } else {
+            
+                do {
+                    try tbl.sqlRows(self.createFriendFunction4(), params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
+
+                do {
+                    // new one - set the default 1.00
+                    thesql = "INSERT INTO config(name,val) VALUES('function_\(tbl.table())_4','1.00')"
+                    try config.sqlRows(thesql, params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
             }
-        } else {
-            
-            try! tbl.sqlRows(self.createFriendFunction4(), params: [])
-            
-            // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('function_\(tbl.table())_4','1.00')"
-            try! config.sqlRows(thesql, params: [])
-            
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
-        tr = try! config.sqlRows(thesql, params: ["function_\(tbl.table())_5"])
-        if tr.count > 0 {
-            let testval = Double(tr[0].data["val"] as! String)
-            if testval != friendFunction5 {
-                // update to the new installation
-                self.updateFriendFunction5(currentlevel: testval!)
+        let tr6 = try? config.sqlRows(thesql, params: ["function_\(tbl.table())_5"])
+        if tr6.isNotNil, let tr = tr6 {
+            if tr.count > 0 {
+                let testval = Double(tr[0].data["val"] as! String)
+                if testval != friendFunction5 {
+                    // update to the new installation
+                    self.updateFriendFunction5(currentlevel: testval!)
+                }
+            } else {
+            
+                do {
+                    try tbl.sqlRows(self.createFriendFunction5(), params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
+                
+                do {
+                    // new one - set the default 1.00
+                    thesql = "INSERT INTO config(name,val) VALUES('function_\(tbl.table())_5','1.00')"
+                    try config.sqlRows(thesql, params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
             }
-        } else {
-            
-            try! tbl.sqlRows(self.createFriendFunction5(), params: [])
-            
-            // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('function_\(tbl.table())_5','1.00')"
-            try! config.sqlRows(thesql, params: [])
-            
         }
         
         thesql = "SELECT val, name FROM config WHERE name = $1"
-        tr = try! config.sqlRows(thesql, params: ["function_\(tbl.table())_6"])
-        if tr.count > 0 {
-            let testval = Double(tr[0].data["val"] as! String)
-            if testval != friendFunction6 {
-                // update to the new installation
-                self.updateFriendFunction6(currentlevel: testval!)
+        let tr7 = try? config.sqlRows(thesql, params: ["function_\(tbl.table())_6"])
+        if tr7.isNotNil, let tr = tr7 {
+            if tr.count > 0 {
+                let testval = Double(tr[0].data["val"] as! String)
+                if testval != friendFunction6 {
+                    // update to the new installation
+                    self.updateFriendFunction6(currentlevel: testval!)
+                }
+            } else {
+            
+                do {
+                    try tbl.sqlRows(self.createFriendFunction6(), params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
+
+                do {
+                    // new one - set the default 1.00
+                    thesql = "INSERT INTO config(name,val) VALUES('function_\(tbl.table())_6','1.00')"
+                    try config.sqlRows(thesql, params: [])
+                } catch {
+                    print("Error in FriendsTableViews.create(): \(error)")
+                }
             }
-        } else {
-            
-            try! tbl.sqlRows(self.createFriendFunction6(), params: [])
-            
-            // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('function_\(tbl.table())_6','1.00')"
-            try! config.sqlRows(thesql, params: [])
-            
         }
 
     }

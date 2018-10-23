@@ -114,7 +114,7 @@ public class SuttonFunctions {
                 header.description = theDescription
                 header.record_start_date = from
                 header.record_end_date = to
-                header.status = CCXServiceClass.sharedInstance.getNow()
+                header.status = CCXServiceClass.getNow()
                 header.statusby = user_id ?? CCXDefaultUserValues.user_server
                 header.file_name = fileName
                 
@@ -728,7 +728,7 @@ public class SuttonFunctions {
         var finalFileDate:Date? = nil
         if fileDate.isNil {
             // set the date to today - the time does not matter
-            let dnow = Double(CCXServiceClass.sharedInstance.getNow())
+            let dnow = Double(CCXServiceClass.getNow())
             finalFileDate = Date(timeIntervalSince1970: dnow)
         } else {
             finalFileDate = fileDate!
@@ -911,7 +911,7 @@ public class SuttonFunctions {
 
         
         var files:[Int:String] = [:]
-        let date_count = Date(timeIntervalSince1970: Double(CCXServiceClass.sharedInstance.getNow()))
+        let date_count = Date(timeIntervalSince1970: Double(CCXServiceClass.getNow()))
         
         
         let header = self.createFileHeader(nil, date_count, false, forSchema: schema)

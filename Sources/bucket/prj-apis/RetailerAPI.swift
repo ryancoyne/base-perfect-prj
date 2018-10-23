@@ -589,7 +589,7 @@ struct RetailerAPI {
                         }
 
                         let transaction = CodeTransaction()
-                        transaction.created = CCXServiceClass.sharedInstance.getNow()
+                        transaction.created = CCXServiceClass.getNow()
                         transaction.amount = json?["amount"].doubleValue
                         transaction.amount_available = json?["amount"].doubleValue
                         transaction.total_amount = json?["totalTransactionAmount"].doubleValue
@@ -700,7 +700,7 @@ struct RetailerAPI {
                         return }
                     
                     // lets delete the code
-                    thecode.deleted = CCXServiceClass.sharedInstance.getNow()
+                    thecode.deleted = CCXServiceClass.getNow()
                     
                     let terminal = request.terminal!
                     thecode.deleted_reason = "Terminal \(terminal.serial_number!) deleted this transaction at \(thecode.deleted!.dateString) GMT"

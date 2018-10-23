@@ -24,7 +24,7 @@ final class SupportFunctions {
         var checkTime = 0
         
         if formatTime.isNil {
-            checkTime = CCXServiceClass.sharedInstance.getNow()
+            checkTime = CCXServiceClass.getNow()
         } else {
             checkTime = formatTime!
         }
@@ -157,7 +157,7 @@ final class SupportFunctions {
                 // it does not exist!
                 
                 bh.batch_identifier = tryme
-                bh.status = CCXServiceClass.sharedInstance.getNow()
+                bh.status = CCXServiceClass.getNow()
                 bh.statusby = current_userId
                 bh.current_status = BatchHeaderStatus.working_on_it
                 

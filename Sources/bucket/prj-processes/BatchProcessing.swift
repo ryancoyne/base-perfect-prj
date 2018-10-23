@@ -149,7 +149,7 @@ public class BatchProcessing {
                 let bh = BatchHeader()
                 bh.to(r)
                 
-                var filename = "sutton_no_name.\(CCXServiceClass.sharedInstance.getNow())"
+                var filename = "sutton_no_name.\(CCXServiceClass.getNow())"
                 if bh.file_name.isNotNil { filename = bh.file_name! }
                 
                 // process the detail records

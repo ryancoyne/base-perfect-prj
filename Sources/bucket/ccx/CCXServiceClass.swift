@@ -197,7 +197,7 @@ final class CCXServiceClass {
         
     }
 
-    public func getNow() -> Int {
+    static func getNow() -> Int {
         return Int(utc().epoch())
         // return Int(Date().timeIntervalSince1970)
     }

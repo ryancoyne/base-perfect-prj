@@ -24,25 +24,40 @@ final class BadgeTable {
         // make sure the table level is correct
         let config = Config()
         var thesql = "SELECT val, name FROM config WHERE name = $1"
-        var tr = try! config.sqlRows(thesql, params: ["table_\(tbl.table())"])
-        if tr.count > 0 {
-            let testval = Double(tr[0].data["val"] as! String)
-            if testval != tablelevel {
-                // update to the new installation
-                self.update(currentlevel: testval!)
-            }
-        } else {
+        let tr1 = try? config.sqlRows(thesql, params: ["table_\(tbl.table())"])
+        if tr1.isNotNil, let tr = tr1 {
+            if tr.count > 0 {
+                let testval = Double(tr[0].data["val"] as! String)
+                if testval != tablelevel {
+                    // update to the new installation
+                    self.update(currentlevel: testval!)
+                }
+            } else {
 
-            let sequencesql = CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table())
+                let sequencesql = CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table())
+
+                do {
+                    // create the sequence
+                    try tbl.sqlRows(sequencesql, params: [])
+                } catch {
+                    print("Error in BadgeTable.create(): \(error)")
+                }
             
-            // create the sequence
-            let _ = try! tbl.sqlRows(sequencesql, params: [])
-            
-            let _ = try! tbl.sqlRows(self.table(), params: [])
-            
-            // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('table_\(tbl.table())','1.00')"
-            let _ = try! config.sqlRows(thesql, params: [])
+                do {
+
+                    try tbl.sqlRows(self.table(), params: [])
+                } catch {
+                    print("Error in BadgeTable.create(): \(error)")
+                }
+
+                // new one - set the default 1.00
+                thesql = "INSERT INTO config(name,val) VALUES('table_\(tbl.table())','1.00')"
+                do {
+                    let _ = try config.sqlRows(thesql, params: [])
+                } catch {
+                    print("Error in BadgeTable.create(): \(error)")
+                }
+            }
         }
     }
 

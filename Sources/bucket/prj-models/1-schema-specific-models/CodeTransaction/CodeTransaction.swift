@@ -641,7 +641,7 @@ public class CodeTransaction: PostgresStORM {
         cth.deletedby   = self.deletedby
 
         // add the archive audit info
-        cth.archived = CCXServiceClass.sharedInstance.getNow()
+        cth.archived = CCXServiceClass.getNow()
         if archiveUserId.isNil {
             cth.archivedby = CCXDefaultUserValues.user_server
         } else {
@@ -740,7 +740,7 @@ public class CodeTransaction: PostgresStORM {
             let total_trans_dbl = Double(round(Double(total_trans) * 100) / 100)
             
             let transaction = CodeTransaction()
-            transaction.created = CCXServiceClass.sharedInstance.getNow() + increment
+            transaction.created = CCXServiceClass.getNow() + increment
             transaction.amount = bucket_amount
             transaction.amount_available = bucket_amount
             transaction.total_amount = (1 - bucket_amount) + total_trans_dbl + 1
