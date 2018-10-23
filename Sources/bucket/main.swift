@@ -123,6 +123,8 @@ if let logfile = EnvironmentVariables.sharedInstance.filesDirectoryLogs {
     }
 }
 
+print("main.swift: Setting up logging")
+
 // setup the logging
 RequestLogFile.location = logfilelocation + "/" + requestFileName
 LogFile.location        = logfilelocation + "/" + logFileName
@@ -160,6 +162,8 @@ if CCXServiceClass.doesDirectoryExist(Dir("ccx/installations"), create: false) {
 
 // CREATE DATABASE dbname OWNER dbuser
 
+print("main.swift: Setting up APNS")
+
 if notesettings.IOS_APPID != nil {
     NotificationPusher.addConfigurationAPNS(
         name: notesettings.IOS_APPID!,
@@ -169,21 +173,13 @@ if notesettings.IOS_APPID != nil {
         privateKeyPath: notesettings.IOS_APNS_PRIVATE_KEY_FILEPATH!)
 }
 
+print("main.swift: Setting up postgres")
+
 PostgresConnector.port     = EnvironmentVariables.sharedInstance.DB_PORT!
 PostgresConnector.host     = EnvironmentVariables.sharedInstance.DB_HOSTNAME!
 PostgresConnector.database = EnvironmentVariables.sharedInstance.DB_DATABASE!
 PostgresConnector.username = EnvironmentVariables.sharedInstance.DB_USERNAME!
 PostgresConnector.password = EnvironmentVariables.sharedInstance.DB_PASSWORD!
-
-// FROM: Sept 26, 12AM........ TO Sept 26, 11:59PM
-//do {
-//    let numberOfBatches = try SuttonFunctions.batch(in: .all(.oneFile(to: 1538006399,from: 1537920000, schema: "us", isRepeat: false, description: "The Description for this batch."), user_id: nil))
-//    print(numberOfBatches)
-//} catch {
-//    print(error)
-//}
-//
-//BatchProcessing().processSutton()
 
 if EnvironmentVariables.sharedInstance.URL_PORT != 80 || EnvironmentVariables.sharedInstance.URL_PORT != 443 {
     // non standard port
@@ -201,27 +197,6 @@ if EnvironmentVariables.sharedInstance.URL_PORT != 80 || EnvironmentVariables.sh
     burl.append(EnvironmentVariables.sharedInstance.URL_DOMAIN!)
     AuthenticationVariables.baseURL = burl
 }
-
-//var baseApiURL = ""
-
-//if EnvironmentVariables.sharedInstance.API_URL_PORT != 80 || EnvironmentVariables.sharedInstance.API_URL_PORT != 443 {
-//
-//    var burl = EnvironmentVariables.sharedInstance.API_URL_PROTOCOL!
-//    burl.append("://")
-//    burl.append(EnvironmentVariables.sharedInstance.API_DOMAIN!)
-//    burl.append(":")
-//    burl.append("\(EnvironmentVariables.sharedInstance.API_URL_PORT!)")
-//    burl.append("/")
-//    baseApiURL                         = burl
-//
-//} else {
-//    var burl = EnvironmentVariables.sharedInstance.API_URL_PROTOCOL!
-//    burl.append("://")
-//    burl.append(EnvironmentVariables.sharedInstance.API_DOMAIN!)
-//    burl.append("/")
-//    baseApiURL                         = burl
-//
-//}
 
 //MARK: EMAIL CONFIGURATION
 if EnvironmentVariables.sharedInstance.EMAIL_SERVER != nil {
@@ -265,23 +240,51 @@ PostgresSessionConnector.table = "sessions"
 
 let sessionDriver = SessionPostgresDriver()
 
+print("main.swift: Running Config.runSetup()")
+
 Config.runSetup()
+
+print("main.swift: Complete Config.runSetup()")
 
 // =======================================================================
 // Defaults
 // =======================================================================
-var configTitle = CCXServiceClass.sharedInstance.displayTitle
-var configSubTitle = CCXServiceClass.sharedInstance.displaySubTitle
-var configLogo = CCXServiceClass.sharedInstance.displayLogo
-var configLogoSrcSet = CCXServiceClass.sharedInstance.displayLogoSrcSet
+print("main.swift: Creating displayTitle")
+var configTitle = Config.getVal("title", "")
+//var configTitle = CCXServiceClass.sharedInstance.displayTitle
+print("main.swift: Completed displayTitle")
 
-let systemInit = CCXServiceClass.sharedInstance.systemInit
+print("main.swift: Creating displaySubTitle")
+var configSubTitle = Config.getVal("subtitle","")
+print("main.swift: Completed displaySubTitle")
+
+print("main.swift: Creating displayLogo")
+var configLogo = Config.getVal("logo","/assets/images/no-logo.png")
+print("main.swift: Completed displayLogo")
+
+print("main.swift: Creating displayLogoSrcSet")
+var configLogoSrcSet = Config.getVal("logosrcset","/assets/images/no-logo.png 1x, /assets/images/no-logo.svg 2x")
+print("main.swift: Completed displayLogoSrcSet")
+
+print("main.swift: Creating sysinit")
+let si = Config.getVal("sysinit", "0")
+let systemInit = si.toBool() ?? false
+print("main.swift: Complete sysinit")
 
 // Make sure the tables exist
+
+print("main.swift: Creating CCX Tables")
+
 CCXDBTables.sharedInstance.createTables()
 
+print("main.swift: Complete CCX Tables")
+
 // project specific tables
+print("main.swift: Creating Project Tables")
+
 PRJDBTables.sharedInstance.createTables()
+
+print("main.swift: Completed Project Tables")
 
 // Add the routes to the server.
 var routes: [[String: Any]] = [[String: Any]]()
@@ -335,42 +338,6 @@ func filters() -> [[String: Any]] {
     
     return filters
 }
-
-//MARK: -
-//MARK: External API Call configuration - this is where you set the service_id to process the correct service.
-//if let servicelist = EnvironmentVariables.sharedInstance.ConnectionServices {
-//    for service in servicelist {
-//        
-//        if let srv_id = service.service_id {
-//            switch srv_id {
-//            case 1:
-//                
-//                // we want to connect even if we are not using it right away
-//                StagesConnecter.sharedInstance.services = service
-//                StagesConnecter.sharedInstance.login()
-//
-//                // check to see if you should run the entire process on startup
-//                if let chk = EnvironmentVariables.sharedInstance.CheckOnStart_Server1, chk {
-//                
-//                    // GET USERS and associate
-//                    ExternalServicesConnecter.sharedInstance.server1SyncUsers()
-//                }
-//                
-//            case 2:
-//                if let chk = EnvironmentVariables.sharedInstance.CheckOnStart_Server2, chk {
-//
-//                    // MINDBODY CONNECTOR
-//                    ExternalServicesConnecter.sharedInstance.server2SyncUsers()
-//
-//                }
-//
-//            default:
-//                // not really doing anything here as this should not occur
-//                print("This should not occur, but it did.  service_id: \(srv_id)")
-//            }
-//        }
-//    }
-//}
 
 //MARK:-
 //MARK: Server configuration

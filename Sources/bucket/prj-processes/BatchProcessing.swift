@@ -190,7 +190,7 @@ public class BatchProcessing {
             // make sure the file is there
             #if os(Linux)
                 filepath.append(TransferMount.mainMountPointToSend.path)
-                    filepath.append(filename)
+                filepath.append(filename)
             #else
                 filepath.append(TransferMount.mainMountPointToSendOSX.path)
                 filepath.append(filename)
