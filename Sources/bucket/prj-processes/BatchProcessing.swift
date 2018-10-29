@@ -231,7 +231,7 @@ public class BatchProcessing {
             }
             
             // now close the file
-            _ = try? detail_file.close()
+            detail_file.close()
         }
         
     }
