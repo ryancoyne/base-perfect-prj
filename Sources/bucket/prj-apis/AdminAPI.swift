@@ -25,7 +25,7 @@ struct AdminAPI {
         static var routes : [[String:Any]] {
             return [
 //                ["method":"post",    "uri":"/api/v1/admin/userStats", "handler":userStats],
-                ["method":"post",    "uri":"/api/v1/admin/batch", "handler":processBatch],
+                ["method":"post",    "uri":"/api/v1/admin/suttonBatchAll", "handler":processSuttonBatchAll],
             ]
         }
         
@@ -67,7 +67,7 @@ struct AdminAPI {
         }
         
         //MARK: - User Stats Function
-        public static func processBatch(_ data: [String:Any]) throws -> RequestHandler {
+        public static func processSuttonBatchAll(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
                 
@@ -76,6 +76,10 @@ struct AdminAPI {
                 
 //                guard Account.adminBouce(request, response) else { response.accountPermissionsBounce; return  }
                 
+                // breate the batch
+                SuttonFunctions.batchAll()
+                
+                // process the newly created batch
                 let bp = BatchProcessing()
                 bp.processSutton()
                 

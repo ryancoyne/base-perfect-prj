@@ -18,9 +18,12 @@ struct TransferMount {
     static let mainMountPointTmpOSX    = Dir("transfer/tmp")
     static let mainMountPointToSendOSX = Dir("transfer/tosend")
     static let mainMountLockFileOSX    = File("\(TransferMount.mainMountPointOSX.path).lock")
-    static let ubuntuMount  = "/bin/mount"
-    static let ubuntuUMount = "/bin/umount"
-    static let ubuntuSudo   = "/usr/bin/sudo"
+//    static let ubuntuMount  = "/bin/mount"
+//    static let ubuntuUMount = "/bin/umount"
+//    static let ubuntuSudo   = "/usr/bin/sudo"
+    static let ubuntuMount  = "transfer_mount.sh"
+    static let ubuntuUMount = "transfer_umount.sh"
+
 }
 
 public class BatchProcessing {
@@ -236,9 +239,10 @@ public class BatchProcessing {
         
             print("Mounting the main directory \(TransferMount.mainMountPoint.name)")
         
-            task.launchPath = TransferMount.ubuntuSudo
-            task.arguments = [TransferMount.ubuntuMount,"\(TransferMount.mainMountPoint.name)"]
-        
+//            task.launchPath = TransferMount.ubuntuSudo
+//            task.arguments = [TransferMount.ubuntuMount,"\(TransferMount.mainMountPoint.name)"]
+            task.launchPath = TransferMount.ubuntuMount
+
             let pipe = Pipe()
             task.standardOutput = pipe
         
@@ -281,9 +285,11 @@ public class BatchProcessing {
         
             print("Unmounting the main directory \(TransferMount.mainMountPoint.name)")
         
-            task.launchPath = TransferMount.ubuntuSudo
-            task.arguments = [TransferMount.ubuntuSudo,"\(TransferMount.mainMountPoint.name)"]
-        
+//            task.launchPath = TransferMount.ubuntuSudo
+//            task.arguments = [TransferMount.ubuntuSudo,"\(TransferMount.mainMountPoint.name)"]
+
+            task.launchPath = TransferMount.ubuntuUMount
+
             let pipe = Pipe()
             task.standardOutput = pipe
         

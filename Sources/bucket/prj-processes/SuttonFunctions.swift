@@ -60,6 +60,59 @@ public class SuttonFunctions {
         static let workFileDirectoryOSX = Dir("transfer/tmp")
     }
     
+    static func batchAll() {
+        
+        var date_to_start = 0
+        var date_to_end   = 0
+        
+        let yest = SupportFunctions.yesterday(CCXServiceClass.getNow())
+        
+        // when was the last one run?
+        var sql = "SELECT record_end_date FROM us.batch_header ORDER BY record_end_date DESC LIMIT 1"
+        let bh = BatchHeader()
+        let bh_r = try? bh.sqlRows(sql, params: [])
+        if bh_r!.count == 0 {
+            
+            sql = "SELECT * FROM us.us_account_code_detail ORDER BY created ASC LIMIT 1"
+            let uacd = try? bh.sqlRows(sql, params: [])
+            
+            var doit = SupportFunctions.yesterday(CCXServiceClass.getNow())
+            if uacd!.count > 0 {
+                let uacd_d = USAccountCodeDetail()
+                uacd_d.to(uacd!.first!)
+                doit = SupportFunctions.yesterday(uacd_d.created!)
+            }
+            
+            // there were no records
+            date_to_start = doit.start
+            date_to_end   = doit.end
+        } else {
+            
+            let bhr = BatchHeader()
+            bhr.to(bh_r!.first!)
+            
+            // the next day - remmeber - all info is not there, just the record_end_date (see the SQL statement)
+            date_to_start = bhr.record_end_date! + 1
+            date_to_end   = bhr.record_end_date! + 86400
+        }
+        
+        while date_to_end <= yest.end {
+
+            do {
+                let numberOfBatches = try SuttonFunctions.batch(in: .all(.oneFile(to: date_to_end,from: date_to_start, schema: "us", isRepeat: false, description: "Batch from \(date_to_start) to \(date_to_end) epoch."), user_id: nil))
+                print(numberOfBatches)
+            } catch {
+                print(error)
+            }
+            
+            // increment the next week
+            date_to_start += 86400
+            date_to_end   += 86400
+
+        }
+        
+    }
+    
     @discardableResult
     static func batch(in: Batch) throws -> BatchResult {
         

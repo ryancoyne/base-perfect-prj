@@ -194,7 +194,8 @@ final class SupportFunctions {
         
         let day_end = (epoch - daysec_calc) - 1
         
-        var day_start = (day_end - now.dayInSeconds)
+        // add the one to make it midnight.  If we do not add the 1 the start is 11:59:59 the day before (24 hours earlier)
+        var day_start = ((day_end - now.dayInSeconds) + 1)
         if days.isNotNil, days! > 1 {
             day_start = day_start - (days! * 86400)
         }
