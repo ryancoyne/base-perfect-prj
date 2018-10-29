@@ -44,6 +44,9 @@ public class BatchProcessing {
         var std = 1
         if days.isNotNil, days! > 1 { std = days! }
         
+        // mount the transfer directories
+        self.mountFileDirectory()
+        
         if start.isNotNil, start! > 0 {
             let timerange = SupportFunctions.yesterday(stt, std)
             // we now have the timerange for the sutton file creation
@@ -52,7 +55,10 @@ public class BatchProcessing {
             // process all records
             self.processBatch("US", "sutton_all", user_id)
         }
-        
+
+        // done: umount the transfer directories
+        self.umountFileDirectory()
+
     }
     
     private func processBatch(_ schemain:String,_ batch_type:String,_ user_id:String, _ start:Int? = 0, _ end:Int? = 0) {
@@ -106,7 +112,7 @@ public class BatchProcessing {
         sel_h.append("ORDER BY id ASC; ")
         
         var locked: File
-        self.mountFileDirectory()
+//        self.mountFileDirectory()
 
         // lets loop thru and process the records
         let bch_h = BatchHeader()
