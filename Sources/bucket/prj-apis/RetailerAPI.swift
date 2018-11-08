@@ -769,6 +769,16 @@ struct RetailerAPI {
                 let cde = try? thecode.sqlRows(sql, params: [])
                 if cde.isNotNil, let c = cde!.first {
                     thecode.to(c)
+                } else {
+                    // check for the already redeemed
+                    let sqld = "SELECT * FROM \(schema).code_transaction_history WHERE customer_code = '\(code)' "
+                    let cded = try? thecode.sqlRows(sqld, params: [])
+                    if cded.isNotNil, cded!.count > 0 {
+                        // it was already redeemed - we CANNOT delete!
+                        _ = try? response.setBody(json: ["errorCode":"CodeRedeemed","message":"The code was redeemed already.  Please Contact Bucket Support."])
+                        response.completed(status: .custom(code: 452, message: "Code Already Redeemed"))
+                        return
+                    }
                 }
 
                 // We should also check and make sure the retailer is deleting their own transaction:
