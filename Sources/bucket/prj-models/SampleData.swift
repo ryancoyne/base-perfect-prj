@@ -25,7 +25,7 @@ final class SampleData {
     func addCashoutSource() {
         let tbl = CashoutSource()
 
-        let created_time = CCXServiceClass.sharedInstance.getNow()
+        let created_time = CCXServiceClass.getNow()
 
         var sqlstatement = "INSERT INTO us.\(tbl.table()) "
         
@@ -45,7 +45,7 @@ final class SampleData {
     func addUserData() {
         let tbl = Account()
         
-        let createdtime = CCXServiceClass.sharedInstance.getNow()
+        let createdtime = CCXServiceClass.getNow()
         
         var checkuser = "SELECT id FROM public.account WHERE id = 'AUTO_CREATED_USER'; "
         var tr = try? tbl.sqlRows(checkuser, params: [])
@@ -101,7 +101,7 @@ final class SampleData {
 
         let tbl = Retailer()
         
-        let created_time = CCXServiceClass.sharedInstance.getNow()
+        let created_time = CCXServiceClass.getNow()
         
         var sqlstatement = "INSERT INTO us.\(tbl.table()) "
         
@@ -247,7 +247,7 @@ final class SampleData {
         
         let tbl = Account()
         
-        let created_time = CCXServiceClass.sharedInstance.getNow()
+        let created_time = CCXServiceClass.getNow()
 
         var userid = UUID().uuidString
         var checkuser = "INSERT INTO public.account "

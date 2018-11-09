@@ -18,15 +18,16 @@ final class CCXServiceClass {
         displayLogo = Config.getVal("logo","/assets/images/no-logo.png")
         displayLogoSrcSet = Config.getVal("logosrcset","/assets/images/no-logo.png 1x, /assets/images/no-logo.svg 2x")
         let si = Config.getVal("sysinit", "0")
-        systemInit = si.toBool()!
-        
+        systemInit = si.toBool() ?? false
+        print("CCXServiceClass.sharedInstance.swift: Complete init")
+
     }
     
-    let displayTitle: String
-    let displaySubTitle: String
-    let displayLogo: String
-    let displayLogoSrcSet: String
-    let systemInit: Bool
+    var displayTitle: String = ""
+    var displaySubTitle: String = ""
+    var displayLogo: String = ""
+    var displayLogoSrcSet: String = ""
+    var systemInit: Bool = false
     
     static let sharedInstance = CCXServiceClass()
     
@@ -46,6 +47,18 @@ final class CCXServiceClass {
 //        #endif
 //
 //    }()
+    
+    func getRandomNum(_ min: Int, _ max: Int) -> Int {
+        // make sure the following is in the main.sqift to seed the random number in Lunix
+        // #if os(Linux)
+        //   srandom(UInt32(time(nil)))
+        // #endif
+        #if os(Linux)
+          return Int(random() % max) + min
+        #else
+          return Int(arc4random_uniform(UInt32(max)) + UInt32(min))
+        #endif
+    }
     
     public let filesDirectoryProfilePics: String = {
         
@@ -184,7 +197,7 @@ final class CCXServiceClass {
         
     }
 
-    public func getNow() -> Int {
+    static func getNow() -> Int {
         return Int(utc().epoch())
         // return Int(Date().timeIntervalSince1970)
     }

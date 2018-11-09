@@ -369,7 +369,7 @@ class Friends: PostgresStORM {
                     // I requested it - don't show it....
                     return FriendStatusReturn.friendsPending
                 } else {
-                    frnd.accepted = CCXServiceClass.sharedInstance.getNow()
+                    frnd.accepted = CCXServiceClass.getNow()
                     // ok - if we are here the record is not mine
                     do {
                         try frnd.saveWithCustomType()
@@ -386,7 +386,7 @@ class Friends: PostgresStORM {
 
         
         // they passed all of the points, then create the new found friendship
-        let now = CCXServiceClass.sharedInstance.getNow()
+        let now = CCXServiceClass.getNow()
         friend.created = now
         friend.invited = now
         friend.createdby = session.userid
@@ -405,7 +405,7 @@ class Friends: PostgresStORM {
 //        var failed = false
 //        for id in ids {
 //            let friend = Friends()
-//            let now = CCXServiceClass.sharedInstance.getNow()
+//            let now = CCXServiceClass.getNow()
 //            friend.created = now
 //            friend.invited = now
 //            friend.createdby = session.userid
@@ -447,7 +447,7 @@ class Friends: PostgresStORM {
                 // this is a friend who was rejected
                 if let id = result!.first?.data["id"].intValue {
                     friend.id = id
-                    friend.rejected = CCXServiceClass.sharedInstance.getNow()
+                    friend.rejected = CCXServiceClass.getNow()
                     if let yup = try? friend.saveWithCustomType(schemaIn: "public",session.userid), !yup.isEmpty {
                         return true
                     } else {

@@ -24,7 +24,7 @@ final class SupportFunctions {
         var checkTime = 0
         
         if formatTime.isNil {
-            checkTime = CCXServiceClass.sharedInstance.getNow()
+            checkTime = CCXServiceClass.getNow()
         } else {
             checkTime = formatTime!
         }
@@ -157,7 +157,7 @@ final class SupportFunctions {
                 // it does not exist!
                 
                 bh.batch_identifier = tryme
-                bh.status = CCXServiceClass.sharedInstance.getNow()
+                bh.status = CCXServiceClass.getNow()
                 bh.statusby = current_userId
                 bh.current_status = BatchHeaderStatus.working_on_it
                 
@@ -179,7 +179,7 @@ final class SupportFunctions {
         return (retInt, retString)
     }
     
-    static func yesterday(_ epoch:Int) -> (start:Int, end:Int) {
+    static func yesterday(_ epoch:Int,_ days:Int? = 1) -> (start:Int, end:Int) {
         
         let timeZone = TimeZone(secondsFromGMT: 0)!
         let locale = Locale(identifier: "en_US_POSIX")
@@ -193,8 +193,13 @@ final class SupportFunctions {
         let daysec_calc = (hour*60*60) + (min*60) + sec
         
         let day_end = (epoch - daysec_calc) - 1
-        let day_start = (day_end - now.dayInSeconds)
         
+        // add the one to make it midnight.  If we do not add the 1 the start is 11:59:59 the day before (24 hours earlier)
+        var day_start = ((day_end - now.dayInSeconds) + 1)
+        if days.isNotNil, days! > 1 {
+            day_start = day_start - (days! * 86400)
+        }
+
         return (day_start,day_end)
         
     }

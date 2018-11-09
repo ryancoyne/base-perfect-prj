@@ -12,6 +12,7 @@ public class Config: PostgresStORM {
     public var val  = ""
     
     public static func getVal(_ key: String, _ def: String) -> String {
+        print("CCXConfig.swift: Config \(key)")
         let this = Config()
         do {
             try this.get(key)

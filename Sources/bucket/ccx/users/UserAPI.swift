@@ -445,10 +445,10 @@ struct UserAPI {
                             user.remoteid = json["id"].stringValue!
                             
                             if let _ = json["created"] {
-                                json["modified"] = CCXServiceClass.sharedInstance.getNow()
+                                json["modified"] = CCXServiceClass.getNow()
                                 json["modifiedby"] = user.id
                             } else {
-                                json["created"] = CCXServiceClass.sharedInstance.getNow()
+                                json["created"] = CCXServiceClass.getNow()
                                 json["createdby"] = user.id
                             }
                             
@@ -498,7 +498,7 @@ struct UserAPI {
                     }
                     
                     user.detail = json
-                    user.detail["created"] = CCXServiceClass.sharedInstance.getNow()
+                    user.detail["created"] = CCXServiceClass.getNow()
                     user.detail["createdby"] = user.id
                     
                     AuditRecordActions.userAdd(schema: nil,
@@ -563,18 +563,15 @@ struct UserAPI {
                                     request.session?.userid = account.id
                                     
                                     AuditRecordActions.userLogin(schema: nil,
-                                                                 session_id: request.session?.token ?? "NO SESSION TOKEN",
-                                                                 user: account.id,
-                                                                 row_data: nil,
-                                                                 changed_fields: nil,
-                                                                 description: "User login: \(account.source).",
-                                                                 changedby: account.id)
-
-                                    
+                                                            session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                            user: account.id,
+                                                            row_data: nil,
+                                                            changed_fields: nil,
+                                                            description: "User login: \(account.source).",
+                                                            changedby: account.id)
                                     try? response.setBody(json: account.asDictionary)
                                         .setHeader(.contentType, value: "application/json")
                                         .completed(status: .ok)
-                                    
                                 } else {
                                     // Return an error indicating we failed attempting to use oauth.
                                     response.invalidToken
@@ -666,7 +663,7 @@ struct UserAPI {
                         user.detail["appNotifications"] = appNotif
                     }
                     
-                    user.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
+                    user.detail["modified"] = CCXServiceClass.getNow()
                     user.detail["modifiedby"] = user.id
                     
                     AuditRecordActions.userChange(schema: nil,
@@ -678,11 +675,15 @@ struct UserAPI {
                                                   changedby: user.id)
 
                     // no need for the GIS save as the location is not saved nin a geo field (it is in detail)
-                    try! user.save()
+                    do {
+                        try user.save()
                     
-                    try? response.setBody(json: ["result":"success"])
-                        .setHeader(.contentType, value: "application/json")
-                        .completed(status: .ok)
+                        try? response.setBody(json: ["result":"success"])
+                            .setHeader(.contentType, value: "application/json")
+                            .completed(status: .ok)
+                    } catch {
+                        return response.caughtError(error)
+                    }
                     
                 } catch BucketAPIError.unparceableJSON(let attemptedJSON) {
                     return response.invalidRequest(attemptedJSON)
@@ -886,7 +887,7 @@ struct UserAPI {
             }
             c.detail["\(imagetype)_picture"] = picturesource
             changed_fields["\(imagetype)_picture"] = picturesource
-            c.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
+            c.detail["modified"] = CCXServiceClass.getNow()
             
             if newfilenameadjustedimage.count > 0 {
                 // we have the small image!
@@ -1125,9 +1126,9 @@ struct UserAPI {
                             acc.detail["isNew"] = true
                             
                             if let _ = acc.detail["created"] {
-                                acc.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
+                                acc.detail["modified"] = CCXServiceClass.getNow()
                             } else {
-                                acc.detail["created"] = CCXServiceClass.sharedInstance.getNow()
+                                acc.detail["created"] = CCXServiceClass.getNow()
                             }
                             
                             do {
@@ -1225,7 +1226,7 @@ struct UserAPI {
                                 acc.usertype = .standard
                             }
                             //                        acc.usertype = .standard
-                            acc.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
+                            acc.detail["modified"] = CCXServiceClass.getNow()
                             acc.passreset.removeAll()
                             do {
                                 try acc.save()
@@ -1278,7 +1279,7 @@ struct UserAPI {
                 // now lets add a current location record
                 let ul = UserLocation()
                 ul.geopoint = CCXGeographyPoint(latitude: latitude, longitude: longitude)
-                ul.geopointtime = CCXServiceClass.sharedInstance.getNow()
+                ul.geopointtime = CCXServiceClass.getNow()
                 //MARK:-
                 //MARK: CHECK USER ID FOR NEW USERS
                 //MARK:-
@@ -1555,7 +1556,11 @@ extension Account {
                 self.detail.removeValue(forKey: "isNew")
                 dic["detail"].dicValue.removeValue(forKey: "isNew")
                 dic["isNew"] = true
-                try! self.save()
+                do {
+                    try self.save()
+                } catch {
+                    
+                }
             }
         default:
             if self.detail["isNew"].isNotNil, self.detail["isNew"].boolValue == true {

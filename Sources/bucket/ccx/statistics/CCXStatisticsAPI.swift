@@ -21,7 +21,7 @@ struct CCXStatisticsAPI {
         //MARK: Today accounts
         // get the created statistics - since midnight
         var start = CCXServiceClass.sharedInstance.getMidnight()
-        var end = CCXServiceClass.sharedInstance.getNow()
+        var end = CCXServiceClass.getNow()
         var sqlstatement = "SELECT COUNT(id) FROM account WHERE (detail #>> '{created}')::int BETWEEN $1 and $2"
         var rows = try Account().sqlRows(sqlstatement, params: [String(describing: start), String(describing: end)])
         print("\(rows[0].data["count"] as! Int)")

@@ -219,7 +219,7 @@ extension Handlers {
                 
                 if user.id.isEmpty {
                     user.makeID()
-                    user.detail["created"] = CCXServiceClass.sharedInstance.getNow()
+                    user.detail["created"] = CCXServiceClass.getNow()
                     
                     try? user.create()
                     
@@ -227,7 +227,7 @@ extension Handlers {
                     UserAPI.UserSuccessfullyCreated(user)
                     
                 } else {
-                    user.detail["modified"] = CCXServiceClass.sharedInstance.getNow()
+                    user.detail["modified"] = CCXServiceClass.getNow()
                     try? user.save()
                 }
                 

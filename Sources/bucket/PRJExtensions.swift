@@ -15,12 +15,20 @@ extension String {
     /// The count is defaulted to 8.
     static func referenceCode(_ count : Int?=8, forSchema : String) -> String {
         
+        var count_to_use = 0
+        if count.isNotNil {
+            count_to_use = count! - 1
+        } else {
+            count_to_use = 7
+        }
+        
         let isUnusedReferenceCode = false
         while !isUnusedReferenceCode {
             var result = [Character](repeating: "a", count: count!)
             
             for i in 0...count!-1 {
-                let r = Int(arc4random_uniform(s.k))
+//                let r = Int(arc4random_uniform(s.k))
+                let r = CCXServiceClass.sharedInstance.getRandomNum(0, count_to_use)
                 result[i] = s.c[r]
             }
             

@@ -156,7 +156,7 @@ public class AuditFunctions {
                 let usa = USAuditFunctions()
                 usa.customerCodeAuditRecord(ct, 1, 3, user)
                 usa.customerAccountDetailAuditRecord(userId: user,
-                                                     changed: CCXServiceClass.sharedInstance.getNow(),
+                                                     changed: CCXServiceClass.getNow(),
                                                      toValue: 4,
                                                      codeNumber: ct.customer_code!,
                                                      amount: ct.total_amount!,

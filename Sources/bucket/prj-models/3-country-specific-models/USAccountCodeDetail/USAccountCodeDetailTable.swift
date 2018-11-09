@@ -93,7 +93,22 @@ final class USAccountCodeDetailTable {
             thesql = "INSERT INTO config(name,val) VALUES('\(schema).view_\(tbl.table())_deleted_no','1.00')"
             let _ = try! config.sqlRows(thesql, params: [])
         }
-        
+
+        thesql = "SELECT val, name FROM config WHERE name = $1"
+        tr = try! config.sqlRows(thesql, params: ["\(schema).view_\(tbl.table())_processed_no"])
+        if tr.count > 0 {
+            let testval = Double(tr[0].data["val"] as! String)
+            if testval != tablelevel {
+                // update to the new installation
+                self.update(currentlevel: testval!, schema)
+            }
+        } else {
+            let _ = try! tbl.sqlRows(CCXDBTables.sharedInstance.addProcessedViewsNo(tbl.table(), schema), params: [])
+            // new one - set the default 1.00
+            thesql = "INSERT INTO config(name,val) VALUES('\(schema).view_\(tbl.table())_processed_no','1.00')"
+            let _ = try! config.sqlRows(thesql, params: [])
+        }
+
     }
     
     private func update(currentlevel: Double, _ schemaId:String? = "public") {

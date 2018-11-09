@@ -22,14 +22,14 @@ extension NumberFormatter {
         self.maximumIntegerDigits = buffingCharacters
         self.maximumFractionDigits = 0
         self.minimumFractionDigits = 0
-        return self.string(from: value as NSNumber)
+        return self.string(from: NSNumber(value: value))
     }
     func format(_ value : Double, buffingCharacters: Int, decimalLimit: Int) -> String? {
         self.minimumIntegerDigits = buffingCharacters
         self.maximumIntegerDigits = buffingCharacters
         self.minimumFractionDigits = decimalLimit
         self.maximumFractionDigits = decimalLimit
-        return self.string(from: value as NSNumber)
+        return self.string(from: NSNumber(value: value))
     }
 }
 
@@ -52,21 +52,70 @@ public class SuttonFunctions {
     
     struct SuttonDefaults {
         static let schema = "us"
-        static let mainFileDirectory = Dir("/transferfiles")
-        static let usFileDirectory = Dir("/transferfiles/us")
-        static let workFileDirectory = Dir("/transferfiles/tmp")
-        static let workUsFileDirectory = Dir("/transferfiles/tmp/us")
+        static let mainFileDirectory    = Dir("/transfer")
+        static let usFileDirectory      = Dir("/transfer/tosend")
+        static let workFileDirectory    = Dir("/transfer/tmp")
+        static let mainFileDirectoryOSX = Dir("transfer")
+        static let usFileDirectoryOSX   = Dir("transfer/tosend")
+        static let workFileDirectoryOSX = Dir("transfer/tmp")
     }
     
-    func testMountUmount() {
+    static func batchAll() {
         
-        let tester = SuttonFunctions()
-        tester.mountFileDirectory()
-        tester.umountFileDirectory()
+        var date_to_start = 0
+        var date_to_end   = 0
+        
+        let yest = SupportFunctions.yesterday(CCXServiceClass.getNow())
+        
+        // when was the last one run?
+        var sql = "SELECT record_end_date FROM us.batch_header ORDER BY record_end_date DESC LIMIT 1"
+        let bh = BatchHeader()
+        let bh_r = try? bh.sqlRows(sql, params: [])
+        if bh_r!.count == 0 {
+            
+            sql = "SELECT * FROM us.us_account_code_detail ORDER BY created ASC LIMIT 1"
+            let uacd = try? bh.sqlRows(sql, params: [])
+            
+            var doit = SupportFunctions.yesterday(CCXServiceClass.getNow())
+            if uacd!.count > 0 {
+                let uacd_d = USAccountCodeDetail()
+                uacd_d.to(uacd!.first!)
+                doit = SupportFunctions.yesterday(uacd_d.created!)
+            }
+            
+            // there were no records
+            date_to_start = doit.start
+            date_to_end   = doit.end
+        } else {
+            
+            let bhr = BatchHeader()
+            bhr.to(bh_r!.first!)
+            
+            // the next day - remmeber - all info is not there, just the record_end_date (see the SQL statement)
+            date_to_start = bhr.record_end_date! + 1
+            date_to_end   = bhr.record_end_date! + 86400
+        }
+        
+        while date_to_end <= yest.end {
+
+            do {
+                let numberOfBatches = try SuttonFunctions.batch(in: .all(.oneFile(to: date_to_end,from: date_to_start, schema: "us", isRepeat: false, description: "Batch from \(date_to_start) to \(date_to_end) epoch."), user_id: nil))
+                print(numberOfBatches)
+            } catch {
+                print(error)
+            }
+            
+            // increment the next week
+            date_to_start += 86400
+            date_to_end   += 86400
+
+        }
+        
     }
     
     @discardableResult
-    static func batch(_ in: Batch) throws -> BatchResult {
+    static func batch(in: Batch) throws -> BatchResult {
+        let processing_time = Int(Date().timeIntervalSince1970)
         switch `in` {
         case .all(let option, let user_id):
             switch option {
@@ -89,22 +138,29 @@ public class SuttonFunctions {
                 
                 // Before writing anything, lets check if we have records for the following queries:
                 let query = USAccountCodeDetail()
-                var sqlStatement = "SELECT * FROM \(input.schema).us_account_code_detail WHERE created BETWEEN \(input.from) AND \(input.to);"
+                var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail_view_processed_no WHERE created BETWEEN \(from) AND \(to);"
+
                 let accountCodeResults = (try? query.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += accountCodeResults.count
                 
                 let query2 = USAccountCodeStatus()
-                sqlStatement = "SELECT * FROM \(input.schema).us_account_code_status WHERE created BETWEEN \(input.from) AND \(input.to);"
+
+                sqlStatement = "SELECT * FROM \(schema).us_account_code_status_view_processed_no WHERE created BETWEEN \(from) AND \(to);"
+
                 let accountCodeStatusResults = (try? query2.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += accountCodeStatusResults.count
                 
                 let query3 = USBucketAccountDetail()
-                sqlStatement = "SELECT * from \(input.schema).us_bucket_account_detail where created BETWEEN \(input.from) AND \(input.to);"
+
+                sqlStatement = "SELECT * from \(schema).us_bucket_account_detail_view_processed_no where created BETWEEN \(from) AND \(to);"
+
                 let bucketAccountDetailResults = (try? query3.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += bucketAccountDetailResults.count
                 
                 let query4 = USBucketAccountStatus()
-                sqlStatement = "SELECT * from \(input.schema).us_bucket_account_status where created BETWEEN \(input.from) AND \(input.to);"
+
+                sqlStatement = "SELECT * from \(schema).us_bucket_account_status_view_processed_no where created BETWEEN \(from) AND \(to);"
+
                 let bucketAccountStatusResults = (try? query4.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += bucketAccountStatusResults.count
                 
@@ -113,10 +169,12 @@ public class SuttonFunctions {
                 header.country_id = countryId
                 header.batch_type = "sutton_all"
                 header.current_status = BatchHeaderStatus.working_on_it
-                header.description = input.description
-                header.record_start_date = input.from
-                header.record_end_date = input.to
-                header.status = CCXServiceClass.sharedInstance.getNow()
+
+                header.description = theDescription
+                header.record_start_date = from
+                header.record_end_date = to
+                header.status = CCXServiceClass.getNow()
+    
                 header.statusby = user_id ?? CCXDefaultUserValues.user_server
                 header.file_name = fileName
                 
@@ -274,6 +332,15 @@ public class SuttonFunctions {
                         currentDetailRecordsCount = 0
                     
                     }
+                    
+                    // update to processed since we are complete with this row
+                    let upd = USAccountCodeDetail()
+                    upd.to(row)
+                    upd.processed   = processing_time
+                    upd.processedby = CCXDefaultUserValues.user_server
+                    
+                    _ = try? upd.saveWithCustomType(schemaIn: schema)
+                    
                 }
                 
                 // Okay, now the next table:
@@ -379,6 +446,15 @@ public class SuttonFunctions {
                         currentDetailRecordsCount = 0
                         
                     }
+                    
+                    // update to processed since we are complete with this row
+                    let upd = USAccountCodeStatus()
+                    upd.to(row)
+                    upd.processed   = processing_time
+                    upd.processedby = CCXDefaultUserValues.user_server
+                    
+                    _ = try? upd.saveWithCustomType(schemaIn: schema)
+
                 }
                 
                 // Now the third table:
@@ -506,6 +582,14 @@ public class SuttonFunctions {
                         
                     }
                     
+                    // update to processed since we are complete with this row
+                    let upd = USBucketAccountDetail()
+                    upd.to(row)
+                    upd.processed   = processing_time
+                    upd.processedby = CCXDefaultUserValues.user_server
+                    
+                    _ = try? upd.saveWithCustomType(schemaIn: schema)
+
                 }
                 
                 // Now last, but not least:
@@ -611,6 +695,14 @@ public class SuttonFunctions {
                         
                     }
                     
+                    // update to processed since we are complete with this row
+                    let upd = USBucketAccountStatus()
+                    upd.to(row)
+                    upd.processed   = processing_time
+                    upd.processedby = CCXDefaultUserValues.user_server
+                    
+                    _ = try? upd.saveWithCustomType(schemaIn: schema)
+
                 }
                 
                 // Now the file control:
@@ -704,94 +796,17 @@ public class SuttonFunctions {
 //        }
 //
 //    }
-    
-    private func mountFileDirectory() {
-    
-        let task = Process()
         
-        var place = ""
-        
-        #if os(macOS)
-            place = "/sbin/mount"
-        #elseif os(Linux)
-            place = "/bin/mount"
-        #endif
-
-        print("Mounting the main directory \(SuttonDefaults.mainFileDirectory.name)")
-        
-        task.launchPath = "/usr/bin/sudo"
-        task.arguments = [place,"\(SuttonDefaults.mainFileDirectory.name)"]
-        
-        let pipe = Pipe()
-        task.standardOutput = pipe
-
-        task.launch()
-
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
-
-        print("Main directory mount output: \(output!)")
-        
-        print("Complete with the mounting")
-
-    }
-
-    private func umountFileDirectory() {
-        
-        let task = Process()
-        
-        var place = ""
-        
-        #if os(macOS)
-        place = "/sbin/umount"
-        #elseif os(Linux)
-        place = "/bin/umount"
-        #endif
-        
-        print("Unmounting the main directory \(SuttonDefaults.mainFileDirectory.name)")
-        
-        task.launchPath = "/usr/bin/sudo"
-        task.arguments = [place,"\(SuttonDefaults.mainFileDirectory.name)"]
-        
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        
-        task.launch()
-        
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
-        
-        print("Main directory umount output: \(output!)")
-        
-        print("Complete with the mounting")
-
-    }
-
-    private func checkFileDirectory() {
-
-        let main_file_dir = SuttonDefaults.mainFileDirectory
-        if !main_file_dir.exists {
-            let _ = try? main_file_dir.create()
-        }
-
-        if main_file_dir.exists {
-            let us_file_dir = SuttonDefaults.usFileDirectory
-            if !us_file_dir.exists {
-                let _ = try? us_file_dir.create()
-            }
-        }
-        
-    }
-    
     private func createFileHeader(_ fileNumber:Int? = 1, _ fileDate:Date? = nil, _ repeatFile:Bool? = false, forSchema: String) -> (file_name: String, main_file_name:String, batch_number:Int, file_date:Date?, reference_code: String?) {
         
         // make sure the driectory is there
+        
         self.checkFileDirectory()
         
         var finalFileDate:Date? = nil
         if fileDate.isNil {
             // set the date to today - the time does not matter
-            let dnow = Double(CCXServiceClass.sharedInstance.getNow())
+            let dnow = Double(CCXServiceClass.getNow())
             finalFileDate = Date(timeIntervalSince1970: dnow)
         } else {
             finalFileDate = fileDate!
@@ -974,7 +989,7 @@ public class SuttonFunctions {
 
         
         var files:[Int:String] = [:]
-        let date_count = Date(timeIntervalSince1970: Double(CCXServiceClass.sharedInstance.getNow()))
+        let date_count = Date(timeIntervalSince1970: Double(CCXServiceClass.getNow()))
         
         
         let header = self.createFileHeader(nil, date_count, false, forSchema: schema)
@@ -993,31 +1008,34 @@ public class SuttonFunctions {
             print("Sorted: \(key): \(value)")
         }
     }
-
-    private func createBatchHeader(_ batch_number:Int) {
-        
-    }
-
-    private func createBatchFooter(_ batch_number:Int) {
-        
-    }
-
-    private func createCodeAccountStatusBatch(_ batch_number:Int) {
-        
-    }
-
-    private func createBucketAccountStatusBatch(_ batch_number:Int) {
-        
-    }
-
-    private func createCodeAccountDetailBatch(_ batch_number:Int) {
-        
-    }
-
-    private func createBucketAccountDetailBatch(_ batch_number:Int) {
-        
-    }
     
-    
-
+    private func checkFileDirectory() {
+        
+        var main_file_dir:Dir
+        
+        #if os(Linux)
+            main_file_dir = SuttonFunctions.SuttonDefaults.mainFileDirectory
+        #else
+            main_file_dir = SuttonFunctions.SuttonDefaults.mainFileDirectoryOSX
+        #endif
+        
+        if !main_file_dir.exists {
+            let _ = try? main_file_dir.create()
+        }
+        
+        var us_file_dir:Dir
+        
+        #if os(Linux)
+            us_file_dir = SuttonFunctions.SuttonDefaults.usFileDirectory
+        #else
+            us_file_dir = SuttonFunctions.SuttonDefaults.usFileDirectoryOSX
+        #endif
+        
+        if main_file_dir.exists {
+            if !us_file_dir.exists {
+                let _ = try? us_file_dir.create()
+            }
+        }
+        
+    }
 }

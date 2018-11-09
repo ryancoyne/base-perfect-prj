@@ -150,12 +150,6 @@ struct RetailerAPI {
                             
                             let term = Terminal()
                             
-//                            let sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(serialNumber)' "
-//                            let trm = try? term.sqlRows(sql, params: [])
-//                            if let t = trm?.first {
-//                                term.to(t)
-//                            }
-
                             let apiKey = UUID().uuidString
                             term.serial_number = serialNumber
                             term.retailer_id = r.id!
@@ -171,18 +165,51 @@ struct RetailerAPI {
                                 term.is_approved    = true
                             }
 
-                            AuditRecordActions.terminalAdd(schema: schema,
-                                                           session_id: request.session?.token ?? "NO SESSION TOKEN",
-                                                           user: request.session?.userid ?? "NO SESSION USER",
-                                                           row_data: term.asDictionary(),
-                                                           changed_fields: nil,
-                                                           description: nil,
-                                                           changedby: nil)
-
                             do {
                                 
                                 try term.saveWithCustomType(schemaIn: schema)
-                                try? response.setBody(json: ["isApproved":term.is_approved, "isSample": term.is_sample_only, "apiKey":apiKey])
+                                
+                                var terminfo:[String:Any] = [:]
+                                terminfo["retailerName"] = r.name!
+                                
+                                if term.address_id.isNotNil, term.address_id! > 0 {
+                                    // look up the address for the address information
+                                    let addresshere = Address()
+                                    let a_sql = "SELECT * FROM \(schema).\(addresshere.table()) WHERE id = \(term.address_id!)"
+                                    if let a = try? addresshere.sqlRows(a_sql, params: []) {
+                                        addresshere.to(a.first!)
+                                        
+                                        var termadd:[String:Any] = [:]
+                                        if let a1 = addresshere.address1, !a1.isEmpty { termadd["address1"] = a1 }
+                                        if let a1 = addresshere.address2, !a1.isEmpty { termadd["address2"] = a1 }
+                                        if let a1 = addresshere.address3, !a1.isEmpty { termadd["address3"] = a1 }
+                                        if let a1 = addresshere.postal_code, !a1.isEmpty { termadd["postalCode"] = a1 }
+                                        if let a1 = addresshere.city, !a1.isEmpty { termadd["city"] = a1 }
+                                        if let a1 = addresshere.state, !a1.isEmpty { termadd["state"] = a1 }
+                                        
+                                        terminfo["address"] = termadd
+                                    }
+                                }
+                                
+                                var retInfo:[String:Any] = [:]
+                                retInfo["isApproved"] = term.is_approved
+                                retInfo["isSample"]   = term.is_sample_only
+                                retInfo["apiKey"]     = apiKey
+                                retInfo.merge(terminfo, uniquingKeysWith: { (current, _) in current })
+                                
+                                var arec = term.asDictionary()
+                                arec.merge(retInfo, uniquingKeysWith: { (current, _) in current })
+                                
+                                AuditRecordActions.terminalAdd(schema: schema,
+                                                               session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                               user: request.session?.userid ?? "NO SESSION USER",
+                                                               row_data: arec,
+                                                               changed_fields: nil,
+                                                               description: nil,
+                                                               changedby: nil)
+                                
+
+                                try? response.setBody(json: retInfo)
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
                                 
@@ -205,6 +232,30 @@ struct RetailerAPI {
                             responseDictionary["isApproved"] = terminal.is_approved
                             responseDictionary["isSample"] = terminal.is_sample_only
                             responseDictionary["apiKey"] = thePassword
+                            
+                            var terminfo:[String:Any] = [:]
+                            terminfo["retailerName"] = r.name!
+                            
+                            if terminal.address_id.isNotNil, terminal.address_id! > 0 {
+                                // look up the address for the address information
+                                let addresshere = Address()
+                                let a_sql = "SELECT * FROM \(schema).\(addresshere.table()) WHERE id = \(terminal.address_id!)"
+                                if let a = try? addresshere.sqlRows(a_sql, params: []) {
+                                    addresshere.to(a.first!)
+                                    
+                                    var termadd:[String:Any] = [:]
+                                    if let a1 = addresshere.address1, !a1.isEmpty { termadd["address1"] = a1 }
+                                    if let a1 = addresshere.address2, !a1.isEmpty { termadd["address2"] = a1 }
+                                    if let a1 = addresshere.address3, !a1.isEmpty { termadd["address3"] = a1 }
+                                    if let a1 = addresshere.postal_code, !a1.isEmpty { termadd["postalCode"] = a1 }
+                                    if let a1 = addresshere.city, !a1.isEmpty { termadd["city"] = a1 }
+                                    if let a1 = addresshere.state, !a1.isEmpty { termadd["state"] = a1 }
+                                    
+                                    terminfo["address"] = termadd
+                                }
+                            }
+
+                            responseDictionary.merge(terminfo, uniquingKeysWith: { (current, _) in current })
                             
                             // Create and assign the hashed password:
                             terminal.terminal_key = thePassword.ourPasswordHash
@@ -264,9 +315,36 @@ struct RetailerAPI {
                                 term.is_approved    = true
                             }
 
-                            let respDict:[String:Any] = ["isApproved":term.is_approved, "isSample": term.is_sample_only, "apiKey":apiKey]
+                            var terminfo:[String:Any] = [:]
+                            terminfo["retailerName"] = r.name!
                             
-                            var audit = respDict
+                            if term.address_id.isNotNil, term.address_id! > 0 {
+                                // look up the address for the address information
+                                let addresshere = Address()
+                                let a_sql = "SELECT * FROM \(schema).\(addresshere.table()) WHERE id = \(term.address_id!)"
+                                if let a = try? addresshere.sqlRows(a_sql, params: []) {
+                                    addresshere.to(a.first!)
+                                    
+                                    var termadd:[String:Any] = [:]
+                                    if let a1 = addresshere.address1, !a1.isEmpty { termadd["address1"] = a1 }
+                                    if let a1 = addresshere.address2, !a1.isEmpty { termadd["address2"] = a1 }
+                                    if let a1 = addresshere.address3, !a1.isEmpty { termadd["address3"] = a1 }
+                                    if let a1 = addresshere.postal_code, !a1.isEmpty { termadd["postalCode"] = a1 }
+                                    if let a1 = addresshere.city, !a1.isEmpty { termadd["city"] = a1 }
+                                    if let a1 = addresshere.state, !a1.isEmpty { termadd["state"] = a1 }
+                                    
+                                    terminfo["address"] = termadd
+                                }
+                            }
+                            
+                            var retInfo:[String:Any] = [:]
+                            retInfo["isApproved"] = term.is_approved
+                            retInfo["isSample"]   = term.is_sample_only
+                            retInfo["apiKey"]     = apiKey
+                            retInfo.merge(terminfo, uniquingKeysWith: { (current, _) in current })
+                            
+                            var audit:[String:Any] = [:]
+                            audit.merge(retInfo, uniquingKeysWith: { (current, _) in current })
                             audit["terminal"] = term.asDictionary()
 
                             AuditRecordActions.terminalAdd(schema: schema,
@@ -280,7 +358,7 @@ struct RetailerAPI {
                             do {
                                 
                                 try term.saveWithCustomType(schemaIn: schema)
-                                try? response.setBody(json: respDict )
+                                try? response.setBody(json: retInfo )
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
                                 
@@ -289,29 +367,49 @@ struct RetailerAPI {
                                 response.caughtError(error)
                                 return
                             }
-                            
+
                         } else if terminal.retailer_id.isNotNil && terminal.is_approved {
                             // The terminal does exist.  Lets see if we retailer id is the same as what they are saying, if so.. send them a password:
                             guard r.id! == terminal.retailer_id else { /* Send back an error indicating this device is on another account */  return response.alreadyRegistered(serialNumber) }
-                            
+
                             // Save the new password, and return the response:
                             let thePassword = UUID().uuidString
-                            
+
                             // if the address has nnot ben set, and there is only one address, set it to that address
                             if let ta = terminal.address_id, ta == 0, add.id.isNotNil {
                                 terminal.address_id = add.id
                             }
-                            
+
                             // Build the response:
                             var responseDictionary = [String:Any]()
                             responseDictionary["isApproved"] = terminal.is_approved
                             responseDictionary["isSample"] = terminal.is_sample_only
                             responseDictionary["apiKey"] = thePassword
-                            
+
+                            if terminal.address_id.isNotNil, terminal.address_id! > 0 {
+                                // look up the address for the address information
+                                let addresshere = Address()
+                                let a_sql = "SELECT * FROM \(schema).\(addresshere.table()) WHERE id = \(terminal.address_id!)"
+                                if let a = try? addresshere.sqlRows(a_sql, params: []) {
+                                    addresshere.to(a.first!)
+                                    
+                                    var termadd:[String:Any] = [:]
+                                    if let a1 = addresshere.address1, !a1.isEmpty { termadd["address1"] = a1 }
+                                    if let a1 = addresshere.address2, !a1.isEmpty { termadd["address2"] = a1 }
+                                    if let a1 = addresshere.address3, !a1.isEmpty { termadd["address3"] = a1 }
+                                    if let a1 = addresshere.postal_code, !a1.isEmpty { termadd["postalCode"] = a1 }
+                                    if let a1 = addresshere.city, !a1.isEmpty { termadd["city"] = a1 }
+                                    if let a1 = addresshere.state, !a1.isEmpty { termadd["state"] = a1 }
+                                    
+                                    responseDictionary["address"] = termadd
+                                }
+                            }
+
                             // Create and assign the hashed password:
                             terminal.terminal_key = thePassword.ourPasswordHash
                             
-                            var audit = responseDictionary
+                            var audit:[String:Any] = [:]
+                            audit.merge(responseDictionary, uniquingKeysWith: { (current, _) in current })
                             audit["terminal"] = terminal.asDictionary()
                             
                             AuditRecordActions.terminalAdd(schema: schema,
@@ -329,7 +427,6 @@ struct RetailerAPI {
                             try? response.setBody(json: responseDictionary)
                                 .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                 .completed(status: .ok)
-                            
                         }
                         
                     }
@@ -546,13 +643,20 @@ struct RetailerAPI {
                         qrCodeURL.append(thecode)
                         json!["qrCodeContent"] = qrCodeURL
                         
+                        var sql = ""
+                        
                         // We need to go and get the integer terminal id:
-                        let retailer = Retailer()
-                        var sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(request.getRetailerCode()!)' "
-                        let rtlr = try? retailer.sqlRows(sql, params: [])
-                        if rtlr.isNotNil, let c = rtlr!.first {
-                            retailer.to(c)
+                        var retailer = Retailer()
+                        if let r = rt.retailer {
+                            retailer = r
+                        } else {
+                            sql = "SELECT * FROM \(schema).retailer WHERE retailer_code = '\(request.getRetailerCode()!)' "
+                            let rtlr = try? retailer.sqlRows(sql, params: [])
+                            if rtlr.isNotNil, let c = rtlr!.first {
+                                retailer.to(c)
+                            }
                         }
+                        
                         
                         var terminal:Terminal
                         if let t = rt.terminal {
@@ -563,6 +667,13 @@ struct RetailerAPI {
                             let trmn = try? terminal.sqlRows(sql, params: [])
                             if trmn.isNotNil, let c = trmn!.first {
                                 terminal.to(c)
+                                
+                                // this means that there was an issue with the retailer ID - lets catch up
+                                sql = "SELECT * FROM \(schema).retailer WHERE id = \(terminal.retailer_id!)"
+                                if let ret_2 = try? terminal.sqlRows(sql, params: []), let rt2 = ret_2.first {
+                                    retailer.to(rt2)
+                                }
+                                
                             }
                         }
                         
@@ -575,7 +686,7 @@ struct RetailerAPI {
                         }
 
                         let transaction = CodeTransaction()
-                        transaction.created = CCXServiceClass.sharedInstance.getNow()
+                        transaction.created = CCXServiceClass.getNow()
                         transaction.amount = json?["amount"].doubleValue
                         transaction.amount_available = json?["amount"].doubleValue
                         transaction.total_amount = json?["totalTransactionAmount"].doubleValue
@@ -658,6 +769,16 @@ struct RetailerAPI {
                 let cde = try? thecode.sqlRows(sql, params: [])
                 if cde.isNotNil, let c = cde!.first {
                     thecode.to(c)
+                } else {
+                    // check for the already redeemed
+                    let sqld = "SELECT * FROM \(schema).code_transaction_history WHERE customer_code = '\(code)' "
+                    let cded = try? thecode.sqlRows(sqld, params: [])
+                    if cded.isNotNil, cded!.count > 0 {
+                        // it was already redeemed - we CANNOT delete!
+                        _ = try? response.setBody(json: ["errorCode":"CodeRedeemed","message":"The code was redeemed already.  Please Contact Bucket Support."])
+                        response.completed(status: .custom(code: 452, message: "Code Already Redeemed"))
+                        return
+                    }
                 }
 
                 // We should also check and make sure the retailer is deleting their own transaction:
@@ -686,7 +807,7 @@ struct RetailerAPI {
                         return }
                     
                     // lets delete the code
-                    thecode.deleted = CCXServiceClass.sharedInstance.getNow()
+                    thecode.deleted = CCXServiceClass.getNow()
                     
                     let terminal = request.terminal!
                     thecode.deleted_reason = "Terminal \(terminal.serial_number!) deleted this transaction at \(thecode.deleted!.dateString) GMT"
@@ -705,7 +826,7 @@ struct RetailerAPI {
                     
                     AuditRecordActions.customerCodeDelete(schema: schema,
                                                           session_id: request.session?.token ?? "NO SESSION TOKEN",
-                                                          row_data: ["deleted_code": thecode],
+                                                          row_data: ["deleted_code": thecode.asDictionary()],
                                                           changed_fields: nil,
                                                           description: nil,
                                                           changedby: request.session?.token ?? "NO SESSION USER")
@@ -938,17 +1059,17 @@ extension Retailer {
         
     }
 
-    public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> (bounced:Bool?, terminal:Terminal?)? {
+    public static func retailerTerminalBounce(_ request: HTTPRequest, _ response: HTTPResponse) -> (bounced:Bool?, terminal:Terminal?, retailer:Retailer?)? {
         
         // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-        guard request.SecurityCheck() else { response.badSecurityToken; return (true, nil) }
+        guard request.SecurityCheck() else { response.badSecurityToken; return (true, nil, nil) }
 
         //Make sure we have the retailer Id and retailer secret:
 //        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
-        guard let retailerSecret = request.retailerSecret else { response.unauthorizedTerminal; return (true, nil) }
+        guard let retailerSecret = request.retailerSecret else { response.unauthorizedTerminal; return (true, nil, nil) }
 
-        guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return (true, nil) }
-        guard let _ = request.countryId else { response.invalidCountryCode; return (true, nil) }
+        guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return (true, nil, nil) }
+        guard let _ = request.countryId else { response.invalidCountryCode; return (true, nil, nil) }
         
         // lets test for the retailer code (not the retailer ID
         let schema = Country.getSchema(request)
@@ -959,10 +1080,10 @@ extension Retailer {
             let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode.lowercased())'"
             let r = Retailer()
             let r_ret = try? r.sqlRows(sql, params: [])
-            if r_ret.isNotNil, r_ret!.isEmpty {
+            if r_ret.isNil, r_ret!.count == 0 {
                 // the code was not found
                 response.invalidRetailer
-                return (true, nil)
+                return (true, nil, nil)
             } else {
                 // set the retailer id
                 retailerId = r_ret!.first!.data["id"].intValue!
@@ -970,7 +1091,7 @@ extension Retailer {
         } else {
             // the retailer code was not sent in
             response.invalidRetailer
-            return (true, nil)
+            return (true, nil, nil)
         }
 
         // Get our secret code formatted properly to check what we have in the DB:
@@ -990,13 +1111,13 @@ extension Retailer {
         //  4. The terminal is not assigned to an address
         
         // this means the terminal number is invalid - RETURN the appropriate error code
-        if terminalQuery.id.isNil { response.unauthorizedTerminal; return (true, nil) }
+        if terminalQuery.id.isNil { response.unauthorizedTerminal; return (true, nil, nil) }
         
         // this means the terminal is not approved
-        if !terminalQuery.is_approved { response.unauthorizedTerminal; return (true, nil) }
+        if !terminalQuery.is_approved { response.unauthorizedTerminal; return (true, nil, nil) }
         
         // and finally - make sure there is an address assigned to this terminal
-        if terminalQuery.address_id.isNil || terminalQuery.address_id == 0 { response.noLocationTerminal; return (true, nil) }
+        if terminalQuery.address_id.isNil || terminalQuery.address_id == 0 { response.noLocationTerminal; return (true, nil, nil) }
 
         // Checking the final condition (last condition to minimize the number of queries during error)
         let retailerQuery = Retailer()
@@ -1007,9 +1128,9 @@ extension Retailer {
         }
 
         // now lets look to make sure the serial number is to the current retailer
-        if retailerQuery.id != terminalQuery.retailer_id { response.alreadyRegistered(terminalSerialNumber); return (true, nil) }
+        if retailerQuery.id != terminalQuery.retailer_id { response.alreadyRegistered(terminalSerialNumber); return (true, nil, nil) }
         
-        return (false, terminalQuery)
+        return (false, terminalQuery, retailerQuery)
     }
 
 }

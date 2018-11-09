@@ -21,12 +21,14 @@ struct AdminAPI {
     
     //MARK: - JSON Routes
     /// This json structure supports all the JSON endpoints that you can use in the application.
-    struct web {
+    struct json {
         static var routes : [[String:Any]] {
             return [
-                ["method":"post",    "uri":"/api/v1/admin/userStats", "handler":userStats],
+//                ["method":"post",    "uri":"/api/v1/admin/userStats", "handler":userStats],
+                ["method":"post",    "uri":"/api/v1/admin/suttonBatchAll", "handler":processSuttonBatchAll],
             ]
         }
+        
         //MARK: - User Stats Function
         public static func userStats(_ data: [String:Any]) throws -> RequestHandler {
             return {
@@ -61,6 +63,30 @@ struct AdminAPI {
                 response.render(template: "views/forgotpassword")
                 response.completed()
 
+            }
+        }
+        
+        //MARK: - User Stats Function
+        public static func processSuttonBatchAll(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+//                guard request.SecurityCheck() else { response.badSecurityToken; return }
+                
+//                guard Account.adminBouce(request, response) else { response.accountPermissionsBounce; return  }
+                
+                // breate the batch
+                SuttonFunctions.batchAll()
+                
+                // process the newly created batch
+                let bp = BatchProcessing()
+                bp.processSutton()
+                
+                // and render the template (once we have the template complete)
+                response.render(template: "views/batch")
+                response.completed()
+                
             }
         }
     }

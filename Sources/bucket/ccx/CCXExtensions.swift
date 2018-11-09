@@ -1146,8 +1146,8 @@ extension PostgresStORM {
         
         // build the sql
         var str = "UPDATE \(schema).\(self.table()) "
-        str.append("SET \"deleted\"  = \(String(describing: CCXServiceClass.sharedInstance.getNow())), \"deletedby\"  = '\(deleteuser)', ")
-        str.append("    \"modified\" = \(String(describing: CCXServiceClass.sharedInstance.getNow())), \"modifiedby\" = '\(deleteuser)' ")
+        str.append("SET \"deleted\"  = \(String(describing: CCXServiceClass.getNow())), \"deletedby\"  = '\(deleteuser)', ")
+        str.append("    \"modified\" = \(String(describing: CCXServiceClass.getNow())), \"modifiedby\" = '\(deleteuser)' ")
         str.append("WHERE \"\(idcolumn.lowercased())\" = \(idnumber)")
  
         do {
@@ -1203,7 +1203,7 @@ extension PostgresStORM {
         // build the sql
         var str = "UPDATE \(schema).\(self.table()) "
         str.append("SET \"deleted\"  = 0, \"deletedby\" = NULL, ")
-        str.append("    \"modified\" = \(String(describing: CCXServiceClass.sharedInstance.getNow())), \"modifiedby\" = '\(deleteuser)' ")
+        str.append("    \"modified\" = \(String(describing: CCXServiceClass.getNow())), \"modifiedby\" = '\(deleteuser)' ")
         str.append("WHERE \"\(idcolumn.lowercased())\" = \(idnumber)")
         
         do {
@@ -1285,7 +1285,7 @@ extension PostgresStORM {
                     keys.append(i.0)
                     vals.append(gisstring)
                 default:
-                    print("[CCXStORMExtensions] [updateWithGIS] [\(CCXServiceClass.sharedInstance.getNow().dateString)]  WARNING: Need to add the following type to update/add/saveWithCustomType: \(c)")
+                    print("[CCXStORMExtensions] [updateWithGIS] [\(CCXServiceClass.getNow().dateString)]  WARNING: Need to add the following type to update/add/saveWithCustomType: \(c)")
                     continue
                 }
             }
@@ -1339,7 +1339,7 @@ extension PostgresStORM {
             
             // first lets see if the field is 'created' or 'createdby'
             if (i.0 == "created") {
-                let now = CCXServiceClass.sharedInstance.getNow()
+                let now = CCXServiceClass.getNow()
                 keys.append(i.0)
                 vals.append(String(describing: now))
                 switch self {
@@ -1414,7 +1414,7 @@ extension PostgresStORM {
                     keys.append(i.0)
                     vals.append(gisstring)
                 default:
-                    print("[CCXStORMExtensions] [updateWithGIS] [\(CCXServiceClass.sharedInstance.getNow().dateString)]  WARNING: Need to add the following type to update/add/saveWithCustomType: \(c)")
+                    print("[CCXStORMExtensions] [updateWithGIS] [\(CCXServiceClass.getNow().dateString)]  WARNING: Need to add the following type to update/add/saveWithCustomType: \(c)")
                     continue
                 }
             }
@@ -1483,7 +1483,7 @@ extension PostgresStORM {
             }
             
             if (i.element.0 == "modified") {
-                let now = CCXServiceClass.sharedInstance.getNow()
+                let now = CCXServiceClass.getNow()
                 let value = String(describing: now)
                 set.append(" \(i.element.0) = \(value),")
                 switch self {
@@ -1952,7 +1952,7 @@ extension Account {
         // Here we want to check the csrf & the authorization.
         guard let csrf = request.session?.data["csrf"].stringValue, let sendCsrf = request.header(.custom(name: "X-CSRF-Token")) else {
             
-            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
+            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.getNow())"
             AuditRecordActions.securityFailure(schema: request.countryCode,
                                                session_id: session,
                                                user: request.session?.userid,
@@ -1964,7 +1964,7 @@ extension Account {
         }
         guard request.session?.userid.isEmpty == false && csrf == sendCsrf else {
             
-            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
+            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.getNow())"
             AuditRecordActions.securityFailure(schema: request.countryCode,
                                                session_id: session,
                                                user: request.session?.userid,
@@ -1987,12 +1987,12 @@ extension Account {
             let dur = now.intervalSince(then)
         
             if dur.days > 0.5 {
-                user.lastSeen = CCXServiceClass.sharedInstance.getNow()
+                user.lastSeen = CCXServiceClass.getNow()
                 try? user.save()
             }
             
         } else {
-            user.lastSeen = CCXServiceClass.sharedInstance.getNow()
+            user.lastSeen = CCXServiceClass.getNow()
             try? user.save()
         }
         
@@ -2022,7 +2022,7 @@ extension Account {
         // Here we want to check the csrf & the authorization.
         guard let csrf = request.session?.data["csrf"].stringValue, let sendCsrf = request.header(.custom(name: "X-CSRF-Token")) else {
             
-            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
+            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.getNow())"
             AuditRecordActions.securityFailure(schema: request.countryCode,
                                                session_id: session,
                                                user: request.session?.userid,
@@ -2034,7 +2034,7 @@ extension Account {
         }
         guard request.session?.userid.isEmpty == false && csrf == sendCsrf else {
             
-            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
+            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.getNow())"
             AuditRecordActions.securityFailure(schema: request.countryCode,
                                                session_id: session,
                                                user: request.session?.userid,
@@ -2051,7 +2051,7 @@ extension Account {
 
         if !user.isAdmin() {
             
-            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.sharedInstance.getNow())"
+            let session = request.session?.token ?? "NO SESSION TOKEN: \(CCXServiceClass.getNow())"
             AuditRecordActions.securityFailure(schema: request.countryCode,
                                                session_id: session,
                                                user: request.session?.userid,

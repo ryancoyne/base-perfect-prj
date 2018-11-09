@@ -229,59 +229,127 @@ final class PRJDBTables {
 //        SampleTable.sharedInstance.create()
 
         // Bucket specific tables
+        print("Setting up CountryTable")
         CountryTable.sharedInstance.create()
+        print("Completed CountryTable")
+        print("Setting up POSTable")
         POSTable.sharedInstance.create()
+        print("Completed POSTable")
+        print("Setting up TerminalTable")
         TerminalTable.sharedInstance.create()
+        print("Completed TerminalTable")
+        print("Setting up RetailerTable")
         RetailerTable.sharedInstance.create()
+        print("Completed RetailerTable")
+        print("Setting up RetailerContactsTable")
         RetailerContactsTable.sharedInstance.create()
+        print("Completed RetailerContactsTable")
+        print("Setting up ContactTypeTable")
         ContactTypeTable.sharedInstance.create()
+        print("Completed ContactTypeTable")
+        print("Setting up FormTable")
         FormTable.sharedInstance.create()
+        print("Completed FormTable")
+        print("Setting up FormFieldTable")
         FormFieldTable.sharedInstance.create()
+        print("Completed FormFieldTable")
+        print("Setting up FormFieldsTable")
         FormFieldsTable.sharedInstance.create()
+        print("Completed FormFieldsTable")
+        print("Setting up FormFieldTypeTabl")
         FormFieldTypeTable.sharedInstance.create()
+        print("Completed FormFieldTypeTabl")
+        print("Setting up CashoutSourceTable")
         CashoutSourceTable.sharedInstance.create()
+        print("Completed CashoutSourceTable")
+        print("Setting up CashoutGroupTable")
         CashoutGroupTable.sharedInstance.create()
+        print("Completed CashoutGroupTable")
+        print("Setting up CashoutOptionTable")
         CashoutOptionTable.sharedInstance.create()
+        print("Completed CashoutOptionTable")
+        print("Setting up CompletedFormsHeaderTable")
         CompletedFormsHeaderTable.sharedInstance.create()
+        print("Completed CompletedFormsHeaderTable")
+        print("Setting up CompletedFormsDetailTable")
         CompletedFormsDetailTable.sharedInstance.create()
-        
+        print("Completed CompletedFormsDetailTable")
+
+        print("Setting up CodeTransactionTable")
         CodeTransactionTable.sharedInstance.create()
+        print("Completed CodeTransactionTable")
+        print("Setting up CodeTransactionHistoryTable")
         CodeTransactionHistoryTable.sharedInstance.create()
-        
+        print("Completed CodeTransactionHistoryTable")
+
+        print("Setting up LedgerTable")
         LedgerTable.sharedInstance.create()
+        print("Completed LedgerTable")
+        print("Setting up LedgerAccountTable")
         LedgerAccountTable.sharedInstance.create()
+        print("Completed LedgerAccountTable")
+        print("Setting up LedgerAccountTypeTable")
         LedgerAccountTypeTable.sharedInstance.create()
+        print("Completed LedgerAccountTypeTable")
+        print("Setting up LedgerTypeTable")
         LedgerTypeTable.sharedInstance.create()
-        
+        print("Completed LedgerTypeTable")
+
+        print("Setting up UserTotalTable")
         UserTotalTable.sharedInstance.create()
-        
+        print("Completed UserTotalTable")
+
+        print("Setting up BatchHeaderTable")
         BatchHeaderTable.sharedInstance.create()
+        print("Completed BatchHeaderTable")
+        print("Setting up BatchDetailTable")
         BatchDetailTable.sharedInstance.create()
-        
+        print("Completed BatchDetailTable")
+
+        print("Setting up USAccountCodeStatusTabl")
         USAccountCodeStatusTable.sharedInstance.create()
+        print("Completed USAccountCodeStatusTabl")
+        print("Setting up USAccountCodeDetailTable")
         USAccountCodeDetailTable.sharedInstance.create()
+        print("Completed USAccountCodeDetailTable")
+        print("Setting up USBucketAccountStatusTable")
         USBucketAccountStatusTable.sharedInstance.create()
+        print("Completed USBucketAccountStatusTable")
+        print("Setting up USBucketAccountDetailTable")
         USBucketAccountDetailTable.sharedInstance.create()
-        
+        print("Completed USBucketAccountDetailTable")
+
+        print("Setting up AccountTableViews")
         AccountTableViews.sharedInstance.create()
-        
+        print("Completed AccountTableViews")
+
+        print("Setting up RecommendRetailerTable")
         RecommendRetailerTable.sharedInstance.create()
-        
+        print("Completed RecommendRetailerTable")
+
+        print("Setting up AuditRecordTable")
         AuditRecordTable.sharedInstance.create()
-        
+        print("Completed AuditRecordTable")
+
         // make sure the tables exist.... if not - then create it
         let thereturn = CCXDBTables.sharedInstance.isPostGIS()
         if thereturn.postgis && thereturn.postgis_topo {
             // create the postgis tables here
 
+            print("Setting up AddressTable")
             AddressTable.sharedInstance.create()
+            print("Completed AddressTable")
 
             // add the default data
+            print("Setting up insertDefaultData")
             self.insertDefaultData()
+            print("Completed insertDefaultData")
 
             // finally - lets add sample data - controlled by the config and the server environment table entry for sampledata (0 = no, 1 = yes)
             if EnvironmentVariables.sharedInstance.Server != ServerEnvironment.production {
+                print("Setting up insertSampleData")
                 self.insertSampleData()
+                print("Completed insertSampleData")
             }
 
         } else {
@@ -373,25 +441,53 @@ final class PRJDBTables {
         }
         
         // This is where we are adding the default data
+        print("Inserting addCountryCodes")
         InitializeData.sharedInstance.addCountryCodes()
+        print("Done inserting addCountryCodes")
+        print("Inserting addContactTypes")
         InitializeData.sharedInstance.addContactTypes()
+        print("Done inserting addContactTypes")
+        print("Inserting addPOS")
         InitializeData.sharedInstance.addPOS()
+        print("Done inserting addPOS")
+        print("Inserting addFormFieldType")
         InitializeData.sharedInstance.addFormFieldType()
+        print("Done inserting addFormFieldType")
+        print("Inserting addFormField")
         InitializeData.sharedInstance.addFormField()
+        print("Done inserting addFormField")
+        print("Inserting addForms")
         InitializeData.sharedInstance.addForms()
+        print("Done inserting addForms")
+        print("Inserting addFormFields")
         InitializeData.sharedInstance.addFormFields()
+        print("Done inserting addFormFields")
 
+        print("Inserting addLedgerTypes")
         InitializeData.sharedInstance.addLedgerTypes()
+        print("Done inserting addLedgerTypes")
+        print("Inserting addLedgerAccountTypes")
         InitializeData.sharedInstance.addLedgerAccountTypes()
+        print("Done inserting addLedgerAccountTypes")
+        print("Inserting addLedgerAccounts")
         InitializeData.sharedInstance.addLedgerAccounts()
+        print("Done inserting addLedgerAccounts")
 
+        print("Inserting addCashoutGroup")
         InitializeData.sharedInstance.addCashoutGroup()
+        print("Done inserting addCashoutGroup")
+        print("Inserting addCashoutOption")
         InitializeData.sharedInstance.addCashoutOption()
-        
+        print("Done inserting addCashoutOption")
+
+        print("Inserting addSampleUsers")
         InitializeData.sharedInstance.addSampleUsers()
-        
+        print("Done inserting addSampleUsers")
+
+        print("Inserting addBucketUSRetailer")
         InitializeData.sharedInstance.addBucketUSRetailer()
- 
+        print("Done inserting addBucketUSRetailer")
+
         // set the sample data to NO - so no more is added
         do {
             let conf = Config()
@@ -414,23 +510,37 @@ final class PRJDBTables {
         // make sure the table level is correct
         let config = Config()
         var thesql = "SELECT val, name FROM config WHERE name = $1"
-        var tr = try! config.sqlRows(thesql, params: ["table_\(tbl.table())"])
-        if tr.count > 0 {
-            let testval = Double(tr[0].data["val"] as! String)
-            if testval != PRJTableLevels.sampletable {
-                // update to the new installation
-                self.updateSample(currentlevel: testval!)
-            }
-        } else {
+        let tr1 = try? config.sqlRows(thesql, params: ["table_\(tbl.table())"])
+        if tr1.isNotNil, let tr = tr1 {
+            if tr.count > 0 {
+                let testval = Double(tr[0].data["val"] as! String)
+                if testval != PRJTableLevels.sampletable {
+                    // update to the new installation
+                    self.updateSample(currentlevel: testval!)
+                }
+            } else {
             
-            // add the sequence number for auto sequences
-            try! tbl.sqlRows(CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table()), params: [])
+                // add the sequence number for auto sequences
+                do {
+                    try tbl.sqlRows(CCXDBTables.sharedInstance.addSequenceSQL(tablename: tbl.table()), params: [])
+                } catch {
+                    print("Error in createTable(): \(error)")
+                }
+                
+                do {
+                    try tbl.sqlRows(self.tableSample(tablename: tbl.table()), params: [])
+                } catch {
+                    print("Error in createTable(): \(error)")
+                }
 
-            try! tbl.sqlRows(self.tableSample(tablename: tbl.table()), params: [])
-            
-            // new one - set the default 1.00
-            thesql = "INSERT INTO config(name,val) VALUES('table_\(tbl.table())','1.00')"
-            try! config.sqlRows(thesql, params: [])
+                // new one - set the default 1.00
+                thesql = "INSERT INTO config(name,val) VALUES('table_\(tbl.table())','1.00')"
+                do {
+                    try config.sqlRows(thesql, params: [])
+                } catch {
+                    print("Error in createTable(): \(error)")
+                }
+            }
         }
         
     }

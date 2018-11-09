@@ -280,38 +280,38 @@ struct ConsumerAPI {
                 }
                 
                 // if the code is a sample code, see if this is a sample user
-                if ct.isSample() {
-                    
-                    let testA = Account()
-                    _ = try? testA.get(userid)
-                    
-                    if testA.id.isEmpty {
-                        
-                        AuditRecordActions.customerCodeCheck(schema: schema,
-                                                             session_id: request.session?.token ?? "NO SESSION TOKEN",
-                                                             row_data: ["customer_code":request.customerCode ?? "NO CODE","user_id":userid],
-                                                             changed_fields: nil,
-                                                             description: "Code is a SAMPLE code.  We could not find the user account.",
-                                                             changedby: nil)
-                        
-                        // we did not pull the account - returh the error
-                        return response.unableToGetUser
-                    }
-                    
-                    if !testA.isSample() {
-                        
-                        AuditRecordActions.customerCodeCheck(schema: schema,
-                                                             session_id: request.session?.token ?? "NO SESSION TOKEN",
-                                                             row_data: ["customer_code":request.customerCode ?? "NO CODE","user_id":userid],
-                                                             changed_fields: nil,
-                                                             description: "Code is a SAMPLE code.  The user is not a SAMPLE user.",
-                                                             changedby: nil)
-
-                        // this is a sample being redeemed on a non-sample account - NO
-                        return response.sampleCodeRedeemError
-                    }
-                    
-                }
+//                if ct.isSample() {
+//
+//                    let testA = Account()
+//                    _ = try? testA.get(userid)
+//
+//                    if testA.id.isEmpty {
+//
+//                        AuditRecordActions.customerCodeCheck(schema: schema,
+//                                                             session_id: request.session?.token ?? "NO SESSION TOKEN",
+//                                                             row_data: ["customer_code":request.customerCode ?? "NO CODE","user_id":userid],
+//                                                             changed_fields: nil,
+//                                                             description: "Code is a SAMPLE code.  We could not find the user account.",
+//                                                             changedby: nil)
+//
+//                        // we did not pull the account - returh the error
+//                        return response.unableToGetUser
+//                    }
+//
+//                    if !testA.isSample() {
+//
+//                        AuditRecordActions.customerCodeCheck(schema: schema,
+//                                                             session_id: request.session?.token ?? "NO SESSION TOKEN",
+//                                                             row_data: ["customer_code":request.customerCode ?? "NO CODE","user_id":userid],
+//                                                             changed_fields: nil,
+//                                                             description: "Code is a SAMPLE code.  The user is not a SAMPLE user.",
+//                                                             changedby: nil)
+//
+//                        // this is a sample being redeemed on a non-sample account - NO
+//                        return response.sampleCodeRedeemError
+//                    }
+//
+//                }
                 
                 // prepare the return
                 retCode["amount"] = ct.amount!
@@ -329,14 +329,14 @@ struct ConsumerAPI {
                                                          description: "Code value returned",
                                                          changedby: nil)
                     
-                    _=try? response.setBody(json: retCode)
                     response.addHeader(HTTPResponseHeader.Name.cacheControl, value: "no-cache")
-                    response.completed(status: .ok)
+                    response.renderMustache(template: request.documentRoot + "/views/code-download.mustache", context: retCode)
                     return
                     
                 } else {
                     // there was a problem....
-                    response.completed(status: .custom(code: 500, message: "There was a problem pulling the data from the tables."))
+                    response.addHeader(HTTPResponseHeader.Name.cacheControl, value: "no-cache")
+                    response.renderMustache(template: request.documentRoot + "/views/code-download.mustache", context: [:])
                     return
                 }
                 
@@ -406,7 +406,7 @@ struct ConsumerAPI {
                 var retCode:[String:Any] = [:]
                 
                 // lets redeem the code now
-                let redeemed        = CCXServiceClass.sharedInstance.getNow()
+                let redeemed        = CCXServiceClass.getNow()
                 let redeemedby      = request.session!.userid
                 
                 let sql = "SELECT * FROM \(schema).code_transaction_view_deleted_no WHERE id = \(rsp!.first!.data.id!)"
@@ -981,7 +981,7 @@ struct ConsumerAPI {
                     }
 
                     // process the records we saved earlier
-                    let cth_cashedout = CCXServiceClass.sharedInstance.getNow()
+                    let cth_cashedout = CCXServiceClass.getNow()
                     if theitems.count > 0 {
                         for working_cth in theitems {
 
