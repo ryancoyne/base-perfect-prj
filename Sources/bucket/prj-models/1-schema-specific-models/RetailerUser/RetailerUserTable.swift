@@ -1,5 +1,5 @@
 //
-//  TerminalTable.swift
+//  RetailerUserTable.swift
 //  bucket
 //
 //  Created by Ryan Coyne on 8/8/18.
@@ -8,15 +8,15 @@
 import Foundation
 import PostgresStORM
 
-final class TerminalTable {
+final class RetailerUserTable {
     
     //MARK:-
     //MARK: Create the Singleton
     private init() {
     }
     
-    static let sharedInstance = TerminalTable()
-    let tbl = Terminal()
+    static let sharedInstance = RetailerUserTable()
+    let tbl = RetailerUser()
     
     let tablelevel = 1.00
     
@@ -131,15 +131,12 @@ final class TerminalTable {
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
         
         // table specific fields
-        createsql.append("pos_id int NOT NULL DEFAULT 0, ")
         createsql.append("retailer_id int NOT NULL DEFAULT 0, ")
-        createsql.append("address_id int NOT NULL DEFAULT 0, ")
-        createsql.append("serial_number text COLLATE pg_catalog.default, ")
-        createsql.append("terminal_key text COLLATE pg_catalog.default, ")
-        createsql.append("name text COLLATE pg_catalog.default, ")
-        createsql.append("is_approved bool NOT NULL DEFAULT false, ")
-        createsql.append("is_sample_only bool NOT NULL DEFAULT false, ")
-        createsql.append("require_employee_id bool NOT NULL DEFAULT false, ")
+        createsql.append("user_custom_id text COLLATE pg_catalog.default, ")
+        createsql.append("account_id text COLLATE pg_catalog.default, ")
+        createsql.append("date_start int NOT NULL DEFAULT 0, ")
+        createsql.append("date_end int NOT NULL DEFAULT 0, ")
+        createsql.append("may_use_terminal bool NOT NULL DEFAULT false, ")
 
         // ending fields
         createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")

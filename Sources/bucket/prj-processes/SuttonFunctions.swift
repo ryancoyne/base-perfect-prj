@@ -138,28 +138,28 @@ public class SuttonFunctions {
                 
                 // Before writing anything, lets check if we have records for the following queries:
                 let query = USAccountCodeDetail()
-                var sqlStatement = "SELECT * FROM \(schema).us_account_code_detail_view_processed_no WHERE created BETWEEN \(from) AND \(to);"
+                var sqlStatement = "SELECT * FROM \(input.schema).us_account_code_detail_view_processed_no WHERE created BETWEEN \(input.from) AND \(input.to);"
 
                 let accountCodeResults = (try? query.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += accountCodeResults.count
                 
                 let query2 = USAccountCodeStatus()
 
-                sqlStatement = "SELECT * FROM \(schema).us_account_code_status_view_processed_no WHERE created BETWEEN \(from) AND \(to);"
+                sqlStatement = "SELECT * FROM \(input.schema).us_account_code_status_view_processed_no WHERE created BETWEEN \(input.from) AND \(input.to);"
 
                 let accountCodeStatusResults = (try? query2.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += accountCodeStatusResults.count
                 
                 let query3 = USBucketAccountDetail()
 
-                sqlStatement = "SELECT * from \(schema).us_bucket_account_detail_view_processed_no where created BETWEEN \(from) AND \(to);"
+                sqlStatement = "SELECT * from \(input.schema).us_bucket_account_detail_view_processed_no where created BETWEEN \(input.from) AND \(input.to);"
 
                 let bucketAccountDetailResults = (try? query3.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += bucketAccountDetailResults.count
                 
                 let query4 = USBucketAccountStatus()
 
-                sqlStatement = "SELECT * from \(schema).us_bucket_account_status_view_processed_no where created BETWEEN \(from) AND \(to);"
+                sqlStatement = "SELECT * from \(input.schema).us_bucket_account_status_view_processed_no where created BETWEEN \(input.from) AND \(input.to);"
 
                 let bucketAccountStatusResults = (try? query4.sqlRows(sqlStatement, params: [])) ?? []
                 totalDetailRecordsCount += bucketAccountStatusResults.count
@@ -170,9 +170,9 @@ public class SuttonFunctions {
                 header.batch_type = "sutton_all"
                 header.current_status = BatchHeaderStatus.working_on_it
 
-                header.description = theDescription
-                header.record_start_date = from
-                header.record_end_date = to
+                header.description = input.description
+                header.record_start_date = input.from
+                header.record_end_date = input.to
                 header.status = CCXServiceClass.getNow()
     
                 header.statusby = user_id ?? CCXDefaultUserValues.user_server
@@ -339,7 +339,7 @@ public class SuttonFunctions {
                     upd.processed   = processing_time
                     upd.processedby = CCXDefaultUserValues.user_server
                     
-                    _ = try? upd.saveWithCustomType(schemaIn: schema)
+                    _ = try? upd.saveWithCustomType(schemaIn: input.schema)
                     
                 }
                 
@@ -453,7 +453,7 @@ public class SuttonFunctions {
                     upd.processed   = processing_time
                     upd.processedby = CCXDefaultUserValues.user_server
                     
-                    _ = try? upd.saveWithCustomType(schemaIn: schema)
+                    _ = try? upd.saveWithCustomType(schemaIn: input.schema)
 
                 }
                 
@@ -588,7 +588,7 @@ public class SuttonFunctions {
                     upd.processed   = processing_time
                     upd.processedby = CCXDefaultUserValues.user_server
                     
-                    _ = try? upd.saveWithCustomType(schemaIn: schema)
+                    _ = try? upd.saveWithCustomType(schemaIn: input.schema)
 
                 }
                 
@@ -701,7 +701,7 @@ public class SuttonFunctions {
                     upd.processed   = processing_time
                     upd.processedby = CCXDefaultUserValues.user_server
                     
-                    _ = try? upd.saveWithCustomType(schemaIn: schema)
+                    _ = try? upd.saveWithCustomType(schemaIn: input.schema)
 
                 }
                 

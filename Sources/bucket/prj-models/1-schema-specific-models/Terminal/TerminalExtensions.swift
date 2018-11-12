@@ -131,4 +131,16 @@ struct TerminalDictionary {
             }
         }
     }
+    var requireEmployeeId : Bool? {
+        get {
+            return self.dic["require_employee_id"].boolValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["require_employee_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "require_employee_id")
+            }
+        }
+    }
 }

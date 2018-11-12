@@ -977,6 +977,18 @@ fileprivate extension HTTPRequest {
         }
     }
 
+    var employeeId : String? {
+        if let employeeIdFromHeader = self.header(.custom(name: "employeeId")).stringValue {
+            return employeeIdFromHeader
+        }
+        let theTry = try? self.postBodyJSON()?["employeeId"].stringValue
+        if theTry.isNil {
+            return nil
+        } else {
+            return theTry!
+        }
+    }
+
     var retailer : Retailer? {
         guard let retailerId = retailerId, let countryId = countryId else { return nil }
         let schema = Country.getSchema(countryId)

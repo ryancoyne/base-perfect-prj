@@ -21,15 +21,16 @@ public class Terminal: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var pos_id         : Int? = nil
-    var retailer_id    : Int? = nil
-    var serial_number  : String? = nil
-    var address_id     : Int? = nil
-    var name           : String? = nil
-    var is_approved    : Bool = false
-    var is_sample_only : Bool = false
-    var terminal_key   : String? = nil
-    
+    var pos_id            : Int? = nil
+    var retailer_id       : Int? = nil
+    var serial_number     : String? = nil
+    var address_id        : Int? = nil
+    var name              : String? = nil
+    var is_approved       : Bool = false
+    var is_sample_only    : Bool = false
+    var terminal_key      : String? = nil
+    var requireEmployeeId : Bool = false
+
     //MARK: Table name
     override public func table() -> String { return "terminal" }
     
@@ -95,7 +96,11 @@ public class Terminal: PostgresStORM {
         if let data = this.data.terminalDic.terminalKey {
             terminal_key = data
         }
-        
+
+        if let data = this.data.terminalDic.requireEmployeeId {
+            requireEmployeeId = data
+        }
+
     }
     
     func rows() -> [Terminal] {
@@ -152,6 +157,11 @@ public class Terminal: PostgresStORM {
             case "is_sample_only":
                 if (value as? Bool).isNotNil {
                     self.is_sample_only = value as? Bool ?? false
+                }
+
+            case "require_employee_id":
+                if (value as? Bool).isNotNil {
+                    self.requireEmployeeId = value as? Bool ?? false
                 }
 
             default:
@@ -222,6 +232,8 @@ public class Terminal: PostgresStORM {
         dictionary.terminalDic.isApproved = self.is_approved
 
         dictionary.terminalDic.isSampleOnly = self.is_sample_only
+        
+        dictionary.terminalDic.requireEmployeeId = self.requireEmployeeId
 
         return dictionary
     }
@@ -263,6 +275,10 @@ public class Terminal: PostgresStORM {
             diff = false
         }
 
+        if diff == true, self.requireEmployeeId != targetItem.requireEmployeeId {
+            diff = false
+        }
+
         return diff
         
     }
@@ -282,6 +298,17 @@ public class Terminal: PostgresStORM {
         
         return nil
         
+    }
+    
+    public func checkEmployeeId(_ employeeId: String) -> Bool {
+        
+        // if we do not require an employee ID then all Employee ID's are ok
+        if !self.requireEmployeeId { return true }
+        
+        
+        
+        // failed the test - so... done with us
+        return false
     }
     
     public static func getFirst(_ schema : String) -> Terminal? {
