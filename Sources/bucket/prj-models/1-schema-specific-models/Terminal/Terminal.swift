@@ -6,7 +6,9 @@
 //
 
 import Foundation
+import SwiftMoment
 import PerfectHTTP
+
 import StORM
 import PostgresStORM
 
@@ -167,9 +169,7 @@ public class Terminal: PostgresStORM {
             default:
                 print("This should not occur")
             }
-            
         }
-        
     }
     
     
@@ -300,15 +300,45 @@ public class Terminal: PostgresStORM {
         
     }
     
-    public func checkEmployeeId(_ employeeId: String) -> Bool {
+    public func checkEmployeeId(_ employeeId: String,_ theSchema:String? = nil) -> Bool {
         
         // if we do not require an employee ID then all Employee ID's are ok
         if !self.requireEmployeeId { return true }
         
+        var schema = ""
+        if theSchema.isNil {
+            schema = "public"
+        } else {
+            schema = theSchema!.lowercased()
+        }
         
+        let now = CCXServiceClass.getNow()
         
-        // failed the test - so... done with us
-        return false
+        // get the retailer user object
+        let ru = RetailerUser()
+        
+        var sql = "SELECT * FROM \(schema).retailer_user "
+        sql.append("WHERE (")
+        sql.append("(retailer_id = \(self.retailer_id!)) ")
+        sql.append("AND ")
+        sql.append("(user_custom_id = '\(employeeId)') ")
+        sql.append("AND ")
+        // we are determining if the user is limited to a specific date range for them to use the terminal
+        sql.append("    ( ")
+        sql.append("        (date_start = 0 AND date_end = 0) ")
+        sql.append("        OR ")
+        sql.append("        (date_start >= \(now) AND date_end <= \(now)) ")
+        sql.append("    ) ")
+        sql.append(") ")
+        
+        let ru_r = try? ru.sqlRows(sql, params: [])
+        if ru_r.isNotNil, ru_r!.count > 0, let _ = ru_r!.first {
+            // there is a record - so.... all is good
+            return true
+        } else {
+            // no record.....
+            return false
+        }
     }
     
     public static func getFirst(_ schema : String) -> Terminal? {
