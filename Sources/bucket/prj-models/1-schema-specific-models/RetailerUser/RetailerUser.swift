@@ -21,12 +21,12 @@ public class RetailerUser: PostgresStORM {
     var deleted    : Int?    = nil
     var deletedby  : String? = nil
     
-    var retailerId     : Int? = nil
-    var userCustomId   : String? = nil
-    var accountId      : String? = nil
-    var dateStart      : Int? = nil
-    var dateEnd        : Int? = nil
-    var mayUseTerminal : Bool = false
+    var retailer_id      : Int? = nil
+    var user_custom_id   : String? = nil
+    var account_id       : String? = nil
+    var date_start       : Int? = nil
+    var date_end         : Int? = nil
+    var may_use_terminal : Bool = false
 
     //MARK: Table name
     override public func table() -> String { return "retailer_user" }
@@ -63,27 +63,27 @@ public class RetailerUser: PostgresStORM {
         }
         
         if let data = this.data.retailerUserDic.retailerId {
-            retailerId = data
+            retailer_id = data
         }
         
         if let data = this.data.retailerUserDic.userCustomId {
-            userCustomId = data
+            user_custom_id = data
         }
         
         if let data = this.data.retailerUserDic.accountId {
-            accountId = data
+            account_id = data
         }
         
         if let data = this.data.retailerUserDic.dateStart {
-            dateStart = data
+            date_start = data
         }
         
         if let data = this.data.retailerUserDic.dateEnd {
-            dateEnd = data
+            date_end = data
         }
         
         if let data = this.data.retailerUserDic.mayUseTerminal {
-            mayUseTerminal = data
+            may_use_terminal = data
         }
 
     }
@@ -106,32 +106,32 @@ public class RetailerUser: PostgresStORM {
                 
             case "retailer_id":
                 if (value as? Int).isNotNil {
-                    self.retailerId = (value as! Int)
+                    self.retailer_id = (value as! Int)
                 }
                 
             case "user_custom_id":
                 if (value as? String).isNotNil {
-                    self.userCustomId = (value as! String)
+                    self.user_custom_id = (value as! String)
                 }
                 
             case "account_id":
                 if (value as? String).isNotNil {
-                    self.accountId = (value as! String)
+                    self.account_id = (value as! String)
                 }
                 
             case "date_start":
                 if (value as? Int).isNotNil {
-                    self.dateStart = (value as! Int)
+                    self.date_start = (value as! Int)
                 }
                 
             case "date_end":
                 if (value as? Int).isNotNil {
-                    self.dateEnd = (value as! Int)
+                    self.date_end = (value as! Int)
                 }
                 
             case "may_use_terminal":
                 if (value as? Bool).isNotNil {
-                    self.mayUseTerminal = value as? Bool ?? false
+                    self.may_use_terminal = value as? Bool ?? false
                 }
 
             default:
@@ -175,11 +175,27 @@ public class RetailerUser: PostgresStORM {
             dictionary.deletedBy = self.deletedby
         }
         
-        if self.retailerId.isNotNil {
-            dictionary.retailerUserDic.retailerId = self.retailerId
+        if self.retailer_id.isNotNil {
+            dictionary.retailerUserDic.retailerId = self.retailer_id
+        }
+
+        if self.account_id.isNotNil {
+            dictionary.retailerUserDic.accountId = self.account_id
         }
         
-        dictionary.retailerUserDic.mayUseTerminal = self.mayUseTerminal
+        if self.retailer_id.isNotNil {
+            dictionary.retailerUserDic.userCustomId = self.user_custom_id
+        }
+        
+        if self.retailer_id.isNotNil {
+            dictionary.retailerUserDic.dateStart = self.date_start
+        }
+        
+        if self.retailer_id.isNotNil {
+            dictionary.retailerUserDic.dateEnd = self.date_end
+        }
+
+        dictionary.retailerUserDic.mayUseTerminal = self.may_use_terminal
 
         return dictionary
     }
@@ -189,27 +205,27 @@ public class RetailerUser: PostgresStORM {
         
         var diff = true
         
-        if diff == true, self.retailerId != targetItem.retailerId {
+        if diff == true, self.retailer_id != targetItem.retailer_id {
             diff = false
         }
         
-        if diff == true, self.userCustomId != targetItem.userCustomId {
+        if diff == true, self.user_custom_id != targetItem.user_custom_id {
             diff = false
         }
         
-        if diff == true, self.accountId != targetItem.accountId {
+        if diff == true, self.account_id != targetItem.account_id {
             diff = false
         }
         
-        if diff == true, self.dateStart != targetItem.dateStart {
+        if diff == true, self.date_start != targetItem.date_start {
             diff = false
         }
         
-        if diff == true, self.dateEnd != targetItem.dateEnd {
+        if diff == true, self.date_end != targetItem.date_end {
             diff = false
         }
         
-        if diff == true, self.mayUseTerminal != targetItem.mayUseTerminal {
+        if diff == true, self.may_use_terminal != targetItem.may_use_terminal {
             diff = false
         }
         

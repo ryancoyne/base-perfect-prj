@@ -607,6 +607,10 @@ struct RetailerAPI {
                 guard let _ = request.countryId else { return response.invalidCountryCode }
                 
                 let schema = Country.getSchema(request)
+                
+                if let t = rt.terminal, let e = request.employeeId, t.checkEmployeeId(e, schema) {
+                    
+                }
 
                 do {
 
