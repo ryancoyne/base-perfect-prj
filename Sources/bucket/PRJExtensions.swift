@@ -461,6 +461,12 @@ extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .badRequest)
     }
+    var invalidEmployeeId: Void {
+        return try! self
+            .setBody(json: ["errorCode":"InvalidEmployeeId", "message":"The Employee ID is incorrect for this retailer."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 412, message: "Please Check Your Employee Id") )
+    }
     var emptyJSONBody : Void {
         return try! self
             .setBody(json: ["errorCode":"InvalidRequest", "message":"Empty JSON body sent."])

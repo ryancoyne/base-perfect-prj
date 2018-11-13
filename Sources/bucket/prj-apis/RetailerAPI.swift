@@ -192,9 +192,11 @@ struct RetailerAPI {
                                 }
                                 
                                 var retInfo:[String:Any] = [:]
-                                retInfo["isApproved"] = term.is_approved
-                                retInfo["isSample"]   = term.is_sample_only
-                                retInfo["apiKey"]     = apiKey
+                                retInfo["isApproved"]        = term.is_approved
+                                retInfo["isSample"]          = term.is_sample_only
+                                retInfo["apiKey"]            = apiKey
+                                retInfo["requireEmployeeId"] = term.require_employee_id
+                                
                                 retInfo.merge(terminfo, uniquingKeysWith: { (current, _) in current })
                                 
                                 var arec = term.asDictionary()
@@ -232,7 +234,8 @@ struct RetailerAPI {
                             responseDictionary["isApproved"] = terminal.is_approved
                             responseDictionary["isSample"] = terminal.is_sample_only
                             responseDictionary["apiKey"] = thePassword
-                            
+                            responseDictionary["requireEmployeeId"] = terminal.require_employee_id
+
                             var terminfo:[String:Any] = [:]
                             terminfo["retailerName"] = r.name!
                             
@@ -341,6 +344,8 @@ struct RetailerAPI {
                             retInfo["isApproved"] = term.is_approved
                             retInfo["isSample"]   = term.is_sample_only
                             retInfo["apiKey"]     = apiKey
+                            retInfo["requireEmployeeId"] = term.require_employee_id
+                            
                             retInfo.merge(terminfo, uniquingKeysWith: { (current, _) in current })
                             
                             var audit:[String:Any] = [:]
@@ -385,6 +390,7 @@ struct RetailerAPI {
                             responseDictionary["isApproved"] = terminal.is_approved
                             responseDictionary["isSample"] = terminal.is_sample_only
                             responseDictionary["apiKey"] = thePassword
+                            responseDictionary["requireEmployeeId"] = terminal.require_employee_id
 
                             if terminal.address_id.isNotNil, terminal.address_id! > 0 {
                                 // look up the address for the address information
@@ -608,8 +614,15 @@ struct RetailerAPI {
                 
                 let schema = Country.getSchema(request)
                 
-                if let t = rt.terminal, let e = request.employeeId, t.checkEmployeeId(e, schema) {
-                    
+                if let t = rt.terminal, t.require_employee_id {
+                    let e = request.employeeId
+                    if e.isEmptyOrNil {
+                        // employee ID required, not sent
+                        return response.invalidEmployeeId
+                    } else if !(t.checkEmployeeId(e!, schema)) {
+                        // they did not pass the prquirements for employe id
+                        return response.invalidEmployeeId
+                    }
                 }
 
                 do {
@@ -660,7 +673,6 @@ struct RetailerAPI {
                                 retailer.to(c)
                             }
                         }
-                        
                         
                         var terminal:Terminal
                         if let t = rt.terminal {
