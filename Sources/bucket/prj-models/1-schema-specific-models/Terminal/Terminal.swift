@@ -300,6 +300,13 @@ public class Terminal: PostgresStORM {
         
     }
     
+    public static func idFrom(_ schema : String, _ retailerId : Int, terminalSerial : String) -> Int? {
+        let term = Terminal()
+        
+        let sql = "SELECT * FROM \(schema).terminal WHERE retailer_id = \(retailerId) AND serial_number = '\(terminalSerial)';"
+        return (try? term.sqlRows(sql, params: []))?.first?.data.id
+    }
+    
     public func checkEmployeeId(_ employeeId: String,_ theSchema:String? = nil) -> Bool {
         
         // if we do not require an employee ID then all Employee ID's are ok
