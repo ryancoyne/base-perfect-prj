@@ -466,22 +466,64 @@ struct RetailerAPI {
                     let requestJSON = try request.postBodyJSON()!
                     if requestJSON.isEmpty { return response.emptyJSONBody }
                     
-                    let requestTerminalId = requestJSON["terminalId"].intValue ?? 0
+                    var terminalId : Int = 0
+                    if let terminalSerial = requestJSON["terminalId"].stringValue {
+                        terminalId = Terminal.idFrom(schema, rt.retailer!.id!, terminalSerial: terminalSerial) ?? 0
+                    }
+                    
                     let startOrFrom = requestJSON["start"].intValue ?? 0
                     let endOrTo = requestJSON["end"].intValue ?? 0
                     
                     if startOrFrom > endOrTo { return response.dateReportIssue }
                     
-                    let sqlStatement = "SELECT $1.getTransactionReport($2, $3, $4, $5);"
+                    let sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId));"
                     
-                    let rows = try? CodeTransaction().sqlRows(sqlStatement, params: [schema,"\(startOrFrom)", "\(endOrTo)", "\(rt.retailer!.id!)", "\(requestTerminalId)"])
+                    let rows = try? CodeTransaction().sqlRows(sqlStatement, params: [])
                     
                     if let transactions = rows {
-                        let bucketTotal = 0.0
+                        var bucketTotal = 0.0
+                        var transactionsJSON : [[String:Any]] = []
                         for transaction in transactions {
                             var transjson = [String:Any]()
-                            transjson["amount"] = transaction.data["amount"].doubleValue
+                            
+                            if let id = transaction.data.id {
+                                transjson["bucketTransactionId"] = id
+                            }
+                            if let created = transaction.data["created"].intValue, created > 0 {
+                                transjson["created"] = created.dateString
+                            }
+                            if let amount = transaction.data["amount"].doubleValue {
+                                transjson["amount"] = amount
+                                bucketTotal += amount
+                            }
+                            if let totalAmount = transaction.data["total_amount"].doubleValue {
+                                transjson["totalTransactionAmount"] = totalAmount
+                            }
+                            if let clientTransactionId = transaction.data["client_transaction_id"].doubleValue {
+                                transjson["clientTransactionId"] = clientTransactionId
+                            }
+                            if let locationId = transaction.data["client_location"].doubleValue {
+                                transjson["locationId"] = locationId
+                            }
+                            if let disputed = transaction.data["disputed"].intValue, disputed > 0 {
+                                transjson["disputed"] = disputed.dateString
+                            }
+                            if let disputedBy = transaction.data["disputedby"].stringValue {
+                                transjson["disputedBy"] = disputedBy
+                            }
+                            if let redeemed = transaction.data["redeemed"].intValue, redeemed > 0 {
+                                transjson["redeemed"] = redeemed.dateString
+                            }
+                            if let terminalId = transaction.data["terminal_id"].intValue {
+                                transjson["terminalId"] = terminalId
+                            }
+                            
+                            transactionsJSON.append(transjson)
+                            
                         }
+                        
+                        return response.returnReport(bucketTotal, transactions: transactionsJSON)
+                        
                     } else {
                         
                     }
@@ -1011,6 +1053,13 @@ fileprivate extension HTTPResponse {
             .setBody(json: ["errorCode":"AlreadyRegistered", "message":"The terminal with the serial number (\(serialNumber)) is registered to another retailer.  Contact Bucket support."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 410, message: "Terminal Registered"))
+    }
+    
+    func returnReport(_ bucketTotal: Double, transactions: [[String:Any]]) -> Void {
+        return try! self
+            .setBody(json: ["bucketTotal":bucketTotal, "transactions":transactions])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .ok)
     }
 
 }
