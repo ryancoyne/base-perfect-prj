@@ -28,6 +28,7 @@ struct RetailerAPI {
                 ["method":"post",   "uri":"/api/v1/registerterminal", "handler":registerTerminal],
                 ["method":"post",   "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],
                 ["method":"post",   "uri":"/api/v1/transaction", "handler":createTransaction],
+                ["method":"post",   "uri":"/api/v1/report", "handler":report],
                 ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction],
             ]
         }
@@ -446,6 +447,22 @@ struct RetailerAPI {
                     response.caughtError(error)
                     return
                 }
+            }
+        }
+        
+        public static func report(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                
+                guard let _ = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(request)
+                
+                
+                
             }
         }
         
