@@ -468,7 +468,11 @@ struct RetailerAPI {
                     
                     var terminalId : Int = 0
                     if let terminalSerial = requestJSON["terminalId"].stringValue {
-                        terminalId = Terminal.idFrom(schema, rt.retailer!.id!, terminalSerial: terminalSerial) ?? 0
+                        if let id = Terminal.idFrom(schema, rt.retailer!.id!, terminalSerial: terminalSerial) {
+                            terminalId = id
+                        } else {
+                            return response.invalidTerminalId
+                        }
                     }
                     
                     let startOrFrom = requestJSON["start"].intValue ?? 0
@@ -1023,6 +1027,12 @@ fileprivate extension HTTPResponse {
     var noTerminalId : Void {
         return try! self
             .setBody(json: ["errorCode":"NoTerminalId", "message":"You must send in a 'terminalId' key with the serial number of the device as the value."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .forbidden)
+    }
+    var invalidTerminalId : Void {
+        return try! self
+            .setBody(json: ["errorCode":"InvalidTerminalId", "message":"The terminalId you sent does not exist."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .forbidden)
     }
