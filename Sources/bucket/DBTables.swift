@@ -165,7 +165,57 @@ final class PRJDBTables {
     
     }
     
-    
+    //MARK:-
+    //MARK: Core DB Table Functions
+    public func addTransactionReportFunction(_ schemaIn:String? = "public")-> String {
+        
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
+        
+//        var viewsql = "CREATE VIEW \(schema).\(tablename)_view_not_redeemed AS "
+//        viewsql.append("SELECT * FROM \(schema).\(tablename) WHERE redeemed = 0; ")
+        
+        var viewsql = "CREATE OR REPLACE FUNCTION \(schema).getTransactionReport(fromDate int, toDate int, retailerId int, terminalId int=0) "
+        viewsql.append("RETURNS TABLE (id int, created int, amount numeric, total_amount numeric, client_location text, ")
+        viewsql.append("client_transaction_id text, terminal_id int, disputed int, disputedby text, customer_code text, redeemed int) ")
+        viewsql.append("AS $function$ ")
+        
+        viewsql.append("BEGIN ")
+        
+        viewsql.append("IF terminalId = 0 THEN ")
+        
+        viewsql.append("RETURN QUERY ")
+        viewsql.append("SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed ")
+        viewsql.append("FROM \(schema).code_transaction AS ct ")
+        viewsql.append("WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) ")
+        viewsql.append("UNION ")
+        viewsql.append("SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed ")
+        viewsql.append("FROM \(schema).code_transaction_history AS cth ")
+        viewsql.append("WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) ")
+        viewsql.append("ORDER BY created DESC; ")
+        viewsql.append("ELSE ")
+        
+        viewsql.append("RETURN QUERY ")
+        viewsql.append("SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed ")
+        viewsql.append("FROM \(schema).code_transaction AS ct ")
+        viewsql.append("WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId) ")
+        viewsql.append("UNION ")
+        viewsql.append("SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed ")
+        viewsql.append("FROM \(schema).code_transaction_history AS cth ")
+        viewsql.append("WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId) ")
+        viewsql.append("ORDER BY created DESC; ")
+        viewsql.append("END IF; ")
+        
+        viewsql.append("END $function$ ")
+        
+        viewsql.append("LANGUAGE plpgsql; ")
+        
+        return viewsql
+        
+    }
+
     //MARK:-
     //MARK: Core DB creation processes
     public func createTables() {

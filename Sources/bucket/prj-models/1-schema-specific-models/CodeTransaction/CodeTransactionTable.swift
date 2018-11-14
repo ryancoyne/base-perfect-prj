@@ -31,9 +31,9 @@ final class CodeTransactionTable {
 
     //MARK:-
     //MARK: code transaction table
-    func createCodeTransaction(_ schemaIn:String? = "public") {
+    private func createCodeTransaction(_ schemaIn:String? = "public") {
         
-                var schema = "public"
+        var schema = "public"
         if schemaIn.isNotNil {
             schema = schemaIn!.lowercased()
         }
@@ -99,8 +99,6 @@ final class CodeTransactionTable {
         }
 
         
-        
-        
         thesql = "SELECT val, name FROM config WHERE name = $1"
         tr = try! config.sqlRows(thesql, params: ["\(schema).view_\(tbl.table())_not_redeemed"])
         if tr.count > 0 {
@@ -116,6 +114,24 @@ final class CodeTransactionTable {
             let _ = try! config.sqlRows(thesql, params: [])
         }
 
+        thesql = "SELECT val, name FROM config WHERE name = $1"
+        tr = try! config.sqlRows(thesql, params: ["\(schema).function_gettransactionreport"])
+        if tr.count > 0 {
+            let testval = Double(tr[0].data["val"] as! String)
+            if testval != tablelevel {
+                // update to the new installation
+                self.update(currentlevel: testval!, schema)
+            }
+        } else {
+            do {
+                let _ = try tbl.sqlRows(PRJDBTables.sharedInstance.addTransactionReportFunction(schema), params: [])
+                // new one - set the default 1.00
+                thesql = "INSERT INTO config(name,val) VALUES('\(schema).function_gettransactionreport','1.00')"
+                let _ = try config.sqlRows(thesql, params: [])
+            } catch {
+                // there could be an error if both tables are not there yet
+            }
+        }
     }
     
     private func update(currentlevel: Double, _ schemaIn:String? = "public") {
