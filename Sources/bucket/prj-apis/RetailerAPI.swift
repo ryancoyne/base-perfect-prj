@@ -466,6 +466,36 @@ struct RetailerAPI {
                     let requestJSON = try request.postBodyJSON()!
                     if requestJSON.isEmpty { return response.emptyJSONBody }
                     
+                    // Okay, theres 3 different ways they can send the dates in here:
+                    // 1. As an integer.
+                    // 2. As a string.
+                    // 3. As a start and end string.
+                    
+                    var startOrFrom = 0
+                    var endOrTo = 0
+                    
+                    if let day = requestJSON["day"].stringValue {
+                        
+                        if let startMoment = moment(day, dateFormat: "yyyy-MM-dd", timeZone: .utc, locale: .enUS) {
+                            
+                            let endMoment = moment(["year":startMoment.year,
+                                                                                   "month":startMoment.month,
+                                                                                   "day":startMoment.day,
+                                                                                   "hour":23,
+                                                                                   "minute":59,
+                                                                                   "second":59,],
+                                                                                    timeZone: .utc,
+                                                                                    locale: .enUS)!
+                            
+                            startOrFrom = Int(startMoment.epoch())
+                            endOrTo = Int(endMoment.epoch())
+                            
+                        }
+                        
+                    } else {
+                        // Okay they sent start & end.  Lets see if its a string or an integer epoch date:
+                    }
+                    
                     var terminalId : Int = 0
                     if let terminalSerial = requestJSON["terminalId"].stringValue {
                         if let id = Terminal.idFrom(schema, rt.retailer!.id!, terminalSerial: terminalSerial) {
@@ -475,8 +505,8 @@ struct RetailerAPI {
                         }
                     }
                     
-                    let startOrFrom = requestJSON["start"].intValue ?? 0
-                    let endOrTo = requestJSON["end"].intValue ?? 0
+                    startOrFrom = requestJSON["start"].intValue ?? 0
+                    endOrTo = requestJSON["end"].intValue ?? 0
                     
                     if startOrFrom > endOrTo { return response.dateReportIssue }
                     
