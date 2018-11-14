@@ -461,6 +461,39 @@ struct RetailerAPI {
                 
                 let schema = Country.getSchema(request)
                 
+                do {
+                    
+                    let requestJSON = try request.postBodyJSON()!
+                    if requestJSON.isEmpty { return response.emptyJSONBody }
+                    
+                    let requestTerminalId = requestJSON["terminalId"].intValue ?? 0
+                    let startOrFrom = requestJSON["start"].intValue ?? 0
+                    let endOrTo = requestJSON["end"].intValue ?? 0
+                    
+                    if startOrFrom > endOrTo { return response.dateReportIssue }
+                    
+                    let sqlStatement = "SELECT $1.getTransactionReport($2, $3, $4, $5);"
+                    
+                    let rows = try? CodeTransaction().sqlRows(sqlStatement, params: [schema,"\(startOrFrom)", "\(endOrTo)", "\(rt.retailer!.id!)", "\(requestTerminalId)"])
+                    
+                    if let transactions = rows {
+                        let bucketTotal = 0.0
+                        for transaction in transactions {
+                            var transjson = [String:Any]()
+                            transjson["amount"] = transaction.data["amount"].doubleValue
+                        }
+                    } else {
+                        
+                    }
+    
+                } catch BucketAPIError.unparceableJSON(let theString) {
+                    return response.invalidRequest(theString)
+                } catch {
+                    return response.caughtError(error)
+                }
+            
+                // We use a function here to get the report:
+                // Start Date, End Date, RetailerID, TerminalID
                 
                 
             }
@@ -950,6 +983,12 @@ fileprivate extension HTTPResponse {
             .setBody(json: ["errorCode":"NoTerminalId", "message":"You must send in a 'terminalId' key with the serial number of the device as the value."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .forbidden)
+    }
+    var dateReportIssue : Void {
+        return try! self
+            .setBody(json: ["errorCode":"ReportIssue", "message":"Start date must be less than end date."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 420, message: "Report Request Issue"))
     }
     var noLocationTerminal : Void {
         return try! self
