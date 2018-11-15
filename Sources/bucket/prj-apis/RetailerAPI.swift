@@ -205,7 +205,10 @@ struct RetailerAPI {
                                 
                                 var retInfo:[String:Any] = [:]
                                 retInfo["isApproved"]        = term.is_approved
-                                retInfo["isSample"]          = term.is_sample_only
+                                // Only return this if the terminal IS for samples:
+                                if term.is_sample_only {
+                                    retInfo["isSample"]          = term.is_sample_only
+                                }
                                 retInfo["apiKey"]            = apiKey
                                 retInfo["requireEmployeeId"] = term.require_employee_id
                                 
@@ -244,7 +247,10 @@ struct RetailerAPI {
                             // Build the response:
                             var responseDictionary = [String:Any]()
                             responseDictionary["isApproved"] = terminal.is_approved
-                            responseDictionary["isSample"] = terminal.is_sample_only
+                            // Only return this if the terminal IS for samples:
+                            if terminal.is_sample_only {
+                                responseDictionary["isSample"]          = terminal.is_sample_only
+                            }
                             responseDictionary["apiKey"] = thePassword
                             responseDictionary["requireEmployeeId"] = terminal.require_employee_id
 
@@ -354,7 +360,10 @@ struct RetailerAPI {
                             
                             var retInfo:[String:Any] = [:]
                             retInfo["isApproved"] = term.is_approved
-                            retInfo["isSample"]   = term.is_sample_only
+                            // Only return this if the terminal IS for samples:
+                            if term.is_sample_only {
+                                retInfo["isSample"]   = term.is_sample_only
+                            }
                             retInfo["apiKey"]     = apiKey
                             retInfo["requireEmployeeId"] = term.require_employee_id
                             
@@ -400,7 +409,10 @@ struct RetailerAPI {
                             // Build the response:
                             var responseDictionary = [String:Any]()
                             responseDictionary["isApproved"] = terminal.is_approved
-                            responseDictionary["isSample"] = terminal.is_sample_only
+                            // Only return this if the terminal IS for samples:
+                            if terminal.is_sample_only {
+                                responseDictionary["isSample"]   = terminal.is_sample_only
+                            }
                             responseDictionary["apiKey"] = thePassword
                             responseDictionary["requireEmployeeId"] = terminal.require_employee_id
 
