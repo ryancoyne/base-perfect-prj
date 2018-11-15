@@ -2,6 +2,17 @@ import PerfectHTTP
 import Foundation
 import PerfectLocalAuthentication
 
+extension TimeZone {
+    static var utc : TimeZone {
+        return TimeZone(abbreviation: "UTC")!
+    }
+}
+extension Locale {
+    static var enUS : Locale {
+        return Locale(identifier: "en_US")
+    }
+}
+
 extension String {
     
     enum s {
