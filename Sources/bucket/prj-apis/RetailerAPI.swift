@@ -477,15 +477,14 @@ struct RetailerAPI {
                     if let day = requestJSON["day"].stringValue {
                         
                         if let startMoment = moment(day, dateFormat: "yyyy-MM-dd", timeZone: .utc) {
-                            
+                            // Lets make sure we are getting the very end of the day, in the correct timezone:
                             let endMoment = moment(["year":startMoment.year,
                                                                                    "month":startMoment.month,
                                                                                    "day":startMoment.day,
                                                                                    "hour":23,
                                                                                    "minute":59,
                                                                                    "second":59,],
-                                                                                    timeZone: .utc,
-                                                                                    locale: .enUS)!
+                                                                                    timeZone: .utc)!
                             
                             startOrFrom = Int(startMoment.epoch())
                             endOrTo = Int(endMoment.epoch())
