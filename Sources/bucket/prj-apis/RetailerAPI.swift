@@ -782,17 +782,18 @@ struct RetailerAPI {
                 
                 let schema = Country.getSchema(request)
                 
+                var retailerUserId : Int? = nil
+                
                 if let t = rt.terminal, t.require_employee_id {
-                    let e = request.employeeId
-                    if e.isEmptyOrNil {
-                        // employee ID required, not sent
-                        return response.invalidEmployeeId
-                    } else if !(t.checkEmployeeId(e!, schema)) {
-                        // they did not pass the prquirements for employe id
-                        return response.invalidEmployeeId
-                    }
+                    // If we require the id, and it is empty or nil, return an error:
+                    guard !request.employeeId.isEmptyOrNil else { return response.invalidEmployeeId }
+                     let check = t.checkEmployeeId(request.employeeId!, schema)
+                    guard check.success else { return response.invalidEmployeeId }
+                    
+                    retailerUserId = check.retailerUserId
+                    
                 }
-
+                
                 do {
 
                     // we are using the json variable to return the code too.
@@ -871,6 +872,7 @@ struct RetailerAPI {
 
                         let transaction = CodeTransaction()
                         transaction.created = CCXServiceClass.getNow()
+                        transaction.retailer_user_id = retailerUserId
                         transaction.amount = json?["amount"].doubleValue
                         transaction.amount_available = json?["amount"].doubleValue
                         transaction.total_amount = json?["totalTransactionAmount"].doubleValue

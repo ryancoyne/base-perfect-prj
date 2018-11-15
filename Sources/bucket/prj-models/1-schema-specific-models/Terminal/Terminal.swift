@@ -307,10 +307,10 @@ public class Terminal: PostgresStORM {
         return (try? term.sqlRows(sql, params: []))?.first?.data.id
     }
     
-    public func checkEmployeeId(_ employeeId: String,_ theSchema:String? = nil) -> Bool {
+    public func checkEmployeeId(_ employeeId: String,_ theSchema:String? = nil) -> (success: Bool, retailerUserId : Int?) {
         
         // if we do not require an employee ID then all Employee ID's are ok
-        if !self.require_employee_id { return true }
+        if !self.require_employee_id { return (true, nil) }
         
         var schema = ""
         if theSchema.isNil {
@@ -324,7 +324,7 @@ public class Terminal: PostgresStORM {
         // get the retailer user object
         let ru = RetailerUser()
         
-        var sql = "SELECT * FROM \(schema).retailer_user "
+        var sql = "SELECT id FROM \(schema).retailer_user "
         sql.append("WHERE (")
         sql.append("(retailer_id = \(self.retailer_id!)) ")
         sql.append("AND ")
@@ -339,12 +339,12 @@ public class Terminal: PostgresStORM {
         sql.append(") ")
         
         let ru_r = try? ru.sqlRows(sql, params: [])
-        if ru_r.isNotNil, ru_r!.count > 0, let _ = ru_r!.first {
+        if ru_r.isNotNil, ru_r!.count > 0, let record = ru_r!.first {
             // there is a record - so.... all is good
-            return true
+            return (true, record.data.id)
         } else {
             // no record.....
-            return false
+            return (false, nil)
         }
     }
     
