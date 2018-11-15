@@ -1,0 +1,5 @@
+We need the following new header values:
+
+- employeeId
+- eventId
+- exportType
