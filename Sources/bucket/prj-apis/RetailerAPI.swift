@@ -33,6 +33,17 @@ struct RetailerAPI {
             ]
         }
         
+        //MARK: - Create Or Update Event:
+        public static func createOrUpdateEvent(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                
+                
+            }
+        }
+        
+        
         //MARK: - Get Bill Denominations:
         public static func billDenoms(_ data: [String:Any]) throws -> RequestHandler {
             return {
@@ -520,7 +531,7 @@ struct RetailerAPI {
                         }
                     }
                     
-                    if startOrFrom > endOrTo { return response.dateReportIssue }
+                    if startOrFrom > endOrTo { return response.dateIssue }
                     
                     var sqlStatement = ""
                     if offsetLimit.isNil {
@@ -1085,11 +1096,11 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .forbidden)
     }
-    var dateReportIssue : Void {
+    var dateIssue : Void {
         return try! self
-            .setBody(json: ["errorCode":"ReportIssue", "message":"Start date must be less than end date."])
+            .setBody(json: ["errorCode":"DateIssue", "message":"Start date must be less than end date."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .custom(code: 420, message: "Report Request Issue"))
+            .completed(status: .custom(code: 420, message: "Date Request Issue"))
     }
     func emptyReport(start : Any, end: Any) -> Void {
         return try! self
