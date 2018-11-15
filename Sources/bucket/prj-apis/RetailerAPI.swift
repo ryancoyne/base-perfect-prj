@@ -461,6 +461,8 @@ struct RetailerAPI {
                 
                 let schema = Country.getSchema(request)
                 
+                let offsetLimit = request.offsetLimit
+                
                 do {
                     
                     let requestJSON = try request.postBodyJSON()!
@@ -500,7 +502,7 @@ struct RetailerAPI {
                             } else if let start = start as? Int {
                                 startOrFrom = start
                             }
-                            if let end = end as? String, let theMoment = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZZZ", timeZone: .utc) {
+                            if let end = end as? String, let theMoment = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
                                 endOrTo = Int(theMoment.epoch())
                             } else if let end = end as? Int {
                                 endOrTo = end
@@ -520,7 +522,12 @@ struct RetailerAPI {
                     
                     if startOrFrom > endOrTo { return response.dateReportIssue }
                     
-                    let sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId));"
+                    var sqlStatement = ""
+                    if offsetLimit.isNil {
+                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId));"
+                    } else {
+                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(offsetLimit!.offset), \(offsetLimit!.limit));"
+                    }
                     
                     let rows = try? CodeTransaction().sqlRows(sqlStatement, params: [])
                     
@@ -1154,6 +1161,21 @@ fileprivate extension HTTPRequest {
         } else {
             return theTry!
         }
+    }
+    
+    var offsetLimit : (offset : Int, limit: Int)? {
+        
+        let foundOffsetStr = self.queryParams.first { $0.0 == "offset" }?.1
+        let foundLimitStr = self.queryParams.first { $0.0 == "limit" }?.1
+        
+        
+        if let fO = foundOffsetStr, let fL = foundLimitStr {
+            if let ffO = Int(fO), let ffL = Int(fL) {
+                return (offset: ffO, limit: ffL)
+            }
+        }
+        
+        return nil
     }
 
     var employeeId : String? {

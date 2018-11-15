@@ -1279,6 +1279,7 @@ fileprivate extension HTTPRequest {
         }
         return 0.0
     }
+    
     func getOffsetLimit() -> (offsetNumber:Int, limitNumber:Int) {
         
         var ol = 0, of = 0
