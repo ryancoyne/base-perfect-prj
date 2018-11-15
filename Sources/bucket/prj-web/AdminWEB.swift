@@ -55,7 +55,7 @@ struct AdminWEB {
                 for s in schemas {
                     
                     var data:[String:Any] = [:]
-                    
+                    let sql = "SELECT SUM(amount) AS bucket_total, COUNT(customer_code) AS bucket_count"
                     
                     
                     
