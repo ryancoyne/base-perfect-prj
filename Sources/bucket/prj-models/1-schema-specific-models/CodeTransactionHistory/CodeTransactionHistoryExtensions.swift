@@ -47,6 +47,18 @@ struct CodeTransactionHistoryDictionary {
             }
         }
     }
+    var retailerUserId : Int? {
+        get {
+            return self.dic["retailer_user_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["retailer_user_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "retailer_user_id")
+            }
+        }
+    }
     var customerCode : String? {
         get {
             return self.dic["customer_code"].stringValue

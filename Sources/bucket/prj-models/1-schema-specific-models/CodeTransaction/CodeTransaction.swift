@@ -43,6 +43,7 @@ public class CodeTransaction: PostgresStORM {
     var disputed_reason     : String? = nil
     var customer_codeurl     : String? = nil
     var terminal_id : Int? = nil
+    var retailer_user_id : Int? = nil
     var client_location : String? = nil
     var client_transaction_id     : String? = nil
     var batch_id : String? = nil
@@ -154,6 +155,10 @@ public class CodeTransaction: PostgresStORM {
             client_transaction_id = data
         }
         
+        if let data = this.data.codeTransactionDic.retailerUserId {
+            retailer_user_id = data
+        }
+        
         if let data = this.data.codeTransactionDic.customerCode {
             customer_code = data
         }
@@ -228,6 +233,11 @@ public class CodeTransaction: PostgresStORM {
             case "retailer_id":
                 if (value as? Int).isNotNil {
                     self.retailer_id = (value as! Int)
+                }
+                
+            case "retailer_user_id":
+                if (value as? Int).isNotNil {
+                    self.retailer_user_id = (value as! Int)
                 }
             
             case "terminal_id":
@@ -398,6 +408,10 @@ public class CodeTransaction: PostgresStORM {
             dictionary.codeTransactionDic.archived = self.archived
         }
         
+        if self.retailer_user_id.isNotNil {
+            dictionary.codeTransactionDic.retailerUserId = self.retailer_user_id
+        }
+        
         if self.archivedby.isNotNil {
             dictionary.codeTransactionDic.archivedBy = self.archivedby
         }
@@ -527,6 +541,10 @@ public class CodeTransaction: PostgresStORM {
         }
         
         if diff == true, self.client_location != targetItem.client_location {
+            diff = false
+        }
+        
+        if diff == true, self.retailer_user_id != targetItem.retailer_user_id {
             diff = false
         }
         

@@ -28,6 +28,7 @@ public class CodeTransactionHistory: PostgresStORM {
     var processedby  : String? = nil
     
     var retailer_id           : Int? = nil
+    var retailer_user_id : Int? = nil
     var country_id            : Int? = nil
     var customer_code         : String? = nil
     var deleted_reason     : String? = nil
@@ -100,6 +101,9 @@ public class CodeTransactionHistory: PostgresStORM {
         
         if let data = this.data.codeTransactionHistoryDic.cashedoutNote {
             cashedout_note = data
+        }
+        if let data = this.data.codeTransactionHistoryDic.retailerUserId {
+            retailer_user_id = data
         }
         if let data = this.data.codeTransactionHistoryDic.cashedoutTotal.doubleValue {
             cashedout_total = data
@@ -222,6 +226,11 @@ public class CodeTransactionHistory: PostgresStORM {
             case "retailer_id":
                 if (value as? Int).isNotNil {
                     self.retailer_id = (value as! Int)
+                }
+                
+            case "retailer_user_id":
+                if (value as? Int).isNotNil {
+                    self.retailer_user_id = (value as! Int)
                 }
                 
             case "client_transaction_id":
@@ -446,6 +455,10 @@ public class CodeTransactionHistory: PostgresStORM {
             dictionary.codeTransactionHistoryDic.countryId = self.country_id
         }
         
+        if self.retailer_user_id.isNotNil {
+            dictionary.codeTransactionHistoryDic.retailerUserId = self.retailer_user_id
+        }
+        
         if self.retailer_id.isNotNil {
             dictionary.codeTransactionHistoryDic.retailerId = self.retailer_id
         }
@@ -531,6 +544,10 @@ public class CodeTransactionHistory: PostgresStORM {
         }
         
         if diff == true, self.disputed_reason != targetItem.disputed_reason {
+            diff = false
+        }
+        
+        if diff == true, self.retailer_user_id != targetItem.retailer_user_id {
             diff = false
         }
         
