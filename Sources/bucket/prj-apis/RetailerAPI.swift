@@ -476,7 +476,7 @@ struct RetailerAPI {
                     
                     if let day = requestJSON["day"].stringValue {
                         
-                        if let startMoment = moment(day, dateFormat: "yyyy-MM-dd", timeZone: .utc, locale: .enUS) {
+                        if let startMoment = moment(day, dateFormat: "yyyy-MM-dd", timeZone: .utc) {
                             
                             let endMoment = moment(["year":startMoment.year,
                                                                                    "month":startMoment.month,
@@ -494,6 +494,20 @@ struct RetailerAPI {
                         
                     } else {
                         // Okay they sent start & end.  Lets see if its a string or an integer epoch date:
+                        if let start = requestJSON["start"], let end = requestJSON["end"] {
+                            
+                            if let start = start as? String, let theMoment = moment(start, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                                startOrFrom = Int(theMoment.epoch())
+                            } else if let start = start as? Int {
+                                startOrFrom = start
+                            }
+                            if let end = end as? String, let theMoment = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZZZ", timeZone: .utc) {
+                                endOrTo = Int(theMoment.epoch())
+                            } else if let end = end as? Int {
+                                endOrTo = end
+                            }
+                        }
+                        
                     }
                     
                     var terminalId : Int = 0
@@ -505,16 +519,13 @@ struct RetailerAPI {
                         }
                     }
                     
-                    startOrFrom = requestJSON["start"].intValue ?? 0
-                    endOrTo = requestJSON["end"].intValue ?? 0
-                    
                     if startOrFrom > endOrTo { return response.dateReportIssue }
                     
                     let sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId));"
                     
                     let rows = try? CodeTransaction().sqlRows(sqlStatement, params: [])
                     
-                    if let transactions = rows {
+                    if let transactions = rows, !transactions.isEmpty {
                         var bucketTotal = 0.0
                         var transactionsJSON : [[String:Any]] = []
                         for transaction in transactions {
@@ -559,6 +570,8 @@ struct RetailerAPI {
                         return response.returnReport(bucketTotal, transactions: transactionsJSON)
                         
                     } else {
+                        
+                        return response.emptyReport(start: startOrFrom, end: endOrTo)
                         
                     }
     
@@ -1071,6 +1084,12 @@ fileprivate extension HTTPResponse {
             .setBody(json: ["errorCode":"ReportIssue", "message":"Start date must be less than end date."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 420, message: "Report Request Issue"))
+    }
+    func emptyReport(start : Any, end: Any) -> Void {
+        return try! self
+            .setBody(json: ["errorCode":"EmptyReport", "message":"Empty report between \(start) and \(end)"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 418, message: "Empty Report"))
     }
     var noLocationTerminal : Void {
         return try! self
