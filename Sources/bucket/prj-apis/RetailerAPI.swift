@@ -978,7 +978,22 @@ struct RetailerAPI {
                 
                 let schema = Country.getSchema(request)
                 
+                var theEventId : Int = 0
+                if let eventId = request.eventId {
+                    guard RetailerEvent.exists(withId: eventId, schema: schema) else { return response.eventDNE }
+                    // Okay.. lets make sure we aren't past the ending date ->
+                    let event = try? RetailerEvent().sqlRows("SELECT * FROM \(schema).retailer_event_view_deleted_no WHERE id = \(eventId);", params: []).first
+                    let now = CCXServiceClass.getNow()
+                    
+                    if let endDate = event??.data["end_date"].intValue, now >= endDate {
+                        return response.eventClosed
+                    } else {
+                        theEventId = event??.data.id ?? 0
+                    }
+                }
+                
                 var retailerUserId : Int? = nil
+                
                 if let t = rt.terminal, t.require_employee_id {
                     // If we require the id, and it is empty or nil, return an error:
                     guard !request.employeeId.isEmptyOrNil else { return response.invalidEmployeeId }
@@ -992,17 +1007,18 @@ struct RetailerAPI {
                 do {
 
                     // we are using the json variable to return the code too.
-                    var json = try request.postBodyJSON()
+                    var json = try request.postBodyJSON()!
+                    guard !json.isEmpty else { return response.emptyJSONBody }
                     
                     // get the code
                     if let t = rt.terminal, t.is_sample_only {
-                        json!["sample"] = true
+                        json["sample"] = true
                     }
-                    var ccode = Retailer().createCustomerCode(schemaId: schema, json!)
+                    var ccode = Retailer().createCustomerCode(schemaId: schema, json)
                     
                     // loop until we get a customer code that is unique
                     while !ccode.success {
-                        ccode = Retailer().createCustomerCode(schemaId: schema, json!)
+                        ccode = Retailer().createCustomerCode(schemaId: schema, json)
                     }
                     
 //                    var itsASample = false
@@ -1016,13 +1032,13 @@ struct RetailerAPI {
                         let thecode: String = ccode.message
 //                        if itsASample { thecode.append(".SAMPLE") }
                     
-                        json!["customerCode"] = thecode
+                        json["customerCode"] = thecode
                         
                         var qrCodeURL = ""
                         qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerApiURL?.absoluteString ?? "")
                         qrCodeURL.append("redeem/")
                         qrCodeURL.append(thecode)
-                        json!["qrCodeContent"] = qrCodeURL
+                        json["qrCodeContent"] = qrCodeURL
                         
                         var sql = ""
                         
@@ -1068,15 +1084,16 @@ struct RetailerAPI {
                         let transaction = CodeTransaction()
                         transaction.created = CCXServiceClass.getNow()
                         transaction.retailer_user_id = retailerUserId
-                        transaction.amount = json?["amount"].doubleValue
-                        transaction.amount_available = json?["amount"].doubleValue
-                        transaction.total_amount = json?["totalTransactionAmount"].doubleValue
-                        transaction.client_location = json?["locationId"].stringValue
-                        transaction.client_transaction_id = json?["clientTransactionId"].stringValue
+                        transaction.event_id = theEventId
+                        transaction.amount = json["amount"].doubleValue
+                        transaction.amount_available = json["amount"].doubleValue
+                        transaction.total_amount = json["totalTransactionAmount"].doubleValue
+                        transaction.client_location = json["locationId"].stringValue
+                        transaction.client_transaction_id = json["clientTransactionId"].stringValue
                         transaction.terminal_id = terminal.id
                         transaction.retailer_id = retailer.id
-                        transaction.customer_code = json?["customerCode"].stringValue
-                        transaction.customer_codeurl = json?["qrCodeContent"].stringValue
+                        transaction.customer_code = json["customerCode"].stringValue
+                        transaction.customer_codeurl = json["qrCodeContent"].stringValue
                         if let cc = add.country_id {
                             transaction.country_id = cc
                         }
@@ -1090,10 +1107,10 @@ struct RetailerAPI {
                         // and now - lets save theb transaction in the Audit table
                         AuditFunctions().addCustomerCodeAuditRecord(transaction)
                         
-                        json!["bucketTransactionId"] = transaction.id
+                        json["bucketTransactionId"] = transaction.id
                         
                         var rn:[String:Any] = transaction.asDictionary()
-                        for (key, val) in json! {
+                        for (key, val) in json {
                             rn[key] = val
                         }
                         
@@ -1106,22 +1123,21 @@ struct RetailerAPI {
                         
                         
                         // if we are here then everything went well
-                        try? response.setBody(json: json!)
+                        try? response.setBody(json: json)
                             .completed(status: .ok)
                         return
                     }
                     
                     // we have to work on the correct error return codes
                     // ideas?
-                    try? response.setBody(json: json!)
+                    try? response.setBody(json: json)
                         .completed(status: .ok)
                     
                 } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
                     return response.invalidRequest(invalidJSONString)
-                    
                 } catch {
                     // Not sure what error could be thrown here, but the only one we throw right now is if the JSON is unparceable.
-                    
+                    return response.caughtError(error)
                 }
                 
             }
@@ -1408,12 +1424,18 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .ok)
     }
-
     var noEvents : Void {
         return try! self
             .setBody(json: ["errorCode":"NoEvents", "message":"There were no events found with the given information."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 430, message: "No Events Found"))
+    }
+    
+    var eventClosed : Void {
+        return try! self
+            .setBody(json: ["errorCode":"EventClosed", "message":"You cannot add a transaction to an event that is not in session."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 424, message: "No Events Found"))
     }
 }
 
@@ -1474,6 +1496,14 @@ fileprivate extension HTTPRequest {
         }
     }
 
+    var eventId : Int? {
+        if let eventId = self.header(.custom(name: "eventId"))?.intValue {
+            return eventId
+        } else {
+            return nil
+        }
+    }
+    
     var employeeId : String? {
         if let employeeIdFromHeader = self.header(.custom(name: "employeeId")).stringValue {
             return employeeIdFromHeader

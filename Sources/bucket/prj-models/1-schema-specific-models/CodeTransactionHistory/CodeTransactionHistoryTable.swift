@@ -154,6 +154,7 @@ final class CodeTransactionHistoryTable {
         // table specific fields
         createsql.append("country_id int NOT NULL DEFAULT 0, ")
         createsql.append("retailer_id int NOT NULL DEFAULT 0, ")
+        createsql.append("event_id int NOT NULL DEFAULT 0, ")
         createsql.append("retailer_user_id int NOT NULL DEFAULT 0, ")
         createsql.append("amount numeric(10,5) NOT NULL DEFAULT 0, ")
         createsql.append("amount_available numeric(10,5) NOT NULL DEFAULT 0, ")
