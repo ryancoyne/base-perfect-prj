@@ -177,36 +177,66 @@ final class PRJDBTables {
 //        var viewsql = "CREATE VIEW \(schema).\(tablename)_view_not_redeemed AS "
 //        viewsql.append("SELECT * FROM \(schema).\(tablename) WHERE redeemed = 0; ")
         
-        var viewsql = "CREATE OR REPLACE FUNCTION \(schema).getTransactionReport(fromDate int, toDate int, retailerId int, terminalId int=0) "
+        var viewsql = "CREATE OR REPLACE FUNCTION \(schema).getTransactionReport(fromDate bigint, toDate bigint, retailerId int, terminalId int=0, retailerUserId int=0, offsetBy int=0, limitBy int=200) "
         viewsql.append("RETURNS TABLE (id int, created int, amount numeric, total_amount numeric, client_location text, ")
         viewsql.append("client_transaction_id text, terminal_id int, disputed int, disputedby text, customer_code text, redeemed int) ")
         viewsql.append("AS $function$ ")
         
         viewsql.append("BEGIN ")
         
-        viewsql.append("IF terminalId = 0 THEN ")
+        viewsql.append("    IF terminalId = 0 AND retailerUserId = 0 THEN ")
         
-        viewsql.append("RETURN QUERY ")
-        viewsql.append("SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed ")
-        viewsql.append("FROM \(schema).code_transaction AS ct ")
-        viewsql.append("WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) ")
-        viewsql.append("UNION ")
-        viewsql.append("SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed ")
-        viewsql.append("FROM \(schema).code_transaction_history AS cth ")
-        viewsql.append("WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) ")
-        viewsql.append("ORDER BY created DESC; ")
-        viewsql.append("ELSE ")
+        viewsql.append("        RETURN QUERY ")
+        viewsql.append("            SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed ")
+        viewsql.append("            FROM us.code_transaction AS ct ")
+        viewsql.append("            WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) ")
+        viewsql.append("            UNION ")
+        viewsql.append("            SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed ")
+        viewsql.append("            FROM us.code_transaction_history AS cth ")
+        viewsql.append("            WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) ")
+        viewsql.append("            ORDER BY created DESC ")
+        viewsql.append("            OFFSET offsetBy LIMIT limitBy; ")
         
-        viewsql.append("RETURN QUERY ")
-        viewsql.append("SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed ")
-        viewsql.append("FROM \(schema).code_transaction AS ct ")
-        viewsql.append("WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId) ")
-        viewsql.append("UNION ")
-        viewsql.append("SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed ")
-        viewsql.append("FROM \(schema).code_transaction_history AS cth ")
-        viewsql.append("WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId) ")
-        viewsql.append("ORDER BY created DESC; ")
-        viewsql.append("END IF; ")
+        viewsql.append("    ELSIF (retailerUserId = 0) AND (terminalId > 0) THEN ")
+        
+        viewsql.append("        RETURN QUERY ")
+        viewsql.append("            SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed ")
+        viewsql.append("            FROM us.code_transaction AS ct ")
+        viewsql.append("            WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId) ")
+        viewsql.append("            UNION ")
+        viewsql.append("            SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed ")
+        viewsql.append("            FROM us.code_transaction_history AS cth ")
+        viewsql.append("            WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId) ")
+        viewsql.append("            ORDER BY created DESC ")
+        viewsql.append("            OFFSET offsetBy LIMIT limitBy; ")
+        
+        viewsql.append("    ELSIF (retailerUserId > 0) AND (terminalId > 0) THEN ")
+        
+        viewsql.append("        RETURN QUERY ")
+        viewsql.append("            SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed ")
+        viewsql.append("            FROM us.code_transaction AS ct ")
+        viewsql.append("            WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId) AND (ct.retailer_user_id = retailerUserId) ")
+        viewsql.append("            UNION ")
+        viewsql.append("            SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed ")
+        viewsql.append("            FROM us.code_transaction_history AS cth ")
+        viewsql.append("            WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId) AND (cth.retailer_user_id = retailerUserId) ")
+        viewsql.append("            ORDER BY created DESC ")
+        viewsql.append("            OFFSET offsetBy LIMIT limitBy; ")
+        
+        viewsql.append("    ELSE ")
+        
+        viewsql.append("        RETURN QUERY ")
+        viewsql.append("            SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed ")
+        viewsql.append("            FROM us.code_transaction AS ct ")
+        viewsql.append("            WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.retailer_user_id = retailerUserId) ")
+        viewsql.append("            UNION ")
+        viewsql.append("            SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed ")
+        viewsql.append("            FROM us.code_transaction_history AS cth ")
+        viewsql.append("            WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.retailer_user_id = retailerUserId) ")
+        viewsql.append("            ORDER BY created DESC ")
+        viewsql.append("            OFFSET offsetBy LIMIT limitBy; ")
+        viewsql.append("    END IF; ")
+
         
         viewsql.append("END $function$ ")
         

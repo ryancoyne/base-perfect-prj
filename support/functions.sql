@@ -1,5 +1,5 @@
 
-CREATE OR REPLACE FUNCTION us.getTransactionReport(fromDate int, toDate int, retailerId int, terminalId int=0, retailerUserId int=0, offsetBy int=0, limitBy int=200)
+CREATE OR REPLACE FUNCTION us.getTransactionReport(fromDate bigint, toDate bigint, retailerId int, terminalId int=0, retailerUserId int=0, offsetBy int=0, limitBy int=200)
 RETURNS TABLE (id int, created int, amount numeric, total_amount numeric, client_location text,
 client_transaction_id text, terminal_id int, disputed int, disputedby text, customer_code text, redeemed int)
 AS $function$
