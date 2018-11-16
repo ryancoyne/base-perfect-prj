@@ -78,7 +78,7 @@ struct RetailerAPI {
                     
                     sqlStatement.append(")")
                     
-                    if let events = try? RetailerEvent().sqlRows(sqlStatement, params: []) {
+                    if let events = try? RetailerEvent().sqlRows(sqlStatement, params: []), !events.isEmpty {
                         
                         var eventsJSON = [[String:Any]]()
                         
