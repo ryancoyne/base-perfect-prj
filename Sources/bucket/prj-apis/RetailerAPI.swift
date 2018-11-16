@@ -155,11 +155,11 @@ struct RetailerAPI {
                 switch schema {
                 case "us":
                 // Return the US denominations:
-                    bodyReturn = ["usesNaturalChangeFunction":false]
+                    bodyReturn = ["usesNaturalChangeFunction":true, "denominations":[100.00, 50.00, 20.00, 10.00, 5.00, 2.00, 1.00], "currencyDecimals":2]
                     break
                 case "sg":
                 // Return the SG Denominations:
-                    bodyReturn = ["usesNaturalChangeFunction":true, "denominations":[100.00, 50.00, 20.00, 10.00, 5.00, 2.00]]
+                    bodyReturn = ["usesNaturalChangeFunction":true, "denominations":[100.00, 50.00, 20.00, 10.00, 5.00, 2.00], "currencyDecimals":2]
                     break
                 default:
                     return response.unsupportedCountry
