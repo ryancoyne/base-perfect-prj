@@ -116,8 +116,25 @@ final class CodeTransactionHistoryTable {
                 // there could be an error if both tables are not there yet
             }
         }
-
         
+        thesql = "SELECT val, name FROM config WHERE name = $1"
+        tr = try! config.sqlRows(thesql, params: ["\(schema).function_gettransactionreporttotals"])
+        if tr.count > 0 {
+            let testval = Double(tr[0].data["val"] as! String)
+            if testval != tablelevel {
+                // update to the new installation
+                self.update(currentlevel: testval!, schema)
+            }
+        } else {
+            do {
+                let _ = try tbl.sqlRows(PRJDBTables.sharedInstance.addTransactionReportTotalsFunction(schema), params: [])
+                // new one - set the default 1.00
+                thesql = "INSERT INTO config(name,val) VALUES('\(schema).function_gettransactionreporttotals','1.00')"
+                let _ = try config.sqlRows(thesql, params: [])
+            } catch {
+                // there could be an error if both tables are not there yet
+            }
+        }
     }
     
     private func update(currentlevel: Double,_ schemaIn:String? = "public") {
