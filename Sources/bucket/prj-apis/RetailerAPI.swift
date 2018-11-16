@@ -32,7 +32,7 @@ struct RetailerAPI {
                 ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction,],
                 ["method":"put", "uri":"/api/v1/event", "handler":createOrUpdateEvent,],
                 ["method":"delete", "uri":"/api/v1/event/{id}", "handler":deleteEvent,],
-                ["method":"post", "uri":"/api/v1/event", "handler":getEvents,],
+                ["method":"post", "uri":"/api/v1/events", "handler":getEvents,],
             ]
         }
         
@@ -52,9 +52,60 @@ struct RetailerAPI {
                 
                 let schema = Country.getSchema(request)
                 
+                let offsetLimit = request.offsetLimit
+                
                 // Okay.  Lets first do the scenario when they have the id:
-                
-                
+                do {
+                    let json = try request.postBodyJSON()!
+                    // We do not require a post body here.  It can be empty.
+                    
+                    let eventId = json.id ?? 0
+                    let dates = request.epochDates
+                    
+                    var sqlStatement = "SELECT * FROM \(schema).getRetailerEvents(\(rt.retailer!.id!), \(eventId)"
+                    
+                    if dates.isNotNil {
+                        sqlStatement.append(", \(dates!.start), \(dates!.end)")
+                    }
+                    
+                    if offsetLimit.isNotNil {
+                        sqlStatement.append(", \(offsetLimit!.offset), \(offsetLimit!.limit)")
+                    }
+                    
+                    sqlStatement.append(")")
+                    
+                    if let events = try? RetailerEvent().sqlRows(sqlStatement, params: []) {
+                        
+                        var eventsJSON = [[String:Any]]()
+                        
+                        for event in events {
+                            var eventJSON = [String:Any]()
+                            eventJSON["id"] = event.data.id
+                            if let modified = event.data.modified.intValue, modified > 0 {
+                                eventJSON["modified"] = modified.dateString
+                            }
+                            if let modified = event.data.created.intValue, modified > 0 {
+                                eventJSON["created"] = modified.dateString
+                            }
+                            eventJSON["eventName"] = event.data["event_name"].stringValue
+                            eventJSON["eventMessage"] = event.data["event_message"].stringValue
+                            eventJSON["startDate"] = event.data["start_date"].intValue?.dateString
+                            eventJSON["endDate"] = event.data["end_date"].intValue?.dateString
+                            eventsJSON.append(eventJSON)
+                        }
+                        
+                        // Return the events!
+                        return response.returnEvents(eventsJSON)
+                        
+                    } else {
+                        return response.noEvents
+                    }
+                    
+                } catch BucketAPIError.unparceableJSON(let theStr) {
+                    return response.invalidRequest(theStr)
+                } catch {
+                    return response.caughtError(error)
+                }
             }
         }
         
@@ -1350,7 +1401,20 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .ok)
     }
+    
+    func returnEvents(_ eventsArray : [[String:Any]]) -> Void {
+        return try! self
+            .setBody(json: ["events":eventsArray])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .ok)
+    }
 
+    var noEvents : Void {
+        return try! self
+            .setBody(json: ["errorCode":"NoEvents", "message":"There were no events found with the given information."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 430, message: "No Events Found"))
+    }
 }
 
 fileprivate extension HTTPRequest {
@@ -1393,6 +1457,21 @@ fileprivate extension HTTPRequest {
         }
         
         return nil
+    }
+    
+    var epochDates : (start: Int, end: Int)? {
+        
+        if let postJSON = try? self.postBodyJSON() {
+            if let start = postJSON?["start"].stringValue, let end = postJSON?["end"].stringValue, let startEpochInt = moment(start, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch(), let endEpochInt = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch() {
+                return (Int(startEpochInt), Int(endEpochInt))
+            } else if let start = postJSON?["start"].intValue, let end = postJSON?["end"].intValue {
+                return (start, end)
+            } else {
+                return nil
+            }
+        } else {
+            return nil
+        }
     }
 
     var employeeId : String? {
