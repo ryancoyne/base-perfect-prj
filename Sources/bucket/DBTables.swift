@@ -339,6 +339,66 @@ final class PRJDBTables {
         
     }
     
+    public func addRetailerEventFunction(_ schemaIn:String? = "public")-> String {
+        
+        var schema = "public"
+        if schemaIn.isNotNil {
+            schema = schemaIn!.lowercased()
+        }
+        
+        var viewsql = "CREATE OR REPLACE FUNCTION \(schema).getRetailerEvents(retailerId int, eventId int=0, fromDate int=0, toDate int=0, offsetBy int=0, limitBy int=200) "
+        
+        viewsql.append("RETURNS TABLE (id int, created int, modified int, event_name text, event_message text, start_date int, end_date int, retailer_id int) ")
+        viewsql.append("AS $function$ ")
+        
+        viewsql.append("BEGIN ")
+        
+        viewsql.append("    IF fromDate > 0 AND toDate > 0 AND eventId > 0 THEN ")
+        
+        viewsql.append("        RETURN QUERY ")
+        viewsql.append("            SELECT re.id, re.created, re.modified, re.event_name, re.event_message, re.start_date, re.end_date, re.retailer_id ")
+        viewsql.append("            FROM us.retailer_event_view_deleted_no as re ")
+        viewsql.append("            WHERE ((re.start_date BETWEEN fromDate AND toDate) OR (re.end_date BETWEEN fromDate AND toDate)) AND (re.retailer_id = retailerId) AND (re.id = eventId) ")
+        viewsql.append("            ORDER BY created DESC ")
+        viewsql.append("            OFFSET offsetBy LIMIT limitBy; ")
+        
+        viewsql.append("    ELSIF fromDate = 0 AND toDate = 0 AND eventId = 0 THEN ")
+        
+        viewsql.append("        RETURN QUERY ")
+        viewsql.append("            SELECT re.id, re.created, re.modified, re.event_name, re.event_message, re.start_date, re.end_date, re.retailer_id ")
+        viewsql.append("            FROM us.retailer_event_view_deleted_no as re ")
+        viewsql.append("            WHERE (re.retailer_id = retailerId) ")
+        viewsql.append("            ORDER BY created DESC ")
+        viewsql.append("            OFFSET offsetBy LIMIT limitBy; ")
+        
+        viewsql.append("    ELSIF fromDate = 0 AND toDate = 0 AND eventId > 0 THEN ")
+        
+        viewsql.append("        RETURN QUERY ")
+        viewsql.append("            SELECT re.id, re.created, re.modified, re.event_name, re.event_message, re.start_date, re.end_date, re.retailer_id ")
+        viewsql.append("            FROM us.retailer_event_view_deleted_no as re ")
+        viewsql.append("            WHERE (re.retailer_id = retailerId) AND (re.id = eventId) ")
+        viewsql.append("            ORDER BY created DESC ")
+        viewsql.append("            OFFSET offsetBy LIMIT limitBy; ")
+        
+        viewsql.append("    ELSE ")
+        
+        viewsql.append("        RETURN QUERY ")
+        viewsql.append("            SELECT re.id, re.created, re.modified, re.event_name, re.event_message, re.start_date, re.end_date, re.retailer_id ")
+        viewsql.append("            FROM us.retailer_event_view_deleted_no as re ")
+        viewsql.append("            WHERE ((re.start_date BETWEEN fromDate AND toDate) OR (re.end_date BETWEEN fromDate AND toDate)) AND (re.retailer_id = retailerId) ")
+        viewsql.append("            ORDER BY created DESC ")
+        viewsql.append("            OFFSET offsetBy LIMIT limitBy; ")
+        
+        viewsql.append("    END IF; ")
+        
+        viewsql.append("END $function$ ")
+        
+        viewsql.append("LANGUAGE plpgsql; ")
+        
+        return viewsql
+        
+    }
+    
     //MARK:-
     //MARK: Core DB creation processes
     public func createTables() {

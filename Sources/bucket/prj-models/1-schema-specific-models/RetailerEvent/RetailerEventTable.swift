@@ -21,17 +21,17 @@ final class RetailerEventTable {
     let tablelevel = 1.00
     
     //MARK:-
-    //MARK: batch detail table
+    //MARK: retailer events table
     func create() {
         
         for i in PRJCountries.list  {
-            createBatchDetail((i.uppercased()))
+            createRetailerEvents((i.uppercased()))
         }
     }
     
     //MARK:-
-    //MARK: batch detail by schema table
-    private func createBatchDetail(_ schemaIn:String? = "public") {
+    //MARK: retailer events by schema table
+    private func createRetailerEvents(_ schemaIn:String? = "public") {
         
         var schema = "public"
         if schemaIn.isNotNil {
@@ -132,6 +132,26 @@ final class RetailerEventTable {
                 }
             }
         }
+        
+        thesql = "SELECT val, name FROM config WHERE name = $1"
+        let tr = try! config.sqlRows(thesql, params: ["\(schema).function_getretailerevents"])
+        if tr.count > 0 {
+            let testval = Double(tr[0].data["val"] as! String)
+            if testval != tablelevel {
+                // update to the new installation
+                self.update(currentlevel: testval!, schema)
+            }
+        } else {
+            do {
+                let _ = try tbl.sqlRows(PRJDBTables.sharedInstance.addRetailerEventFunction(schema), params: [])
+                // new one - set the default 1.00
+                thesql = "INSERT INTO config(name,val) VALUES('\(schema).function_getretailerevents','1.00')"
+                let _ = try config.sqlRows(thesql, params: [])
+            } catch {
+                // there could be an error if both tables are not there yet
+            }
+        }
+
     }
     
     private func update(currentlevel: Double, _ schemaIn:String? = "public") {
