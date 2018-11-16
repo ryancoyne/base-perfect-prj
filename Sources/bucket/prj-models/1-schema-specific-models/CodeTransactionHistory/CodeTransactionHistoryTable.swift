@@ -163,7 +163,6 @@ final class CodeTransactionHistoryTable {
         
         // common
         createsql.append("( ")
-//        createsql.append("id integer NOT NULL DEFAULT 0 UNIQUE, ")
         createsql.append("id integer NOT NULL DEFAULT 0, ")
 
         createsql.append(CCXDBTables.sharedInstance.addCommonFields())
@@ -197,11 +196,11 @@ final class CodeTransactionHistoryTable {
         createsql.append("cashedout int NOT NULL DEFAULT 0, ")
         createsql.append("cashedoutby text COLLATE pg_catalog.default, ")
         createsql.append("cashedout_total numeric(10,5) NOT NULL DEFAULT 0, ")
-//        createsql.append("cashedout_note text COLLATE pg_catalog.default, ")
-        createsql.append("cashedout_note text COLLATE pg_catalog.default ")
+        createsql.append("cashedout_note text COLLATE pg_catalog.default, ")
+        createsql.append("retailer_user_id integer DEFAULT 0, ")
+        createsql.append("event_id integer DEFAULT 0 ")
 
         // ending fields
-//        createsql.append("CONSTRAINT \(tbl.table())_pkey PRIMARY KEY (id) ")
         createsql.append("); ")
         
         print(createsql)
