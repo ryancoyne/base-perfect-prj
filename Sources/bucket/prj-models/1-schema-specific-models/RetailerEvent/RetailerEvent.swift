@@ -202,6 +202,15 @@ public class RetailerEvent: PostgresStORM {
         return diff
         
     }
+    
+    public static func exists(withId : Int) -> Bool {
+        let test = RetailerEvent()
+        try? test.get(withId)
+        return test.isError()
+    }
+    
 }
+
+
 
 

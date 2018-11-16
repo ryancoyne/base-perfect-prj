@@ -70,27 +70,50 @@ struct RetailerAPI {
                     // Okay, lets first check the dates.  They are required.
                     var epochStart = 0
                     var epochEnd = 0
-                    if let startStr = json["start"].stringValue, let startDate = moment(startStr, timeZone: .utc), let endStr = json["end"].stringValue, let endDate = moment(endStr, timeZone: .utc) {
+                
+                    if let startStr = json["start"].stringValue, let startDate = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc), let endStr = json["end"].stringValue, let endDate = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
                         epochStart = Int(startDate.epoch())
                         epochEnd = Int(endDate.epoch())
                         guard epochStart < epochEnd else { return response.dateIssue }
+                    } else if let startStr = json["start"].stringValue, let endStr = json["end"].stringValue {
+                        return response.dateParseIssue(start: startStr, end: endStr)
                     } else {
-                        
+                        return response.eventDatesRequired
                     }
                     
                     // If they sent the json id, they are updating:
                     let theEvent = RetailerEvent()
+                    theEvent.retailer_id = rt.retailer?.id
                     if let id = json.id {
                         // THIS IS AN UPDATE:
+                        // First check to see if this id exists:
+                        guard RetailerEvent.exists(withId: id) else { return response.eventDNE }
+                        
                         theEvent.id = id
                         theEvent.event_name = json["eventName"].stringValue
+                        theEvent.event_message = json["eventMessage"].stringValue
+                        theEvent.start_date = epochStart
+                        theEvent.end_date = epochEnd
+                        
+                        _ = try? theEvent.saveWithCustomType(schemaIn: schema)
+                        
+                       return response.updatedEvent(id)
+                        
                     } else {
                         // THIS IS A CREATE:
                         theEvent.event_name = json["eventName"].stringValue
                         theEvent.event_message = json["eventMessage"].stringValue
+                        theEvent.start_date = epochStart
+                        theEvent.end_date = epochEnd
+                        
+                        if let id = try! theEvent.saveWithCustomType(schemaIn: schema).first?.data.id {
+                            theEvent.id = id
+                            return response.createdEvent(id)
+                        } else {
+                            return response.caughtError(NSError(domain: "PUT /event", code: 500, userInfo: [NSLocalizedDescriptionKey : "There was a database error attempting to create your event."]))
+                        }
+                        
                     }
-                    
-                    
                     
                 } catch BucketAPIError.unparceableJSON(let theString) {
                     return response.invalidRequest(theString)
@@ -1240,6 +1263,41 @@ fileprivate extension HTTPResponse {
     func returnReport(_ bucketTotal: Double, transactions: [[String:Any]]) -> Void {
         return try! self
             .setBody(json: ["bucketTotal":bucketTotal, "transactions":transactions])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .ok)
+    }
+    
+    var eventDNE : Void {
+        return try! self
+            .setBody(json: ["errorCode":"EventIdDNE", "message":"The event ID does not exist."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 404, message: "Event Does Not Exist"))
+    }
+    
+    func dateParseIssue(start: String, end: String) -> Void {
+        return try! self
+            .setBody(json: ["errorCode":"DateParseIssue", "message":"We are having problems parsing \(start) and \(end).  Please make sure it is following the date format of: 'yyyy-MM-dd HH:mm:ssZZZ'."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 404, message: "Event Does Not Exist"))
+    }
+    
+    var eventDatesRequired : Void {
+        return try! self
+            .setBody(json: ["errorCode":"EventDatesRequired", "message":"Please include a 'start' and 'end' key for the dates of the event.  Please use date format 'yyyy-MM-dd HH:mm:ssZZZ'.'"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 404, message: "Event Does Not Exist"))
+    }
+    
+    func createdEvent(_ id : Int) -> Void {
+        return try! self
+            .setBody(json: ["id":id, "result":"You successfully created the event."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .created)
+    }
+    
+    func updatedEvent(_ id : Int) -> Void {
+        return try! self
+            .setBody(json: ["id":id, "result":"You successfully updated the event."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .ok)
     }
