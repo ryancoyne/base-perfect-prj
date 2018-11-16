@@ -1281,14 +1281,14 @@ fileprivate extension HTTPResponse {
         return try! self
             .setBody(json: ["errorCode":"DateParseIssue", "message":"We are having problems parsing \(start) and \(end).  Please make sure it is following the date format of: 'yyyy-MM-dd HH:mm:ssZZZ'."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .custom(code: 404, message: "Event Does Not Exist"))
+            .completed(status: .custom(code: 420, message: "Date Request Issue"))
     }
     
     var eventDatesRequired : Void {
         return try! self
             .setBody(json: ["errorCode":"EventDatesRequired", "message":"Please include a 'start' and 'end' key for the dates of the event.  Please use date format 'yyyy-MM-dd HH:mm:ssZZZ'.'"])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .custom(code: 404, message: "Event Does Not Exist"))
+            .completed(status: .custom(code: 420, message: "Date Request Issue"))
     }
     
     func createdEvent(_ id : Int) -> Void {
