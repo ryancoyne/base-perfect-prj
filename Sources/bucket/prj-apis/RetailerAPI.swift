@@ -486,6 +486,17 @@ struct RetailerAPI {
                 
                 let offsetLimit = request.offsetLimit
                 
+                var retailerUserId : Int = 0
+                if let t = rt.terminal, t.require_employee_id {
+                    // If we require the id, and it is empty or nil, return an error:
+                    guard !request.employeeId.isEmptyOrNil else { return response.invalidEmployeeId }
+                    let check = t.checkEmployeeId(request.employeeId!, schema)
+                    guard check.success else { return response.invalidEmployeeId }
+                    
+                    retailerUserId = check.retailerUserId ?? 0
+                    
+                }
+                
                 do {
                     
                     let requestJSON = try request.postBodyJSON()!
@@ -546,10 +557,11 @@ struct RetailerAPI {
                     if startOrFrom > endOrTo { return response.dateIssue }
                     
                     var sqlStatement = ""
+                    
                     if offsetLimit.isNil {
                         sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId));"
                     } else {
-                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(offsetLimit!.offset), \(offsetLimit!.limit));"
+                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId),\(offsetLimit!.offset), \(offsetLimit!.limit));"
                     }
                     
                     let rows = try? CodeTransaction().sqlRows(sqlStatement, params: [])
@@ -783,7 +795,6 @@ struct RetailerAPI {
                 let schema = Country.getSchema(request)
                 
                 var retailerUserId : Int? = nil
-                
                 if let t = rt.terminal, t.require_employee_id {
                     // If we require the id, and it is empty or nil, return an error:
                     guard !request.employeeId.isEmptyOrNil else { return response.invalidEmployeeId }
