@@ -202,6 +202,15 @@ public class RetailerEvent: PostgresStORM {
         return diff
         
     }
+    
+    public static func exists(withId : Int, schema: String) -> Bool {
+        let test = RetailerEvent()
+        let result = try? test.sqlRows("SELECT id FROM \(schema).\(test.table()) WHERE id = \(withId);", params: [])
+        return result?.first?.data.id.isNotNil == true
+    }
+    
 }
+
+
 
 

@@ -29,8 +29,88 @@ struct RetailerAPI {
                 ["method":"post",   "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],
                 ["method":"post",   "uri":"/api/v1/transaction", "handler":createTransaction],
                 ["method":"post",   "uri":"/api/v1/report", "handler":report],
-                ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction],
+                ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction,],
+                ["method":"put", "uri":"/api/v1/event", "handler":createOrUpdateEvent,],
+                ["method":"delete", "uri":"/api/v1/event/{id}", "handler":deleteEvent,],
+                ["method":"post", "uri":"/api/v1/events", "handler":getEvents,],
             ]
+        }
+        
+        //MARK: - Fetch Events:
+        public static func getEvents(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                
+                // We will have a country passed in through the header:
+                guard let _ = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(request)
+                
+                let offsetLimit = request.offsetLimit
+                
+                // Okay.  Lets first do the scenario when they have the id:
+                do {
+                    let json = try request.postBodyJSON()!
+                    // We do not require a post body here.  It can be empty.
+                    
+                    let eventId = json.id ?? 0
+                    let dates = request.epochDates
+                    
+                    var sqlStatement = "SELECT * FROM \(schema).getRetailerEvents(\(rt.retailer!.id!), \(eventId)"
+                    
+                    if dates.isNotNil {
+                        sqlStatement.append(", \(dates!.start), \(dates!.end)")
+                    }
+                    
+                    if offsetLimit.isNotNil {
+                        if dates.isNil {
+                            sqlStatement.append(", 0, 0, \(offsetLimit!.offset), \(offsetLimit!.limit)")
+                        } else {
+                            sqlStatement.append(", \(offsetLimit!.offset), \(offsetLimit!.limit)")
+                        }
+                    }
+                    
+                    sqlStatement.append(")")
+                    
+                    if let events = try? RetailerEvent().sqlRows(sqlStatement, params: []), !events.isEmpty {
+                        
+                        var eventsJSON = [[String:Any]]()
+                        
+                        for event in events {
+                            var eventJSON = [String:Any]()
+                            eventJSON["id"] = event.data.id
+                            if let modified = event.data.modified.intValue, modified > 0 {
+                                eventJSON["modified"] = modified.dateString
+                            }
+                            if let modified = event.data.created.intValue, modified > 0 {
+                                eventJSON["created"] = modified.dateString
+                            }
+                            eventJSON["eventName"] = event.data["event_name"].stringValue
+                            eventJSON["eventMessage"] = event.data["event_message"].stringValue
+                            eventJSON["startDate"] = event.data["start_date"].intValue?.dateString
+                            eventJSON["endDate"] = event.data["end_date"].intValue?.dateString
+                            eventsJSON.append(eventJSON)
+                        }
+                        
+                        // Return the events!
+                        return response.returnEvents(eventsJSON)
+                        
+                    } else {
+                        return response.noEvents
+                    }
+                    
+                } catch BucketAPIError.unparceableJSON(let theStr) {
+                    return response.invalidRequest(theStr)
+                } catch {
+                    return response.caughtError(error)
+                }
+            }
         }
         
         //MARK: - Create Or Update Event:
@@ -38,11 +118,111 @@ struct RetailerAPI {
             return {
                 request, response in
                 
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                
+                // We will have a country passed in through the header:
+                guard let _ = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(request)
+                
+                do {
+                    
+                    let json = try request.postBodyJSON()!
+                    guard !json.isEmpty else { return response.emptyJSONBody }
+                    
+                    // Okay, lets first check the dates.  They are required.
+                    var epochStart : Int? = nil
+                    var epochEnd : Int? = nil
+                
+                    if let startStr = json["start"].stringValue, let startDate = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc), let endStr = json["end"].stringValue, let endDate = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                        epochStart = Int(startDate.epoch())
+                        epochEnd = Int(endDate.epoch())
+                        guard epochStart! < epochEnd! else { return response.dateIssue }
+                    } else if let startStr = json["start"].stringValue, let endStr = json["end"].stringValue {
+                        return response.dateParseIssue(start: startStr, end: endStr)
+                    }
+                    
+                    // If they sent the json id, they are updating:
+                    let theEvent = RetailerEvent()
+                    theEvent.retailer_id = rt.retailer?.id
+                    if let id = json.id {
+                        // THIS IS AN UPDATE:
+                        // First check to see if this id exists:
+                        guard RetailerEvent.exists(withId: id, schema: schema) else { return response.eventDNE }
+                        
+                        theEvent.id = id
+                        theEvent.event_name = json["eventName"].stringValue
+                        theEvent.event_message = json["eventMessage"].stringValue
+                        // When updating, the start and end dates are not required:
+                        theEvent.start_date = epochStart
+                        theEvent.end_date = epochEnd
+                        
+                        _ = try? theEvent.saveWithCustomType(schemaIn: schema)
+                        
+                       return response.updatedEvent(id)
+                        
+                    } else {
+                        // THIS IS A CREATE:
+                        theEvent.event_name = json["eventName"].stringValue
+                        theEvent.event_message = json["eventMessage"].stringValue
+                        
+                        // When creating, the start and end dates are required.
+                        if epochStart.isNil || epochEnd.isNil { return response.eventDatesRequired }
+                        
+                        theEvent.start_date = epochStart
+                        theEvent.end_date = epochEnd
+                        
+                        if let id = try! theEvent.saveWithCustomType(schemaIn: schema).first?.data.id {
+                            theEvent.id = id
+                            return response.createdEvent(id)
+                        } else {
+                            return response.caughtError(NSError(domain: "PUT /event", code: 500, userInfo: [NSLocalizedDescriptionKey : "There was a database error attempting to create your event."]))
+                        }
+                        
+                    }
+                    
+                } catch BucketAPIError.unparceableJSON(let theString) {
+                    return response.invalidRequest(theString)
+                } catch {
+                    return response.caughtError(error)
+                }
                 
             }
         }
         
+        //MARK: - Delete Event:
+        public static func deleteEvent(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                
+                // We will have a country passed in through the header:
+                guard let _ = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(request)
+                
+                guard let eventId = request.urlVariables["id"]!.intValue, RetailerEvent.exists(withId: eventId, schema: schema) else { return response.eventDNE }
+                
+                // Okay.. we need to check if we have any transactions associated with this event.  If we do, then we need to return an error.
+                guard !rt.retailer!.hasTransactionsInEvent(eventId: eventId) else { return response.cannotDeleteEvent }
+                
+                let event = RetailerEvent()
+                event.id = eventId
+                _ = try? event.softDeleteWithCustomType(schemaIn: schema)
+                
+                return response.eventDeleted
+                
+            }
+        }
         
         //MARK: - Get Bill Denominations:
         public static func billDenoms(_ data: [String:Any]) throws -> RequestHandler {
@@ -62,11 +242,11 @@ struct RetailerAPI {
                 switch schema {
                 case "us":
                 // Return the US denominations:
-                    bodyReturn = ["usesNaturalChangeFunction":false]
+                    bodyReturn = ["usesNaturalChangeFunction":true, "denominations":[100.00, 50.00, 20.00, 10.00, 5.00, 2.00, 1.00], "currencyDecimals":2]
                     break
                 case "sg":
                 // Return the SG Denominations:
-                    bodyReturn = ["usesNaturalChangeFunction":true, "denominations":[100.00, 50.00, 20.00, 10.00, 5.00, 2.00]]
+                    bodyReturn = ["usesNaturalChangeFunction":true, "denominations":[100.00, 50.00, 20.00, 10.00, 5.00, 2.00], "currencyDecimals":2]
                     break
                 default:
                     return response.unsupportedCountry
@@ -101,8 +281,6 @@ struct RetailerAPI {
                     let json = try request.postBodyJSON()
                     // Throw an error if the json body is empty.  We should have something in the post body JSON here.
                     guard !json!.isEmpty else { return response.emptyJSONBody }
-                    
-                    // This should be the retailerBounce part:
                     
                     guard (request.countryId) != nil else {  response.invalidCountryCode; return }
                     
@@ -477,6 +655,9 @@ struct RetailerAPI {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
                 // We should first bouce the retailer (takes care of all the general retailer errors):
                 guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
                 
@@ -790,6 +971,9 @@ struct RetailerAPI {
         public static func createTransaction(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
             
                 // We should first bouce the retailer (takes care of all the general retailer errors):
                 guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
@@ -798,7 +982,22 @@ struct RetailerAPI {
                 
                 let schema = Country.getSchema(request)
                 
+                var theEventId : Int = 0
+                if let eventId = request.eventId {
+                    guard RetailerEvent.exists(withId: eventId, schema: schema) else { return response.eventDNE }
+                    // Okay.. lets make sure we aren't past the ending date ->
+                    let event = try? RetailerEvent().sqlRows("SELECT * FROM \(schema).retailer_event_view_deleted_no WHERE id = \(eventId);", params: []).first
+                    let now = CCXServiceClass.getNow()
+                    
+                    if let endDate = event??.data["end_date"].intValue, now >= endDate {
+                        return response.eventClosed
+                    } else {
+                        theEventId = event??.data.id ?? 0
+                    }
+                }
+                
                 var retailerUserId : Int? = nil
+                
                 if let t = rt.terminal, t.require_employee_id {
                     // If we require the id, and it is empty or nil, return an error:
                     guard !request.employeeId.isEmptyOrNil else { return response.invalidEmployeeId }
@@ -812,17 +1011,18 @@ struct RetailerAPI {
                 do {
 
                     // we are using the json variable to return the code too.
-                    var json = try request.postBodyJSON()
+                    var json = try request.postBodyJSON()!
+                    guard !json.isEmpty else { return response.emptyJSONBody }
                     
                     // get the code
                     if let t = rt.terminal, t.is_sample_only {
-                        json!["sample"] = true
+                        json["sample"] = true
                     }
-                    var ccode = Retailer().createCustomerCode(schemaId: schema, json!)
+                    var ccode = Retailer().createCustomerCode(schemaId: schema, json)
                     
                     // loop until we get a customer code that is unique
                     while !ccode.success {
-                        ccode = Retailer().createCustomerCode(schemaId: schema, json!)
+                        ccode = Retailer().createCustomerCode(schemaId: schema, json)
                     }
                     
 //                    var itsASample = false
@@ -836,13 +1036,13 @@ struct RetailerAPI {
                         let thecode: String = ccode.message
 //                        if itsASample { thecode.append(".SAMPLE") }
                     
-                        json!["customerCode"] = thecode
+                        json["customerCode"] = thecode
                         
                         var qrCodeURL = ""
                         qrCodeURL.append(EnvironmentVariables.sharedInstance.PublicServerApiURL?.absoluteString ?? "")
                         qrCodeURL.append("redeem/")
                         qrCodeURL.append(thecode)
-                        json!["qrCodeContent"] = qrCodeURL
+                        json["qrCodeContent"] = qrCodeURL
                         
                         var sql = ""
                         
@@ -888,15 +1088,16 @@ struct RetailerAPI {
                         let transaction = CodeTransaction()
                         transaction.created = CCXServiceClass.getNow()
                         transaction.retailer_user_id = retailerUserId
-                        transaction.amount = json?["amount"].doubleValue
-                        transaction.amount_available = json?["amount"].doubleValue
-                        transaction.total_amount = json?["totalTransactionAmount"].doubleValue
-                        transaction.client_location = json?["locationId"].stringValue
-                        transaction.client_transaction_id = json?["clientTransactionId"].stringValue
+                        transaction.event_id = theEventId
+                        transaction.amount = json["amount"].doubleValue
+                        transaction.amount_available = json["amount"].doubleValue
+                        transaction.total_amount = json["totalTransactionAmount"].doubleValue
+                        transaction.client_location = json["locationId"].stringValue
+                        transaction.client_transaction_id = json["clientTransactionId"].stringValue
                         transaction.terminal_id = terminal.id
                         transaction.retailer_id = retailer.id
-                        transaction.customer_code = json?["customerCode"].stringValue
-                        transaction.customer_codeurl = json?["qrCodeContent"].stringValue
+                        transaction.customer_code = json["customerCode"].stringValue
+                        transaction.customer_codeurl = json["qrCodeContent"].stringValue
                         if let cc = add.country_id {
                             transaction.country_id = cc
                         }
@@ -910,10 +1111,10 @@ struct RetailerAPI {
                         // and now - lets save theb transaction in the Audit table
                         AuditFunctions().addCustomerCodeAuditRecord(transaction)
                         
-                        json!["bucketTransactionId"] = transaction.id
+                        json["bucketTransactionId"] = transaction.id
                         
                         var rn:[String:Any] = transaction.asDictionary()
-                        for (key, val) in json! {
+                        for (key, val) in json {
                             rn[key] = val
                         }
                         
@@ -926,22 +1127,21 @@ struct RetailerAPI {
                         
                         
                         // if we are here then everything went well
-                        try? response.setBody(json: json!)
+                        try? response.setBody(json: json)
                             .completed(status: .ok)
                         return
                     }
                     
                     // we have to work on the correct error return codes
                     // ideas?
-                    try? response.setBody(json: json!)
+                    try? response.setBody(json: json)
                         .completed(status: .ok)
                     
                 } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
                     return response.invalidRequest(invalidJSONString)
-                    
                 } catch {
                     // Not sure what error could be thrown here, but the only one we throw right now is if the JSON is unparceable.
-                    
+                    return response.caughtError(error)
                 }
                 
             }
@@ -952,6 +1152,9 @@ struct RetailerAPI {
         public static func deleteTransaction(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // We should first bouce the retailer (takes care of all the general retailer errors):
                 guard let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
@@ -1079,6 +1282,9 @@ struct RetailerAPI {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
                 // Verify Retailer
                 Retailer.retailerBounce(request, response)
                 
@@ -1166,13 +1372,74 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .ok)
     }
-
-}
-
-fileprivate extension Moment {
-    /// This is the yyyyMMdd formatted string for right now.
-    var intervalString : String {
-        return self.format("yyyyMMdd")
+    
+    var eventDNE : Void {
+        return try! self
+            .setBody(json: ["errorCode":"EventIdDNE", "message":"The event ID does not exist."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 404, message: "Event Does Not Exist"))
+    }
+    
+    func dateParseIssue(start: String, end: String) -> Void {
+        return try! self
+            .setBody(json: ["errorCode":"DateParseIssue", "message":"We are having problems parsing \(start) and \(end).  Please make sure it is following the date format of: 'yyyy-MM-dd HH:mm:ssZZZ'."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 420, message: "Date Request Issue"))
+    }
+    
+    var eventDatesRequired : Void {
+        return try! self
+            .setBody(json: ["errorCode":"EventDatesRequired", "message":"Please include a 'start' and 'end' key for the dates of the event.  Please use date format 'yyyy-MM-dd HH:mm:ssZZZ'.'"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 420, message: "Date Request Issue"))
+    }
+    
+    func createdEvent(_ id : Int) -> Void {
+        return try! self
+            .setBody(json: ["id":id, "result":"You successfully created the event."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .created)
+    }
+    
+    func updatedEvent(_ id : Int) -> Void {
+        return try! self
+            .setBody(json: ["id":id, "result":"You successfully updated the event."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .ok)
+    }
+    
+    var cannotDeleteEvent : Void {
+        return try! self
+            .setBody(json: ["errorCode":"EventHasTransactions", "message":"You can only delete an event if it has no associated transactions."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 421, message: "Can't Delete"))
+    }
+    
+    var eventDeleted : Void {
+        return try! self
+            .setBody(json: ["result":"You successfully deleted the event!"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .ok)
+    }
+    
+    func returnEvents(_ eventsArray : [[String:Any]]) -> Void {
+        return try! self
+            .setBody(json: ["events":eventsArray])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .ok)
+    }
+    var noEvents : Void {
+        return try! self
+            .setBody(json: ["errorCode":"NoEvents", "message":"There were no events found with the given information."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 430, message: "No Events Found"))
+    }
+    
+    var eventClosed : Void {
+        return try! self
+            .setBody(json: ["errorCode":"EventClosed", "message":"You cannot add a transaction to an event that is not in session."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 424, message: "Event Closed"))
     }
 }
 
@@ -1217,7 +1484,30 @@ fileprivate extension HTTPRequest {
         
         return nil
     }
+    
+    var epochDates : (start: Int, end: Int)? {
+        
+        if let postJSON = try? self.postBodyJSON() {
+            if let start = postJSON?["start"].stringValue, let end = postJSON?["end"].stringValue, let startEpochInt = moment(start, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch(), let endEpochInt = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch() {
+                return (Int(startEpochInt), Int(endEpochInt))
+            } else if let start = postJSON?["start"].intValue, let end = postJSON?["end"].intValue {
+                return (start, end)
+            } else {
+                return nil
+            }
+        } else {
+            return nil
+        }
+    }
 
+    var eventId : Int? {
+        if let eventId = self.header(.custom(name: "eventId"))?.intValue {
+            return eventId
+        } else {
+            return nil
+        }
+    }
+    
     var employeeId : String? {
         if let employeeIdFromHeader = self.header(.custom(name: "employeeId")).stringValue {
             return employeeIdFromHeader

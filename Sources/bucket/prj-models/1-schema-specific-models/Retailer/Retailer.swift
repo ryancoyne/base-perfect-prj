@@ -99,6 +99,12 @@ public class Retailer: PostgresStORM {
         return rows
     }
     
+    func hasTransactionsInEvent(eventId: Int) -> Bool {
+        let sqlStatement = "SELECT ct.id FROM us.code_transaction AS ct WHERE (ct.retailer_id = \(self.id!)) UNION SELECT cth.id FROM us.code_transaction_history AS cth WHERE (cth.retailer_id = \(self.id!)) LIMIT 1;"
+        let result = try? self.sqlRows(sqlStatement, params: [])
+        return result.isNotNil && !result!.isEmpty
+    }
+    
     func fromDictionary(sourceDictionary: [String:Any]) {
         
         for (key, value) in sourceDictionary {

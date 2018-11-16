@@ -30,6 +30,7 @@ public class CodeTransactionHistory: PostgresStORM {
     var retailer_id           : Int? = nil
     var retailer_user_id : Int? = nil
     var country_id            : Int? = nil
+    var event_id     : Int? = nil
     var customer_code         : String? = nil
     var deleted_reason     : String? = nil
     var disputed_reason     : String? = nil
@@ -89,6 +90,10 @@ public class CodeTransactionHistory: PostgresStORM {
         
         if let data = this.data.codeTransactionHistoryDic.disputedReason {
             disputed_reason = data
+        }
+        
+        if let data = this.data.codeTransactionDic.eventId {
+            event_id = data
         }
 
         if let data = this.data.codeTransactionHistoryDic.cashedoutBy {
@@ -221,6 +226,11 @@ public class CodeTransactionHistory: PostgresStORM {
             case "country_id":
                 if (value as? Int).isNotNil {
                     self.country_id = (value as! Int)
+                }
+                
+            case "event_id":
+                if (value as? Int).isNotNil {
+                    self.event_id = (value as! Int)
                 }
                 
             case "retailer_id":
@@ -435,6 +445,10 @@ public class CodeTransactionHistory: PostgresStORM {
             dictionary.codeTransactionHistoryDic.disputedReason = self.disputed_reason
         }
         
+        if self.event_id.isNotNil {
+            dictionary.codeTransactionHistoryDic.eventId = self.event_id
+        }
+        
         if self.cashedoutby.isNotNil {
             dictionary.codeTransactionHistoryDic.cashedoutBy = self.cashedoutby
         }
@@ -548,6 +562,10 @@ public class CodeTransactionHistory: PostgresStORM {
         }
         
         if diff == true, self.retailer_user_id != targetItem.retailer_user_id {
+            diff = false
+        }
+        
+        if diff == true, self.event_id != targetItem.event_id {
             diff = false
         }
         

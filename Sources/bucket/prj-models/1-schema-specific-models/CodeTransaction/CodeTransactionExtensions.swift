@@ -47,6 +47,18 @@ struct CodeTransactionDictionary {
             }
         }
     }
+    var eventId : Int? {
+        get {
+            return self.dic["event_id"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["event_id"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "event_id")
+            }
+        }
+    }
     var retailerUserId : Int? {
         get {
             return self.dic["retailer_user_id"].intValue

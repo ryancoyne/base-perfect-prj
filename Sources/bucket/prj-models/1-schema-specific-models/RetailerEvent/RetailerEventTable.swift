@@ -165,7 +165,7 @@ final class RetailerEventTable {
         // table specific fields
         createsql.append("retailer_id int default 0, ")
         createsql.append("event_name text COLLATE pg_catalog.default, ")
-        createsql.append("event_message int default 0, ")
+        createsql.append("event_message text COLLATE pg_catalog.default, ")
         createsql.append("start_date int default 0, ")
         createsql.append("end_date int default 0, ")
         

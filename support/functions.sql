@@ -63,7 +63,6 @@ END $function$
 
 LANGUAGE plpgsql;
 
-
 CREATE OR REPLACE FUNCTION us.getTransactionReportTotals(fromDate bigint, toDate bigint, retailerId int, terminalId int=0, retailerUserId int=0, offsetBy int=0, limitBy int=200, OUT total_count bigint, OUT total_value numeric)
 AS
 $$
@@ -144,4 +143,54 @@ RETURN;
 END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+-- THIS IS THE FUNCTION TO GET EVENTS ASSOCIATED WITH THE RETAILER: --
+
+CREATE OR REPLACE FUNCTION us.getRetailerEvents(retailerId int, eventId int=0, fromDate int=0, toDate int=0, offsetBy int=0, limitBy int=200)
+RETURNS TABLE (id int, created int, modified int, event_name text, event_message text, start_date int, end_date int, retailer_id int)
+AS $function$
+
+BEGIN
+
+IF fromDate > 0 AND toDate > 0 AND eventId > 0 THEN
+
+RETURN QUERY
+SELECT re.id, re.created, re.modified, re.event_name, re.event_message, re.start_date, re.end_date, re.retailer_id
+FROM us.retailer_event_view_deleted_no as re
+WHERE ((re.start_date BETWEEN fromDate AND toDate) OR (re.end_date BETWEEN fromDate AND toDate)) AND (re.retailer_id = retailerId) AND (re.id = eventId)
+ORDER BY created DESC
+OFFSET offsetBy LIMIT limitBy;
+
+ELSIF fromDate = 0 AND toDate = 0 AND eventId = 0 THEN
+
+RETURN QUERY
+SELECT re.id, re.created, re.modified, re.event_name, re.event_message, re.start_date, re.end_date, re.retailer_id
+FROM us.retailer_event_view_deleted_no as re
+WHERE (re.retailer_id = retailerId)
+ORDER BY created DESC
+OFFSET offsetBy LIMIT limitBy;
+
+ELSIF fromDate = 0 AND toDate = 0 AND eventId > 0 THEN
+
+RETURN QUERY
+SELECT re.id, re.created, re.modified, re.event_name, re.event_message, re.start_date, re.end_date, re.retailer_id
+FROM us.retailer_event_view_deleted_no as re
+WHERE (re.retailer_id = retailerId) AND (re.id = eventId)
+ORDER BY created DESC
+OFFSET offsetBy LIMIT limitBy;
+
+ELSE
+
+RETURN QUERY
+SELECT re.id, re.created, re.modified, re.event_name, re.event_message, re.start_date, re.end_date, re.retailer_id
+FROM us.retailer_event_view_deleted_no as re
+WHERE ((re.start_date BETWEEN fromDate AND toDate) OR (re.end_date BETWEEN fromDate AND toDate)) AND (re.retailer_id = retailerId)
+ORDER BY created DESC
+OFFSET offsetBy LIMIT limitBy;
+
+END IF;
+
+END $function$
+
+LANGUAGE plpgsql;
 
