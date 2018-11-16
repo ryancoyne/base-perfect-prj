@@ -29,8 +29,21 @@ struct RetailerAPI {
                 ["method":"post",   "uri":"/api/v1/transaction/{retailerId}", "handler":createTransaction],
                 ["method":"post",   "uri":"/api/v1/transaction", "handler":createTransaction],
                 ["method":"post",   "uri":"/api/v1/report", "handler":report],
-                ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction],
+                ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction,],
+                ["method":"put", "uri":"/api/v1/event", "handler":createOrUpdateEvent,],
+                ["method":"delete", "uri":"/api/v1/event", "handler":deleteEvent,],
+                ["method":"delete", "uri":"/api/v1/event", "handler":getEvents,],
             ]
+        }
+        
+        //MARK: - Fetch Events:
+        public static func getEvents(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                
+                
+            }
         }
         
         //MARK: - Create Or Update Event:
@@ -43,6 +56,15 @@ struct RetailerAPI {
             }
         }
         
+        //MARK: - Delete Event:
+        public static func deleteEvent(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                
+                
+            }
+        }
         
         //MARK: - Get Bill Denominations:
         public static func billDenoms(_ data: [String:Any]) throws -> RequestHandler {
