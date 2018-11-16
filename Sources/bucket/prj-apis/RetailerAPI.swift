@@ -31,8 +31,8 @@ struct RetailerAPI {
                 ["method":"post",   "uri":"/api/v1/report", "handler":report],
                 ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction,],
                 ["method":"put", "uri":"/api/v1/event", "handler":createOrUpdateEvent,],
-                ["method":"delete", "uri":"/api/v1/event", "handler":deleteEvent,],
-                ["method":"delete", "uri":"/api/v1/event", "handler":getEvents,],
+                ["method":"delete", "uri":"/api/v1/event/{id}", "handler":deleteEvent,],
+                ["method":"post", "uri":"/api/v1/event", "handler":getEvents,],
             ]
         }
         
@@ -132,7 +132,18 @@ struct RetailerAPI {
             return {
                 request, response in
                 
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                
+                // We will have a country passed in through the header:
+                guard let _ = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(request)
+                
+                let eventId = request.urlVariables["id"]!.intValue
                 
             }
         }
