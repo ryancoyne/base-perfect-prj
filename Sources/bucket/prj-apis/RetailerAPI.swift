@@ -484,23 +484,27 @@ struct RetailerAPI {
                 
                 let schema = Country.getSchema(request)
                 
-                let offsetLimit = request.offsetLimit
-                
-                var retailerUserId : Int = 0
+                // Here we may be requiring the employeeId.  SO we will have the employeeId also in the JSON to give the flexibility to change the report.
                 if let t = rt.terminal, t.require_employee_id {
                     // If we require the id, and it is empty or nil, return an error:
                     guard !request.employeeId.isEmptyOrNil else { return response.invalidEmployeeId }
                     let check = t.checkEmployeeId(request.employeeId!, schema)
                     guard check.success else { return response.invalidEmployeeId }
-                    
-                    retailerUserId = check.retailerUserId ?? 0
-                    
                 }
+                
+                var retailerUserId : Int = 0
+                let offsetLimit = request.offsetLimit
                 
                 do {
                     
                     let requestJSON = try request.postBodyJSON()!
                     if requestJSON.isEmpty { return response.emptyJSONBody }
+                    
+                    // Here we will set the retailerUserId for the query of the request:
+                    if let retailerUserCode = requestJSON["employeeId"].stringValue, let t = rt.terminal {
+                        let check = t.checkEmployeeId(retailerUserCode, schema)
+                        retailerUserId = check.retailerUserId ?? 0
+                    }
                     
                     // Okay, theres 3 different ways they can send the dates in here:
                     // 1. As an integer.
@@ -559,7 +563,7 @@ struct RetailerAPI {
                     var sqlStatement = ""
                     
                     if offsetLimit.isNil {
-                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId));"
+                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId));"
                     } else {
                         sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId),\(offsetLimit!.offset), \(offsetLimit!.limit));"
                     }
