@@ -51,7 +51,13 @@ struct RetailerAPI {
             return {
                 request, response in
                 
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
+                // We will have a country passed in through the header:
+                guard let _ = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(request)
                 
             }
         }
@@ -499,6 +505,9 @@ struct RetailerAPI {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
                 // We should first bouce the retailer (takes care of all the general retailer errors):
                 guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
                 
@@ -812,6 +821,9 @@ struct RetailerAPI {
         public static func createTransaction(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
             
                 // We should first bouce the retailer (takes care of all the general retailer errors):
                 guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
@@ -975,6 +987,9 @@ struct RetailerAPI {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
                 // We should first bouce the retailer (takes care of all the general retailer errors):
                 guard let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
                 
@@ -1101,6 +1116,9 @@ struct RetailerAPI {
             return {
                 request, response in
                 
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
                 // Verify Retailer
                 Retailer.retailerBounce(request, response)
                 
@@ -1189,13 +1207,6 @@ fileprivate extension HTTPResponse {
             .completed(status: .ok)
     }
 
-}
-
-fileprivate extension Moment {
-    /// This is the yyyyMMdd formatted string for right now.
-    var intervalString : String {
-        return self.format("yyyyMMdd")
-    }
 }
 
 fileprivate extension HTTPRequest {
