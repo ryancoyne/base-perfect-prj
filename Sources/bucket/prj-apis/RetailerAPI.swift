@@ -54,10 +54,49 @@ struct RetailerAPI {
                 // Do our normal stuff here:
                 guard request.SecurityCheck() else { return response.badSecurityToken }
                 
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                
                 // We will have a country passed in through the header:
                 guard let _ = request.countryId else { return response.invalidCountryCode }
                 
                 let schema = Country.getSchema(request)
+                
+                do {
+                    
+                    let json = try request.postBodyJSON()!
+                    guard !json.isEmpty else { return response.emptyJSONBody }
+                    
+                    // Okay, lets first check the dates.  They are required.
+                    var epochStart = 0
+                    var epochEnd = 0
+                    if let startStr = json["start"].stringValue, let startDate = moment(startStr, timeZone: .utc), let endStr = json["end"].stringValue, let endDate = moment(endStr, timeZone: .utc) {
+                        epochStart = Int(startDate.epoch())
+                        epochEnd = Int(endDate.epoch())
+                        guard epochStart < epochEnd else { return response.dateIssue }
+                    } else {
+                        
+                    }
+                    
+                    // If they sent the json id, they are updating:
+                    let theEvent = RetailerEvent()
+                    if let id = json.id {
+                        // THIS IS AN UPDATE:
+                        theEvent.id = id
+                        theEvent.event_name = json["eventName"].stringValue
+                    } else {
+                        // THIS IS A CREATE:
+                        theEvent.event_name = json["eventName"].stringValue
+                        theEvent.event_message = json["eventMessage"].stringValue
+                    }
+                    
+                    
+                    
+                } catch BucketAPIError.unparceableJSON(let theString) {
+                    return response.invalidRequest(theString)
+                } catch {
+                    return response.caughtError(error)
+                }
                 
             }
         }
@@ -129,8 +168,6 @@ struct RetailerAPI {
                     let json = try request.postBodyJSON()
                     // Throw an error if the json body is empty.  We should have something in the post body JSON here.
                     guard !json!.isEmpty else { return response.emptyJSONBody }
-                    
-                    // This should be the retailerBounce part:
                     
                     guard (request.countryId) != nil else {  response.invalidCountryCode; return }
                     
