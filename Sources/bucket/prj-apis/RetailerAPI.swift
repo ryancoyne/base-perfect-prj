@@ -41,6 +41,18 @@ struct RetailerAPI {
             return {
                 request, response in
                 
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                
+                // We will have a country passed in through the header:
+                guard let _ = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(request)
+                
+                // Okay.  Lets first do the scenario when they have the id:
                 
                 
             }
@@ -143,7 +155,16 @@ struct RetailerAPI {
                 
                 let schema = Country.getSchema(request)
                 
-                let eventId = request.urlVariables["id"]!.intValue
+                guard let eventId = request.urlVariables["id"]!.intValue, RetailerEvent.exists(withId: eventId, schema: schema) else { return response.eventDNE }
+                
+                // Okay.. we need to check if we have any transactions associated with this event.  If we do, then we need to return an error.
+                guard !rt.retailer!.hasTransactionsInEvent(eventId: eventId) else { return response.cannotDeleteEvent }
+                
+                let event = RetailerEvent()
+                event.id = eventId
+                _ = try? event.softDeleteWithCustomType(schemaIn: schema)
+                
+                return response.eventDeleted
                 
             }
         }
@@ -1312,6 +1333,20 @@ fileprivate extension HTTPResponse {
     func updatedEvent(_ id : Int) -> Void {
         return try! self
             .setBody(json: ["id":id, "result":"You successfully updated the event."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .ok)
+    }
+    
+    var cannotDeleteEvent : Void {
+        return try! self
+            .setBody(json: ["errorCode":"EventHasTransactions", "message":"You can only delete an event if it has no associated transactions."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 421, message: "Can't Delete"))
+    }
+    
+    var eventDeleted : Void {
+        return try! self
+            .setBody(json: ["result":"You successfully deleted the event!"])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .ok)
     }
