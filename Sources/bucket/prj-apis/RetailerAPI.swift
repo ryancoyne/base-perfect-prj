@@ -69,7 +69,11 @@ struct RetailerAPI {
                     }
                     
                     if offsetLimit.isNotNil {
-                        sqlStatement.append(", \(offsetLimit!.offset), \(offsetLimit!.limit)")
+                        if dates.isNil {
+                            sqlStatement.append(", 0, 0, \(offsetLimit!.offset), \(offsetLimit!.limit)")
+                        } else {
+                            sqlStatement.append(", \(offsetLimit!.offset), \(offsetLimit!.limit)")
+                        }
                     }
                     
                     sqlStatement.append(")")
