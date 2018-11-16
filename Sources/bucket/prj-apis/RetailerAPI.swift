@@ -68,17 +68,15 @@ struct RetailerAPI {
                     guard !json.isEmpty else { return response.emptyJSONBody }
                     
                     // Okay, lets first check the dates.  They are required.
-                    var epochStart = 0
-                    var epochEnd = 0
+                    var epochStart : Int? = nil
+                    var epochEnd : Int? = nil
                 
                     if let startStr = json["start"].stringValue, let startDate = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc), let endStr = json["end"].stringValue, let endDate = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
                         epochStart = Int(startDate.epoch())
                         epochEnd = Int(endDate.epoch())
-                        guard epochStart < epochEnd else { return response.dateIssue }
+                        guard epochStart! < epochEnd! else { return response.dateIssue }
                     } else if let startStr = json["start"].stringValue, let endStr = json["end"].stringValue {
                         return response.dateParseIssue(start: startStr, end: endStr)
-                    } else {
-                        return response.eventDatesRequired
                     }
                     
                     // If they sent the json id, they are updating:
@@ -87,11 +85,12 @@ struct RetailerAPI {
                     if let id = json.id {
                         // THIS IS AN UPDATE:
                         // First check to see if this id exists:
-                        guard RetailerEvent.exists(withId: id) else { return response.eventDNE }
+                        guard RetailerEvent.exists(withId: id, schema: schema) else { return response.eventDNE }
                         
                         theEvent.id = id
                         theEvent.event_name = json["eventName"].stringValue
                         theEvent.event_message = json["eventMessage"].stringValue
+                        // When updating, the start and end dates are not required:
                         theEvent.start_date = epochStart
                         theEvent.end_date = epochEnd
                         
@@ -103,6 +102,10 @@ struct RetailerAPI {
                         // THIS IS A CREATE:
                         theEvent.event_name = json["eventName"].stringValue
                         theEvent.event_message = json["eventMessage"].stringValue
+                        
+                        // When creating, the start and end dates are required.
+                        if epochStart.isNil || epochEnd.isNil { return response.eventDatesRequired }
+                        
                         theEvent.start_date = epochStart
                         theEvent.end_date = epochEnd
                         

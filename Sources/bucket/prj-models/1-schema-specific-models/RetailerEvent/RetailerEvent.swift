@@ -203,10 +203,10 @@ public class RetailerEvent: PostgresStORM {
         
     }
     
-    public static func exists(withId : Int) -> Bool {
+    public static func exists(withId : Int, schema: String) -> Bool {
         let test = RetailerEvent()
-        try? test.get(withId)
-        return test.isError()
+        let result = try? test.sqlRows("SELECT id FROM \(schema).\(test.table()) WHERE id = \(withId);", params: [])
+        return result?.first?.data.id.isNotNil == true
     }
     
 }
