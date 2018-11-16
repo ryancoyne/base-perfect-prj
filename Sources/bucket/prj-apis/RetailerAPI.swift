@@ -1435,7 +1435,7 @@ fileprivate extension HTTPResponse {
         return try! self
             .setBody(json: ["errorCode":"EventClosed", "message":"You cannot add a transaction to an event that is not in session."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .custom(code: 424, message: "No Events Found"))
+            .completed(status: .custom(code: 424, message: "Event Closed"))
     }
 }
 
