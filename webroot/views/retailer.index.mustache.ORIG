@@ -1,0 +1,17 @@
+{{>header}}
+<div class="row" style="margin-top: 100px;">
+<div class="col three first">{{>left}}</div>
+<div class="col thirteen last">
+
+{{^authenticated}}
+{{>login-body}}
+{{/authenticated}}
+
+{{#authenticated}}
+{{>components/retailer.index}}
+{{/authenticated}}
+
+
+</div>
+</div>
+{{>footer}}
