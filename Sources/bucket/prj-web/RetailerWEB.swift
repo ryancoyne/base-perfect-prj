@@ -164,6 +164,8 @@ struct RetailerWEB {
                 
                 var data_return:[String:Any] = [:]
                 
+                data_return["title_label"] = "Retailer Information"
+
                 data_return["page_retailer"] = true
                 data_return["country_id"] = country_id
                 let ctry = Country()
@@ -252,6 +254,7 @@ struct RetailerWEB {
                 
                 data_return["page_retailer_detail"] = true
                 data_return["country_id"] = country_id
+                data_return["title_label"] = "Retailer Information"
 
                 var ret:[[String:Any]] = []
 
