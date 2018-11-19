@@ -60,16 +60,16 @@
                     <input type="text" class="form-control" id="inputZip">
                 </div>
             </div>
+            
             <div class="form-row bg-secondary text-white">
                 <div class="col-md-6">Terminals</div>
                 <div class="col-md-6 ">
                     <a class="page-link bg-secondary text-white float-right" href="/retailer/{{country_id}}/{{id}}/terminal/add">Add A Terminal</a>
                 </div>
-
             </div>
                 {{^terminals}}
                     <div class="form-row">
-                        <div class="col-md-12 bg-secondary text-white">No Addresses On Record.</div>
+                        <div class="col-md-12 bg-secondary text-white">No Terminals On Record For This Address.</div>
                     </div>
                 {{/terminals}}
                 {{#terminals}}

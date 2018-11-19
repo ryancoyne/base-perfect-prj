@@ -3,7 +3,14 @@
     <!-- Page Content -->
     <div class="container">
 
-      <!-- Page Heading -->
+    <div class="form-row bg-secondary text-white">
+        <div class="col-md-6">Retailer List</div>
+        <div class="col-md-6 ">
+            <a class="page-link bg-secondary text-white float-right" href="/retailer/{{country_id}}/add">Add A Retailer</a>
+        </div>
+    </div>
+
+      <!-- Retailers -->
       {{#retailers}}
         {{^is_suspended}}
             <div class="form-row">
