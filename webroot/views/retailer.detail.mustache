@@ -4,68 +4,79 @@
     <!-- Page Content -->
     <div class="container">
 
-      <!-- Page Heading -->
-      <h1 class="my-4">{retailer_name}
-        <small>{retailer_address}</small>
-      </h1>
-
-      <form>
-          {{#retailers}}
+    {{#retailer}}
+    <form>
         <div class="form-row">
-          <div class="form-group col-md-6">
-            <label for="retailerName">Retailer Name</label>
-            <input type="text" class="form-control" id="retailerName" placeholder="Company Name" value="{{retailer_name}}">
-          </div>
-        </div>
-        {{#addresses}}
-            <div class="form-group">
-              <label for="inputAddress">Address</label>
-              <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
+            <div class="form-group col-md-6">
+                <label for="retailerName">Retailer Name</label>
+                <input type="text" class="form-control" id="retailerName" placeholder="Company Name" value="{{retailer_name}}">
             </div>
-            <div class="form-group">
-              <label for="inputAddress2">Address 2</label>
-              <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
+            <div class="form-group col-md-4">
+                <label for="retailerName">Retailer Code</label>
+                <input type="text" class="form-control" id="retailerCode" placeholder="Retailer Code" value="{{retailer_code}}">
+            </div>
+        </div>
+        <div class="form-row bg-secondary text-white">
+            <div class="col-md-12">Addresses</div>
+        </div>
+        {{^addresses}}
+            <div class="form-row">
+                <div class="col-md-12">No Addresses On Record.</div>
+            </div>
+        {{/addresses}}
+        {{#addresses}}
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="inputAddress">Address</label>
+                    <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
+                </div>
             </div>
             <div class="form-row">
-              <div class="form-group col-md-6">
-                <label for="inputCity">City</label>
-                <input type="text" class="form-control" id="inputCity">
-              </div>
-              <div class="form-group col-md-4">
-                <label for="inputState">State</label>
-                <select id="inputState" class="form-control">
-                  <option selected>Choose...</option>
-                  <option>...</option>
-                </select>
-              </div>
-              <div class="form-group col-md-2">
-                <label for="inputZip">Zip</label>
-                <input type="text" class="form-control" id="inputZip">
-              </div>
-            </div>
-            <div class="form-group">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="gridCheck">
-                <label class="form-check-label" for="gridCheck">
-                  Check me out
-                </label>
-              </div>
-            </div>
-            {{#terminals}}
-              <div class="form-group">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="gridCheck">
-                  <label class="form-check-label" for="gridCheck">
-                    Check me out
-                  </label>
+                <div class="form-group col-md-12">
+                    <label for="inputAddress2">Address 2</label>
+                    <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
                 </div>
-              </div>
-            {{/terminals}}
-          {{/addresses}}
-        {{/retailers}}
-        <div class="form-group">
-          <button type="submit" class="btn btn-primary">Update</button>
-        </div>
-      </form>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="inputCity">City</label>
+                    <input type="text" class="form-control" id="inputCity">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="inputState">State</label>
+                    <select id="inputState" class="form-control">
+                        <option selected>Choose...</option>
+                        <option>...</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="inputZip">Zip</label>
+                    <input type="text" class="form-control" id="inputZip">
+                </div>
+            </div>
+            <div class="form-row bg-secondary text-white">
+                <div class="col-md-12">Terminals</div>
+            </div>
+                {{^terminals}}
+                    <div class="form-row">
+                        <div class="col-md-12 bg-secondary text-white">No Addresses On Record.</div>
+                    </div>
+                {{/terminals}}
+                {{#terminals}}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="gridCheck">
+                                <label class="form-check-label" for="gridCheck">Check me out</label>
+                            </div>
+                        </div>
+                    </div>
+                {{/terminals}}
+            {{/addresses}}
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        {{/retailer}}
 
 {{> admin.footer }}
