@@ -17,8 +17,14 @@
             </div>
         </div>
         <div class="form-row bg-secondary text-white">
-            <div class="col-md-12">Addresses</div>
+            <div class="col-md-6">Addresses</div>
+            <div class="col-md-6 ">
+                <a class="page-link bg-secondary text-white float-right" href="/retailer/{{country_id}}/{{id}}/address/add">Add An Address</a>
+            </div>
         </div>
+        <div class="form-row">
+        </div>
+
         {{^addresses}}
             <div class="form-row">
                 <div class="col-md-12">No Addresses On Record.</div>
@@ -55,7 +61,11 @@
                 </div>
             </div>
             <div class="form-row bg-secondary text-white">
-                <div class="col-md-12">Terminals</div>
+                <div class="col-md-6">Terminals</div>
+                <div class="col-md-6 ">
+                    <a class="page-link bg-secondary text-white float-right" href="/retailer/{{country_id}}/{{id}}/terminal/add">Add A Terminal</a>
+                </div>
+
             </div>
                 {{^terminals}}
                     <div class="form-row">

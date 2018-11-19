@@ -27,10 +27,10 @@ struct RetailerWEB {
 //                ["method":"get", "uri":"/retailer", "handler":retailerterminalindex],
                 ["method":"get", "uri":"/retailer/{countryId}", "handler":retailerindex],
                 ["method":"get", "uri":"/retailer/{countryId}/{retailerId}", "handler":retailerdetail],
-//                ["method":"get", "uri":"/retailer/terminal/{countryId}/{retailerId}/{terminalId}", "handler":retailerterminal],
-//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/location", "handler":retailerlocations],
-//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminals", "handler":retailerterminals],
-//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/{locationId}/terminals", "handler":retailerterminals],
+//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminal/add", "handler":retailer_add_terminal],
+//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminal/{terminalId}", "handler":retailer_terminal],
+//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/address/{addressId}", "handler":retailer_address],
+//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminals", "handler":retailer_add_address],
             ]
         }
         
