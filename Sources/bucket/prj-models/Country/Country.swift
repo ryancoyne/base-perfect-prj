@@ -262,7 +262,10 @@ public class Country: PostgresStORM {
 
         if cid > 0 {
             let c = Country()
-            let _ = try? c.get(cid)
+            let c_r = try? c.sqlRows("SELECT * FROM \(schema).\(c.table()) WHERE id = \(cid);", params: [])
+            if c_r.isNotNil {
+                c.to(c_r!.first!)
+            }
             if let cc = c.code_alpha_2 {
                 schema = cc.lowercased()
             }

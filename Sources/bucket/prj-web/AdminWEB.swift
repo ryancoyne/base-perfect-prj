@@ -25,7 +25,7 @@ struct AdminWEB {
         // POST request for login
         static var routes : [[String:Any]] {
             return [
-                ["method":"post", "uri":"/admin/stats", "handler":generalStats()],
+//                ["method":"post", "uri":"/admin/stats", "handler":generalStats],
             ]
         }
     

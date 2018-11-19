@@ -24,13 +24,13 @@ struct RetailerWEB {
         // POST request for login
         static var routes : [[String:Any]] {
             return [
-                ["method":"get", "uri":"/retailer", "handler":retailerterminalindex],
+//                ["method":"get", "uri":"/retailer", "handler":retailerterminalindex],
                 ["method":"get", "uri":"/retailer/{countryId}", "handler":retailerindex],
                 ["method":"get", "uri":"/retailer/{countryId}/{retailerId}", "handler":retailerdetail],
-                ["method":"get", "uri":"/retailer/terminal/{countryId}/{retailerId}/{terminalId}", "handler":retailerterminal],
-                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/location", "handler":retailerlocations],
-                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminals", "handler":retailerterminals],
-                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/{locationId}/terminals", "handler":retailerterminals],
+//                ["method":"get", "uri":"/retailer/terminal/{countryId}/{retailerId}/{terminalId}", "handler":retailerterminal],
+//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/location", "handler":retailerlocations],
+//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminals", "handler":retailerterminals],
+//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/{locationId}/terminals", "handler":retailerterminals],
             ]
         }
         
@@ -133,7 +133,9 @@ struct RetailerWEB {
                 request, response in
                 
                 // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-                guard request.SecurityCheck() else { return response.badSecurityToken }
+                #if !os(macOS)
+                    guard request.SecurityCheck() else { return response.badSecurityToken }
+                #endif
 
                 // grab the country id
                 let country_id = request.countryId
@@ -147,20 +149,64 @@ struct RetailerWEB {
                 }
                 
                 // grab the retailer information for the retailer
-                let retailer_id = request.retailerId
+//                let retailer_id = request.retailerId
                 
                 // make sure the user has authority to access the retailer information
                 if country_id.isNil { response.invalidCountryCode; return }
-                if retailer_id.isNil { response.invalidRetailerCode; return }
+//                if retailer_id.isNil { response.invalidRetailerCode; return }
                 
                 // check to see if the user is permitted to these retailer pages
-                let user = request.account
-                if user.isNil { return }
-                if !user!.bounceRetailerAdmin(schema, retailer_id!) {
+//                let user = request.account
+//                if user.isNil { return }
+//                if !user!.bounceRetailerAdmin(schema, retailer_id!) {
                     
+//                }
+                
+                var data_return:[String:Any] = [:]
+                
+                data_return["page_retailer"] = true
+                data_return["country_id"] = country_id
+                let ctry = Country()
+                let _ = try? ctry.get(country_id!)
+                if ctry.name.isNotNil {
+                    data_return["title"] = ctry.name!
+                    data_return["subtitle"] = ctry.code_alpha_2?.lowercased()
+                }
+                
+                // lets grab the retailers for the country
+                var sql = "SELECT * FROM \(schema).retailer;"
+                let r = Retailer()
+                let r_r = try? r.sqlRows(sql, params: [])
+                if r_r.isNotNil {
+                    var ret:[[String:Any]] = []
+                    for r_d in r_r! {
+                        let reta = Retailer()
+                        reta.to(r_d)
+                        var ret_raw = reta.asDictionary()
+                        
+                        sql = "SELECT COUNT(*) FROM \(schema).address WHERE retailer_id = \(reta.id!)"
+                        let add_c = try? r.sqlRows(sql, params: [])
+                        if add_c.isNotNil, add_c!.count > 0 {
+                            ret_raw["address_count"] = add_c!.first!.data["count"].intValue
+                        } else {
+                            ret_raw["address_count"] = 0
+                        }
+                        
+                        sql = "SELECT COUNT(*) FROM \(schema).terminal WHERE retailer_id = \(reta.id!)"
+                        let trm_c = try? r.sqlRows(sql, params: [])
+                        if trm_c.isNotNil, trm_c!.count > 0 {
+                            ret_raw["terminal_count"] = trm_c!.first!.data["count"].intValue
+                        } else {
+                            ret_raw["terminal_count"] = 0
+                        }
+
+                        ret.append(ret_raw)
+
+                    }
+                    data_return["retailers"] = ret
                 }
 
-                response.render(template: "views/retailer.index")
+                response.render(template: "views/retailer.index", context: data_return)
                 response.completed()
                 
             }
@@ -171,38 +217,96 @@ struct RetailerWEB {
                 request, response in
                 
                 // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                #if !os(macOS)
                 guard request.SecurityCheck() else { return response.badSecurityToken }
-
-                // get the email:
-                guard let email = request.param(name: "email") else { return }
-                // Okay see if we can find the account:
-                let find = Account()
-                try? find.find(["email":email])
+                #endif
                 
-                if !find.id.isEmpty {
-                    // okay.  we need to create their pass reset thingy and send an email:
-                    
-                    find.passreset = AccessToken.generate()
-                    
-                    if (try? find.save()).isNotNil {
-                        let h = "<p>To reset your password for your account, please <a href=\"\(AuthenticationVariables.baseURL)/verifyAccount/forgotpassword/\(find.passreset)\">click here</a></p>"
-                        
-                        response.render(template: "views/forgotpassword", context: ["msg_body":"We sent a confirmation email to \(email).","msg_title":"Success!"])
-                        response.completed()
-                        
-                        Utility.sendMail(name: find.username, address: email, subject: "Password reset!", html: h, text: "")
-                    } else {
-                        
-                        response.render(template: "views/forgotpassword", context: ["msg_body":"Please try again.","msg_title":"Unknown Error."])
-                        response.completed()
-                        
-                    }
-                    
+                // grab the country id
+                let country_id = request.countryId
+                var schema = ""
+                if country_id.isNotNil {
+                    schema = Country.getSchema(country_id!)
                 } else {
-                    // Show an error:
-                    response.render(template: "views/forgotpassword", context: ["msg_body":"We had an issue looking up this email.","msg_title":"Forgot Password Error"])
-                    response.completed()
+                    // there is an error with the country ID
+                    response.unsupportedCountry
+                    return
                 }
+                
+                // grab the retailer information for the retailer
+                let retailer_id = request.retailerId
+
+                // make sure the user has authority to access the retailer information
+                if country_id.isNil { response.invalidCountryCode; return }
+                if retailer_id.isNil { response.invalidRetailerCode; return }
+                
+                #if !os(macOS)
+                // check to see if the user is permitted to these retailer pages
+                let user = request.account
+                if user.isNil { return }
+                if !user!.bounceRetailerAdmin(schema, retailer_id!) {
+                
+                }
+                #endif
+
+                var data_return:[String:Any] = [:]
+                
+                data_return["page_retailer_detail"] = true
+                data_return["country_id"] = country_id
+
+                var ret:[[String:Any]] = []
+
+                // lets grab the retailer info
+                var sql = "SELECT * FROM \(schema).retailer WHERE id = \(retailer_id!);"
+                let r = Retailer()
+                let r_r = try? r.sqlRows(sql, params: [])
+                if r_r.isNotNil {
+                    for r_d in r_r! {
+                        let reta = Retailer()
+                        reta.to(r_d)
+                        ret.append(reta.asDictionary())
+                        data_return["title"] = reta.name!
+                        data_return["subtitle"] = nil
+                    }
+                    data_return["retailer"] = ret
+                }
+                
+                // get the addresses
+                sql = "SELECT * FROM \(schema).address AS ad WHERE ad.retailer_id = \(retailer_id!) "
+                sql.append("ORDER BY id ASC;")
+                let a = Address()
+                let a_r = try? a.sqlRows(sql, params: [])
+                if a_r.isNotNil {
+                    var ret:[[String:Any]] = []
+                    for a_d in a_r! {
+                        let addr = Address()
+                        addr.to(a_d)
+                        var address = addr.asDictionary()
+                        
+                        // get the terminals
+                        let sql_t = "SELECT * FROM \(schema).terminal WHERE address_id = \(addr.id!) AND retailer_id = \(addr.retailer_id!) "
+                        var terminals:[[String:Any]] = []
+                        let trm = Terminal()
+                        let trm_r = try? trm.sqlRows(sql_t, params: [])
+                        if trm_r.isNotNil, trm_r!.count > 0 {
+                            for trm_d in trm_r! {
+                                let t = Terminal()
+                                t.to(trm_d)
+                                terminals.append(t.asDictionary())
+                            }
+                            
+                            if terminals.count > 0 {
+                                address["terminals"] = terminals
+                            }
+                        }
+
+                        ret.append(address)
+
+                    }
+                    data_return["addresses"] = ret
+                }
+
+                response.render(template: "views/retailer.detail", context: data_return)
+                response.completed()
                 
             }
         }
