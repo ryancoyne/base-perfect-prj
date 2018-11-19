@@ -1,0 +1,92 @@
+
+{{> admin.header }}
+
+    <!-- Page Content -->
+    <div class="container">
+
+    {{#retailer}}
+    <form>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="retailerName">Retailer Name</label>
+                <input type="text" class="form-control" id="retailerName" placeholder="Company Name" value="{{retailer_name}}">
+            </div>
+            <div class="form-group col-md-4">
+                <label for="retailerName">Retailer Code</label>
+                <input type="text" class="form-control" id="retailerCode" placeholder="Retailer Code" value="{{retailer_code}}">
+            </div>
+        </div>
+        <div class="form-row bg-secondary text-white">
+            <div class="col-md-6">Addresses</div>
+            <div class="col-md-6 ">
+                <a class="page-link bg-secondary text-white float-right" href="/retailer/{{country_id}}/{{id}}/address/add">Add An Address</a>
+            </div>
+        </div>
+        <div class="form-row">
+        </div>
+
+        {{^addresses}}
+            <div class="form-row">
+                <div class="col-md-12">No Addresses On Record.</div>
+            </div>
+        {{/addresses}}
+        {{#addresses}}
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="inputAddress">Address</label>
+                    <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="inputAddress2">Address 2</label>
+                    <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="inputCity">City</label>
+                    <input type="text" class="form-control" id="inputCity">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="inputState">State</label>
+                    <select id="inputState" class="form-control">
+                        <option selected>Choose...</option>
+                        <option>...</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="inputZip">Zip</label>
+                    <input type="text" class="form-control" id="inputZip">
+                </div>
+            </div>
+            <div class="form-row bg-secondary text-white">
+                <div class="col-md-6">Terminals</div>
+                <div class="col-md-6 ">
+                    <a class="page-link bg-secondary text-white float-right" href="/retailer/{{country_id}}/{{id}}/terminal/add">Add A Terminal</a>
+                </div>
+
+            </div>
+                {{^terminals}}
+                    <div class="form-row">
+                        <div class="col-md-12 bg-secondary text-white">No Addresses On Record.</div>
+                    </div>
+                {{/terminals}}
+                {{#terminals}}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="gridCheck">
+                                <label class="form-check-label" for="gridCheck">Check me out</label>
+                            </div>
+                        </div>
+                    </div>
+                {{/terminals}}
+            {{/addresses}}
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        {{/retailer}}
+
+{{> admin.footer }}
