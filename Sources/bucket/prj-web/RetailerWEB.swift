@@ -25,9 +25,9 @@ struct RetailerWEB {
         static var routes : [[String:Any]] {
             return [
 //                ["method":"get", "uri":"/retailer", "handler":retailerterminalindex],
-                ["method":"get", "uri":"/retailer/{countryId}", "handler":retailer_index],
-                ["method":"get", "uri":"/retailer/{countryId}/add", "handler":retailer_add],
-                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}", "handler":retailer_detail],
+                ["method":"get", "uri":"/retailer/index/{countryId}", "handler":retailer_index],
+                ["method":"get", "uri":"/retailer/add/{countryId}", "handler":retailer_add],
+                ["method":"get", "uri":"/retailer/detail/{countryId}/{retailerId}", "handler":retailer_detail],
 //                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminal/add", "handler":retailer_add_terminal],
 //                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminal/{terminalId}", "handler":retailer_terminal],
 //                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/address/{addressId}", "handler":retailer_address],
@@ -87,7 +87,7 @@ struct RetailerWEB {
                 }
                 
                 // lets grab the retailers for the country
-                var sql = "SELECT * FROM \(schema).retailer;"
+                var sql = "SELECT * FROM \(schema).retailer ORDER BY name DESC;"
                 let r = Retailer()
                 let r_r = try? r.sqlRows(sql, params: [])
                 if r_r.isNotNil {
@@ -250,11 +250,11 @@ struct RetailerWEB {
                 
                 #if !os(macOS)
                 // check to see if the user is permitted to these retailer pages
-                let user = request.account
-                if user.isNil { return }
-                if !user!.bounceRetailerAdmin(schema, retailer_id!) {
+//                let user = request.account
+//                if user.isNil { return }
+//                if !user!.bounceRetailerAdmin(schema, retailer_id!) {
                     
-                }
+//                }
                 #endif
                 
                 var data_return:[String:Any] = [:]

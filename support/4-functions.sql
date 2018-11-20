@@ -194,3 +194,6 @@ END $function$
 
 LANGUAGE plpgsql;
 
+ALTER FUNCTION us.getRetailerEvents OWNER to bucket;
+ALTER FUNCTION us.getTransactionReport OWNER to bucket;
+ALTER FUNCTION us.getTransactionReportTotals OWNER to bucket;
