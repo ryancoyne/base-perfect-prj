@@ -1069,7 +1069,7 @@ struct RetailerAPI {
                             terminal = t
                         } else {
                             terminal = Terminal()
-                            sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(request.terminalId!)' "
+                            sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(request.terminalCode!)' "
                             let trmn = try? terminal.sqlRows(sql, params: [])
                             if trmn.isNotNil, let c = trmn!.first {
                                 terminal.to(c)
@@ -1594,7 +1594,7 @@ fileprivate extension HTTPRequest {
     var retailerSecret : String? {
         return self.header(.custom(name: "x-functions-key"))
     }
-    var terminalId : String? {
+    var terminalCode : String? {
         if let terminalIdFromHeader = self.header(.custom(name: "terminalCode")) ?? self.header(.custom(name: "terminalId")) {
             return terminalIdFromHeader
         } else {
@@ -1666,7 +1666,7 @@ fileprivate extension HTTPRequest {
     var terminal : Terminal? {
         // Lets see if we have a terminal from the input data:
         // They need to input the x-functions-key as their retailer password.
-        guard let password = self.retailerSecret, let terminalId = self.terminalId, let countryId = self.countryId else { return nil }
+        guard let password = self.retailerSecret, let terminalId = self.terminalCode, let countryId = self.countryId else { return nil }
         
         let schema = Country.getSchema(countryId)
         
@@ -1742,7 +1742,7 @@ extension Retailer {
 //        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
         guard let retailerSecret = request.retailerSecret else { response.unauthorizedTerminal; return (true, nil, nil) }
 
-        guard let terminalSerialNumber = request.terminalId else { response.noTerminalCode; return (true, nil, nil) }
+        guard let terminalSerialNumber = request.terminalCode else { response.noTerminalCode; return (true, nil, nil) }
         guard let _ = request.countryId else { response.invalidCountryCode; return (true, nil, nil) }
         
         // lets test for the retailer code (not the retailer ID
