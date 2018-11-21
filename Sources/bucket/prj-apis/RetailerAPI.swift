@@ -791,8 +791,8 @@ struct RetailerAPI {
                             if let redeemed = transaction.data["redeemed"].intValue, redeemed > 0 {
                                 transjson["redeemed"] = redeemed.dateString
                             }
-                            if let terminalId = transaction.data["terminal_id"].intValue {
-                                transjson["terminalId"] = terminalId
+                            if let serialNumber = transaction.data["serial_number"].stringValue {
+                                transjson["terminalCode"] = serialNumber
                             }
                             
                             transactionsJSON.append(transjson)
