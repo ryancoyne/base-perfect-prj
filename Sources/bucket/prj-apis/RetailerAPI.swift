@@ -1595,7 +1595,7 @@ fileprivate extension HTTPRequest {
         return self.header(.custom(name: "x-functions-key"))
     }
     var terminalId : String? {
-        if let terminalIdFromHeader = self.header(.custom(name: "terminalCode")).stringValue ?? self.header(.custom(name: "terminalId")) {
+        if let terminalIdFromHeader = self.header(.custom(name: "terminalCode")) ?? self.header(.custom(name: "terminalId")) {
             return terminalIdFromHeader
         } else {
             // Or try in json:
