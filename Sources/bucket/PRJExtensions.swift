@@ -485,7 +485,7 @@ extension HTTPRequest {
 
     }
     var countryId : Int? {
-        let sentCountryId = self.header(.custom(name: "country"))
+        let sentCountryId = self.header(.custom(name: "country")) ?? self.header(.custom(name: "countryId")) ?? self.urlVariables["countryId"] ?? self.urlVariables["countryCode"] ?? self.header(.custom(name: "countryCode"))
         // We need to
         if sentCountryId?.isNumeric() == true {
             // It is an integer, lets return the integer value:
@@ -509,7 +509,7 @@ extension HTTPRequest {
             return nil
         }
         
-        if let retcode = self.header(.custom(name: "retailerCode")) ?? self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"] {
+        if let retcode = retailerCode {
             let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode.lowercased())'"
             let r = Retailer()
             let r_ret = try? r.sqlRows(sql, params: [])
