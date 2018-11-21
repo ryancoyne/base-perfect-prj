@@ -766,7 +766,6 @@ struct RetailerAPI {
                             }
                             if let amount = transaction.data["amount"].doubleValue {
                                 transjson["amount"] = amount
-                                bucketTotal += amount
                             }
                             if let totalAmount = transaction.data["total_amount"].doubleValue {
                                 transjson["totalTransactionAmount"] = totalAmount
@@ -1596,10 +1595,13 @@ fileprivate extension HTTPRequest {
         return self.header(.custom(name: "x-functions-key"))
     }
     var terminalId : String? {
-        if let terminalIdFromHeader = self.header(.custom(name: "terminalCode")).stringValue {
+        if let terminalIdFromHeader = self.header(.custom(name: "terminalCode")).stringValue ?? self.header(.custom(name: "terminalId")) {
             return terminalIdFromHeader
         } else {
-            return nil
+            // Or try in json:
+            let json = try? self.postBodyJSON()
+            let theval = (json??["terminalId"] ?? json??["terminalCode"])?.stringValue
+            return theval
         }
     }
     
