@@ -509,7 +509,7 @@ extension HTTPRequest {
             return nil
         }
         
-        if let retcode = self.header(.custom(name: "retailerCode")) ?? self.header(.custom(name: "retailerId")) {
+        if let retcode = self.header(.custom(name: "retailerCode")) ?? self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"] {
             let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode.lowercased())'"
             let r = Retailer()
             let r_ret = try? r.sqlRows(sql, params: [])
@@ -523,7 +523,7 @@ extension HTTPRequest {
     }
     
     var retailerCode : Int? {
-        let sentRetailerId = self.header(.custom(name: "retailerCode")) ?? /* This is the deprecated header: */ self.header(.custom(name: "retailerId"))
+        let sentRetailerId = self.header(.custom(name: "retailerCode")) ?? /* This is the deprecated header: */ self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
         
         let schema : String? = self.countryCode ?? Country.getSchema(self.countryId ?? 0)
         if schema.isEmptyOrNil { return nil }
