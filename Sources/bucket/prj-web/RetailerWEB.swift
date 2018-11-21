@@ -145,7 +145,7 @@ struct RetailerWEB {
                 }
                 
                 // grab the retailer information for the retailer
-                let retailer_id = request.retailerCode
+                let retailer_id = request.retailerId
 
                 // make sure the user has authority to access the retailer information
                 if country_id.isNil { response.invalidCountryCode; return }

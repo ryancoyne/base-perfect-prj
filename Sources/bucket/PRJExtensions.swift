@@ -522,8 +522,15 @@ extension HTTPRequest {
         
     }
     
-    var retailerCode : Int? {
+    /// This returns the retailer identification from the header.
+    var retailerCode : String? {
         let sentRetailerId = self.header(.custom(name: "retailerCode")) ?? /* This is the deprecated header: */ self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
+        return sentRetailerId
+    }
+    
+    /// This computes the retailer_id from the retailerCode that is entered in the header.
+    var retailerId : Int? {
+        let sentRetailerId = retailerCode
         
         let schema : String? = self.countryCode ?? Country.getSchema(self.countryId ?? 0)
         if schema.isEmptyOrNil { return nil }
@@ -538,7 +545,7 @@ extension HTTPRequest {
             }
         } else if let sr = sentRetailerId.stringValue {
             // they did not send in the numeric code
-            // so check the ID itself
+            // so check the code itself
             let retailer = Retailer()
             let sql = "SELECT * FROM \(schema!).retailer WHERE retailer_code = '\(sr.lowercased())'"
             let rtlr = try? retailer.sqlRows(sql, params: [])
