@@ -457,7 +457,7 @@ extension HTTPRequest {
     var countryCode : String? {
 
         // they may pass in either the code or the number
-        if let country = self.header(.custom(name:"country")) {
+        if let country = self.header(.custom(name:"country")) ?? self.header(.custom(name: "countryId")) ?? self.header(.custom(name: "countryCode")) ?? self.urlVariables["countryId"] ?? self.urlVariables["countryCode"] {
 
             if country.isAlpha(), Country.idWith(country).isNotNil {
                 return country
