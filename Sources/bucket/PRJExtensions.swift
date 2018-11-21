@@ -522,7 +522,7 @@ extension HTTPRequest {
         
     }
     
-    var retailerId : Int? {
+    var retailerCode : Int? {
         let sentRetailerId = self.header(.custom(name: "retailerCode"))
         
         let schema : String? = self.countryCode ?? Country.getSchema(self.countryId ?? 0)
@@ -582,11 +582,11 @@ extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .badRequest)
     }
-    var invalidEmployeeId: Void {
+    var invalidEmployeeCode: Void {
         return try! self
-            .setBody(json: ["errorCode":"InvalidEmployeeId", "message":"The Employee ID is incorrect for this retailer."])
+            .setBody(json: ["errorCode":"InvalidEmployeeCode", "message":"The Employee Code is incorrect for this retailer."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .custom(code: 412, message: "Please Check Your Employee Id") )
+            .completed(status: .custom(code: 412, message: "Please Check Your Employee Code") )
     }
     var emptyJSONBody : Void {
         return try! self

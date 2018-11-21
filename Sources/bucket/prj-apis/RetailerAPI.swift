@@ -388,7 +388,7 @@ struct RetailerAPI {
                                     retInfo["isSample"]          = term.is_sample_only
                                 }
                                 retInfo["apiKey"]            = apiKey
-                                retInfo["requireEmployeeId"] = term.require_employee_id
+                                retInfo["requireEmployeeCode"] = term.require_employee_id
                                 
                                 retInfo.merge(terminfo, uniquingKeysWith: { (current, _) in current })
                                 
@@ -430,7 +430,7 @@ struct RetailerAPI {
                                 responseDictionary["isSample"]          = terminal.is_sample_only
                             }
                             responseDictionary["apiKey"] = thePassword
-                            responseDictionary["requireEmployeeId"] = terminal.require_employee_id
+                            responseDictionary["requireEmployeeCode"] = terminal.require_employee_id
 
                             var terminfo:[String:Any] = [:]
                             terminfo["retailerName"] = r.name!
@@ -543,7 +543,7 @@ struct RetailerAPI {
                                 retInfo["isSample"]   = term.is_sample_only
                             }
                             retInfo["apiKey"]     = apiKey
-                            retInfo["requireEmployeeId"] = term.require_employee_id
+                            retInfo["requireEmployeeCode"] = term.require_employee_id
                             
                             retInfo.merge(terminfo, uniquingKeysWith: { (current, _) in current })
                             
@@ -592,7 +592,7 @@ struct RetailerAPI {
                                 responseDictionary["isSample"]   = terminal.is_sample_only
                             }
                             responseDictionary["apiKey"] = thePassword
-                            responseDictionary["requireEmployeeId"] = terminal.require_employee_id
+                            responseDictionary["requireEmployeeCode"] = terminal.require_employee_id
 
                             if terminal.address_id.isNotNil, terminal.address_id! > 0 {
                                 // look up the address for the address information
@@ -668,9 +668,9 @@ struct RetailerAPI {
                 // Here we may be requiring the employeeId.  SO we will have the employeeId also in the JSON to give the flexibility to change the report.
                 if let t = rt.terminal, t.require_employee_id {
                     // If we require the id, and it is empty or nil, return an error:
-                    guard !request.employeeCode.isEmptyOrNil else { return response.invalidEmployeeId }
+                    guard !request.employeeCode.isEmptyOrNil else { return response.invalidEmployeeCode }
                     let check = t.checkEmployeeId(request.employeeCode!, schema)
-                    guard check.success else { return response.invalidEmployeeId }
+                    guard check.success else { return response.invalidEmployeeCode }
                 }
                 
                 var retailerUserId : Int = 0
@@ -731,7 +731,7 @@ struct RetailerAPI {
                     }
                     
                     var terminalId : Int = 0
-                    if let terminalSerial = requestJSON["terminalCode"].stringValue {
+                    if let terminalSerial = requestJSON["reportTerminalCode"].stringValue {
                         if let id = Terminal.idFrom(schema, rt.retailer!.id!, terminalSerial: terminalSerial) {
                             terminalId = id
                         } else {
@@ -1006,9 +1006,9 @@ struct RetailerAPI {
                 
                 if let t = rt.terminal, t.require_employee_id {
                     // If we require the id, and it is empty or nil, return an error:
-                    guard !request.employeeCode.isEmptyOrNil else { return response.invalidEmployeeId }
+                    guard !request.employeeCode.isEmptyOrNil else { return response.invalidEmployeeCode }
                      let check = t.checkEmployeeId(request.employeeCode!, schema)
-                    guard check.success else { return response.invalidEmployeeId }
+                    guard check.success else { return response.invalidEmployeeCode }
                     
                     retailerUserId = check.retailerUserId
                     
@@ -1206,7 +1206,7 @@ struct RetailerAPI {
                     // Return a general error with a different status code that we will know that the retailers are not matching.
                     // We will tell them to go to Bucket for support.  If they report an error of code 454, we know there is an issue with the retailers matching.
                     let retailer = Retailer()
-                    let sql = "SELECT * FROM \(schema).retailer WHERE id = '\(request.retailerId!)' "
+                    let sql = "SELECT * FROM \(schema).retailer WHERE id = '\(request.retailerCode!)' "
                     let rtlr = try? retailer.sqlRows(sql, params: [])
                     if rtlr.isNotNil, let c = rtlr!.first {
                         retailer.to(c)
@@ -1515,7 +1515,7 @@ fileprivate extension HTTPRequest {
     }
 
     var retailer : Retailer? {
-        guard let retailerId = retailerId, let countryId = countryId else { return nil }
+        guard let retailerId = retailerCode, let countryId = countryId else { return nil }
         let schema = Country.getSchema(countryId)
         let retailer = Retailer()
         let sql = "SELECT * FROM \(schema).retailer WHERE id = \(retailerId)"
@@ -1574,7 +1574,7 @@ extension Retailer {
         guard request.SecurityCheck() else { response.badSecurityToken; return nil }
 
         //Make sure we have the retailer Id and retailer secret:
-        guard let retailerId = request.retailerId else { response.invalidRetailer; return nil }
+        guard let retailerId = request.retailerCode else { response.invalidRetailer; return nil }
         guard let countryId = request.countryId else {  response.invalidCountryCode; return nil }
         
         let schema = Country.getSchema(countryId)
