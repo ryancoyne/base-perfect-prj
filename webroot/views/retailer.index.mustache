@@ -1,48 +1,77 @@
 {{> admin.header }}
 
-    <!-- Page Content -->
-    <div class="container">
+{{>message-insert}}
 
-    <div class="form-row bg-secondary text-white">
-        <div class="col-md-6">Retailer List</div>
-        <div class="col-md-6 ">
-            <a class="page-link bg-secondary text-white float-right" href="/retailer/add/{{country_id}}">Add A Retailer</a>
-        </div>
-    </div>
+    {{^authenticated}}
+        {{>login-body}}
+    {{/authenticated}}
 
-      <!-- Retailers -->
-      {{#retailers}}
-        {{^is_suspended}}
-            <div class="form-row">
-        {{/is_suspended}}
-        {{#is_suspended}}
-            <div class="form-row form-control is-invalid">
-        {{/is_suspended}}
-        <a class="page-link col-md-6" href="/retailer/detail/{{country_id}}/{{id}}">{{name}} ({{id}})</a>
-        <span class="col col-md-2 align-items-center">Code: {{retailer_code}}</span>
-            {{#is_verified}}
-                <span class="col col-md-2 align-items-center">Verified: Yes</span>
-            {{/is_verified}}
-            {{^is_verified}}
-                <span class="col col-md-2 form-control bg-warning align-items-center">Verified: NO</span>
-            {{/is_verified}}
-            {{#is_suspended}}
-                <span class="col col-md-2 form-control bg-danger text-white align-items-center">Suspended: YES</span>
-            {{/is_suspended}}
-            {{^is_suspended}}
-                <span class="col col-md-2 align-items-center">Suspended: No</span>
-            {{/is_suspended}}
-        </div>
-            {{^is_suspended}}
-                <div class="form-row">
-            {{/is_suspended}}
-            {{#is_suspended}}
-                <div class="form-row form-control is-invalid">
-            {{/is_suspended}}
-            <span class="col col-md-1 align-items-center">&nbsp;</span>
-            <span class="col col-md-10 align-items-center">addresses: {{address_count}}&nbsp;&nbsp;&nbsp;&nbsp;terminals: {{terminal_count}}</span>
-            <span class="col col-md-1 align-items-center">&nbsp;</span>
+    {{#authenticated}}
+
+        {{#require_login}}
+            {{>login-body}}
+        {{/require_login}}
+
+        {{^require_login}}
+
+            <!-- Page Content -->
+            <div class="container">
+
+            <div class="form-row bg-secondary text-white">
+                <div class="col-md-6">Retailer List</div>
+                <div class="col-md-6 ">
+                    <a class="page-link bg-secondary text-white float-right" href="/retailer/add/{{country_id}}">Add A Retailer</a>
+                </div>
             </div>
-      {{/retailers}}
+
+            <!-- Retailers -->
+            {{#retailers}}
+      
+                {{^is_suspended}}
+                    <div class="form-row">
+                {{/is_suspended}}
+        
+                {{#is_suspended}}
+                    <div class="form-row form-control is-invalid">
+                {{/is_suspended}}
+        
+                <a class="page-link col-md-6" href="/retailer/detail/{{country_id}}/{{id}}">{{name}} ({{id}})</a>
+                <span class="col col-md-2 align-items-center">Code: {{retailer_code}}</span>
+        
+                {{#is_verified}}
+                    <span class="col col-md-2 align-items-center">Verified: Yes</span>
+                {{/is_verified}}
+            
+                {{^is_verified}}
+                    <span class="col col-md-2 form-control bg-warning align-items-center">Verified: NO</span>
+                {{/is_verified}}
+            
+                {{#is_suspended}}
+                    <span class="col col-md-2 form-control bg-danger text-white align-items-center">Suspended: YES</span>
+                {{/is_suspended}}
+            
+                {{^is_suspended}}
+                    <span class="col col-md-2 align-items-center">Suspended: No</span>
+                {{/is_suspended}}
+                
+                </div>
+            
+                {{^is_suspended}}
+                    <div class="form-row">
+                {{/is_suspended}}
+                
+                {{#is_suspended}}
+                    <div class="form-row form-control is-invalid">
+                {{/is_suspended}}
+                
+                <span class="col col-md-1 align-items-center">&nbsp;</span>
+                <span class="col col-md-10 align-items-center">addresses: {{address_count}}&nbsp;&nbsp;&nbsp;&nbsp;terminals: {{terminal_count}}</span>
+                <span class="col col-md-1 align-items-center">&nbsp;</span>
+                </div>
+            {{/retailers}}
+      
+      {{/require_login}}
+
+    {{/authenticated}}
 
 {{> admin.footer }}
