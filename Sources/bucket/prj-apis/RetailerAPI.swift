@@ -301,7 +301,7 @@ struct RetailerAPI {
                         return response.invalidRetailer
                     }
                     
-                    guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
+                    guard let serialNumber = json?["terminalCode"].stringValue else { return response.noTerminalCode }
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
                     guard let _ = request.countryId else { return response.invalidCountryCode }
                 
@@ -731,11 +731,11 @@ struct RetailerAPI {
                     }
                     
                     var terminalId : Int = 0
-                    if let terminalSerial = requestJSON["terminalId"].stringValue {
+                    if let terminalSerial = requestJSON["terminalCode"].stringValue {
                         if let id = Terminal.idFrom(schema, rt.retailer!.id!, terminalSerial: terminalSerial) {
                             terminalId = id
                         } else {
-                            return response.invalidTerminalId
+                            return response.invalidTerminalCode
                         }
                     }
                     
@@ -781,6 +781,12 @@ struct RetailerAPI {
                             }
                             if let disputedBy = transaction.data["disputedby"].stringValue {
                                 transjson["disputedBy"] = disputedBy
+                            }
+                            if let refunded = transaction.data["refunded"].intValue, refunded > 0 {
+                                transjson["refunded"] = refunded.dateString
+                            }
+                            if let refundedBy = transaction.data["refundedby"].stringValue {
+                                transjson["refundedBy"] = refundedBy
                             }
                             if let redeemed = transaction.data["redeemed"].intValue, redeemed > 0 {
                                 transjson["redeemed"] = redeemed.dateString
@@ -833,7 +839,7 @@ struct RetailerAPI {
                     
                     // This should be the retailerBounce part:
                     guard let retailerIntegerId = Retailer.retailerBounce(request, response) else { return }
-                    guard let serialNumber = json?["terminalId"].stringValue else { return response.noTerminalId }
+                    guard let serialNumber = json?["terminalCode"].stringValue else { return response.noTerminalCode }
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
                     guard let _ = request.countryId else { return response.invalidCountryCode }
                     
@@ -1275,8 +1281,7 @@ struct RetailerAPI {
                 
             }
         }
-        
-
+    
         //MARK: - Delete Terminal
         static func terminalDelete(data: [String:Any]) throws -> RequestHandler {
             return {
@@ -1319,15 +1324,15 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 453, message: "Retailer Conflict"))
     }
-    var noTerminalId : Void {
+    var noTerminalCode : Void {
         return try! self
-            .setBody(json: ["errorCode":"NoTerminalId", "message":"You must send in a 'terminalId' key with the serial number of the device as the value."])
+            .setBody(json: ["errorCode":"NoTerminalCode", "message":"You must send in a 'terminalCode' key with the serial number of the device as the value."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .forbidden)
     }
-    var invalidTerminalId : Void {
+    var invalidTerminalCode : Void {
         return try! self
-            .setBody(json: ["errorCode":"InvalidTerminalId", "message":"The terminalId you sent does not exist."])
+            .setBody(json: ["errorCode":"InvalidTerminalCode", "message":"The terminalCode you sent does not exist."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .forbidden)
     }
@@ -1446,9 +1451,6 @@ fileprivate extension HTTPResponse {
 fileprivate extension HTTPRequest {
     
 //    @available(*, deprecated, message: "no longer available in version v1.1")
-//    var retailerId : String? {
-//        return self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
-//    }
     var intervalId : String? {
         return self.urlVariables["intervalId"]
     }
@@ -1459,14 +1461,10 @@ fileprivate extension HTTPRequest {
         return self.header(.custom(name: "x-functions-key"))
     }
     var terminalId : String? {
-        if let terminalIdFromHeader = self.header(.custom(name: "terminalId")).stringValue {
+        if let terminalIdFromHeader = self.header(.custom(name: "terminalCode")).stringValue {
             return terminalIdFromHeader
-        }
-        let theTry = try? self.postBodyJSON()?["terminalId"].stringValue
-        if theTry.isNil {
-            return nil
         } else {
-            return theTry!
+            return nil
         }
     }
     
@@ -1501,7 +1499,7 @@ fileprivate extension HTTPRequest {
     }
 
     var eventId : Int? {
-        if let eventId = self.header(.custom(name: "eventId"))?.intValue {
+        if let eventId = self.header(.custom(name: "eventId")).intValue {
             return eventId
         } else {
             return nil
@@ -1509,15 +1507,17 @@ fileprivate extension HTTPRequest {
     }
     
     var employeeId : String? {
-        if let employeeIdFromHeader = self.header(.custom(name: "employeeId")).stringValue {
+        if let employeeIdFromHeader = self.header(.custom(name: "employeeCode")).stringValue {
             return employeeIdFromHeader
-        }
-        let theTry = try? self.postBodyJSON()?["employeeId"].stringValue
-        if theTry.isNil {
-            return nil
         } else {
-            return theTry!
+            return nil
         }
+//        let theTry = try? self.postBodyJSON()?["employeeId"].stringValue
+//        if theTry.isNil {
+//            return nil
+//        } else {
+//            return theTry!
+//        }
     }
 
     var retailer : Retailer? {
@@ -1611,7 +1611,7 @@ extension Retailer {
 //        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
         guard let retailerSecret = request.retailerSecret else { response.unauthorizedTerminal; return (true, nil, nil) }
 
-        guard let terminalSerialNumber = request.terminalId else { response.noTerminalId; return (true, nil, nil) }
+        guard let terminalSerialNumber = request.terminalId else { response.noTerminalCode; return (true, nil, nil) }
         guard let _ = request.countryId else { response.invalidCountryCode; return (true, nil, nil) }
         
         // lets test for the retailer code (not the retailer ID
