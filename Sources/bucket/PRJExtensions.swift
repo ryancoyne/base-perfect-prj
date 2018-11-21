@@ -7,11 +7,6 @@ extension TimeZone {
         return TimeZone(abbreviation: "UTC")!
     }
 }
-extension Locale {
-    static var enUS : Locale {
-        return Locale(identifier: "en_US")
-    }
-}
 
 extension Account {
     
@@ -465,16 +460,16 @@ extension HTTPRequest {
     
     //MARK: - Country will be used across both API's:
     var countryCode : String? {
-        
+
         // they may pass in either the code or the number
-        if let countryCode = self.urlVariables["countryCode"] {
-            
-            if countryCode.isAlpha(), Country.idWith(countryCode).isNotNil {
-                return countryCode
-            } else if countryCode.isNumeric() {
+        if let country = self.header(.custom(name:"country")) ?? self.header(.custom(name: "countryId")) ?? self.urlVariables["countryId"] ?? self.urlVariables["countryCode"] ?? self.header(.custom(name: "countryCode")) {
+
+            if country.isAlpha(), Country.idWith(country).isNotNil {
+                return country
+            } else if country.isNumeric() {
                 // get the country code alpha
                 let cc = Country()
-                let _ = try? cc.get(countryCode.intValue!)
+                let _ = try? cc.get(country.intValue!)
                 if cc.code_alpha_2.isNotNil {
                     return cc.code_alpha_2!
                 }
@@ -482,20 +477,20 @@ extension HTTPRequest {
                 // incorrect format passed in
                 return nil
             }
-        
+
         }
-        
+
         // if they did not pass the country code variable, see if there is a country id and process it
         if let cid = self.countryId  {
             return Country.getSchema(cid)
         }
-        
+
         // was not passed in correctly
         return nil
-        
+
     }
     var countryId : Int? {
-        let sentCountryId = self.header(.custom(name: "countryId")) ?? self.urlVariables["countryId"] ?? self.urlVariables["countryCode"]
+        let sentCountryId = self.header(.custom(name: "country")) ?? self.header(.custom(name: "countryId")) ?? self.urlVariables["countryId"] ?? self.urlVariables["countryCode"] ?? self.header(.custom(name: "countryCode"))
         // We need to
         if sentCountryId?.isNumeric() == true {
             // It is an integer, lets return the integer value:
@@ -519,7 +514,7 @@ extension HTTPRequest {
             return nil
         }
         
-        if let retcode = self.header(.custom(name: "retailerId")) ?? self.header(.custom(name: "retailerCode")) {
+        if let retcode = retailerCode {
             let sql = "SELECT id FROM \(schema).retailer WHERE retailer_code = '\(retcode.lowercased())'"
             let r = Retailer()
             let r_ret = try? r.sqlRows(sql, params: [])
@@ -532,10 +527,17 @@ extension HTTPRequest {
         
     }
     
+    /// This returns the retailer identification from the header.
+    var retailerCode : String? {
+        let sentRetailerId = self.header(.custom(name: "retailerCode")) ?? /* This is the deprecated header: */ self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
+        return sentRetailerId
+    }
+    
+    /// This computes the retailer_id from the retailerCode that is entered in the header.
     var retailerId : Int? {
-        let sentRetailerId = self.header(.custom(name: "retailerId")) ?? self.urlVariables["retailerId"]
+        let sentRetailerId = retailerCode
         
-        let schema = self.countryCode
+        let schema : String? = self.countryCode ?? Country.getSchema(self.countryId ?? 0)
         if schema.isEmptyOrNil { return nil }
         
         // We need to
@@ -548,7 +550,7 @@ extension HTTPRequest {
             }
         } else if let sr = sentRetailerId.stringValue {
             // they did not send in the numeric code
-            // so check the ID itself
+            // so check the code itself
             let retailer = Retailer()
             let sql = "SELECT * FROM \(schema!).retailer WHERE retailer_code = '\(sr.lowercased())'"
             let rtlr = try? retailer.sqlRows(sql, params: [])
@@ -592,11 +594,11 @@ extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .badRequest)
     }
-    var invalidEmployeeId: Void {
+    var invalidEmployeeCode: Void {
         return try! self
-            .setBody(json: ["errorCode":"InvalidEmployeeId", "message":"The Employee ID is incorrect for this retailer."])
+            .setBody(json: ["errorCode":"InvalidEmployeeCode", "message":"The Employee Code is incorrect for this retailer."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .custom(code: 412, message: "Please Check Your Employee Id") )
+            .completed(status: .custom(code: 412, message: "Please Check Your Employee Code") )
     }
     var emptyJSONBody : Void {
         return try! self
