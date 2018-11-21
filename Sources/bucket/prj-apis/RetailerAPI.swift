@@ -668,8 +668,8 @@ struct RetailerAPI {
                 // Here we may be requiring the employeeId.  SO we will have the employeeId also in the JSON to give the flexibility to change the report.
                 if let t = rt.terminal, t.require_employee_id {
                     // If we require the id, and it is empty or nil, return an error:
-                    guard !request.employeeId.isEmptyOrNil else { return response.invalidEmployeeId }
-                    let check = t.checkEmployeeId(request.employeeId!, schema)
+                    guard !request.employeeCode.isEmptyOrNil else { return response.invalidEmployeeId }
+                    let check = t.checkEmployeeId(request.employeeCode!, schema)
                     guard check.success else { return response.invalidEmployeeId }
                 }
                 
@@ -682,7 +682,7 @@ struct RetailerAPI {
                     if requestJSON.isEmpty { return response.emptyJSONBody }
                     
                     // Here we will set the retailerUserId for the query of the request:
-                    if let retailerUserCode = requestJSON["employeeId"].stringValue, let t = rt.terminal {
+                    if let retailerUserCode = requestJSON["employeeCode"].stringValue, let t = rt.terminal {
                         let check = t.checkEmployeeId(retailerUserCode, schema)
                         retailerUserId = check.retailerUserId ?? 0
                     }
@@ -1006,8 +1006,8 @@ struct RetailerAPI {
                 
                 if let t = rt.terminal, t.require_employee_id {
                     // If we require the id, and it is empty or nil, return an error:
-                    guard !request.employeeId.isEmptyOrNil else { return response.invalidEmployeeId }
-                     let check = t.checkEmployeeId(request.employeeId!, schema)
+                    guard !request.employeeCode.isEmptyOrNil else { return response.invalidEmployeeId }
+                     let check = t.checkEmployeeId(request.employeeCode!, schema)
                     guard check.success else { return response.invalidEmployeeId }
                     
                     retailerUserId = check.retailerUserId
@@ -1506,18 +1506,12 @@ fileprivate extension HTTPRequest {
         }
     }
     
-    var employeeId : String? {
+    var employeeCode : String? {
         if let employeeIdFromHeader = self.header(.custom(name: "employeeCode")).stringValue {
             return employeeIdFromHeader
         } else {
             return nil
         }
-//        let theTry = try? self.postBodyJSON()?["employeeId"].stringValue
-//        if theTry.isNil {
-//            return nil
-//        } else {
-//            return theTry!
-//        }
     }
 
     var retailer : Retailer? {
