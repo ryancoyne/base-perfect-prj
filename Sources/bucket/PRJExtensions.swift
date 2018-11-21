@@ -13,6 +13,119 @@ extension Locale {
     }
 }
 
+extension Account {
+    
+    public func isBucketAdmin() -> Bool {
+        switch usertype {
+        case .admin :
+            return true
+        default:
+            return false
+        }
+    }
+
+    public func isBucketStandard() -> Bool {
+        switch usertype {
+        case .admin1:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public func isRetailerAdmin() -> Bool {
+        switch usertype {
+        case .admin2:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public func isRetailerStandard() -> Bool {
+        switch usertype {
+        case .admin3:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+extension HTTPRequest {
+    
+    func userBucketAdmin() -> Bool {
+        var admin = false
+        
+        if let u = self.session?.userid {
+            let user = Account()
+            try? user.get(u)
+            
+            // make sure they are the correct admin
+            if user.isBucketAdmin() || user.isBucketStandard() {
+                admin = true
+            }
+        }
+        return admin
+    }
+
+    func userBucketStandard() -> Bool {
+        var admin = false
+        
+        if let u = self.session?.userid {
+            let user = Account()
+            try? user.get(u)
+            
+            // make sure they are the correct admin
+            if user.isBucketStandard() {
+                admin = true
+            }
+        }
+        return admin
+    }
+
+    func userRetailerAdmin() -> (isAdmin: Bool, retailerId: Int)  {
+        var admin = false
+        var retailer = 0
+        
+        if let u = self.session?.userid {
+            let user = Account()
+            try? user.get(u)
+            
+            // make sure they are the correct admin
+            if user.isRetailerAdmin() || user.isRetailerStandard() {
+                admin = true
+            }
+            
+            if admin, let ret_id = user.detail["retailer"].intValue {
+                retailer = ret_id
+            }
+        }
+        
+        return (admin, retailer)
+        
+    }
+
+    func userRetailerStandard() -> (isStandard: Bool, retailerId: Int)  {
+        var admin = false
+        var retailer = 0
+        
+        if let u = self.session?.userid {
+            let user = Account()
+            try? user.get(u)
+            
+            // make sure they are the correct admin
+            admin =  user.isRetailerAdmin()
+            
+            if admin, let ret_id = user.detail["retailer"].intValue {
+                retailer = ret_id
+            }
+        }
+        return (admin, retailer)
+    }
+
+}
+
 extension String {
     
     enum s {

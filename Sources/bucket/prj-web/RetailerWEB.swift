@@ -24,7 +24,6 @@ struct RetailerWEB {
         // POST request for login
         static var routes : [[String:Any]] {
             return [
-//                ["method":"get", "uri":"/retailer", "handler":retailerterminalindex],
                 ["method":"get", "uri":"/retailer/index/{countryId}", "handler":retailer_index],
                 ["method":"get", "uri":"/retailer/add/{countryId}", "handler":retailer_add],
                 ["method":"get", "uri":"/retailer/detail/{countryId}/{retailerId}", "handler":retailer_detail],
