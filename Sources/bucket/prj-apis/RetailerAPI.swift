@@ -743,6 +743,7 @@ struct RetailerAPI {
                     if startOrFrom > endOrTo { return response.dateIssue }
                     
                     var sqlStatement = ""
+                    var totalSqlStatement = ""
                     
                     if offsetLimit.isNil {
                         sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId));"
@@ -753,7 +754,10 @@ struct RetailerAPI {
                     let rows = try? CodeTransaction().sqlRows(sqlStatement, params: [])
                     
                     if let transactions = rows, !transactions.isEmpty {
-                        var bucketTotal = 0.0
+                        // Okay... lets get the total:
+                        let theTotalsQuery = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId));", params: []).first!
+                        let bucketTotal = theTotalsQuery.data["total_value"].doubleValue ?? 0.0
+                        let totalRecords = theTotalsQuery.data["total_count"].intValue ?? 0
                         var transactionsJSON : [[String:Any]] = []
                         for transaction in transactions {
                             var transjson = [String:Any]()
@@ -799,7 +803,7 @@ struct RetailerAPI {
                             
                         }
                         
-                        return response.returnReport(bucketTotal, transactions: transactionsJSON)
+                        return response.returnReport(bucketTotal, totalRecords, transactions: transactionsJSON)
                         
                     } else {
                         
@@ -1505,9 +1509,9 @@ fileprivate extension HTTPResponse {
             .completed(status: .custom(code: 410, message: "Terminal Registered"))
     }
     
-    func returnReport(_ bucketTotal: Double, transactions: [[String:Any]]) -> Void {
+    func returnReport(_ bucketTotal: Double, _ totalCount : Int, transactions: [[String:Any]]) -> Void {
         return try! self
-            .setBody(json: ["bucketTotal":bucketTotal, "transactions":transactions])
+            .setBody(json: ["bucketTotal":bucketTotal, "totalQueryCount": totalCount, "transactions":transactions])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .ok)
     }
