@@ -33,6 +33,7 @@ public class CodeTransactionHistory: PostgresStORM {
     var event_id     : Int? = nil
     var customer_code         : String? = nil
     var deleted_reason     : String? = nil
+    var refunded_reason     : String? = nil
     var disputed_reason     : String? = nil
     var customer_codeurl      : String? = nil
     var terminal_id           : Int? = nil
@@ -49,6 +50,8 @@ public class CodeTransactionHistory: PostgresStORM {
     var disputedby : String? = nil
     var redeemed : Int? = nil
     var redeemedby : String? = nil
+    var refunded : Int? = nil
+    var refundedby : String? = nil
     var cashedout : Int? = nil
     var cashedoutby : String? = nil
     var cashedout_total : Double? = nil
@@ -94,6 +97,18 @@ public class CodeTransactionHistory: PostgresStORM {
         
         if let data = this.data.codeTransactionDic.eventId {
             event_id = data
+        }
+        
+        if let data = this.data.codeTransactionDic.refundedReason {
+            refunded_reason = data
+        }
+        
+        if let data = this.data.codeTransactionDic.refunded {
+            refunded = data
+        }
+        
+        if let data = this.data.codeTransactionDic.refundedBy {
+            refundedby = data
         }
 
         if let data = this.data.codeTransactionHistoryDic.cashedoutBy {
@@ -226,6 +241,21 @@ public class CodeTransactionHistory: PostgresStORM {
             case "country_id":
                 if (value as? Int).isNotNil {
                     self.country_id = (value as! Int)
+                }
+                
+            case "refunded":
+                if (value as? Int).isNotNil {
+                    self.refunded = (value as! Int)
+                }
+                
+            case "refundedby":
+                if (value as? String).isNotNil {
+                    self.refundedby = (value as! String)
+                }
+                
+            case "refunded_reason":
+                if (value as? String).isNotNil {
+                    self.refunded_reason = (value as! String)
                 }
                 
             case "event_id":

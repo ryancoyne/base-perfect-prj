@@ -30,6 +30,7 @@ struct RetailerAPI {
                 ["method":"post",   "uri":"/api/v1/transaction", "handler":createTransaction],
                 ["method":"post",   "uri":"/api/v1/report", "handler":report],
                 ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction,],
+                ["method":"patch", "uri":"/api/v1/transaction/{customerCode}", "handler":refundTransaction,],
                 ["method":"put", "uri":"/api/v1/event", "handler":createOrUpdateEvent,],
                 ["method":"delete", "uri":"/api/v1/event/{id}", "handler":deleteEvent,],
                 ["method":"post", "uri":"/api/v1/events", "handler":getEvents,],
@@ -1269,6 +1270,140 @@ struct RetailerAPI {
                                                               description: nil,
                                                               changedby: request.session?.token ?? "NO SESSION USER")
 
+                        
+                        let _ = try? response.setBody(json: responseD)
+                        response.completed(status: .custom(code: 452, message: "Code Redeemed Already"))
+                        return
+                    }
+                    
+                    response.invalidCustomerCode
+                    return
+                }
+                
+            }
+        }
+        
+        //MARK: - Refund Transaction
+        public static func refundTransaction(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                
+                guard let code = request.customerCode else { response.invalidCustomerCode; return }
+                guard let _ = request.countryId else { response.invalidCountryCode; return }
+                
+                let schema = Country.getSchema(request)
+                
+                // note that since the unclaimed codes are not in the individual countries (yet), there is only one table in the public schema to deal with
+                // get the code from the url path
+                // lets see if the code has not been redeemed yet :)
+                let thecode = CodeTransaction()
+                
+                let sql = "SELECT * FROM \(schema).code_transaction WHERE customer_code = '\(code)' "
+                let cde = try? thecode.sqlRows(sql, params: [])
+                if cde.isNotNil, let c = cde!.first {
+                    thecode.to(c)
+                } else {
+                    // check for the already redeemed
+                    let sqld = "SELECT * FROM \(schema).code_transaction_history WHERE customer_code = '\(code)' "
+                    let cded = try? thecode.sqlRows(sqld, params: [])
+                    if cded.isNotNil, cded!.count > 0 {
+                        // it was already redeemed - we CANNOT delete!
+                        _ = try? response.setBody(json: ["errorCode":"CodeRedeemed","message":"The code was redeemed already.  Please Contact Bucket Support."])
+                        response.completed(status: .custom(code: 452, message: "Code Already Redeemed"))
+                        return
+                    }
+                }
+                
+                // We should also check and make sure the retailer is deleting their own transaction:
+                guard let retailerId = request.retailer?.id, thecode.retailer_id == retailerId else { return response.incorrectRetailer }
+                
+                // Check if we have a returning object:
+                if thecode.id.isNotNil {
+                    
+                    // see if the code is deleted
+                    guard thecode.deleted! == 0 else { _ = try? response.setBody(json: ["errorCode":"CodeDeleted","message":"The code was already deleted."])
+                        response.completed(status: .custom(code: 451, message: "Code Already Deleted"))
+                        return }
+                    
+                    // see if the code is deleted
+                    guard thecode.refunded! == 0 else { _ = try? response.setBody(json: ["errorCode":"CodeRefunded","message":"The code was already refunded."])
+                        response.completed(status: .custom(code: 455, message: "Code Already Refunded"))
+                        return }
+                    
+                    // Make sure the retailers match:
+                    // Return a general error with a different status code that we will know that the retailers are not matching.
+                    // We will tell them to go to Bucket for support.  If they report an error of code 454, we know there is an issue with the retailers matching.
+                    let retailer = Retailer()
+                    let sql = "SELECT * FROM \(schema).retailer WHERE id = '\(request.retailerId!)' "
+                    let rtlr = try? retailer.sqlRows(sql, params: [])
+                    if rtlr.isNotNil, let c = rtlr!.first {
+                        retailer.to(c)
+                    }
+                    
+                    guard thecode.retailer_id == retailer.id else { _ = try? response.setBody(json: ["errorCode":"UnexpectedIssue","message":"There is an issue with this transaction.  Please contact Bucket Support."])
+                        response.completed(status: .custom(code: 454, message: "Contact Support"))
+                        return }
+                    
+                    // lets refund the code
+                    thecode.refunded = CCXServiceClass.getNow()
+                    
+                    let terminal = request.terminal!
+                    thecode.refunded_reason = "Terminal \(terminal.serial_number!) refunded this transaction at \(thecode.refunded!.dateString) GMT"
+                    
+                    // see if a user is logged in
+                    if let user = request.session?.userid, !user.isEmpty {
+                        thecode.refundedby = user
+                    } else {
+                        thecode.refundedby = CCXDefaultUserValues.user_server
+                    }
+                    
+                    let _ = try? thecode.saveWithCustomType(schemaIn: schema,thecode.refundedby)
+                    
+                    // audit the refund
+                    //TODO:  Mike -> RefundAudit Function ->
+//                    AuditFunctions().deleteCustomerCodeAuditRecord(thecode)
+//                    
+//                    AuditRecordActions.customerCodeDelete(schema: schema,
+//                                                          session_id: request.session?.token ?? "NO SESSION TOKEN",
+//                                                          row_data: ["deleted_code": thecode.asDictionary()],
+//                                                          changed_fields: nil,
+//                                                          description: nil,
+//                                                          changedby: request.session?.token ?? "NO SESSION USER")
+                    
+                    // all OK - returned at the bottom
+                    _=try? response.setBody(json: ["result":"Successfully refunded the transaction."])
+                    response.completed(status: .ok)
+                    
+                } else {
+                    
+                    // We did not... if it is in the history table, then it is already redeemed...
+                    let theCode = CodeTransactionHistory()
+                    let sql = "SELECT * FROM \(schema).code_transaction_history WHERE customer_code = '\(code)'"
+                    let cde = try? theCode.sqlRows(sql, params: [])
+                    if cde.isNotNil, let c = cde!.first {
+                        theCode.to(c)
+                    }
+                    
+                    if theCode.id.isNotNil {
+                        
+                        let responseD:[String:Any] = ["errorCode":"CodeRedeemed","message":"The code was redeemed already.  Please Contact Bucket Support."]
+                        var audit:[String:Any] = responseD
+                        audit["code"]    = theCode.customer_code
+                        audit["code_id"] = theCode.id
+                        
+                        AuditRecordActions.customerCodeDelete(schema: schema,
+                                                              session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                              row_data: audit,
+                                                              changed_fields: nil,
+                                                              description: nil,
+                                                              changedby: request.session?.token ?? "NO SESSION USER")
+                        
                         
                         let _ = try? response.setBody(json: responseD)
                         response.completed(status: .custom(code: 452, message: "Code Redeemed Already"))
