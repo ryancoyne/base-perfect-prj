@@ -1,4 +1,6 @@
 
+DROP FUNCTION us.gettransactionreport(bigint,bigint,integer,integer,integer,integer,integer);
+
 CREATE OR REPLACE FUNCTION us.getTransactionReport(fromDate bigint, toDate bigint, retailerId int, terminalId int=0, retailerUserId int=0, offsetBy int=0, limitBy int=200)
 RETURNS TABLE (id int, created int, amount numeric, total_amount numeric, client_location text, client_transaction_id text, terminal_id int, disputed int, disputedby text, refunded int, refundedby text, customer_code text, redeemed int, retailer_user_id int, serial_number text)
 AS $function$
@@ -201,3 +203,4 @@ LANGUAGE plpgsql;
 ALTER FUNCTION us.getRetailerEvents OWNER to bucket;
 ALTER FUNCTION us.getTransactionReport OWNER to bucket;
 ALTER FUNCTION us.getTransactionReportTotals OWNER to bucket;
+
