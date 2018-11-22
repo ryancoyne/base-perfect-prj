@@ -304,7 +304,7 @@ struct RetailerAPI {
                         return response.invalidRetailer
                     }
                     
-                    guard let serialNumber = json?["terminalCode"].stringValue else { return response.noTerminalCode }
+                    guard let serialNumber = (json?["terminalCode"] ?? json?["terminalId"]).stringValue else { return response.noTerminalCode }
                     guard let server = EnvironmentVariables.sharedInstance.Server else { return response.serverEnvironmentError }
                     guard let _ = request.countryId else { return response.invalidCountryCode }
                 
