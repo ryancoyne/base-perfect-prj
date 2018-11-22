@@ -1516,7 +1516,7 @@ fileprivate extension HTTPResponse {
     
     func returnReport(_ bucketTotal: Double, _ totalCount : Int, _ bucketSalesTotal : Double, _ refundedBucketSales : Double, _ refundedBucketTotal : Double, transactions: [[String:Any]]) -> Void {
         return try! self
-            .setBody(json: ["bucketTotal":bucketTotal, "totalTransactionCount": totalCount, "bucketSales":bucketSalesTotal, "transactions":transactions])
+            .setBody(json: ["bucketTotal":bucketTotal, "totalTransactionCount": totalCount, "bucketSales":bucketSalesTotal, "refundedBucketSales": refundedBucketSales, "refundedBucketTotal": refundedBucketTotal, "transactions":transactions])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .ok)
     }
