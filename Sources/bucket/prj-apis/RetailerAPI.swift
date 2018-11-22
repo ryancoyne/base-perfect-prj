@@ -677,6 +677,8 @@ struct RetailerAPI {
                 var retailerUserId : Int = 0
                 let offsetLimit = request.offsetLimit
                 
+                if ((offsetLimit?.limit ?? 0) >= 999) { return response.maxLimit(999) }
+                
                 do {
                     
                     let requestJSON = try request.postBodyJSON()!
@@ -1564,6 +1566,12 @@ fileprivate extension HTTPResponse {
             .setBody(json: ["errorCode":"EventHasTransactions", "message":"You can only delete an event if it has no associated transactions."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 421, message: "Can't Delete"))
+    }
+    
+    func maxLimit(_ theLimit : Int) -> Void {
+         return try! self.setBody(json: ["errorCode":"InvalidLimit", "message":"The maximum limit is \(theLimit). Please page through the API to list out all the transactions."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 426, message: "Invalid Limit"))
     }
     
     var eventDeleted : Void {
