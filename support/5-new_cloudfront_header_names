@@ -3,6 +3,9 @@ We need the following new header values:
 - employeeId
 - eventId
 - exportType
+
+NEW HEADERS:
 - employeeCode
 - retailerCode
+- terminalCode
 - country
