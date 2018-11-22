@@ -758,6 +758,7 @@ struct RetailerAPI {
                         let theTotalsQuery = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId));", params: []).first!
                         let bucketTotal = theTotalsQuery.data["total_value"].doubleValue ?? 0.0
                         let totalRecords = theTotalsQuery.data["total_count"].intValue ?? 0
+                        let bucketSalesTotal = theTotalsQuery.data["total_sales"].doubleValue ?? 0.0
                         var transactionsJSON : [[String:Any]] = []
                         for transaction in transactions {
                             var transjson = [String:Any]()
