@@ -309,9 +309,6 @@ public class Terminal: PostgresStORM {
     
     public func checkEmployeeId(_ employeeId: String,_ theSchema:String? = nil) -> (success: Bool, retailerUserId : Int?) {
         
-        // if we do not require an employee ID then all Employee ID's are ok
-        if !self.require_employee_id { return (true, nil) }
-        
         var schema = ""
         if theSchema.isNil {
             schema = "public"

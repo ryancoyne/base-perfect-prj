@@ -95,6 +95,18 @@ struct CodeTransactionHistoryDictionary {
             }
         }
     }
+    var refundedReason : String? {
+        get {
+            return self.dic["refunded_reason"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["refunded_reason"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "refunded_reason")
+            }
+        }
+    }
     var disputedReason : String? {
         get {
             return self.dic["disputed_reason"].stringValue
@@ -268,7 +280,30 @@ struct CodeTransactionHistoryDictionary {
             }
         }
     }
-
+    var refunded : Int? {
+        get {
+            return self.dic["refunded"].intValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["refunded"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "refunded")
+            }
+        }
+    }
+    var refundedBy : String? {
+        get {
+            return self.dic["refundedby"].stringValue
+        }
+        set {
+            if newValue != nil {
+                self.dic["refundedby"] = newValue!
+            } else {
+                self.dic.removeValue(forKey: "refundedby")
+            }
+        }
+    }
     var retailerId : Int? {
         get {
             return self.dic["retailer_id"].intValue

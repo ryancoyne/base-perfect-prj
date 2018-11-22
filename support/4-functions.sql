@@ -1,7 +1,6 @@
 
 CREATE OR REPLACE FUNCTION us.getTransactionReport(fromDate bigint, toDate bigint, retailerId int, terminalId int=0, retailerUserId int=0, offsetBy int=0, limitBy int=200)
-RETURNS TABLE (id int, created int, amount numeric, total_amount numeric, client_location text,
-client_transaction_id text, terminal_id int, disputed int, disputedby text, customer_code text, redeemed int)
+RETURNS TABLE (id int, created int, amount numeric, total_amount numeric, client_location text, client_transaction_id text, terminal_id int, disputed int, disputedby text, refunded int, refundedby text, customer_code text, redeemed int, retailer_user_id int, serial_number text)
 AS $function$
 
 BEGIN
@@ -9,12 +8,14 @@ BEGIN
 IF terminalId = 0 AND retailerUserId = 0 THEN
 
 RETURN QUERY
-SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed
-FROM us.code_transaction AS ct
+SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.refunded, ct.refundedby, ct.customer_code, ct.redeemed, ct.retailer_user_id, tm.serial_number
+FROM us.code_transaction_view_deleted_no AS ct
+JOIN us.terminal AS tm ON tm.id = ct.terminal_id
 WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId)
 UNION
-SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed
-FROM us.code_transaction_history AS cth
+SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.refunded, cth.refundedby, cth.customer_code, cth.redeemed, cth.retailer_user_id, tm.serial_number
+FROM us.code_transaction_history_view_deleted_no AS cth
+JOIN us.terminal AS tm ON tm.id = cth.terminal_id
 WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId)
 ORDER BY created DESC
 OFFSET offsetBy LIMIT limitBy;
@@ -22,12 +23,14 @@ OFFSET offsetBy LIMIT limitBy;
 ELSIF (retailerUserId = 0) AND (terminalId > 0) THEN
 
 RETURN QUERY
-SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed
-FROM us.code_transaction AS ct
+SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.refunded, ct.refundedby, ct.customer_code, ct.redeemed, ct.retailer_user_id, tm.serial_number
+FROM us.code_transaction_view_deleted_no AS ct
+JOIN us.terminal AS tm ON tm.id = ct.terminal_id
 WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId)
 UNION
-SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed
-FROM us.code_transaction_history AS cth
+SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.refunded, cth.refundedby, cth.customer_code, cth.redeemed, cth.retailer_user_id, tm.serial_number
+FROM us.code_transaction_history_view_deleted_no AS cth
+JOIN us.terminal AS tm ON tm.id = cth.terminal_id
 WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId)
 ORDER BY created DESC
 OFFSET offsetBy LIMIT limitBy;
@@ -35,12 +38,14 @@ OFFSET offsetBy LIMIT limitBy;
 ELSIF (retailerUserId > 0) AND (terminalId > 0) THEN
 
 RETURN QUERY
-SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed
-FROM us.code_transaction AS ct
+SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.refunded, ct.refundedby, ct.customer_code, ct.redeemed, ct.retailer_user_id, tm.serial_number
+FROM us.code_transaction_view_deleted_no AS ct
+JOIN us.terminal AS tm ON tm.id = ct.terminal_id
 WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId) AND (ct.retailer_user_id = retailerUserId)
 UNION
-SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed
-FROM us.code_transaction_history AS cth
+SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.refunded, cth.refundedby, cth.customer_code, cth.redeemed, cth.retailer_user_id, tm.serial_number
+FROM us.code_transaction_history_view_deleted_no AS cth
+JOIN us.terminal AS tm ON tm.id = cth.terminal_id
 WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId) AND (cth.retailer_user_id = retailerUserId)
 ORDER BY created DESC
 OFFSET offsetBy LIMIT limitBy;
@@ -48,12 +53,14 @@ OFFSET offsetBy LIMIT limitBy;
 ELSE
 
 RETURN QUERY
-SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed
-FROM us.code_transaction AS ct
+SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.refunded, ct.refundedby, ct.customer_code, ct.redeemed, ct.retailer_user_id, tm.serial_number
+FROM us.code_transaction_view_deleted_no AS ct
+JOIN us.terminal AS tm ON tm.id = ct.terminal_id
 WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.retailer_user_id = retailerUserId)
 UNION
-SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed
-FROM us.code_transaction_history AS cth
+SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.refunded, cth.refundedby, cth.customer_code, cth.redeemed, cth.retailer_user_id, tm.serial_number
+FROM us.code_transaction_history_view_deleted_no AS cth
+JOIN us.terminal AS tm ON tm.id = cth.terminal_id
 WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.retailer_user_id = retailerUserId)
 ORDER BY created DESC
 OFFSET offsetBy LIMIT limitBy;
@@ -63,7 +70,9 @@ END $function$
 
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION us.getTransactionReportTotals(fromDate bigint, toDate bigint, retailerId int, terminalId int=0, retailerUserId int=0, offsetBy int=0, limitBy int=200, OUT total_count bigint, OUT total_value numeric)
+-- THIS IS THE NEW UPDATED FUNCTION FOR GETTING THE REPORT TOTAL --
+
+CREATE OR REPLACE FUNCTION us.getTransactionReportTotals(fromDate bigint, toDate bigint, retailerId int, terminalId int=0, retailerUserId int=0, OUT total_count bigint, OUT total_value numeric, OUT total_sales numeric, OUT total_refund_value numeric, OUT total_refund_sales numeric)
 AS
 $$
 
@@ -73,76 +82,71 @@ var_r record;
 BEGIN
 
 total_count := 0;
-total_value = 0;
+total_value := 0.0;
+total_sales := 0.0;
+total_refund_value := 0.0;
+total_refund_sales := 0.0;
 
 IF terminalId = 0 AND retailerUserId = 0 THEN
 
-FOR var_r IN(
-
-SELECT ct.redeemed, count(*) over () as the_count, sum(ct.amount) over () as the_value
-FROM us.code_transaction AS ct
-WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId)
-UNION
-SELECT cth.redeemed, count(*) over () as the_count, sum(cth.amount) over () as the_value
-FROM us.code_transaction_history AS cth
-WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId))
+FOR var_r IN (SELECT ct.redeemed, ct.amount, ct.total_amount, ct.refunded FROM us.code_transaction_view_deleted_no AS ct WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) UNION ALL SELECT cth.redeemed, cth.amount, cth.total_amount, cth.refunded FROM us.code_transaction_history_view_deleted_no AS cth WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId))
 LOOP
-total_count := total_count + var_r.the_count;
-total_value := total_value + var_r.the_value;
+total_count := total_count + 1;
+IF var_r.refunded = 0 THEN
+total_value := total_value + var_r.amount;
+total_sales := total_sales + var_r.total_amount;
+ELSE
+total_refund_value := total_refund_value + var_r.amount;
+total_refund_sales := total_refund_sales + var_r.total_amount;
+END IF;
 END LOOP;
-RETURN;
 
 ELSIF (retailerUserId = 0) AND (terminalId > 0) THEN
 
-FOR var_r IN(
-
-SELECT ct.redeemed, count(*) over () as the_count, sum(ct.amount) over () as the_value
-FROM us.code_transaction AS ct
-WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId)
-UNION
-SELECT cth.redeemed, count(*) over () as the_count, sum(cth.amount) over () as the_value
-FROM us.code_transaction_history AS cth
-WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId))
+FOR var_r IN (SELECT ct.redeemed, ct.amount, ct.total_amount, ct.refunded FROM us.code_transaction_view_deleted_no AS ct WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId) UNION ALL SELECT cth.redeemed, cth.amount, cth.total_amount, cth.refunded FROM us.code_transaction_history_view_deleted_no AS cth WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId))
 LOOP
-total_count := total_count + var_r.the_count;
-total_value := total_value + var_r.the_value;
+total_count := total_count + 1;
+IF var_r.refunded = 0 THEN
+total_value := total_value + var_r.amount;
+total_sales := total_sales + var_r.total_amount;
+ELSE
+total_refund_value := total_refund_value + var_r.amount;
+total_refund_sales := total_refund_sales + var_r.total_amount;
+END IF;
 END LOOP;
-RETURN;
 
 ELSIF (retailerUserId > 0) AND (terminalId > 0) THEN
 
-FOR var_r IN(
-SELECT ct.redeemed, count(*) over () as the_count, sum(ct.amount) over () as the_value
-FROM us.code_transaction AS ct
-WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId) AND (ct.retailer_user_id = retailerUserId)
-UNION
-SELECT cth.redeemed, count(*) over () as the_count, sum(cth.amount) over () as the_value
-FROM us.code_transaction_history AS cth
-WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId) AND (cth.retailer_user_id = retailerUserId))
+FOR var_r IN (SELECT ct.redeemed, ct.amount, ct.total_amount, ct.refunded FROM us.code_transaction_view_deleted_no AS ct WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId) AND (ct.retailer_user_id = retailerUserId) UNION ALL SELECT cth.redeemed, cth.amount, cth.total_amount, cth.refunded FROM us.code_transaction_history_view_deleted_no AS cth WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId) AND (cth.retailer_user_id = retailerUserId))
 LOOP
-total_count := total_count + var_r.the_count;
-total_value := total_value + var_r.the_value;
+total_count := total_count + 1;
+IF var_r.refunded = 0 THEN
+total_value := total_value + var_r.amount;
+total_sales := total_sales + var_r.total_amount;
+ELSE
+total_refund_value := total_refund_value + var_r.amount;
+total_refund_sales := total_refund_sales + var_r.total_amount;
+END IF;
 END LOOP;
-RETURN;
 
 ELSE
 
-FOR var_r IN(
-SELECT ct.redeemed, count(*) over () as the_count, sum(ct.amount) over () as the_value
-FROM us.code_transaction AS ct
-WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.retailer_user_id = retailerUserId)
-UNION
-SELECT cth.redeemed, count(*) over () as the_count, sum(cth.amount) over () as the_value
-FROM us.code_transaction_history AS cth
-WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.retailer_user_id = retailerUserId))
+FOR var_r IN (SELECT ct.redeemed, ct.amount, ct.total_amount, ct.refunded FROM us.code_transaction_view_deleted_no AS ct WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.retailer_user_id = retailerUserId) UNION ALL SELECT cth.redeemed, cth.amount, cth.total_amount, cth.refunded FROM us.code_transaction_history_view_deleted_no AS cth WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.retailer_user_id = retailerUserId))
 LOOP
-total_count := total_count + var_r.the_count;
-total_value := total_value + var_r.the_value;
+total_count := total_count + 1;
+IF var_r.refunded = 0 THEN
+total_value := total_value + var_r.amount;
+total_sales := total_sales + var_r.total_amount;
+ELSE
+total_refund_value := total_refund_value + var_r.amount;
+total_refund_sales := total_refund_sales + var_r.total_amount;
+END IF;
 END LOOP;
-RETURN;
+
 END IF;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- THIS IS THE FUNCTION TO GET EVENTS ASSOCIATED WITH THE RETAILER: --
 

@@ -220,7 +220,7 @@ public class Country: PostgresStORM {
     
     public static func getSchema(_ request : HTTPRequest) -> String {
         
-        let countryId = request.header(.custom(name: "countryId")).stringValue ?? request.urlVariables["countryId"].stringValue
+        let countryId = request.header(.custom(name: "country")) ?? request.header(.custom(name: "countryId")) ?? request.urlVariables["countryId"]
         
         var schema = "public"
         // If the string is

@@ -30,6 +30,7 @@ struct RetailerAPI {
                 ["method":"post",   "uri":"/api/v1/transaction", "handler":createTransaction],
                 ["method":"post",   "uri":"/api/v1/report", "handler":report],
                 ["method":"delete", "uri":"/api/v1/transaction/{customerCode}", "handler":deleteTransaction,],
+                ["method":"patch", "uri":"/api/v1/transaction/{customerCode}", "handler":refundTransaction,],
                 ["method":"put", "uri":"/api/v1/event", "handler":createOrUpdateEvent,],
                 ["method":"delete", "uri":"/api/v1/event/{id}", "handler":deleteEvent,],
                 ["method":"post", "uri":"/api/v1/events", "handler":getEvents,],
@@ -53,6 +54,8 @@ struct RetailerAPI {
                 let schema = Country.getSchema(request)
                 
                 let offsetLimit = request.offsetLimit
+                
+                if ((offsetLimit?.limit ?? 0) >= 1000) { return response.maxLimit(1000) }
                 
                 // Okay.  Lets first do the scenario when they have the id:
                 do {
@@ -676,6 +679,8 @@ struct RetailerAPI {
                 var retailerUserId : Int = 0
                 let offsetLimit = request.offsetLimit
                 
+                if ((offsetLimit?.limit ?? 0) >= 500) { return response.maxLimit(500) }
+                
                 do {
                     
                     let requestJSON = try request.postBodyJSON()!
@@ -685,6 +690,8 @@ struct RetailerAPI {
                     if let retailerUserCode = requestJSON["employeeCode"].stringValue, let t = rt.terminal {
                         let check = t.checkEmployeeId(retailerUserCode, schema)
                         retailerUserId = check.retailerUserId ?? 0
+                    } else if let theId = requestJSON["employeeId"].intValue {
+                        retailerUserId = theId
                     }
                     
                     // Okay, theres 3 different ways they can send the dates in here:
@@ -752,7 +759,13 @@ struct RetailerAPI {
                     let rows = try? CodeTransaction().sqlRows(sqlStatement, params: [])
                     
                     if let transactions = rows, !transactions.isEmpty {
-                        var bucketTotal = 0.0
+                        // Okay... lets get the total:
+                        let theTotalsQuery = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId));", params: []).first!
+                        let bucketTotal = theTotalsQuery.data["total_value"].doubleValue ?? 0.0
+                        let totalRecords = theTotalsQuery.data["total_count"].intValue ?? 0
+                        let bucketSalesTotal = theTotalsQuery.data["total_sales"].doubleValue ?? 0.0
+                        let refundedBucketedTotal = theTotalsQuery.data["total_refund_value"].doubleValue ?? 0.0
+                        let refundedBucketSales = theTotalsQuery.data["total_refund_sales"].doubleValue ?? 0.0
                         var transactionsJSON : [[String:Any]] = []
                         for transaction in transactions {
                             var transjson = [String:Any]()
@@ -763,9 +776,11 @@ struct RetailerAPI {
                             if let created = transaction.data["created"].intValue, created > 0 {
                                 transjson["created"] = created.dateString
                             }
+                            if let customerCode = transaction.data["customer_code"].stringValue {
+                                transjson["customerCode"] = customerCode
+                            }
                             if let amount = transaction.data["amount"].doubleValue {
                                 transjson["amount"] = amount
-                                bucketTotal += amount
                             }
                             if let totalAmount = transaction.data["total_amount"].doubleValue {
                                 transjson["totalTransactionAmount"] = totalAmount
@@ -791,15 +806,18 @@ struct RetailerAPI {
                             if let redeemed = transaction.data["redeemed"].intValue, redeemed > 0 {
                                 transjson["redeemed"] = redeemed.dateString
                             }
-                            if let terminalId = transaction.data["terminal_id"].intValue {
-                                transjson["terminalId"] = terminalId
+                            if let serialNumber = transaction.data["serial_number"].stringValue {
+                                transjson["terminalCode"] = serialNumber
+                            }
+                            if let employeeId = transaction.data["retailer_user_id"].intValue, employeeId > 0 {
+                                transjson["employeeId"] = employeeId
                             }
                             
                             transactionsJSON.append(transjson)
                             
                         }
                         
-                        return response.returnReport(bucketTotal, transactions: transactionsJSON)
+                        return response.returnReport(bucketTotal, totalRecords, bucketSalesTotal, refundedBucketSales, refundedBucketedTotal, transactions: transactionsJSON)
                         
                     } else {
                         
@@ -1012,6 +1030,9 @@ struct RetailerAPI {
                     
                     retailerUserId = check.retailerUserId
                     
+                } else if let t = rt.terminal, !t.require_employee_id, let employeeCode = request.employeeCode {
+                    let check = t.checkEmployeeId(employeeCode, schema)
+                    retailerUserId = check.retailerUserId
                 }
                 
                 do {
@@ -1069,7 +1090,7 @@ struct RetailerAPI {
                             terminal = t
                         } else {
                             terminal = Terminal()
-                            sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(request.terminalId!)' "
+                            sql = "SELECT * FROM \(schema).terminal WHERE serial_number = '\(request.terminalCode!)' "
                             let trmn = try? terminal.sqlRows(sql, params: [])
                             if trmn.isNotNil, let c = trmn!.first {
                                 terminal.to(c)
@@ -1281,6 +1302,140 @@ struct RetailerAPI {
                 
             }
         }
+        
+        //MARK: - Refund Transaction
+        public static func refundTransaction(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                
+                guard let code = request.customerCode else { response.invalidCustomerCode; return }
+                guard let _ = request.countryId else { response.invalidCountryCode; return }
+                
+                let schema = Country.getSchema(request)
+                
+                // note that since the unclaimed codes are not in the individual countries (yet), there is only one table in the public schema to deal with
+                // get the code from the url path
+                // lets see if the code has not been redeemed yet :)
+                let thecode = CodeTransaction()
+                
+                let sql = "SELECT * FROM \(schema).code_transaction WHERE customer_code = '\(code)' "
+                let cde = try? thecode.sqlRows(sql, params: [])
+                if cde.isNotNil, let c = cde!.first {
+                    thecode.to(c)
+                } else {
+                    // check for the already redeemed
+                    let sqld = "SELECT * FROM \(schema).code_transaction_history WHERE customer_code = '\(code)' "
+                    let cded = try? thecode.sqlRows(sqld, params: [])
+                    if cded.isNotNil, cded!.count > 0 {
+                        // it was already redeemed - we CANNOT delete!
+                        _ = try? response.setBody(json: ["errorCode":"CodeRedeemed","message":"The code was redeemed already.  Please Contact Bucket Support."])
+                        response.completed(status: .custom(code: 452, message: "Code Already Redeemed"))
+                        return
+                    }
+                }
+                
+                // We should also check and make sure the retailer is deleting their own transaction:
+                guard let retailerId = request.retailer?.id, thecode.retailer_id == retailerId else { return response.incorrectRetailer }
+                
+                // Check if we have a returning object:
+                if thecode.id.isNotNil {
+                    
+                    // see if the code is deleted
+                    guard thecode.deleted! == 0 else { _ = try? response.setBody(json: ["errorCode":"CodeDeleted","message":"The code was already deleted."])
+                        response.completed(status: .custom(code: 451, message: "Code Already Deleted"))
+                        return }
+                    
+                    // see if the code is deleted
+                    guard thecode.refunded! == 0 else { _ = try? response.setBody(json: ["errorCode":"CodeRefunded","message":"The code was already refunded."])
+                        response.completed(status: .custom(code: 455, message: "Code Already Refunded"))
+                        return }
+                    
+                    // Make sure the retailers match:
+                    // Return a general error with a different status code that we will know that the retailers are not matching.
+                    // We will tell them to go to Bucket for support.  If they report an error of code 454, we know there is an issue with the retailers matching.
+                    let retailer = Retailer()
+                    let sql = "SELECT * FROM \(schema).retailer WHERE id = '\(request.retailerId!)' "
+                    let rtlr = try? retailer.sqlRows(sql, params: [])
+                    if rtlr.isNotNil, let c = rtlr!.first {
+                        retailer.to(c)
+                    }
+                    
+                    guard thecode.retailer_id == retailer.id else { _ = try? response.setBody(json: ["errorCode":"UnexpectedIssue","message":"There is an issue with this transaction.  Please contact Bucket Support."])
+                        response.completed(status: .custom(code: 454, message: "Contact Support"))
+                        return }
+                    
+                    // lets refund the code
+                    thecode.refunded = CCXServiceClass.getNow()
+                    
+                    let terminal = request.terminal!
+                    thecode.refunded_reason = "Terminal \(terminal.serial_number!) refunded this transaction at \(thecode.refunded!.dateString) GMT"
+                    
+                    // see if a user is logged in
+                    if let user = request.session?.userid, !user.isEmpty {
+                        thecode.refundedby = user
+                    } else {
+                        thecode.refundedby = CCXDefaultUserValues.user_server
+                    }
+                    
+                    let _ = try? thecode.saveWithCustomType(schemaIn: schema,thecode.refundedby)
+                    
+                    // audit the refund
+                    //TODO:  Mike -> RefundAudit Function ->
+//                    AuditFunctions().deleteCustomerCodeAuditRecord(thecode)
+//                    
+//                    AuditRecordActions.customerCodeDelete(schema: schema,
+//                                                          session_id: request.session?.token ?? "NO SESSION TOKEN",
+//                                                          row_data: ["deleted_code": thecode.asDictionary()],
+//                                                          changed_fields: nil,
+//                                                          description: nil,
+//                                                          changedby: request.session?.token ?? "NO SESSION USER")
+                    
+                    // all OK - returned at the bottom
+                    _=try? response.setBody(json: ["result":"Successfully refunded the transaction."])
+                    response.completed(status: .ok)
+                    
+                } else {
+                    
+                    // We did not... if it is in the history table, then it is already redeemed...
+                    let theCode = CodeTransactionHistory()
+                    let sql = "SELECT * FROM \(schema).code_transaction_history WHERE customer_code = '\(code)'"
+                    let cde = try? theCode.sqlRows(sql, params: [])
+                    if cde.isNotNil, let c = cde!.first {
+                        theCode.to(c)
+                    }
+                    
+                    if theCode.id.isNotNil {
+                        
+                        let responseD:[String:Any] = ["errorCode":"CodeRedeemed","message":"The code was redeemed already.  Please Contact Bucket Support."]
+                        var audit:[String:Any] = responseD
+                        audit["code"]    = theCode.customer_code
+                        audit["code_id"] = theCode.id
+                        
+                        AuditRecordActions.customerCodeDelete(schema: schema,
+                                                              session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                              row_data: audit,
+                                                              changed_fields: nil,
+                                                              description: nil,
+                                                              changedby: request.session?.token ?? "NO SESSION USER")
+                        
+                        
+                        let _ = try? response.setBody(json: responseD)
+                        response.completed(status: .custom(code: 452, message: "Code Redeemed Already"))
+                        return
+                    }
+                    
+                    response.invalidCustomerCode
+                    return
+                }
+                
+            }
+        }
     
         //MARK: - Delete Terminal
         static func terminalDelete(data: [String:Any]) throws -> RequestHandler {
@@ -1371,9 +1526,9 @@ fileprivate extension HTTPResponse {
             .completed(status: .custom(code: 410, message: "Terminal Registered"))
     }
     
-    func returnReport(_ bucketTotal: Double, transactions: [[String:Any]]) -> Void {
+    func returnReport(_ bucketTotal: Double, _ totalCount : Int, _ bucketSalesTotal : Double, _ refundedBucketSales : Double, _ refundedBucketTotal : Double, transactions: [[String:Any]]) -> Void {
         return try! self
-            .setBody(json: ["bucketTotal":bucketTotal, "transactions":transactions])
+            .setBody(json: ["bucketTotal":bucketTotal, "totalTransactionCount": totalCount, "bucketSales":bucketSalesTotal, "refundedBucketSales": refundedBucketSales, "refundedBucketTotal": refundedBucketTotal, "transactions":transactions])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .ok)
     }
@@ -1420,6 +1575,12 @@ fileprivate extension HTTPResponse {
             .completed(status: .custom(code: 421, message: "Can't Delete"))
     }
     
+    func maxLimit(_ theLimit : Int) -> Void {
+         return try! self.setBody(json: ["errorCode":"InvalidLimit", "message":"The maximum limit is \(theLimit). Please page through the API to list out all the transactions."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 426, message: "Invalid Limit"))
+    }
+    
     var eventDeleted : Void {
         return try! self
             .setBody(json: ["result":"You successfully deleted the event!"])
@@ -1460,11 +1621,14 @@ fileprivate extension HTTPRequest {
     var retailerSecret : String? {
         return self.header(.custom(name: "x-functions-key"))
     }
-    var terminalId : String? {
-        if let terminalIdFromHeader = self.header(.custom(name: "terminalCode")).stringValue {
+    var terminalCode : String? {
+        if let terminalIdFromHeader = self.header(.custom(name: "terminalCode")) ?? self.header(.custom(name: "terminalId")) {
             return terminalIdFromHeader
         } else {
-            return nil
+            // Or try in json:
+            let json = try? self.postBodyJSON()
+            let theval = ((json??["terminalId"]) ?? (json??["terminalCode"])).stringValue
+            return theval
         }
     }
     
@@ -1529,7 +1693,7 @@ fileprivate extension HTTPRequest {
     var terminal : Terminal? {
         // Lets see if we have a terminal from the input data:
         // They need to input the x-functions-key as their retailer password.
-        guard let password = self.retailerSecret, let terminalId = self.terminalId, let countryId = self.countryId else { return nil }
+        guard let password = self.retailerSecret, let terminalId = self.terminalCode, let countryId = self.countryId else { return nil }
         
         let schema = Country.getSchema(countryId)
         
@@ -1605,7 +1769,7 @@ extension Retailer {
 //        guard let retailerSecret = request.retailerSecret, let retailerId = request.retailerId else { response.unauthorizedTerminal; return true }
         guard let retailerSecret = request.retailerSecret else { response.unauthorizedTerminal; return (true, nil, nil) }
 
-        guard let terminalSerialNumber = request.terminalId else { response.noTerminalCode; return (true, nil, nil) }
+        guard let terminalSerialNumber = request.terminalCode else { response.noTerminalCode; return (true, nil, nil) }
         guard let _ = request.countryId else { response.invalidCountryCode; return (true, nil, nil) }
         
         // lets test for the retailer code (not the retailer ID
