@@ -261,7 +261,7 @@ final class PRJDBTables {
             schema = schemaIn!.lowercased()
         }
         
-        var viewsql = "CREATE OR REPLACE FUNCTION \(schema).getTransactionReportTotals(fromDate bigint, toDate bigint, retailerId int, terminalId int=0, retailerUserId int=0, OUT total_count bigint, OUT total_value numeric) "
+        var viewsql = "CREATE OR REPLACE FUNCTION \(schema).getTransactionReportTotals(fromDate bigint, toDate bigint, retailerId int, terminalId int=0, retailerUserId int=0, OUT total_count bigint, OUT total_value numeric, OUT total_sales numeric) "
         viewsql.append("AS ")
         viewsql.append("$$ ")
 
@@ -271,21 +271,23 @@ final class PRJDBTables {
         viewsql.append("        var_r record; ")
         viewsql.append("        total_count := 0; ")
         viewsql.append("        total_value := 0.0; ")
+        viewsql.append("        total_sales := 0.0; ")
 
         viewsql.append("    IF terminalId = 0 AND retailerUserId = 0 THEN ")
 
         viewsql.append("        FOR var_r IN( ")
 
-        viewsql.append("            SELECT ct.redeemed, ct.amount ")
+        viewsql.append("            SELECT ct.redeemed, ct.amount, ct.total_amount ")
         viewsql.append("            FROM us.code_transaction AS ct ")
         viewsql.append("            WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) ")
         viewsql.append("            UNION ALL ")
-        viewsql.append("            SELECT cth.redeemed, cth.amount ")
+        viewsql.append("            SELECT cth.redeemed, cth.amount, cth.total_amount ")
         viewsql.append("            FROM us.code_transaction_history AS cth ")
         viewsql.append("            WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId)) ")
         viewsql.append("        LOOP ")
         viewsql.append("            total_count := total_count + 1; ")
         viewsql.append("            total_value := total_value + var_r.amount; ")
+        viewsql.append("            total_sales := total_sales + var_r.total_amount; ")
         viewsql.append("        END LOOP; ")
         viewsql.append("        RETURN; ")
 
@@ -293,48 +295,51 @@ final class PRJDBTables {
 
         viewsql.append("        FOR var_r IN( ")
 
-        viewsql.append("            SELECT ct.redeemed, ct.amount ")
+        viewsql.append("            SELECT ct.redeemed, ct.amount, ct.total_amount ")
         viewsql.append("            FROM us.code_transaction AS ct ")
         viewsql.append("            WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId) ")
         viewsql.append("            UNION ALL ")
-        viewsql.append("            SELECT cth.redeemed, cth.amount ")
+        viewsql.append("            SELECT cth.redeemed, cth.amount, cth.total_amount ")
         viewsql.append("            FROM us.code_transaction_history AS cth ")
         viewsql.append("            WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId)) ")
         viewsql.append("        LOOP ")
         viewsql.append("            total_count := total_count + 1; ")
         viewsql.append("            total_value := total_value + var_r.amount; ")
+        viewsql.append("            total_sales := total_sales + var_r.total_amount; ")
         viewsql.append("        END LOOP; ")
         viewsql.append("        RETURN; ")
 
         viewsql.append("    ELSIF (retailerUserId > 0) AND (terminalId > 0) THEN ")
 
         viewsql.append("        FOR var_r IN( ")
-        viewsql.append("            SELECT ct.redeemed, ct.amount ")
+        viewsql.append("            SELECT ct.redeemed, ct.amount, ct.total_amount ")
         viewsql.append("            FROM us.code_transaction AS ct ")
         viewsql.append("            WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId) AND (ct.retailer_user_id = retailerUserId) ")
         viewsql.append("            UNION ALL ")
-        viewsql.append("            SELECT cth.redeemed, count(*) over () as the_count, sum(cth.amount) over () as the_value ")
+        viewsql.append("            SELECT cth.redeemed, cth.amount, cth.total_amount ")
         viewsql.append("            FROM us.code_transaction_history AS cth ")
         viewsql.append("            WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId) AND (cth.retailer_user_id = retailerUserId)) ")
         viewsql.append("        LOOP ")
         viewsql.append("            total_count := total_count + 1; ")
         viewsql.append("            total_value := total_value + var_r.amount; ")
+        viewsql.append("            total_sales := total_sales + var_r.total_amount; ")
         viewsql.append("        END LOOP; ")
         viewsql.append("        RETURN; ")
 
         viewsql.append("    ELSE ")
 
         viewsql.append("        FOR var_r IN( ")
-        viewsql.append("            SELECT ct.redeemed, count(*) over () as the_count, sum(ct.amount) over () as the_value ")
+        viewsql.append("            SELECT ct.redeemed, ct.amount, ct.total_amount ")
         viewsql.append("            FROM us.code_transaction AS ct ")
         viewsql.append("            WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.retailer_user_id = retailerUserId) ")
         viewsql.append("            UNION ALL ")
-        viewsql.append("            SELECT cth.redeemed, count(*) over () as the_count, sum(cth.amount) over () as the_value ")
+        viewsql.append("            SELECT cth.redeemed, cth.amount, cth.total_amount ")
         viewsql.append("            FROM us.code_transaction_history AS cth ")
         viewsql.append("            WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.retailer_user_id = retailerUserId)) ")
         viewsql.append("        LOOP ")
         viewsql.append("            total_count := total_count + 1; ")
         viewsql.append("            total_value := total_value + var_r.amount; ")
+        viewsql.append("            total_sales := total_sales + var_r.total_amount; ")
         viewsql.append("        END LOOP; ")
         viewsql.append("        RETURN; ")
         viewsql.append("    END IF; ")
