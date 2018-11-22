@@ -743,7 +743,6 @@ struct RetailerAPI {
                     if startOrFrom > endOrTo { return response.dateIssue }
                     
                     var sqlStatement = ""
-                    var totalSqlStatement = ""
                     
                     if offsetLimit.isNil {
                         sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId));"
@@ -759,6 +758,8 @@ struct RetailerAPI {
                         let bucketTotal = theTotalsQuery.data["total_value"].doubleValue ?? 0.0
                         let totalRecords = theTotalsQuery.data["total_count"].intValue ?? 0
                         let bucketSalesTotal = theTotalsQuery.data["total_sales"].doubleValue ?? 0.0
+                        let refundedBucketedTotal = theTotalsQuery.data["total_refund_value"].doubleValue ?? 0.0
+                        let refundedBucketSales = theTotalsQuery.data["total_refund_sales"].doubleValue ?? 0.0
                         var transactionsJSON : [[String:Any]] = []
                         for transaction in transactions {
                             var transjson = [String:Any]()
@@ -804,7 +805,7 @@ struct RetailerAPI {
                             
                         }
                         
-                        return response.returnReport(bucketTotal, totalRecords, transactions: transactionsJSON)
+                        return response.returnReport(bucketTotal, totalRecords, bucketSalesTotal, refundedBucketSales, refundedBucketedTotal, transactions: transactionsJSON)
                         
                     } else {
                         
@@ -1510,9 +1511,9 @@ fileprivate extension HTTPResponse {
             .completed(status: .custom(code: 410, message: "Terminal Registered"))
     }
     
-    func returnReport(_ bucketTotal: Double, _ totalCount : Int, transactions: [[String:Any]]) -> Void {
+    func returnReport(_ bucketTotal: Double, _ totalCount : Int, _ bucketSalesTotal : Double, _ refundedBucketSales : Double, _ refundedBucketTotal : Double, transactions: [[String:Any]]) -> Void {
         return try! self
-            .setBody(json: ["bucketTotal":bucketTotal, "totalQueryCount": totalCount, "transactions":transactions])
+            .setBody(json: ["bucketTotal":bucketTotal, "totalTransactionCount": totalCount, "bucketSales":bucketSalesTotal, "transactions":transactions])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .ok)
     }
