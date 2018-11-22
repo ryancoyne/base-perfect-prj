@@ -55,6 +55,8 @@ struct RetailerAPI {
                 
                 let offsetLimit = request.offsetLimit
                 
+                if ((offsetLimit?.limit ?? 0) >= 1000) { return response.maxLimit(1000) }
+                
                 // Okay.  Lets first do the scenario when they have the id:
                 do {
                     let json = try request.postBodyJSON()!
@@ -677,7 +679,7 @@ struct RetailerAPI {
                 var retailerUserId : Int = 0
                 let offsetLimit = request.offsetLimit
                 
-                if ((offsetLimit?.limit ?? 0) >= 999) { return response.maxLimit(999) }
+                if ((offsetLimit?.limit ?? 0) >= 500) { return response.maxLimit(500) }
                 
                 do {
                     
