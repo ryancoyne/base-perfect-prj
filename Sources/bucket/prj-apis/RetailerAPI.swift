@@ -1028,6 +1028,9 @@ struct RetailerAPI {
                     
                     retailerUserId = check.retailerUserId
                     
+                } else if let t = rt.terminal, !t.require_employee_id {
+                    let check = t.checkEmployeeId(request.employeeCode!, schema)
+                    retailerUserId = check.retailerUserId
                 }
                 
                 do {
