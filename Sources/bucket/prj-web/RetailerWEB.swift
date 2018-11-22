@@ -139,7 +139,7 @@ struct RetailerWEB {
                     data_return["error_messages"] = msg_return
                 }
                 
-                data_return["source_page"] = "views/retailer.index"
+                response.addHeader(.custom(name:"sourcePage"), value: "views/retailer.index")
                 response.render(template: "views/retailer.index", context: data_return)
                 response.completed()
                 
