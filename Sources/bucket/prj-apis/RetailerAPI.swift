@@ -1625,7 +1625,7 @@ fileprivate extension HTTPRequest {
         } else {
             // Or try in json:
             let json = try? self.postBodyJSON()
-            let theval = (json??["terminalId"] ?? json??["terminalCode"])?.stringValue
+            let theval = ((json??["terminalId"]) ?? (json??["terminalCode"])).stringValue
             return theval
         }
     }
