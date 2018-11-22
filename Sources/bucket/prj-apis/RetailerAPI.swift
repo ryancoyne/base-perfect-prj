@@ -803,7 +803,7 @@ struct RetailerAPI {
                             if let serialNumber = transaction.data["serial_number"].stringValue {
                                 transjson["terminalCode"] = serialNumber
                             }
-                            if let employeeId = transaction.data["retailer_user_id"].intValue {
+                            if let employeeId = transaction.data["retailer_user_id"].intValue, employeeId > 0 {
                                 transjson["employeeId"] = employeeId
                             }
                             
