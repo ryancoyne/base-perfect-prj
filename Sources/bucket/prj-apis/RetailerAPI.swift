@@ -770,6 +770,9 @@ struct RetailerAPI {
                             if let created = transaction.data["created"].intValue, created > 0 {
                                 transjson["created"] = created.dateString
                             }
+                            if let customerCode = transaction.data["customer_code"].stringValue {
+                                transjson["customerCode"] = customerCode
+                            }
                             if let amount = transaction.data["amount"].doubleValue {
                                 transjson["amount"] = amount
                             }
