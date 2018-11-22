@@ -690,6 +690,8 @@ struct RetailerAPI {
                     if let retailerUserCode = requestJSON["employeeCode"].stringValue, let t = rt.terminal {
                         let check = t.checkEmployeeId(retailerUserCode, schema)
                         retailerUserId = check.retailerUserId ?? 0
+                    } else if let theId = requestJSON["employeeId"].intValue {
+                        retailerUserId = theId
                     }
                     
                     // Okay, theres 3 different ways they can send the dates in here:
