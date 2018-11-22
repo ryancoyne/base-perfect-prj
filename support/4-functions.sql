@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION us.getTransactionReport(fromDate bigint, toDate bigint, retailerId int, terminalId int=0, retailerUserId int=0, offsetBy int=0, limitBy int=200)
-RETURNS (id int, created int, amount numeric, total_amount numeric, client_location text, client_transaction_id text, terminal_id int, disputed int, disputedby text, customer_code text, redeemed int, serial_number text)
+RETURNS (id int, created int, amount numeric, total_amount numeric, client_location text, client_transaction_id text, terminal_id int, disputed int, disputedby text, customer_code text, redeemed int, retailer_user_id int, serial_number text)
 AS $function$
 
 BEGIN
@@ -8,12 +8,12 @@ BEGIN
 IF terminalId = 0 AND retailerUserId = 0 THEN
 
 RETURN QUERY
-SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed, tm.serial_number
+SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed, ct.retailer_user_id, tm.serial_number
 FROM us.code_transaction AS ct
 JOIN us.terminal AS tm ON tm.id = ct.terminal_id
 WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId)
 UNION
-SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed, tm.serial_number
+SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed, cth.retailer_user_id, tm.serial_number
 FROM us.code_transaction_history AS cth
 JOIN us.terminal AS tm ON tm.id = cth.terminal_id
 WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId)
@@ -23,12 +23,12 @@ OFFSET offsetBy LIMIT limitBy;
 ELSIF (retailerUserId = 0) AND (terminalId > 0) THEN
 
 RETURN QUERY
-SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed, tm.serial_number
+SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed, ct.retailer_user_id, tm.serial_number
 FROM us.code_transaction AS ct
 JOIN us.terminal AS tm ON tm.id = ct.terminal_id
 WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId)
 UNION
-SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed, tm.serial_number
+SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed, cth.retailer_user_id, tm.serial_number
 FROM us.code_transaction_history AS cth
 JOIN us.terminal AS tm ON tm.id = cth.terminal_id
 WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId)
@@ -38,12 +38,12 @@ OFFSET offsetBy LIMIT limitBy;
 ELSIF (retailerUserId > 0) AND (terminalId > 0) THEN
 
 RETURN QUERY
-SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed, tm.serial_number
+SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed, ct.retailer_user_id, tm.serial_number
 FROM us.code_transaction AS ct
 JOIN us.terminal AS tm ON tm.id = ct.terminal_id
 WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.terminal_id = terminalId) AND (ct.retailer_user_id = retailerUserId)
 UNION
-SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed, tm.serial_number
+SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed, cth.retailer_user_id, tm.serial_number
 FROM us.code_transaction_history AS cth
 JOIN us.terminal AS tm ON tm.id = cth.terminal_id
 WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.terminal_id = terminalId) AND (cth.retailer_user_id = retailerUserId)
@@ -53,12 +53,12 @@ OFFSET offsetBy LIMIT limitBy;
 ELSE
 
 RETURN QUERY
-SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed, tm.serial_number
+SELECT ct.id, ct.created, ct.amount, ct.total_amount, ct.client_location, ct.client_transaction_id, ct.terminal_id, ct.disputed, ct.disputedby, ct.customer_code, ct.redeemed, ct.retailer_user_id, tm.serial_number
 FROM us.code_transaction AS ct
 JOIN us.terminal AS tm ON tm.id = ct.terminal_id
 WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId) AND (ct.retailer_user_id = retailerUserId)
 UNION
-SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed, tm.serial_number
+SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.customer_code, cth.redeemed, cth.retailer_user_id, tm.serial_number
 FROM us.code_transaction_history AS cth
 JOIN us.terminal AS tm ON tm.id = cth.terminal_id
 WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId) AND (cth.retailer_user_id = retailerUserId)
