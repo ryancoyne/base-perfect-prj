@@ -109,17 +109,23 @@ struct ConsumerWEB {
                 context["csrfToken"] = request.session?.data["csrf"] as? String ?? ""
 
                 var redir_path = "/"
-                if let sp = request.header(.custom(name:"sourcePage")) { redir_path = sp }
+                if let sp = request.param(name: "sourcePage") {
+                    redir_path = sp
+                }
 
                 if let email = request.param(name: "email").stringValue, !email.isEmpty,
                     let password = request.param(name: "password").stringValue, !password.isEmpty {
                     do {
                         let account = try Account.loginWithEmail(email, password)
                         request.session?.userid = account.id
-                        context["msg_title"] = "Login Successful."
-                        context["msg_body"] = ""
+                        context["authenticated"] = true
+//                        context["msg_title"] = "Login Successful."
+//                        context["msg_body"] = ""
                         // if there is a source, redirect there
+                        
                         response.redirect(path: redir_path)
+                        response.completed()
+                        return
                     } catch {
                         context["msg_title"] = "Login Error."
                         context["msg_body"] = "Email or password incorrect"
@@ -130,7 +136,8 @@ struct ConsumerWEB {
                     context["msg_body"] = "Email or password not supplied"
                     template = "views/login"
                 }
-                response.render(template: template, context: context)
+//                response.render(template: template, context: context)
+                response.redirect(path: redir_path)
                 response.completed()
             }
         }

@@ -38,7 +38,11 @@
         </div>
         
         <input type="hidden" name="_csrf" value="{{csrfToken}}">
-
+        
+        {{#sourcePage}}
+            <input type="hidden" name="sourcePage" value="{{sourcePage}}">
+        {{/sourcePage}}
+        
     </form>
 
 <div class="row"><div class="col-md-12">&nbsp;</div></div>
