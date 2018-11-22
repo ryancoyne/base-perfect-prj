@@ -1,0 +1,32 @@
+
+CREATE OR REPLACE VIEW us.code_transaction_view_deleted_no AS
+SELECT *
+FROM us.code_transaction
+WHERE code_transaction.deleted = 0;
+
+ALTER TABLE us.code_transaction_view_deleted_no
+OWNER TO bucket;
+
+CREATE OR REPLACE VIEW sg.code_transaction_view_deleted_no AS
+SELECT *
+FROM sg.code_transaction
+WHERE code_transaction.deleted = 0;
+
+ALTER TABLE sg.code_transaction_view_deleted_no
+OWNER TO bucket;
+
+CREATE OR REPLACE VIEW us.code_transaction_history_view_deleted_no AS
+SELECT *
+FROM us.code_transaction_history
+WHERE code_transaction_history.deleted = 0;
+
+ALTER TABLE us.code_transaction_history_view_deleted_no
+OWNER TO bucket;
+
+CREATE OR REPLACE VIEW sg.code_transaction_history_view_deleted_no AS
+SELECT *
+FROM sg.code_transaction_history
+WHERE code_transaction_history.deleted = 0;
+
+ALTER TABLE sg.code_transaction_history_view_deleted_no
+OWNER TO bucket;
