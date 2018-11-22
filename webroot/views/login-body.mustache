@@ -3,36 +3,45 @@
 <div class="col thirteen last push_three">
 
 <!--	<h2 class="dmb">Login</h2>  -->
-    <h2>Login</h2>
+
+<div class="row"><div class="col-md-12">&nbsp;</div></div>
 
 	{{#msg_body}}
-	<div class="error pt pb">
-		<h3>{{msg_title}}</h3>
-		{{{msg_body}}}
-	</div>
+        {{> message-insert }}
+        <div class="row"><div class="col-md-12">&nbsp;</div></div>
 	{{/msg_body}}
 
 	<form action="/login" method="POST">
 
-		<fieldset>
-			<label class="above" for="email">Email</label>
-			<input type="text" id="email" name="email" placeholder="Email" />
-		</fieldset>
+        <div class="form-row">
+            <div class="col-md-3">&nbsp;</div>
+            <div class="form-group col-md-6">
+                <input type="text" class="form-control" id="email" name="email" placeholder="Email/Username">
+            </div>
+            <div class="col-md-3">&nbsp;</div>
+        </div>
 
-		<fieldset class="mt">
-			<label class="above" for="password">Password</label>
-			<input type="password" id="password" name="password" placeholder="Password" />
-		</fieldset>
+        <div class="form-row">
+            <div class="col-md-3">&nbsp;</div>
+            <div class="form-group col-md-6">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+            </div>
+            <div class="col-md-3">&nbsp;</div>
+        </div>
 
-		<input type="hidden" name="_csrf" value="{{csrfToken}}">
-		<button type="submit" class="dmt">Login</button>
-		<a href="/" class="button">Cancel</a>
+        <div class="form-row">
+            <div class="col-md-3">&nbsp;</div>
+            <div class="col-md-2"><button type="submit" class="btn btn-primary">Login</button></div>
+            <div class="col-md-2"><a href="/" class="btn">Cancel</a></div>
+            <div class="col-md-2"><a href="/forgotpassword" class="btn">Forgot Password?</a></div>
+            <div class="col-md-3">&nbsp;</div>
+        </div>
+        
+        <input type="hidden" name="_csrf" value="{{csrfToken}}">
 
     </form>
 
-    <a href="/forgotpassword">
-        <button>Forgot Password?</button>
-    </a>
+<div class="row"><div class="col-md-12">&nbsp;</div></div>
 
 </div>
 

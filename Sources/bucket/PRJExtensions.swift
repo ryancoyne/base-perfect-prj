@@ -400,6 +400,11 @@ extension HTTPRequest {
     
     func SecurityCheck() -> Bool {
         
+        // always not require header security values on the local machine
+        #if os(macOS)
+            return true
+        #endif
+        
         var passedCheck = false
         
         // check for the header value from the CloudFront instance

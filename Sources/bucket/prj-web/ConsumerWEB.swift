@@ -90,7 +90,6 @@ struct ConsumerWEB {
                 // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
                 guard request.SecurityCheck() else { response.badSecurityToken; return }
 
-//                var template = "views/msg" // where it goes to after
                 var template = "views/index" // where it goes to after
                 
                 var context: [String : Any] = ["title": "Bucket Technologies", "subtitle":"Goodbye coins, Hello Change"]
@@ -108,7 +107,10 @@ struct ConsumerWEB {
 
                 if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
                 context["csrfToken"] = request.session?.data["csrf"] as? String ?? ""
-                
+
+                var redir_path = "/"
+                if let sp = request.header(.custom(name:"sourcePage")) { redir_path = sp }
+
                 if let email = request.param(name: "email").stringValue, !email.isEmpty,
                     let password = request.param(name: "password").stringValue, !password.isEmpty {
                     do {
@@ -116,7 +118,8 @@ struct ConsumerWEB {
                         request.session?.userid = account.id
                         context["msg_title"] = "Login Successful."
                         context["msg_body"] = ""
-                        response.redirect(path: "/")
+                        // if there is a source, redirect there
+                        response.redirect(path: redir_path)
                     } catch {
                         context["msg_title"] = "Login Error."
                         context["msg_body"] = "Email or password incorrect"
