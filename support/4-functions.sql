@@ -13,7 +13,7 @@ FROM us.code_transaction AS ct
 JOIN us.terminal AS tm ON tm.id = ct.terminal_id
 WHERE (ct.created BETWEEN fromDate AND toDate) AND (ct.retailer_id = retailerId)
 UNION
-SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, ct.hrefunded, cth.refundedby, cth.customer_code, cth.redeemed, cth.retailer_user_id, tm.serial_number
+SELECT cth.id, cth.created, cth.amount, cth.total_amount, cth.client_location, cth.client_transaction_id, cth.terminal_id, cth.disputed, cth.disputedby, cth.refunded, cth.refundedby, cth.customer_code, cth.redeemed, cth.retailer_user_id, tm.serial_number
 FROM us.code_transaction_history AS cth
 JOIN us.terminal AS tm ON tm.id = cth.terminal_id
 WHERE (cth.created BETWEEN fromDate AND toDate) AND (cth.retailer_id = retailerId)
