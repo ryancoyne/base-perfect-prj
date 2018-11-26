@@ -210,11 +210,11 @@ struct RetailerAPI {
                         theEvent.start_date = epochStart
                         theEvent.end_date = epochEnd
                         
-                        if let id = try! theEvent.saveWithCustomType(schemaIn: schema).first?.data.id {
-                            theEvent.id = id
-                            return response.createdEvent(id)
+                        if let id = try? theEvent.saveWithCustomType(schemaIn: schema).first?.data.id, let theid = id {
+                            theEvent.id = theid
+                            return response.createdEvent(theid)
                         } else {
-                            return response.caughtError(NSError(domain: "PUT /event", code: 500, userInfo: [NSLocalizedDescriptionKey : "There was a database error attempting to create your event."]))
+                            return response.caughtError(NSError(domain: "PUT /event", code: 500, userInfo: [NSLocalizedDescriptionKey : "There was a internal error attempting to create your event."]))
                         }
                         
                     }
