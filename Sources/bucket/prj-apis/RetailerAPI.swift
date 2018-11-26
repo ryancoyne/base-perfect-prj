@@ -141,12 +141,43 @@ struct RetailerAPI {
                     var epochStart : Int? = nil
                     var epochEnd : Int? = nil
                 
-                    if let startStr = json["start"].stringValue, let startDate = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc), let endStr = json["end"].stringValue, let endDate = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
-                        epochStart = Int(startDate.epoch())
-                        epochEnd = Int(endDate.epoch())
-                        guard epochStart! < epochEnd! else { return response.dateIssue }
-                    } else if let startStr = json["start"].stringValue, let endStr = json["end"].stringValue {
-                        return response.dateParseIssue(start: startStr, end: endStr)
+                    // We dont want to check here for the start or end since only on the create the start and end is required.
+                    if let startStr =  json["start"].stringValue, let endStr = json["end"].stringValue {
+                        // Okay, they send a start or an end.  Lets see if it is numeric or alpha:
+                        switch (startStr.isNumeric(), endStr.isNumeric()) {
+                        case (true, true):
+                            epochStart = Int(startStr)
+                            epochEnd = Int(endStr)
+                            guard epochStart! < epochEnd! else { return response.dateIssue }
+                            break
+                        case (false, false):
+                            if let startMoment = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc), let endMoment = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                                epochStart = Int(startMoment.epoch())
+                                epochEnd = Int(endMoment.epoch())
+                            } else {
+                                return response.dateParseIssue(start: startStr, end: endStr)
+                            }
+                            guard epochStart! < epochEnd! else { return response.dateIssue }
+                            break
+                        case (true, false):
+                            epochStart = Int(startStr)
+                            if let endMoment = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                                epochEnd = Int(endMoment.epoch())
+                            } else {
+                                return response.dateParseIssue(start: startStr, end: endStr)
+                            }
+                            guard epochStart! < epochEnd! else { return response.dateIssue }
+                            break
+                        case (false, true):
+                            epochEnd = Int(endStr)
+                            if let startMoment = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                                epochStart = Int(startMoment.epoch())
+                            } else {
+                                return response.dateParseIssue(start: startStr, end: endStr)
+                            }
+                            guard epochStart! < epochEnd! else { return response.dateIssue }
+                            break
+                        }
                     }
                     
                     // If they sent the json id, they are updating:
@@ -1491,12 +1522,7 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .forbidden)
     }
-    var dateIssue : Void {
-        return try! self
-            .setBody(json: ["errorCode":"DateIssue", "message":"Start date must be less than end date."])
-            .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .custom(code: 420, message: "Date Request Issue"))
-    }
+    
     func emptyReport(start : Any, end: Any) -> Void {
         return try! self
             .setBody(json: ["errorCode":"EmptyReport", "message":"Empty report between \(start) and \(end)"])
@@ -1546,10 +1572,15 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 420, message: "Date Request Issue"))
     }
-    
+    var dateIssue : Void {
+        return try! self
+            .setBody(json: ["errorCode":"DateIssue", "message":"Start date must be less than end date."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 420, message: "Date Request Issue"))
+    }
     var eventDatesRequired : Void {
         return try! self
-            .setBody(json: ["errorCode":"EventDatesRequired", "message":"Please include a 'start' and 'end' key for the dates of the event.  Please use date format 'yyyy-MM-dd HH:mm:ssZZZ'.'"])
+            .setBody(json: ["errorCode":"EventDatesRequired", "message":"Please include a 'start' and 'end' key for the dates of the event.'"])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 420, message: "Date Request Issue"))
     }
@@ -1600,7 +1631,6 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 430, message: "No Events Found"))
     }
-    
     var eventClosed : Void {
         return try! self
             .setBody(json: ["errorCode":"EventClosed", "message":"You cannot add a transaction to an event that is not in session."])
