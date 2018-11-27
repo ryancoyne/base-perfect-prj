@@ -747,6 +747,7 @@ struct RetailerAPI {
                 }
                 
                 var retailerUserId : Int = 0
+                var eventId : Int = 0
                 let offsetLimit = request.offsetLimit
                 
                 if ((offsetLimit?.limit ?? 0) >= 500) { return response.maxLimit(500) }
@@ -763,6 +764,8 @@ struct RetailerAPI {
                     } else if let theId = requestJSON["employeeId"].intValue {
                         retailerUserId = theId
                     }
+                    
+                    eventId = requestJSON["eventId"].intValue ?? 0
                     
                     // Okay, theres 3 different ways they can send the dates in here:
                     // 1. As an integer.
@@ -821,16 +824,16 @@ struct RetailerAPI {
                     var sqlStatement = ""
                     
                     if offsetLimit.isNil {
-                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId));"
+                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId), \(eventId));"
                     } else {
-                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId),\(offsetLimit!.offset), \(offsetLimit!.limit));"
+                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId), \(eventId),\(offsetLimit!.offset), \(offsetLimit!.limit));"
                     }
                     
                     let rows = try? CodeTransaction().sqlRows(sqlStatement, params: [])
                     
                     if let transactions = rows, !transactions.isEmpty {
                         // Okay... lets get the total:
-                        let theTotalsQuery = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId));", params: []).first!
+                        let theTotalsQuery = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId), \(eventId));", params: []).first!
                         let bucketTotal = theTotalsQuery.data["total_value"].doubleValue ?? 0.0
                         let totalRecords = theTotalsQuery.data["total_count"].intValue ?? 0
                         let bucketSalesTotal = theTotalsQuery.data["total_sales"].doubleValue ?? 0.0
@@ -881,6 +884,9 @@ struct RetailerAPI {
                             }
                             if let employeeId = transaction.data["retailer_user_id"].intValue, employeeId > 0 {
                                 transjson["employeeId"] = employeeId
+                            }
+                            if let eventId = transaction.data["event_id"].intValue, eventId > 0 {
+                                transjson["eventId"] = eventId
                             }
                             
                             transactionsJSON.append(transjson)
