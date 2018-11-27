@@ -34,7 +34,46 @@ struct RetailerAPI {
                 ["method":"put", "uri":"/api/v1/event", "handler":createOrUpdateEvent,],
                 ["method":"delete", "uri":"/api/v1/event/{id}", "handler":deleteEvent,],
                 ["method":"post", "uri":"/api/v1/events", "handler":getEvents,],
+                ["method":"post", "uri":"/api/v1/report/events", "handler":reportEvents,],
             ]
+        }
+        //MARK: - Report Events:
+        public static func reportEvents(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                
+                // We will have a country passed in through the header:
+                guard let _ = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(request)
+                
+                let offsetLimit = request.offsetLimit
+                
+                if ((offsetLimit?.limit ?? 0) >= 1000) { return response.maxLimit(1000) }
+                
+                // Okay.  Lets first do the scenario when they have the id:
+                do {
+                    let json = try request.postBodyJSON()!
+                    // We do not require a post body here.  It can be empty.
+                    
+                    let eventId = json.id ?? 0
+                    let dates = json.epochDates
+                    
+                    
+                    
+                } catch BucketAPIError.unparceableJSON(let theStr) {
+                    return response.invalidRequest(theStr)
+                } catch {
+                    return response.caughtError(error)
+                }
+                
+            }
         }
         
         //MARK: - Fetch Events:
@@ -63,7 +102,7 @@ struct RetailerAPI {
                     // We do not require a post body here.  It can be empty.
                     
                     let eventId = json.id ?? 0
-                    let dates = request.epochDates
+                    let dates = json.epochDates
                     
                     var sqlStatement = "SELECT * FROM \(schema).getRetailerEvents(\(rt.retailer!.id!), \(eventId)"
                     
@@ -1639,6 +1678,18 @@ fileprivate extension HTTPResponse {
     }
 }
 
+fileprivate extension Dictionary where Key == String, Value == Any {
+    var epochDates : (start: Int, end: Int)? {
+        if let start = self["start"].stringValue, let end = self["end"].stringValue, let startEpochInt = moment(start, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch(), let endEpochInt = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch() {
+            return (Int(startEpochInt), Int(endEpochInt))
+        } else if let start = self["start"].intValue, let end = self["end"].intValue {
+            return (start, end)
+        } else {
+            return nil
+        }
+    }
+}
+
 fileprivate extension HTTPRequest {
     
 //    @available(*, deprecated, message: "no longer available in version v1.1")
@@ -1677,20 +1728,20 @@ fileprivate extension HTTPRequest {
         return nil
     }
     
-    var epochDates : (start: Int, end: Int)? {
-        
-        if let postJSON = try? self.postBodyJSON() {
-            if let start = postJSON?["start"].stringValue, let end = postJSON?["end"].stringValue, let startEpochInt = moment(start, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch(), let endEpochInt = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch() {
-                return (Int(startEpochInt), Int(endEpochInt))
-            } else if let start = postJSON?["start"].intValue, let end = postJSON?["end"].intValue {
-                return (start, end)
-            } else {
-                return nil
-            }
-        } else {
-            return nil
-        }
-    }
+//    var epochDates : (start: Int, end: Int)? {
+//
+//        if let postJSON = try? self.postBodyJSON() {
+//            if let start = postJSON?["start"].stringValue, let end = postJSON?["end"].stringValue, let startEpochInt = moment(start, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch(), let endEpochInt = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch() {
+//                return (Int(startEpochInt), Int(endEpochInt))
+//            } else if let start = postJSON?["start"].intValue, let end = postJSON?["end"].intValue {
+//                return (start, end)
+//            } else {
+//                return nil
+//            }
+//        } else {
+//            return nil
+//        }
+//    }
 
     var eventId : Int? {
         if let eventId = self.header(.custom(name: "eventId")).intValue {
