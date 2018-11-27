@@ -47,6 +47,7 @@ struct RetailerAPI {
                 
                 // We should first bouce the retailer (takes care of all the general retailer errors):
                 guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                let retailerId = rt.retailer!.id!
                 
                 // We will have a country passed in through the header:
                 guard let _ = request.countryId else { return response.invalidCountryCode }
@@ -66,7 +67,7 @@ struct RetailerAPI {
                     let dates = json.epochDates
                     
                     // We need to get the events between these dates:
-                    var sqlStatement = "SELECT * FROM \(schema).getRetailerEvents(\(rt.retailer!.id!), \(eventId)"
+                    var sqlStatement = "SELECT * FROM \(schema).getRetailerEvents(\(retailerId), \(eventId)"
                     
                     if dates.isNotNil {
                         sqlStatement.append(", \(dates!.start), \(dates!.end)")
@@ -105,12 +106,12 @@ struct RetailerAPI {
                             let eventId = eventJSON.id!
                             
                             // Lets fetch the totals for this
-                            let theTotalsQuery = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), 0, 0, \(eventId));", params: []).first!
+                            let theTotalsQuery = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(retailerId), 0, 0, \(eventId));", params: []).first!
                             if let bucketTotal = theTotalsQuery.data["total_value"].doubleValue {
                                 eventJSON["bucketTotal"] = bucketTotal
                                 
                                 // Lets fetch the transactions for this event
-                                let transactions = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), 0, 0, \(eventId), -1, -1);", params: [])
+                                let transactions = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(retailerId), 0, 0, \(eventId), -1, -1);", params: [])
                                 var transactionsJSON = [[String:Any]]()
                                 for transaction in transactions {
                                     var transactionJSON = [String:Any]()
