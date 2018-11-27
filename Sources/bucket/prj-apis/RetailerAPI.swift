@@ -65,7 +65,122 @@ struct RetailerAPI {
                     let eventId = json.id ?? 0
                     let dates = json.epochDates
                     
+                    // We need to get the events between these dates:
+                    var sqlStatement = "SELECT * FROM \(schema).getRetailerEvents(\(rt.retailer!.id!), \(eventId)"
                     
+                    if dates.isNotNil {
+                        sqlStatement.append(", \(dates!.start), \(dates!.end)")
+                    }
+                    
+                    if offsetLimit.isNotNil {
+                        if dates.isNil {
+                            sqlStatement.append(", 0, 0, \(offsetLimit!.offset), \(offsetLimit!.limit)")
+                        } else {
+                            sqlStatement.append(", \(offsetLimit!.offset), \(offsetLimit!.limit)")
+                        }
+                    }
+                    
+                    sqlStatement.append(")")
+                    
+                    if let events = try? RetailerEvent().sqlRows(sqlStatement, params: []), !events.isEmpty {
+                        
+                        var eventsJSON = [[String:Any]]()
+                        
+                        for event in events {
+                            var eventJSON = [String:Any]()
+                            eventJSON["id"] = event.data.id
+                            if let modified = event.data.modified.intValue, modified > 0 {
+                                eventJSON["modified"] = modified.dateString
+                            }
+                            if let modified = event.data.created.intValue, modified > 0 {
+                                eventJSON["created"] = modified.dateString
+                            }
+                            eventJSON["eventName"] = event.data["event_name"].stringValue
+                            eventJSON["eventMessage"] = event.data["event_message"].stringValue
+                            eventJSON["startDate"] = event.data["start_date"].intValue?.dateString
+                            eventJSON["endDate"] = event.data["end_date"].intValue?.dateString
+                            
+                            let startOrFrom = event.data["start_date"].intValue ?? 0
+                            let endOrTo = event.data["end_date"].intValue ?? 0
+                            let eventId = eventJSON.id!
+                            
+                            // Lets fetch the totals for this
+                            let theTotalsQuery = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), 0, 0, \(eventId));", params: []).first!
+                            if let bucketTotal = theTotalsQuery.data["total_value"].doubleValue {
+                                eventJSON["bucketTotal"] = bucketTotal
+                                
+                                // Lets fetch the transactions for this event
+                                let transactions = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), 0, 0, \(eventId), -1, -1);", params: [])
+                                var transactionsJSON = [[String:Any]]()
+                                for transaction in transactions {
+                                    var transactionJSON = [String:Any]()
+                                    
+                                    if let id = transaction.data.id {
+                                        transactionJSON["bucketTransactionId"] = id
+                                    }
+                                    if let created = transaction.data["created"].intValue, created > 0 {
+                                        transactionJSON["created"] = created.dateString
+                                    }
+                                    if let customerCode = transaction.data["customer_code"].stringValue {
+                                        transactionJSON["customerCode"] = customerCode
+                                    }
+                                    if let amount = transaction.data["amount"].doubleValue {
+                                        transactionJSON["amount"] = amount
+                                    }
+                                    if let totalAmount = transaction.data["total_amount"].doubleValue {
+                                        transactionJSON["totalTransactionAmount"] = totalAmount
+                                    }
+                                    if let clientTransactionId = transaction.data["client_transaction_id"].doubleValue {
+                                        transactionJSON["clientTransactionId"] = clientTransactionId
+                                    }
+                                    if let locationId = transaction.data["client_location"].doubleValue {
+                                        transactionJSON["locationId"] = locationId
+                                    }
+                                    if let disputed = transaction.data["disputed"].intValue, disputed > 0 {
+                                        transactionJSON["disputed"] = disputed.dateString
+                                    }
+                                    if let disputedBy = transaction.data["disputedby"].stringValue {
+                                        transactionJSON["disputedBy"] = disputedBy
+                                    }
+                                    if let refunded = transaction.data["refunded"].intValue, refunded > 0 {
+                                        transactionJSON["refunded"] = refunded.dateString
+                                    }
+                                    if let refundedBy = transaction.data["refundedby"].stringValue {
+                                        transactionJSON["refundedBy"] = refundedBy
+                                    }
+                                    if let redeemed = transaction.data["redeemed"].intValue, redeemed > 0 {
+                                        transactionJSON["redeemed"] = redeemed.dateString
+                                    }
+                                    if let serialNumber = transaction.data["serial_number"].stringValue {
+                                        transactionJSON["terminalCode"] = serialNumber
+                                    }
+                                    if let employeeId = transaction.data["retailer_user_id"].intValue, employeeId > 0 {
+                                        transactionJSON["employeeId"] = employeeId
+                                    }
+                                    if let eventId = transaction.data["event_id"].intValue, eventId > 0 {
+                                        transactionJSON["eventId"] = eventId
+                                    }
+                                    
+                                    transactionsJSON.append(transactionJSON)
+                                }
+                                
+                                if !transactionsJSON.isEmpty {
+                                    eventJSON["transactions"] = transactionsJSON
+                                }
+                                
+                            }
+                            
+                            eventsJSON.append(eventJSON)
+                        }
+                        
+                        // Return the events!
+                        return response.returnEvents(eventsJSON)
+                        
+                    } else {
+                        
+                        return response.noEvents
+                        
+                    }
                     
                 } catch BucketAPIError.unparceableJSON(let theStr) {
                     return response.invalidRequest(theStr)
