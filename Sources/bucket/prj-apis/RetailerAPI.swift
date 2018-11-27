@@ -109,6 +109,9 @@ struct RetailerAPI {
                             let theTotalsQuery = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(retailerId), 0, 0, \(eventId));", params: []).first!
                             if let bucketTotal = theTotalsQuery.data["total_value"].doubleValue {
                                 eventJSON["bucketTotal"] = bucketTotal
+                                eventJSON["bucketSales"] = theTotalsQuery.data["total_sales"].doubleValue ?? 0.0
+                                eventJSON["refundedBucketTotal"] = theTotalsQuery.data["total_refund_value"].doubleValue ?? 0.0
+                                eventJSON["refundedBucketSales"] = theTotalsQuery.data["total_refund_sales"].doubleValue ?? 0.0
                                 
                                 // Lets fetch the transactions for this event
                                 let transactions = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(retailerId), 0, 0, \(eventId), -1, -1);", params: [])
