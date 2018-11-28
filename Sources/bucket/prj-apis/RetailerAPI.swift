@@ -1968,7 +1968,7 @@ fileprivate extension HTTPResponse {
         return try! self
             .setBody(json: ["errorCode":"InvalidExportType", "message":"The current supported types are:  csv."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .custom(code: 400, message: "Invalid Export Type"))
+            .completed(status: .custom(code: 422, message: "Invalid Export Type"))
     }
 }
 
