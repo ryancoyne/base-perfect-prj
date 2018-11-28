@@ -299,44 +299,12 @@ struct RetailerAPI {
                     var epochStart : Int? = nil
                     var epochEnd : Int? = nil
                 
-                    // We dont want to check here for the start or end since only on the create the start and end is required.
-                    if let startStr =  json["start"].stringValue, let endStr = json["end"].stringValue {
-                        // Okay, they send a start or an end.  Lets see if it is numeric or alpha:
-                        switch (startStr.isNumeric(), endStr.isNumeric()) {
-                        case (true, true):
-                            epochStart = Int(startStr)
-                            epochEnd = Int(endStr)
-                            guard epochStart! < epochEnd! else { return response.dateIssue }
-                            break
-                        case (false, false):
-                            if let startMoment = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc), let endMoment = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
-                                epochStart = Int(startMoment.epoch())
-                                epochEnd = Int(endMoment.epoch())
-                            } else {
-                                return response.dateParseIssue(start: startStr, end: endStr)
-                            }
-                            guard epochStart! < epochEnd! else { return response.dateIssue }
-                            break
-                        case (true, false):
-                            epochStart = Int(startStr)
-                            if let endMoment = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
-                                epochEnd = Int(endMoment.epoch())
-                            } else {
-                                return response.dateParseIssue(start: startStr, end: endStr)
-                            }
-                            guard epochStart! < epochEnd! else { return response.dateIssue }
-                            break
-                        case (false, true):
-                            epochEnd = Int(endStr)
-                            if let startMoment = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
-                                epochStart = Int(startMoment.epoch())
-                            } else {
-                                return response.dateParseIssue(start: startStr, end: endStr)
-                            }
-                            guard epochStart! < epochEnd! else { return response.dateIssue }
-                            break
-                        }
-                    }
+                    // The dates
+                    let dates = json.epochDates
+                    // Make sure that if they are sending in a start and an end that they are dates that make sense:
+                    if dates.isNotNil && dates!.end < dates!.start { return response.dateIssue }
+                    epochStart = dates?.start
+                    epochEnd = dates?.end
                     
                     // If they sent the json id, they are updating:
                     let theEvent = RetailerEvent()
@@ -894,40 +862,9 @@ struct RetailerAPI {
                     var startOrFrom = 0
                     var endOrTo = 0
                     
-                    if let day = requestJSON["day"].stringValue {
-                        
-                        if let startMoment = moment(day, dateFormat: "yyyy-MM-dd", timeZone: .utc) {
-                            // Lets make sure we are getting the very end of the day, in the correct timezone:
-                            let endMoment = moment(["year":startMoment.year,
-                                                                                   "month":startMoment.month,
-                                                                                   "day":startMoment.day,
-                                                                                   "hour":23,
-                                                                                   "minute":59,
-                                                                                   "second":59,],
-                                                                                    timeZone: .utc)!
-                            
-                            startOrFrom = Int(startMoment.epoch())
-                            endOrTo = Int(endMoment.epoch())
-                            
-                        }
-                        
-                    } else {
-                        // Okay they sent start & end.  Lets see if its a string or an integer epoch date:
-                        if let start = requestJSON["start"], let end = requestJSON["end"] {
-                            
-                            if let start = start as? String, let theMoment = moment(start, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
-                                startOrFrom = Int(theMoment.epoch())
-                            } else if let start = start as? Int {
-                                startOrFrom = start
-                            }
-                            if let end = end as? String, let theMoment = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
-                                endOrTo = Int(theMoment.epoch())
-                            } else if let end = end as? Int {
-                                endOrTo = end
-                            }
-                        }
-                        
-                    }
+                    guard let dates = requestJSON.epochDates else { return response.datesRequired }
+                    startOrFrom = dates.start
+                    endOrTo = dates.end
                     
                     var terminalId : Int = 0
                     if let terminalSerial = requestJSON["reportTerminalCode"].stringValue {
@@ -1748,6 +1685,12 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 420, message: "Date Request Issue"))
     }
+    var datesRequired : Void {
+        return try! self
+            .setBody(json: ["errorCode":"DatesRequired", "message":"Please include a 'start' and 'end' key for the dates of the event.'"])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 420, message: "Date Request Issue"))
+    }
     
     func createdEvent(_ id : Int) -> Void {
         return try! self
@@ -1805,13 +1748,38 @@ fileprivate extension HTTPResponse {
 
 fileprivate extension Dictionary where Key == String, Value == Any {
     var epochDates : (start: Int, end: Int)? {
-        if let start = self["start"].stringValue, let end = self["end"].stringValue, let startEpochInt = moment(start, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch(), let endEpochInt = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch() {
-            return (Int(startEpochInt), Int(endEpochInt))
-        } else if let start = self["start"].intValue, let end = self["end"].intValue {
-            return (start, end)
-        } else {
+        var epochStart : Int = 0
+        var epochEnd : Int = 0
+        if let startStr =  self["start"].stringValue, let endStr = self["end"].stringValue {
+            // Okay, they send a start or an end.  Lets see if it is numeric or alpha:
+            switch (startStr.isNumeric(), endStr.isNumeric()) {
+            case (true, true):
+                epochStart = Int(startStr)!
+                epochEnd = Int(endStr)!
+                break
+            case (false, false):
+                if let startMoment = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc), let endMoment = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                    epochStart = Int(startMoment.epoch())
+                    epochEnd = Int(endMoment.epoch())
+                }
+                break
+            case (true, false):
+                epochStart = Int(startStr)!
+                if let endMoment = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                    epochEnd = Int(endMoment.epoch())
+                }
+                break
+            case (false, true):
+                epochEnd = Int(endStr)!
+                if let startMoment = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                    epochStart = Int(startMoment.epoch())
+                }
+                break
+            }
+            if epochStart > 0 && epochEnd > 0  { return (epochStart, epochEnd) }
             return nil
         }
+        return nil
     }
 }
 
