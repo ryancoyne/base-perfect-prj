@@ -393,7 +393,8 @@ END $function$
 
 LANGUAGE plpgsql;
 
-ALTER FUNCTION us.getRetailerEvents OWNER to bucket;
-ALTER FUNCTION us.getTransactionReport OWNER to bucket;
-ALTER FUNCTION us.getTransactionReportTotals OWNER to bucket;
-
+ALTER FUNCTION us.getretailerevents (integer, integer, integer, integer, integer, integer) OWNER to bucket;
+ALTER FUNCTION us.gettransactionreport (bigint, bigint, integer, integer, integer, integer, integer, integer) OWNER to bucket;
+ALTER FUNCTION us.gettransactionreport (bigint, bigint, integer, integer, integer, integer, integer) OWNER to bucket;
+ALTER FUNCTION us.gettransactionreport (integer, integer, integer, integer) OWNER to bucket;
+ALTER FUNCTION us.gettransactionreporttotals (bigint, bigint, integer, integer, integer, integer, OUT bigint, OUT numeric, OUT numeric, OUT numeric, OUT numeric) OWNER to bucket;
