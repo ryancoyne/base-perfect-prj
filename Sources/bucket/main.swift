@@ -280,11 +280,11 @@ CCXDBTables.sharedInstance.createTables()
 print("main.swift: Complete CCX Tables")
 
 // project specific tables
-print("main.swift: Creating Project Tables")
-
-PRJDBTables.sharedInstance.createTables()
-
-print("main.swift: Completed Project Tables")
+//print("main.swift: Creating Project Tables")
+//
+//PRJDBTables.sharedInstance.createTables()
+//
+//print("main.swift: Completed Project Tables")
 
 // Add the routes to the server.
 var routes: [[String: Any]] = [[String: Any]]()
