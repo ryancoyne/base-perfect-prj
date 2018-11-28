@@ -180,7 +180,9 @@ struct RetailerAPI {
                                 csvEvent.append("Transaction ID, Amount, Customer Code, Created, Redeemed, Terminal Code\n")
                                 
                                 // Now we need to go get the transactions:
-                                if let transactions = try? CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReport(\(eventStart), \(eventEnd), \(retailerId), 0, 0, \(theEventId!), -1, -1);", params: []) {
+                                let sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(eventStart), \(eventEnd), \(retailerId), 0, 0, \(theEventId!), \(offsetLimit?.offset ?? -1), \(offsetLimit?.limit ?? -1));"
+                                
+                                if let transactions = try? CodeTransaction().sqlRows(sqlStatement, params: []) {
                                     for transaction in transactions {
                                         csvEvent.append("\(transaction.data.id!), ")
                                         if let amount = transaction.data["amount"].doubleValue {
