@@ -302,7 +302,7 @@ struct RetailerAPI {
                     // The dates
                     let dates = json.epochDates
                     // Make sure that if they are sending in a start and an end that they are dates that make sense:
-                    if dates.isNotNil && dates!.end < dates!.start { return response.dateIssue }
+                    if dates.isNil || dates.isNotNil && dates!.end < dates!.start { return response.dateIssue }
                     epochStart = dates?.start
                     epochEnd = dates?.end
                     
@@ -1750,28 +1750,28 @@ fileprivate extension Dictionary where Key == String, Value == Any {
     var epochDates : (start: Int, end: Int)? {
         var epochStart : Int = 0
         var epochEnd : Int = 0
-        if let startStr =  self["start"].stringValue, let endStr = self["end"].stringValue {
+        if let start =  self["start"], let end = self["end"] {
             // Okay, they send a start or an end.  Lets see if it is numeric or alpha:
-            switch (startStr.isNumeric(), endStr.isNumeric()) {
+            switch (start is Int, end is Int) {
             case (true, true):
-                epochStart = Int(startStr)!
-                epochEnd = Int(endStr)!
+                epochStart = start as! Int
+                epochEnd = end as! Int
                 break
             case (false, false):
-                if let startMoment = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc), let endMoment = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                if let startMoment = moment(start as! String, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc), let endMoment = moment(end as! String, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
                     epochStart = Int(startMoment.epoch())
                     epochEnd = Int(endMoment.epoch())
                 }
                 break
             case (true, false):
-                epochStart = Int(startStr)!
-                if let endMoment = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                epochStart = start as! Int
+                if let endMoment = moment(end as! String, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
                     epochEnd = Int(endMoment.epoch())
                 }
                 break
             case (false, true):
-                epochEnd = Int(endStr)!
-                if let startMoment = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                epochEnd = end as! Int
+                if let startMoment = moment(start as! String, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
                     epochStart = Int(startMoment.epoch())
                 }
                 break
