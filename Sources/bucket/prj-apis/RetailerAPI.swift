@@ -1778,6 +1778,21 @@ fileprivate extension Dictionary where Key == String, Value == Any {
             }
             if epochStart > 0 && epochEnd > 0  { return (epochStart, epochEnd) }
             return nil
+        } else if let day = self["day"].stringValue {
+            if let startMoment = moment(day, dateFormat: "yyyy-MM-dd", timeZone: .utc) {
+                // Lets make sure we are getting the very end of the day, in the correct timezone:
+                let endMoment = moment(["year":startMoment.year,
+                                        "month":startMoment.month,
+                                        "day":startMoment.day,
+                                        "hour":23,
+                                        "minute":59,
+                                        "second":59,],
+                                       timeZone: .utc)!
+                
+                epochStart = Int(startMoment.epoch())
+                epochEnd = Int(endMoment.epoch())
+                return (epochStart, epochEnd)
+            }
         }
         return nil
     }
@@ -1820,21 +1835,6 @@ fileprivate extension HTTPRequest {
         
         return nil
     }
-    
-//    var epochDates : (start: Int, end: Int)? {
-//
-//        if let postJSON = try? self.postBodyJSON() {
-//            if let start = postJSON?["start"].stringValue, let end = postJSON?["end"].stringValue, let startEpochInt = moment(start, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch(), let endEpochInt = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch() {
-//                return (Int(startEpochInt), Int(endEpochInt))
-//            } else if let start = postJSON?["start"].intValue, let end = postJSON?["end"].intValue {
-//                return (start, end)
-//            } else {
-//                return nil
-//            }
-//        } else {
-//            return nil
-//        }
-//    }
 
     var eventId : Int? {
         if let eventId = self.header(.custom(name: "eventId")).intValue {
