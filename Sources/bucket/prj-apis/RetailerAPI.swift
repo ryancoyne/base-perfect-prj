@@ -34,7 +34,165 @@ struct RetailerAPI {
                 ["method":"put", "uri":"/api/v1/event", "handler":createOrUpdateEvent,],
                 ["method":"delete", "uri":"/api/v1/event/{id}", "handler":deleteEvent,],
                 ["method":"post", "uri":"/api/v1/events", "handler":getEvents,],
+                ["method":"post", "uri":"/api/v1/report/events", "handler":reportEvents,],
             ]
+        }
+        //MARK: - Report Events:
+        public static func reportEvents(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                let retailerId = rt.retailer!.id!
+                
+                // We will have a country passed in through the header:
+                guard let _ = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(request)
+                
+                let offsetLimit = request.offsetLimit
+                
+                if ((offsetLimit?.limit ?? 0) >= 1000) { return response.maxLimit(1000) }
+                
+                // Okay.  Lets first do the scenario when they have the id:
+                do {
+                    let json = try request.postBodyJSON()!
+                    // We do not require a post body here.  It can be empty.
+                    
+                    let eventId = json.id ?? 0
+                    let dates = json.epochDates
+                    
+                    // We need to get the events between these dates:
+                    var sqlStatement = "SELECT * FROM \(schema).getRetailerEvents(\(retailerId), \(eventId)"
+                    
+                    if dates.isNotNil {
+                        sqlStatement.append(", \(dates!.start), \(dates!.end)")
+                    }
+                    
+                    if offsetLimit.isNotNil {
+                        if dates.isNil {
+                            sqlStatement.append(", 0, 0, \(offsetLimit!.offset), \(offsetLimit!.limit)")
+                        } else {
+                            sqlStatement.append(", \(offsetLimit!.offset), \(offsetLimit!.limit)")
+                        }
+                    }
+                    
+                    sqlStatement.append(")")
+                    
+                    if let events = try? RetailerEvent().sqlRows(sqlStatement, params: []), !events.isEmpty {
+                        
+                        var eventsJSON = [[String:Any]]()
+                        
+                        for event in events {
+                            var eventJSON = [String:Any]()
+                            eventJSON["id"] = event.data.id
+                            if let modified = event.data.modified.intValue, modified > 0 {
+                                eventJSON["modified"] = modified.dateString
+                            }
+                            if let modified = event.data.created.intValue, modified > 0 {
+                                eventJSON["created"] = modified.dateString
+                            }
+                            eventJSON["eventName"] = event.data["event_name"].stringValue
+                            eventJSON["eventMessage"] = event.data["event_message"].stringValue
+                            eventJSON["startDate"] = event.data["start_date"].intValue?.dateString
+                            eventJSON["endDate"] = event.data["end_date"].intValue?.dateString
+                            
+                            let startOrFrom = event.data["start_date"].intValue ?? 0
+                            let endOrTo = event.data["end_date"].intValue ?? 0
+                            let eventId = eventJSON.id!
+                            
+                            // Lets fetch the totals for this
+                            let theTotalsQuery = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(retailerId), 0, 0, \(eventId));", params: []).first!
+                            if let bucketTotal = theTotalsQuery.data["total_value"].doubleValue {
+                                eventJSON["bucketTotal"] = bucketTotal
+                                eventJSON["bucketSales"] = theTotalsQuery.data["total_sales"].doubleValue ?? 0.0
+                                eventJSON["refundedBucketTotal"] = theTotalsQuery.data["total_refund_value"].doubleValue ?? 0.0
+                                eventJSON["refundedBucketSales"] = theTotalsQuery.data["total_refund_sales"].doubleValue ?? 0.0
+                                
+                                // Lets fetch the transactions for this event
+                                let transactions = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(retailerId), 0, 0, \(eventId), -1, -1);", params: [])
+                                var transactionsJSON = [[String:Any]]()
+                                for transaction in transactions {
+                                    var transactionJSON = [String:Any]()
+                                    
+                                    if let id = transaction.data.id {
+                                        transactionJSON["bucketTransactionId"] = id
+                                    }
+                                    if let created = transaction.data["created"].intValue, created > 0 {
+                                        transactionJSON["created"] = created.dateString
+                                    }
+                                    if let customerCode = transaction.data["customer_code"].stringValue {
+                                        transactionJSON["customerCode"] = customerCode
+                                    }
+                                    if let amount = transaction.data["amount"].doubleValue {
+                                        transactionJSON["amount"] = amount
+                                    }
+                                    if let totalAmount = transaction.data["total_amount"].doubleValue {
+                                        transactionJSON["totalTransactionAmount"] = totalAmount
+                                    }
+                                    if let clientTransactionId = transaction.data["client_transaction_id"].doubleValue {
+                                        transactionJSON["clientTransactionId"] = clientTransactionId
+                                    }
+                                    if let locationId = transaction.data["client_location"].doubleValue {
+                                        transactionJSON["locationId"] = locationId
+                                    }
+                                    if let disputed = transaction.data["disputed"].intValue, disputed > 0 {
+                                        transactionJSON["disputed"] = disputed.dateString
+                                    }
+                                    if let disputedBy = transaction.data["disputedby"].stringValue {
+                                        transactionJSON["disputedBy"] = disputedBy
+                                    }
+                                    if let refunded = transaction.data["refunded"].intValue, refunded > 0 {
+                                        transactionJSON["refunded"] = refunded.dateString
+                                    }
+                                    if let refundedBy = transaction.data["refundedby"].stringValue {
+                                        transactionJSON["refundedBy"] = refundedBy
+                                    }
+                                    if let redeemed = transaction.data["redeemed"].intValue, redeemed > 0 {
+                                        transactionJSON["redeemed"] = redeemed.dateString
+                                    }
+                                    if let serialNumber = transaction.data["serial_number"].stringValue {
+                                        transactionJSON["terminalCode"] = serialNumber
+                                    }
+                                    if let employeeId = transaction.data["retailer_user_id"].intValue, employeeId > 0 {
+                                        transactionJSON["employeeId"] = employeeId
+                                    }
+                                    if let eventId = transaction.data["event_id"].intValue, eventId > 0 {
+                                        transactionJSON["eventId"] = eventId
+                                    }
+                                    
+                                    transactionsJSON.append(transactionJSON)
+                                }
+                                
+                                if !transactionsJSON.isEmpty {
+                                    eventJSON["transactions"] = transactionsJSON
+                                }
+                                
+                            }
+                            
+                            eventsJSON.append(eventJSON)
+                        }
+                        
+                        // Return the events!
+                        return response.returnEvents(eventsJSON)
+                        
+                    } else {
+                        
+                        return response.noEvents
+                        
+                    }
+                    
+                } catch BucketAPIError.unparceableJSON(let theStr) {
+                    return response.invalidRequest(theStr)
+                } catch {
+                    return response.caughtError(error)
+                }
+                
+            }
         }
         
         //MARK: - Fetch Events:
@@ -63,7 +221,7 @@ struct RetailerAPI {
                     // We do not require a post body here.  It can be empty.
                     
                     let eventId = json.id ?? 0
-                    let dates = request.epochDates
+                    let dates = json.epochDates
                     
                     var sqlStatement = "SELECT * FROM \(schema).getRetailerEvents(\(rt.retailer!.id!), \(eventId)"
                     
@@ -141,12 +299,43 @@ struct RetailerAPI {
                     var epochStart : Int? = nil
                     var epochEnd : Int? = nil
                 
-                    if let startStr = json["start"].stringValue, let startDate = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc), let endStr = json["end"].stringValue, let endDate = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
-                        epochStart = Int(startDate.epoch())
-                        epochEnd = Int(endDate.epoch())
-                        guard epochStart! < epochEnd! else { return response.dateIssue }
-                    } else if let startStr = json["start"].stringValue, let endStr = json["end"].stringValue {
-                        return response.dateParseIssue(start: startStr, end: endStr)
+                    // We dont want to check here for the start or end since only on the create the start and end is required.
+                    if let startStr =  json["start"].stringValue, let endStr = json["end"].stringValue {
+                        // Okay, they send a start or an end.  Lets see if it is numeric or alpha:
+                        switch (startStr.isNumeric(), endStr.isNumeric()) {
+                        case (true, true):
+                            epochStart = Int(startStr)
+                            epochEnd = Int(endStr)
+                            guard epochStart! < epochEnd! else { return response.dateIssue }
+                            break
+                        case (false, false):
+                            if let startMoment = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc), let endMoment = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                                epochStart = Int(startMoment.epoch())
+                                epochEnd = Int(endMoment.epoch())
+                            } else {
+                                return response.dateParseIssue(start: startStr, end: endStr)
+                            }
+                            guard epochStart! < epochEnd! else { return response.dateIssue }
+                            break
+                        case (true, false):
+                            epochStart = Int(startStr)
+                            if let endMoment = moment(endStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                                epochEnd = Int(endMoment.epoch())
+                            } else {
+                                return response.dateParseIssue(start: startStr, end: endStr)
+                            }
+                            guard epochStart! < epochEnd! else { return response.dateIssue }
+                            break
+                        case (false, true):
+                            epochEnd = Int(endStr)
+                            if let startMoment = moment(startStr, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc) {
+                                epochStart = Int(startMoment.epoch())
+                            } else {
+                                return response.dateParseIssue(start: startStr, end: endStr)
+                            }
+                            guard epochStart! < epochEnd! else { return response.dateIssue }
+                            break
+                        }
                     }
                     
                     // If they sent the json id, they are updating:
@@ -179,11 +368,11 @@ struct RetailerAPI {
                         theEvent.start_date = epochStart
                         theEvent.end_date = epochEnd
                         
-                        if let id = try! theEvent.saveWithCustomType(schemaIn: schema).first?.data.id {
-                            theEvent.id = id
-                            return response.createdEvent(id)
+                        if let id = try? theEvent.saveWithCustomType(schemaIn: schema).first?.data.id, let theid = id {
+                            theEvent.id = theid
+                            return response.createdEvent(theid)
                         } else {
-                            return response.caughtError(NSError(domain: "PUT /event", code: 500, userInfo: [NSLocalizedDescriptionKey : "There was a database error attempting to create your event."]))
+                            return response.caughtError(NSError(domain: "PUT /event", code: 500, userInfo: [NSLocalizedDescriptionKey : "There was a internal error attempting to create your event."]))
                         }
                         
                     }
@@ -677,6 +866,7 @@ struct RetailerAPI {
                 }
                 
                 var retailerUserId : Int = 0
+                var eventId : Int = 0
                 let offsetLimit = request.offsetLimit
                 
                 if ((offsetLimit?.limit ?? 0) >= 500) { return response.maxLimit(500) }
@@ -693,6 +883,8 @@ struct RetailerAPI {
                     } else if let theId = requestJSON["employeeId"].intValue {
                         retailerUserId = theId
                     }
+                    
+                    eventId = requestJSON["eventId"].intValue ?? 0
                     
                     // Okay, theres 3 different ways they can send the dates in here:
                     // 1. As an integer.
@@ -751,16 +943,16 @@ struct RetailerAPI {
                     var sqlStatement = ""
                     
                     if offsetLimit.isNil {
-                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId));"
+                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId), \(eventId));"
                     } else {
-                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId),\(offsetLimit!.offset), \(offsetLimit!.limit));"
+                        sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId), \(eventId),\(offsetLimit!.offset), \(offsetLimit!.limit));"
                     }
                     
                     let rows = try? CodeTransaction().sqlRows(sqlStatement, params: [])
                     
                     if let transactions = rows, !transactions.isEmpty {
                         // Okay... lets get the total:
-                        let theTotalsQuery = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId));", params: []).first!
+                        let theTotalsQuery = try! CodeTransaction().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(rt.retailer!.id!), \(terminalId), \(retailerUserId), \(eventId));", params: []).first!
                         let bucketTotal = theTotalsQuery.data["total_value"].doubleValue ?? 0.0
                         let totalRecords = theTotalsQuery.data["total_count"].intValue ?? 0
                         let bucketSalesTotal = theTotalsQuery.data["total_sales"].doubleValue ?? 0.0
@@ -811,6 +1003,9 @@ struct RetailerAPI {
                             }
                             if let employeeId = transaction.data["retailer_user_id"].intValue, employeeId > 0 {
                                 transjson["employeeId"] = employeeId
+                            }
+                            if let eventId = transaction.data["event_id"].intValue, eventId > 0 {
+                                transjson["eventId"] = eventId
                             }
                             
                             transactionsJSON.append(transjson)
@@ -1491,12 +1686,7 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .forbidden)
     }
-    var dateIssue : Void {
-        return try! self
-            .setBody(json: ["errorCode":"DateIssue", "message":"Start date must be less than end date."])
-            .setHeader(.contentType, value: "application/json; charset=UTF-8")
-            .completed(status: .custom(code: 420, message: "Date Request Issue"))
-    }
+    
     func emptyReport(start : Any, end: Any) -> Void {
         return try! self
             .setBody(json: ["errorCode":"EmptyReport", "message":"Empty report between \(start) and \(end)"])
@@ -1546,10 +1736,15 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 420, message: "Date Request Issue"))
     }
-    
+    var dateIssue : Void {
+        return try! self
+            .setBody(json: ["errorCode":"DateIssue", "message":"Start date must be less than end date."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 420, message: "Date Request Issue"))
+    }
     var eventDatesRequired : Void {
         return try! self
-            .setBody(json: ["errorCode":"EventDatesRequired", "message":"Please include a 'start' and 'end' key for the dates of the event.  Please use date format 'yyyy-MM-dd HH:mm:ssZZZ'.'"])
+            .setBody(json: ["errorCode":"EventDatesRequired", "message":"Please include a 'start' and 'end' key for the dates of the event.'"])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 420, message: "Date Request Issue"))
     }
@@ -1600,12 +1795,23 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 430, message: "No Events Found"))
     }
-    
     var eventClosed : Void {
         return try! self
             .setBody(json: ["errorCode":"EventClosed", "message":"You cannot add a transaction to an event that is not in session."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 424, message: "Event Closed"))
+    }
+}
+
+fileprivate extension Dictionary where Key == String, Value == Any {
+    var epochDates : (start: Int, end: Int)? {
+        if let start = self["start"].stringValue, let end = self["end"].stringValue, let startEpochInt = moment(start, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch(), let endEpochInt = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch() {
+            return (Int(startEpochInt), Int(endEpochInt))
+        } else if let start = self["start"].intValue, let end = self["end"].intValue {
+            return (start, end)
+        } else {
+            return nil
+        }
     }
 }
 
@@ -1647,20 +1853,20 @@ fileprivate extension HTTPRequest {
         return nil
     }
     
-    var epochDates : (start: Int, end: Int)? {
-        
-        if let postJSON = try? self.postBodyJSON() {
-            if let start = postJSON?["start"].stringValue, let end = postJSON?["end"].stringValue, let startEpochInt = moment(start, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch(), let endEpochInt = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch() {
-                return (Int(startEpochInt), Int(endEpochInt))
-            } else if let start = postJSON?["start"].intValue, let end = postJSON?["end"].intValue {
-                return (start, end)
-            } else {
-                return nil
-            }
-        } else {
-            return nil
-        }
-    }
+//    var epochDates : (start: Int, end: Int)? {
+//
+//        if let postJSON = try? self.postBodyJSON() {
+//            if let start = postJSON?["start"].stringValue, let end = postJSON?["end"].stringValue, let startEpochInt = moment(start, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch(), let endEpochInt = moment(end, dateFormat: "yyyy-MM-dd HH:mm:ssZZZ", timeZone: .utc)?.epoch() {
+//                return (Int(startEpochInt), Int(endEpochInt))
+//            } else if let start = postJSON?["start"].intValue, let end = postJSON?["end"].intValue {
+//                return (start, end)
+//            } else {
+//                return nil
+//            }
+//        } else {
+//            return nil
+//        }
+//    }
 
     var eventId : Int? {
         if let eventId = self.header(.custom(name: "eventId")).intValue {
