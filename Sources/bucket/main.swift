@@ -290,7 +290,7 @@ print("main.swift: Completed Project Tables")
 var routes: [[String: Any]] = [[String: Any]]()
 
 routes = routes + UserAPI.json.routes
-routes = routes + UserAPI.web.routes
+routes = routes + UserWEB.web.routes
 routes = routes + InstallationsV1Controller.json.routes
 routes = routes + CCXStatisticsV1Controller.json.routes
 routes = routes + FriendAPI.json.routes

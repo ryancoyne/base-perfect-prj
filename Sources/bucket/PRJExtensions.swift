@@ -379,11 +379,24 @@ extension Account {
 }
 
 extension HTTPRequest {
+    
     var account : Account? {
-        guard let userid = session?.userid else { return nil }
+        guard let userid = self.session?.userid, !userid.isEmpty else { return nil }
         let acount = Account()
         try? acount.get(userid)
         return acount
+    }
+    
+    func getSourcePath()->String {
+        
+        var retpath = ""
+        
+        if let pathC = self.getCookie(name: "sourcePage") {
+            
+            retpath = pathC
+        }
+        
+        return retpath
     }
     
     func postBodyJSON() throws -> [String:Any]? {
@@ -566,6 +579,40 @@ extension HTTPRequest {
 }
 
 extension HTTPResponse {
+    
+    func addSourcePage(_ sourcePage:String) {
+        
+        if sourcePage.isEmpty { return }
+        
+        /*
+         Note that the Expiration enum is defined as follows:
+         
+         public enum Expiration {
+         /// Session cookie with no explicit expiration
+         case session
+         /// Expiratiuon in a number of seconds from now
+         case relativeSeconds(Int)
+         /// Expiration at an absolute time given in seconds from epoch
+         case absoluteSeconds(Int)
+         ///    Custom expiration date string
+         case absoluteDate(String)
+         }
+         */
+        
+        let sourcePageCookie = HTTPCookie(
+            name: "sourcePage",
+            value: sourcePage,
+            domain: "localhost",
+            expires: .session,
+            path: "/",
+            secure: false,
+            httpOnly: false
+        )
+
+        self.addCookie(sourcePageCookie)
+        
+    }
+    
     var unableToGetUser : Void {
         return try! self
             .setBody(json: ["errorCode":"UserError", "message":"There was a problem retrieving the user account"])

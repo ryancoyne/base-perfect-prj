@@ -105,12 +105,27 @@ struct ConsumerWEB {
                     return
                 }
 
-                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
-                context["csrfToken"] = request.session?.data["csrf"] as? String ?? ""
+//                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
+//                context["csrfToken"] = request.session?.data["csrf"] as? String ?? ""
 
-                var redir_path = "/"
-                if let sp = request.param(name: "sourcePage") {
-                    redir_path = sp
+                if let s = request.session, !s.userid.isEmpty, s.data["csrf"].stringValue == request.header(.custom(name: "X-CSRF-Token")) {
+                    
+                    AuditRecordActions.userLogin(schema: nil,
+                                                 session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                 user: request.session?.userid,
+                                                 row_data: nil,
+                                                 changed_fields: nil,
+                                                 description: "The user was already logged in and tried to login again.",
+                                                 changedby: request.session?.userid)
+                    
+                    if !request.getSourcePath().isEmpty {
+                        response.redirect(path: request.getSourcePath())
+                        response.completed(status: .ok)
+                        return
+                    }
+                    
+                    response.alreadyAuthenticated(request)
+                    return
                 }
 
                 if let email = request.param(name: "email").stringValue, !email.isEmpty,
@@ -119,11 +134,13 @@ struct ConsumerWEB {
                         let account = try Account.loginWithEmail(email, password)
                         request.session?.userid = account.id
                         context["authenticated"] = true
+                        
 //                        context["msg_title"] = "Login Successful."
 //                        context["msg_body"] = ""
                         // if there is a source, redirect there
                         
-                        response.redirect(path: redir_path)
+                        response.redirect(path: request.getSourcePath(), sessionid: request.session!.token)
+//                        response.sessionRedirect(path: request.getSourcePath(), session: request.session!)
                         response.completed()
                         return
                     } catch {
@@ -137,7 +154,7 @@ struct ConsumerWEB {
                     template = "views/login"
                 }
 //                response.render(template: template, context: context)
-                response.redirect(path: redir_path)
+                response.redirect(path: request.getSourcePath())
                 response.completed()
             }
         }

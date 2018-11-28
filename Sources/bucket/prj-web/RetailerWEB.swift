@@ -55,17 +55,19 @@ struct RetailerWEB {
                     schema = Country.getSchema(country_id!)
                 }
                 
+                var nothere = false
                 if schema.isEmpty || country_id.isNil {
                     // there is an error with the country ID
                     msg_return.append(["msg_body":"We currently are not in this country.  Please try again later."])
+                    nothere = true
                 }
                 
                 // check to see if the user is permitted to these retailer pages
                 let user = request.account
-                if user.isNil {
+                if (user.isNil && !nothere) || user.isNil {
                     msg_return.append(["msg_body":"Please login to access this section."])
                     data_return["require_login"] = true
-                } else {
+                } else if !nothere {
                     if !(user!.isRetailerStandard() || user!.isBucketStandard()) {
                         msg_return.append(["msg_body":"Please login correctly to access this section."])
                         data_return["require_login"] = true
@@ -91,7 +93,7 @@ struct RetailerWEB {
                 }
                 
                 // only look up the retailers if there is a schema to use
-                if !schema.isEmpty {
+                if !schema.isEmpty && user.isNotNil {
 
                     var sql = ""
                     
@@ -138,6 +140,8 @@ struct RetailerWEB {
                 if msg_return.count > 0 {
                     data_return["error_messages"] = msg_return
                 }
+
+                response.addSourcePage("/retailer/index/\(country_id ?? 0)")
                 
                 data_return["sourcePage"] = "/retailer/index/\(country_id ?? 0)"
                 response.render(template: "views/retailer.index", context: data_return)
