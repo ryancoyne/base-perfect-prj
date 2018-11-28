@@ -177,7 +177,7 @@ final class PRJDBTables {
 //        var viewsql = "CREATE VIEW \(schema).\(tablename)_view_not_redeemed AS "
 //        viewsql.append("SELECT * FROM \(schema).\(tablename) WHERE redeemed = 0; ")
         
-        var viewsql = "CREATE OR REPLACE FUNCTION \(schema).getTransactionReport(fromDate bigint, toDate bigint, retailerId int, eventId int=0, terminalId int=0, retailerUserId int=0, offsetBy int=0, limitBy int=200) "
+        var viewsql = "CREATE OR REPLACE FUNCTION \(schema).getTransactionReport(fromDate bigint, toDate bigint, retailerId int, terminalId int=0, retailerUserId int=0, eventId int=0, offsetBy int=0, limitBy int=200) "
         viewsql.append("RETURNS TABLE (id int, created int, amount numeric, total_amount numeric, client_location text, ")
         viewsql.append("client_transaction_id text, terminal_id int, disputed int, disputedby text, refunded int, refundedby text, customer_code text, redeemed int, retailer_user_id int, event_id int, serial_number text) ")
         viewsql.append("AS $function$ ")
