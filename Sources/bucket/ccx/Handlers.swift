@@ -77,6 +77,8 @@ class Handlers {
             if theFile.exists {
                 do {
                     let theString = try theFile.readString()
+                    // Make sure it can be casted to json before sending back:
+                    _ = try theString.jsonDecode()
                     
                     response.setBody(string: theString)
                         .setHeader(.contentType, value: "application/json")
