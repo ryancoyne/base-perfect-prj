@@ -80,9 +80,10 @@ class Handlers {
                     // Make sure it can be casted to json before sending back:
                     _ = try theString.jsonDecode()
                     
-                    response.setBody(string: theString)
-                        .setHeader(.contentType, value: "application/json")
-                        .completed(status: .ok)
+                    return response.setBody(string: theString)
+                                                .setHeader(.contentType, value: "application/json")
+                                                .setHeader(.cacheControl, value: "no-cache")
+                                                .completed(status: .ok)
                     
                 } catch {
                     return response.caughtError(error)
