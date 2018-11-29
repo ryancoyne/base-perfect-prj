@@ -36,13 +36,17 @@ struct ConsumerAPI {
                 ["method":"post",    "uri":"/api/v1/cashout/{groupId}/options", "handler":cashoutOptions],
                 ["method":"post",    "uri":"/api/v1/cashout/{optionId}", "handler":cashout],
                 // Recommend A Retailer
-                ["method":"post",    "uri":"/api/v1/referRetailer", "handler":referRetailer]
+                ["method":"post",    "uri":"/api/v1/referRetailer", "handler":referRetailer],
+                
             ]
         }
         //MARK: - Balance Function:
         public static func balance(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // Check the user:
                 guard !Account.userBounce(request, response) else { return }
@@ -88,6 +92,9 @@ struct ConsumerAPI {
         public static func transactionHistory(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // Check if the user is logged in:
                 guard !Account.userBounce(request, response) else { return }
@@ -215,6 +222,9 @@ struct ConsumerAPI {
         public static func codeBalance(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // Check if the user is logged in:
 //                guard !Account.userBounce(request, response) else { return }
@@ -347,6 +357,9 @@ struct ConsumerAPI {
         public static func redeemCode(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // Check if the user is logged in:
                 guard !Account.userBounce(request, response) else { return }
@@ -502,6 +515,9 @@ struct ConsumerAPI {
         public static func cashoutOptions(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // Check if the user is logged in:
                 guard !Account.userBounce(request, response) else { return }
@@ -667,6 +683,9 @@ struct ConsumerAPI {
             return {
                 request, response in
                 
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
                 // Check if the user is logged in:
                 guard !Account.userBounce(request, response) else { return }
 
@@ -796,6 +815,9 @@ struct ConsumerAPI {
         public static func cashout(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // Check if the user is logged in:
                 guard !Account.userBounce(request, response) else { return }
@@ -1096,6 +1118,9 @@ struct ConsumerAPI {
         public static func referRetailer(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // Check the user:
                 guard !Account.userBounce(request, response) else { return }

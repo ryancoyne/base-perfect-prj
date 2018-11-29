@@ -26,6 +26,12 @@ struct AdminAPI {
             return [
 //                ["method":"post",    "uri":"/api/v1/admin/userStats", "handler":userStats],
                 ["method":"post",    "uri":"/api/v1/admin/suttonBatchAll", "handler":processSuttonBatchAll],
+                
+                // Cashout Group Management (Admin Only)
+                // Create & Update:
+                ["method":"post",    "uri":"/api/v1/cashout/groups", "handler":cashoutTypes],
+                // Delete:
+                ["method":"delete",    "uri":"/api/v1/cashout/groups", "handler":cashoutTypes],
             ]
         }
         
