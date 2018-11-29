@@ -35,7 +35,217 @@ struct RetailerAPI {
                 ["method":"delete", "uri":"/api/v1/event/{id}", "handler":deleteEvent,],
                 ["method":"post", "uri":"/api/v1/events", "handler":getEvents,],
                 ["method":"post", "uri":"/api/v1/report/events", "handler":reportEvents,],
+                ["method":"post", "uri":"/api/v1/export/events", "handler":exportEvents,],
             ]
+        }
+        //MARK: - Export Events Data:
+        public static func exportEvents(_ data: [String:Any]) throws -> RequestHandler {
+            return {
+                request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
+                
+                // We should first bouce the retailer (takes care of all the general retailer errors):
+                guard  let rt = Retailer.retailerTerminalBounce(request, response), !rt.bounced! else { return }
+                let retailerId = rt.retailer!.id!
+                
+                // We will have a country passed in through the header:
+                guard let _ = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(request)
+                
+                do {
+                    
+                    let json = try request.postBodyJSON()!
+                    guard !json.isEmpty else { return response.emptyJSONBody }
+                    
+                    // We need an email:
+                    guard let email = json["email"].stringValue else { return response.emailRequired }
+                    let eventId = json["eventId"].intValue
+                    let offsetLimit = request.offsetLimit
+                    let exportType = request.exportType.lowercased()
+                    let dates = json.epochDates
+                    
+                    // Okay we gathered all the needed infomration for the request.  Now we need to create the CSV file and then send it out as an attachment.
+                    // We need to get the events between these dates:
+                    var sqlStatement = "SELECT * FROM \(schema).getRetailerEvents(\(retailerId), \(eventId ?? 0)"
+                    
+                    if dates.isNotNil {
+                        sqlStatement.append(", \(dates!.start), \(dates!.end)")
+                    }
+                    
+                    if offsetLimit.isNotNil {
+                        if dates.isNil {
+                            sqlStatement.append(", 0, 0, \(offsetLimit!.offset), \(offsetLimit!.limit)")
+                        } else {
+                            sqlStatement.append(", \(offsetLimit!.offset), \(offsetLimit!.limit)")
+                        }
+                    }
+                    
+                    sqlStatement.append(")")
+                    
+                    let dir = Dir("/tmp")
+                    
+                    if !dir.exists {
+                        do {
+                            try dir.create()
+                        } catch {
+                            print("Error creating TMP file")
+                        }
+                    }
+                    
+                    // Okay - we need to check if we have a specific eventId, if we do, we will wrap a CSV file with all the transactions:
+                    if eventId.isNil {
+                        switch exportType {
+                        case "csv":
+                            let fileName = "Events_Export_\(rt.retailer!.retailer_code!)_\(CCXServiceClass.getNow()).\(exportType)"
+                            let filePath = URL(fileURLWithPath: "/tmp").appendingPathComponent(fileName)
+                            var csvText = "Event ID, Event Name, Event Message, Bucket Total, Transaction Count, Start Date, End Date\n"
+                            if let events = try? RetailerEvent().sqlRows(sqlStatement, params: []), !events.isEmpty {
+                                for event in events {
+                                    let startOrFrom = event.data["start_date"].intValue ?? 0
+                                    let endOrTo = event.data["end_date"].intValue ?? 0
+                                    let eventName = event.data["event_name"].stringValue ?? ""
+                                    let eventMessage = event.data["event_name"].stringValue ?? ""
+                                    let thisEventId = event.data.id!
+                                    
+                                    let thisEventTotals = try? RetailerEvent().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(startOrFrom), \(endOrTo), \(retailerId), 0, 0, \(thisEventId));", params: []).first!
+                                    let bucketTotal = thisEventTotals?.data["total_value"].doubleValue ?? 0.0
+                                    let totalCount = thisEventTotals?.data["total_count"].intValue ?? 0
+                                    
+                                    let thisEvent = "\(thisEventId),\(eventName),\(eventMessage),\(bucketTotal),\(totalCount),\(startOrFrom.dateString),\(endOrTo.dateString)\n"
+                                    csvText.append(contentsOf: thisEvent)
+                                    
+                                }
+                                
+                                do {
+                                    try csvText.write(to: filePath, atomically: true, encoding: .utf8)
+                                    
+                                    // Okay we created the CSV.  Lets email it out.
+                                    Utility.sendMail(name: rt.retailer!.name ?? "Bucket Retailer", address: email, subject: "Events Export", html: "", text: "Hi there!\n\nAttached is your CSV file with your events export.", attachments: [dir.path + fileName], {
+                                        let thecsvFile = File(dir.path + fileName)
+                                        thecsvFile.delete()
+                                    })
+                                    
+                                    // Okay.. now send back the success:
+                                    return response.emailSent(to: email)
+                                    
+                                } catch {
+                                    print("Error creating CSV file")
+                                    return response.caughtError(error)
+                                }
+                                
+                            } else {
+                                return response.noEvents
+                            }
+                        default:
+                            return response.invalidExportType
+                        }
+                    } else {
+                        
+                        switch exportType {
+                        case "csv":
+                            // We have an event id.  Lets go and create a CSV for the transactions in that event:
+                            if let theEvent = try? RetailerEvent().sqlRows("SELECT * FROM \(schema).retailer_event_view_deleted_no WHERE id = \(eventId!)", params: []).first, let theEventNotNil = theEvent {
+                                
+                                let theEventId = theEventNotNil.data.id
+                                guard theEventId.isNotNil else { return response.eventDNE }
+                                
+                                let fileName = "Event_Transactions_Export_\(rt.retailer!.retailer_code!)_\(CCXServiceClass.getNow()).\(exportType)"
+                                let filePath = URL(fileURLWithPath: "/tmp").appendingPathComponent(fileName)
+                                
+                                let eventStart = theEventNotNil.data["start_date"].intValue ?? 0
+                                let eventEnd = theEventNotNil.data["end_date"].intValue ?? 0
+                                let eventMessage = theEventNotNil.data["event_message"].stringValue ?? "No Event Message"
+                                let eventName = theEventNotNil.data["event_name"].stringValue ?? "No Event Name"
+                                
+                                var csvEvent = "Event ID, Event Name, Event Message, Bucket Total, Transaction Count, Start Date, End Date\n"
+                                let thisEventTotals = try? RetailerEvent().sqlRows("SELECT * FROM \(schema).getTransactionReportTotals(\(eventStart), \(eventEnd), \(retailerId), 0, 0, \(theEventId!));", params: []).first!
+                                let bucketTotal = thisEventTotals?.data["total_value"].doubleValue ?? 0.0
+                                let totalCount = thisEventTotals?.data["total_count"].intValue ?? 0
+                                
+                                if eventStart > 0 {
+                                    csvEvent.append("\(theEventId!), \(eventName), \(eventMessage), \(bucketTotal), \(totalCount), \(eventStart.dateString), ")
+                                } else {
+                                    csvEvent.append("\(theEventId!), \(eventName), \(eventMessage), \(bucketTotal), \(totalCount), No Start Date, ")
+                                }
+                                if eventEnd > 0 {
+                                    csvEvent.append("\(eventEnd.dateString)\n\n")
+                                } else {
+                                    csvEvent.append("No End Date\n\n")
+                                }
+                                
+                                csvEvent.append("Transactions: \n")
+                                csvEvent.append("Transaction ID, Amount, Customer Code, Created, Redeemed, Terminal Code\n")
+                                
+                                // Now we need to go get the transactions:
+                                let sqlStatement = "SELECT * FROM \(schema).getTransactionReport(\(eventStart), \(eventEnd), \(retailerId), 0, 0, \(theEventId!), \(offsetLimit?.offset ?? -1), \(offsetLimit?.limit ?? -1));"
+                                
+                                if let transactions = try? CodeTransaction().sqlRows(sqlStatement, params: []) {
+                                    for transaction in transactions {
+                                        csvEvent.append("\(transaction.data.id!), ")
+                                        if let amount = transaction.data["amount"].doubleValue {
+                                            csvEvent.append("\(amount), ")
+                                        } else {
+                                            csvEvent.append("No Amount, ")
+                                        }
+                                        if let customerCode = transaction.data["customer_code"].stringValue {
+                                            csvEvent.append("\(customerCode), ")
+                                        } else {
+                                            csvEvent.append("No Customer Code, ")
+                                        }
+                                        if let created = transaction.data["created"].intValue, created > 0 {
+                                            csvEvent.append("\(created.dateString), ")
+                                        } else {
+                                            csvEvent.append("No Creation Date, ")
+                                        }
+                                        if let redeemed = transaction.data["redeemed"].intValue, redeemed > 0 {
+                                            csvEvent.append("\(redeemed.dateString), ")
+                                        } else {
+                                            csvEvent.append("No Redeemed Date, ")
+                                        }
+                                        if let serialNumber = transaction.data["serial_number"].stringValue {
+                                            csvEvent.append("\(serialNumber)\n")
+                                        } else {
+                                            csvEvent.append("No Terminal Code\n")
+                                        }
+                                    }
+                                }
+                                
+                                // Lets try and write the csv file:
+                                
+                                do {
+                                    try csvEvent.write(to: filePath, atomically: true, encoding: .utf8)
+                                    
+                                    // Okay we created the CSV.  Lets email it out.
+                                    Utility.sendMail(name: rt.retailer!.name ?? "Bucket Retailer", address: email, subject: "Event-Transaction Export", html: "", text: "Hi there!\n\nAttached is your CSV file with your event transactions export.", attachments: [dir.path + fileName], {
+                                        let thecsvFile = File(dir.path + fileName)
+                                        thecsvFile.delete()
+                                    })
+                                    
+                                    return response.emailSent(to: email)
+                                    
+                                } catch {
+                                    return response.caughtError(error)
+                                }
+                                
+                            } else {
+                                return response.eventDNE
+                            }
+                        default:
+                            return response.invalidExportType
+                        }
+                        
+                    }
+                    
+                } catch BucketAPIError.unparceableJSON(let theStr) {
+                    return response.invalidRequest(theStr)
+                } catch {
+                    return response.caughtError(error)
+                }
+                
+            }
         }
         //MARK: - Report Events:
         public static func reportEvents(_ data: [String:Any]) throws -> RequestHandler {
@@ -1744,6 +1954,24 @@ fileprivate extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 424, message: "Event Closed"))
     }
+    var emailRequired : Void {
+        return try! self
+            .setBody(json: ["errorCode":"EmailRequired", "message":"You must include an 'email' key in your JSON."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 400, message: "Email Required"))
+    }
+    func emailSent(to : String) -> Void {
+        return try! self
+            .setBody(json: ["message":"The CSV file was sent to \(to)."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .ok)
+    }
+    var invalidExportType : Void {
+        return try! self
+            .setBody(json: ["errorCode":"InvalidExportType", "message":"The current supported types are:  csv."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .custom(code: 422, message: "Invalid Export Type"))
+    }
 }
 
 fileprivate extension Dictionary where Key == String, Value == Any {
@@ -1821,6 +2049,9 @@ fileprivate extension HTTPRequest {
         }
     }
     
+    var exportType : String {
+        return self.urlVariables["exportType"] ?? "csv"
+    }
     var offsetLimit : (offset : Int, limit: Int)? {
         
         let foundOffsetStr = self.queryParams.first { $0.0 == "offset" }?.1

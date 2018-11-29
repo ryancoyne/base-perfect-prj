@@ -1,6 +1,7 @@
 import PerfectHTTP
 import Foundation
 import PerfectLocalAuthentication
+import PerfectSMTP
 
 extension TimeZone {
     static var utc : TimeZone {
@@ -43,6 +44,41 @@ extension Account {
             return true
         default:
             return false
+        }
+    }
+}
+
+extension Utility {
+    public static func sendMail(name: String = "", address: String, subject: String, html: String = "", text: String = "", attachments : [String]?=nil, _ callBack : (()->Void)?=nil) {
+        
+        if html.isEmpty && text.isEmpty { return }
+        
+        let client = SMTPClient(url: SMTPConfig.mailserver, username: SMTPConfig.mailuser, password: SMTPConfig.mailpass)
+        
+        let email = EMail(client: client)
+        email.subject = subject
+        
+        if attachments.isNotNil {
+            email.attachments = attachments!
+        }
+        
+        // set the sender info
+        email.from = Recipient(name: SMTPConfig.mailfromname, address: SMTPConfig.mailfromaddress)
+        if !html.isEmpty { email.content = html }
+        if !text.isEmpty { email.text = text }
+        email.to.append(Recipient(name: name, address: address))
+        
+        do {
+            try email.send { code, header, body in
+                callBack?()
+                /// response info from mail server
+                //                print("code: \(code)")
+                //                print("header: \(header)")
+                //                print("body: \(body)")
+            }
+        } catch {
+            print("email.send error: \(error)")
+            /// something wrong
         }
     }
 }
