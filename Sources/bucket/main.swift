@@ -226,7 +226,8 @@ SessionConfig.userAgentLock = false
 SessionConfig.CSRF.checkState = true
 SessionConfig.CORS.enabled = true
 SessionConfig.cookieSameSite = .lax
-SessionConfig.cookieDomain = EnvironmentVariables.sharedInstance.SessionName!
+//SessionConfig.cookieDomain = EnvironmentVariables.sharedInstance.SessionName!
+SessionConfig.cookieDomain = "127.0.0.1"
 
 // Setup logging
 let myLogger = RequestLogger()

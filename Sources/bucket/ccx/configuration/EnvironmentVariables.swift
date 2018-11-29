@@ -419,7 +419,7 @@ final class EnvironmentVariables {
         }
 
         if self.SessionName == nil {
-            self.SessionName = "localhost"
+            self.SessionName = "PerfectSession"
         }
 
         if self.HTTP_DOCUMENT_ROOT == nil {

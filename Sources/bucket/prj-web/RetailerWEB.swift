@@ -41,7 +41,10 @@ struct RetailerWEB {
         public static func retailer_index(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                
+
+print("retailer_index START: Cookie Name: \(SessionConfig.name)")
+print("retailer_index START: Cookie Value: \(request.getCookie(name: SessionConfig.name) ?? "No Cookie Value")")
+
                 var msg_return:[[String:Any]] = []
                 var data_return:[String:Any] = [:]
                 
@@ -140,6 +143,9 @@ struct RetailerWEB {
                 if msg_return.count > 0 {
                     data_return["error_messages"] = msg_return
                 }
+
+print("retailer_index END: Cookie Name: \(SessionConfig.name)")
+print("retailer_index END: Cookie Value: \(request.getCookie(name: SessionConfig.name) ?? "No Cookie Value")")
 
                 response.addSourcePage("/retailer/index/\(country_id ?? 0)")
                 

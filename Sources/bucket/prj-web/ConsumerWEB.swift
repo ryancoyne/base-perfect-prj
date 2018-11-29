@@ -23,9 +23,9 @@ struct ConsumerWEB {
         // POST request for login
         static var routes : [[String:Any]] {
             return [
-                ["method":"post", "uri":"/login", "handler":login],
-                ["method":"get", "uri":"/forgotpassword", "handler":forgotPassword],
-                ["method":"post", "uri":"/forgotpasswordEntered", "handler":forgotPasswordEntered],
+//                ["method":"post", "uri":"/login", "handler":LocalAuthWebHandlers.login],
+//                ["method":"get", "uri":"/forgotpassword", "handler":forgotPassword],
+//                ["method":"post", "uri":"/forgotpasswordEntered", "handler":forgotPasswordEntered],
             ]
         }
         
