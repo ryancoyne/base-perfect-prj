@@ -67,8 +67,11 @@ class Handlers {
     static func appleAppSiteAssociation(data: [String:Any]) throws -> RequestHandler {
         return {
             request, response in
-            // Here we want to send back the webroot/apple file with application/json:
             
+            // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+            guard request.SecurityCheck() else { response.badSecurityToken; return }
+
+            // Here we want to send back the webroot/apple file with application/json:
             let theFile = File(request.documentRoot+"/well-known/apple-app-site-association")
             
             if theFile.exists {
