@@ -20,6 +20,7 @@
 import PerfectHTTP
 import StORM
 import PerfectLocalAuthentication
+import PerfectLib
 //import SwiftRandom
 //import PerfectSMTP
 
@@ -62,6 +63,32 @@ class Handlers {
 			response.renderMustache(template: request.documentRoot + "/views/index.mustache", context: context)
 		}
 	}
+    
+    static func appleAppSiteAssociation(data: [String:Any]) throws -> RequestHandler {
+        return {
+            request, response in
+            // Here we want to send back the webroot/apple file with application/json:
+            
+            let theFile = File(request.documentRoot+"/well-known/apple-app-site-association")
+            
+            if theFile.exists {
+                do {
+                    let theString = try theFile.readString()
+                    
+                    response.setBody(string: theString)
+                        .setHeader(.contentType, value: "application/json")
+                        .completed(status: .ok)
+                    
+                } catch {
+                    return response.caughtError(error)
+                }
+                
+            } else {
+                
+            }
+            
+        }
+    }
     
     static func extras(_ request: HTTPRequest) -> [String : Any] {
         
