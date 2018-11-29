@@ -681,13 +681,12 @@ struct ConsumerAPI {
                 let schema = Country.getSchema(countryCode)
                 
                 var countsql = "SELECT cog.*, COUNT(coo.id) AS option_count "
-                countsql.append("FROM \(schema).cashout_group_view_deleted_no AS cog ")
+                countsql.append("FROM \(schema).cashout_group AS cog ")
                 countsql.append("JOIN \(schema).cashout_option_view_deleted_no AS coo ")
                 countsql.append("ON cog.id = coo.group_id ")
                 countsql.append("WHERE cog.country_id = $1 ")
                 countsql.append("AND cog.display = true ")
                 countsql.append("AND cog.deleted = 0 ")
-                countsql.append("AND coo.deleted = 0 ")
                 countsql.append("GROUP BY cog.id ")
                 countsql.append("ORDER BY cog.display_order ASC ")
 

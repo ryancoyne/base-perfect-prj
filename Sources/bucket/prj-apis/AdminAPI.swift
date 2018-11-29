@@ -31,7 +31,7 @@ struct AdminAPI {
                 // Create & Update:
                 ["method":"post",    "uri":"/api/v1/cashout/groups", "handler":createOrUpdateCashoutGroup],
                 // Delete:
-                ["method":"delete",    "uri":"/api/v1/cashout/groups", "handler":deleteGroup],
+                ["method":"delete",    "uri":"/api/v1/cashout/groups/{groupId}", "handler":deleteGroup],
             ]
         }
         
@@ -43,7 +43,26 @@ struct AdminAPI {
                 let bounce = Account.adminBouce(request, response)
                 guard !bounce.fails else { return response.accountPermissionsBounce }
                 
-                
+                do {
+                    
+                    let json = try request.postBodyJSON()!
+                    guard !json.isEmpty else { return response.emptyJSONBody }
+                    
+                    // Okay.. lets see if we are updating or creating:
+                    if json.id.isNil {
+                        // We are creating a new group:
+                        
+                    } else {
+                        // Okay, we are UPDATING:
+                        
+                        
+                    }
+                    
+                } catch BucketAPIError.unparceableJSON(let theStr) {
+                    return response.invalidRequest(theStr)
+                } catch {
+                    return response.caughtError(error)
+                }
                 
             }
         }
@@ -59,37 +78,19 @@ struct AdminAPI {
                 let schema = Country.getSchema(request)
                 guard schema != "public" else { return response.invalidCountryCode }
                 
-                do {
+                let groupId = request.groupId
+                
+                let theGroup = CashoutGroup()
+                if let theGroupResult = try? theGroup.sqlRows("SELECT * FROM \(schema).cashout_group WHERE id = \(groupId)", params: []).first, theGroupResult.isNotNil {
+                    theGroup.to(theGroupResult!)
+                    if (theGroup.deleted ?? 0) > 0 { return response.alreadyDeleted }
                     
-                    let json = try request.postBodyJSON()!
-                    guard !json.isEmpty else { return response.emptyJSONBody }
+                    _ = try? theGroup.softDeleteWithCustomType(schemaIn: schema, bounce.user?.id)
                     
-                    // Okay.. lets see if we are updating or creating:
-                    if json.id.isNil {
-                        // We are creating a new group:
-                        
-                    } else {
-                        // Okay, we are UPDATING:
-                        let theGroup = CashoutGroup()
-                        if let theGroupResult = try? theGroup.sqlRows("SELECT * FROM \(schema).cashout_group WHERE id = \(json.id!)", params: []).first, theGroupResult.isNotNil {
-                            theGroup.to(theGroupResult!)
-                            if theGroup.deleted.isNotNil { return response.alreadyDeleted }
-                            
-                            theGroup.deleted = CCXServiceClass.getNow()
-                            theGroup.deletedby = bounce.user?.id
-                            
-                        } else {
-                            return response.groupDNE
-                        }
-                        if let description = json["description"].stringValue {
-                            
-                        }
-                    }
+                    return response.deletedGroup(theGroup.id!)
                     
-                } catch BucketAPIError.unparceableJSON(let theStr) {
-                    return response.invalidRequest(theStr)
-                } catch {
-                    return response.caughtError(error)
+                } else {
+                    return response.groupDNE
                 }
                 
             }
@@ -153,6 +154,12 @@ struct AdminAPI {
     }
 }
 
+fileprivate extension HTTPRequest {
+    var groupId : Int {
+        return self.urlVariables["groupId"].intValue ?? 0
+    }
+}
+
 fileprivate extension HTTPResponse {
     var groupDNE : Void {
         return try! self.setBody(json: ["errorCode":"GroupDNE", "message": "The group id does not exist."])
@@ -163,5 +170,10 @@ fileprivate extension HTTPResponse {
         return try! self.setBody(json: ["errorCode":"GroupAlreadyDeleted", "message": "The group has already been deleted."])
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .custom(code: 404, message: "The Group Id does not exist."))
+    }
+    func deletedGroup(_ id: Int) -> Void {
+        return try! self.setBody(json: ["message":"You successfully deleted group id: \(id)."])
+            .setHeader(.contentType, value: "application/json; charset=UTF-8")
+            .completed(status: .ok)
     }
 }
