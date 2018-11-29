@@ -87,7 +87,9 @@ class Handlers {
                 }
                 
             } else {
-                
+                try! response.setBody(json: ["errorCode":"AASAFileDNE","message":"The Apple App Site Association File currently does not exist on the webserver."])
+                    .setHeader(.contentType, value: "application/json")
+                    .completed(status: .noContent)
             }
             
         }
