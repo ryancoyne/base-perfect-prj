@@ -45,9 +45,6 @@ struct ConsumerAPI {
             return {
                 request, response in
                 
-                // Do our normal stuff here:
-                guard request.SecurityCheck() else { return response.badSecurityToken }
-                
                 // Check the user:
                 guard !Account.userBounce(request, response) else { return }
                 
@@ -92,9 +89,6 @@ struct ConsumerAPI {
         public static func transactionHistory(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                
-                // Do our normal stuff here:
-                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // Check if the user is logged in:
                 guard !Account.userBounce(request, response) else { return }
@@ -358,9 +352,6 @@ struct ConsumerAPI {
             return {
                 request, response in
                 
-                // Do our normal stuff here:
-                guard request.SecurityCheck() else { return response.badSecurityToken }
-                
                 // Check if the user is logged in:
                 guard !Account.userBounce(request, response) else { return }
                 
@@ -515,9 +506,6 @@ struct ConsumerAPI {
         public static func cashoutOptions(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                
-                // Do our normal stuff here:
-                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // Check if the user is logged in:
                 guard !Account.userBounce(request, response) else { return }
@@ -682,10 +670,7 @@ struct ConsumerAPI {
         public static func cashoutTypes(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                
-                // Do our normal stuff here:
-                guard request.SecurityCheck() else { return response.badSecurityToken }
-                
+            
                 // Check if the user is logged in:
                 guard !Account.userBounce(request, response) else { return }
 
@@ -696,8 +681,8 @@ struct ConsumerAPI {
                 let schema = Country.getSchema(countryCode)
                 
                 var countsql = "SELECT cog.*, COUNT(coo.id) AS option_count "
-                countsql.append("FROM \(schema).cashout_group AS cog ")
-                countsql.append("JOIN \(schema).cashout_option AS coo ")
+                countsql.append("FROM \(schema).cashout_group_view_deleted_no AS cog ")
+                countsql.append("JOIN \(schema).cashout_option_view_deleted_no AS coo ")
                 countsql.append("ON cog.id = coo.group_id ")
                 countsql.append("WHERE cog.country_id = $1 ")
                 countsql.append("AND cog.display = true ")
@@ -815,9 +800,6 @@ struct ConsumerAPI {
         public static func cashout(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                
-                // Do our normal stuff here:
-                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // Check if the user is logged in:
                 guard !Account.userBounce(request, response) else { return }
@@ -1118,9 +1100,6 @@ struct ConsumerAPI {
         public static func referRetailer(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                
-                // Do our normal stuff here:
-                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // Check the user:
                 guard !Account.userBounce(request, response) else { return }
