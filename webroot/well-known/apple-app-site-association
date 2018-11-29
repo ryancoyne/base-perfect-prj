@@ -4,7 +4,7 @@
     "details": [
       {
         "appId": "5SLCT4A9TV.com.buckettechnologies.consumerApp",
-        "paths": ["*"],
+        "paths": ["*"]
       }
     ]
   }
