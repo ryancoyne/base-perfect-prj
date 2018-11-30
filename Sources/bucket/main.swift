@@ -227,7 +227,7 @@ SessionConfig.CSRF.checkState = true
 SessionConfig.CORS.enabled = true
 SessionConfig.cookieSameSite = .lax
 //SessionConfig.cookieDomain = EnvironmentVariables.sharedInstance.SessionName!
-SessionConfig.cookieDomain = "127.0.0.1"
+SessionConfig.cookieDomain = EnvironmentVariables.sharedInstance.URL_DOMAIN!
 
 // Setup logging
 let myLogger = RequestLogger()

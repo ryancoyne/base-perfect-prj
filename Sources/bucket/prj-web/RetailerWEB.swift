@@ -73,7 +73,13 @@ struct RetailerWEB {
                     msg_return.append(["msg_body":"Please login to access this section."])
                     data_return["require_login"] = true
                 } else if !nothere {
-                    if !(user!.isRetailerStandard() || user!.isBucketStandard()) {
+                    // no matter what they are logged in...
+                    data_return["authenticated"] = true
+                    // now lets check to see if they are permitted to see this page.
+                    if user!.isRetailerStandard() || user!.isRetailerAdmin() || user!.isBucketStandard() || user!.isBucketAdmin() {
+                        // this means that they are logged in as either a retailer or bucket
+                    } else {
+                        // they are not permitted to access this section.
                         msg_return.append(["msg_body":"Please login correctly to access this section."])
                         data_return["require_login"] = true
                     }
