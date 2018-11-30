@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appId": "5SLCT4A9TV.com.buckettechnologies.consumerApp",
+        "appID": "5SLCT4A9TV.com.buckettechnologies.consumerApp",
         "paths": ["*"]
       }
     ]
