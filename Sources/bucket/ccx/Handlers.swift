@@ -82,6 +82,7 @@ class Handlers {
                     
                     return response.setBody(string: theString)
                                                 .setHeader(.contentType, value: "application/json")
+                                                // Set the cache control for the response.
                                                 .setHeader(.cacheControl, value: "no-cache")
                                                 .completed(status: .ok)
                     
