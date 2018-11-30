@@ -2,10 +2,26 @@ import PerfectHTTP
 import Foundation
 import PerfectLocalAuthentication
 import PerfectSMTP
+import PostgresStORM
 
 extension TimeZone {
     static var utc : TimeZone {
         return TimeZone(abbreviation: "UTC")!
+    }
+}
+
+extension PostgresStORM {
+    /// Retrieves a single row with the supplied ID.
+    public func get(_ id: Any, schema: String) throws {
+        let (idname, _) = firstAsKey()
+        do {
+            if let theResult = try execRows("SELECT * FROM \(schema).\(table()) WHERE \(idname) = \(id)", params: []).first {
+                to(theResult)
+            }
+        } catch {
+//            LogFile.error("Error: \(error)", logFile: "./StORMlog.txt")
+            throw error
+        }
     }
 }
 

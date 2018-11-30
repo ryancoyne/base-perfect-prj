@@ -29,7 +29,7 @@ struct AdminAPI {
                 
                 // Cashout Group Management (Admin Only)
                 // Create & Update:
-                ["method":"post",    "uri":"/api/v1/cashout/groups", "handler":createOrUpdateCashoutGroup],
+                ["method":"post",    "uri":"/api/v1/update/cashout/groups", "handler":createOrUpdateCashoutGroup],
                 // Delete:
                 ["method":"delete",    "uri":"/api/v1/cashout/groups/{groupId}", "handler":deleteGroup],
             ]
@@ -42,6 +42,12 @@ struct AdminAPI {
                 
                 let bounce = Account.adminBouce(request, response)
                 guard !bounce.fails else { return response.accountPermissionsBounce }
+                guard let countryId = request.countryId else { return response.invalidCountryCode }
+                
+                let schema = Country.getSchema(request)
+                
+                // We wont be doing JSON here since we have files to upload for the images:
+                
                 
                 do {
                     
@@ -51,9 +57,64 @@ struct AdminAPI {
                     // Okay.. lets see if we are updating or creating:
                     if json.id.isNil {
                         // We are creating a new group:
+                        let group = CashoutGroup()
+                        
+                        group.country_id = countryId
+                        if let value = json["name"].stringValue {
+                            group.group_name = value
+                        }
+                        if let value = json["description"].stringValue {
+                            group.description = value
+                        }
+                        if let value = json["longDescription"].stringValue {
+                            group.long_description = value
+                        }
+                        if let value = json["optionLayout"].stringValue {
+                            group.option_layout = value
+                        }
+                        if let value = json["display"].boolValue {
+                            group.display = value
+                        }
+                        if let value = json["thresholdAmount"].doubleValue {
+                            group.threshold_amount = value
+                        }
+                        if let value = json["displayOrder"].intValue {
+                            group.display_order = value
+                        }
+                        
+                        // Okay. We need to have images for the cashout groups:
+                        
+                        
+                        // Okay lets save this new group:
+                        _ = try? group.saveWithCustomType(schemaIn: schema, bounce.user?.id)
                         
                     } else {
                         // Okay, we are UPDATING:
+                        let group = CashoutGroup()
+                        _ = try? group.get(json.id!, schema: schema)
+                        
+                        if let value = json["name"].stringValue {
+                            group.group_name = value
+                        }
+                        if let value = json["description"].stringValue {
+                            group.description = value
+                        }
+                        if let value = json["longDescription"].stringValue {
+                            group.long_description = value
+                        }
+                        if let value = json["optionLayout"].stringValue {
+                            group.option_layout = value
+                        }
+                        if let value = json["display"].boolValue {
+                            group.display = value
+                        }
+                        if let value = json["thresholdAmount"].doubleValue {
+                            group.threshold_amount = value
+                        }
+                        if let value = json["displayOrder"].intValue {
+                            group.display_order = value
+                        }
+                        
                         
                         
                     }
@@ -81,18 +142,16 @@ struct AdminAPI {
                 let groupId = request.groupId
                 
                 let theGroup = CashoutGroup()
-                if let theGroupResult = try? theGroup.sqlRows("SELECT * FROM \(schema).cashout_group WHERE id = \(groupId)", params: []).first, theGroupResult.isNotNil {
-                    theGroup.to(theGroupResult!)
-                    if (theGroup.deleted ?? 0) > 0 { return response.alreadyDeleted }
-                    
-                    _ = try? theGroup.softDeleteWithCustomType(schemaIn: schema, bounce.user?.id)
-                    
-                    return response.deletedGroup(theGroup.id!)
-                    
-                } else {
-                    return response.groupDNE
-                }
+                try? theGroup.get(groupId, schema: schema)
                 
+                if theGroup.id.isNil {
+                    return response.groupDNE
+                } else {
+                    if theGroup.deleted ?? 0 > 0 { return response.alreadyDeleted }
+                    _=try? theGroup.softDeleteWithCustomType(schemaIn: schema, bounce.user?.id)
+                    return response.deletedGroup(theGroup.id!)
+                }
+            
             }
         }
         
