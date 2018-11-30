@@ -322,6 +322,7 @@ routes.append(["method":"get", "uri":"/healthcheck", "handler":Handlers.healthch
 //MARK:-
 //MARK: STATIC FILES AND DEFAULT ROUTE
 routes.append(["method":"get", "uri":"/", "handler":Handlers.main])
+routes.append(["method":"get", "uri":"/apple-app-site-association", "handler":Handlers.appleAppSiteAssociation])
 routes.append(["method":"get", "uri":"/**", "handler":PerfectHTTPServer.HTTPHandler.staticFiles,
                "documentRoot":EnvironmentVariables.sharedInstance.HTTP_DOCUMENT_ROOT!,
                "allowResponseFilters":true])

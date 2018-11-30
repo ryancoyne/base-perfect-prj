@@ -20,6 +20,7 @@
 import PerfectHTTP
 import StORM
 import PerfectLocalAuthentication
+import PerfectLib
 //import SwiftRandom
 //import PerfectSMTP
 
@@ -65,6 +66,40 @@ class Handlers {
 
 		}
 	}
+    
+    static func appleAppSiteAssociation(data: [String:Any]) throws -> RequestHandler {
+        return {
+            request, response in
+            
+            // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
+            guard request.SecurityCheck() else { response.badSecurityToken; return }
+
+            // Here we want to send back the webroot/apple file with application/json:
+            let theFile = File(request.documentRoot+"/well-known/apple-app-site-association")
+            
+            if theFile.exists {
+                do {
+                    let theString = try theFile.readString()
+                    // Make sure it can be casted to json before sending back:
+                    _ = try theString.jsonDecode()
+                    
+                    return response.setBody(string: theString)
+                                                .setHeader(.contentType, value: "application/json")
+                                                .setHeader(.cacheControl, value: "no-cache")
+                                                .completed(status: .ok)
+                    
+                } catch {
+                    return response.caughtError(error)
+                }
+                
+            } else {
+                try! response.setBody(json: ["errorCode":"AASAFileDNE","message":"The Apple App Site Association File currently does not exist on the webserver."])
+                    .setHeader(.contentType, value: "application/json")
+                    .completed(status: .noContent)
+            }
+            
+        }
+    }
     
     static func extras(_ request: HTTPRequest) -> [String : Any] {
         

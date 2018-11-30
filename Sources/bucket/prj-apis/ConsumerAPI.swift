@@ -36,7 +36,8 @@ struct ConsumerAPI {
                 ["method":"post",    "uri":"/api/v1/cashout/{groupId}/options", "handler":cashoutOptions],
                 ["method":"post",    "uri":"/api/v1/cashout/{optionId}", "handler":cashout],
                 // Recommend A Retailer
-                ["method":"post",    "uri":"/api/v1/referRetailer", "handler":referRetailer]
+                ["method":"post",    "uri":"/api/v1/referRetailer", "handler":referRetailer],
+                
             ]
         }
         //MARK: - Balance Function:
@@ -218,6 +219,9 @@ struct ConsumerAPI {
         public static func codeBalance(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+                
+                // Do our normal stuff here:
+                guard request.SecurityCheck() else { return response.badSecurityToken }
                 
                 // Check if the user is logged in:
 //                guard !Account.userBounce(request, response) else { return }
@@ -680,7 +684,7 @@ struct ConsumerAPI {
         public static func cashoutTypes(_ data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
-                
+            
                 // Check if the user is logged in:
                 guard !Account.userBounce(request, response) else { return }
 
@@ -692,12 +696,11 @@ struct ConsumerAPI {
                 
                 var countsql = "SELECT cog.*, COUNT(coo.id) AS option_count "
                 countsql.append("FROM \(schema).cashout_group AS cog ")
-                countsql.append("JOIN \(schema).cashout_option AS coo ")
+                countsql.append("JOIN \(schema).cashout_option_view_deleted_no AS coo ")
                 countsql.append("ON cog.id = coo.group_id ")
                 countsql.append("WHERE cog.country_id = $1 ")
                 countsql.append("AND cog.display = true ")
                 countsql.append("AND cog.deleted = 0 ")
-                countsql.append("AND coo.deleted = 0 ")
                 countsql.append("GROUP BY cog.id ")
                 countsql.append("ORDER BY cog.display_order ASC ")
 

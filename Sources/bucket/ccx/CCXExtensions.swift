@@ -2014,10 +2014,10 @@ extension Account {
         }
     }
     
-    static func adminBouce(_ request : HTTPRequest, _ response : HTTPResponse) -> Bool {
+    static func adminBouce(_ request : HTTPRequest, _ response : HTTPResponse) -> (fails:Bool, user:Account?) {
         
         // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-        guard request.SecurityCheck() else { response.badSecurityToken; return true }
+        guard request.SecurityCheck() else { response.badSecurityToken; return (true,nil) }
 
         // Here we want to check the csrf & the authorization.
         guard let csrf = request.session?.data["csrf"].stringValue, let sendCsrf = request.header(.custom(name: "X-CSRF-Token")) else {
@@ -2030,7 +2030,7 @@ extension Account {
                                                description: "The CSRF token failed to pass the check.")
 
             response.notLoggedIn()
-            return true
+            return (true, nil)
         }
         guard request.session?.userid.isEmpty == false && csrf == sendCsrf else {
             
@@ -2042,7 +2042,7 @@ extension Account {
                                                description: "The user is empty and CSRF is not correct.")
 
             response.notLoggedIn()
-            return true
+            return (true, nil)
             
         }
         // Okay they are logged in.  Lets see when the last time, if they have, used any of the API's:
@@ -2058,10 +2058,10 @@ extension Account {
                                                row_data: nil,
                                                description: "The user is not an admin and was trying to access an admin area.")
 
-            return true
+            return (true, user)
         }
         
-        return false
+        return (false, user)
     }
 
 }
