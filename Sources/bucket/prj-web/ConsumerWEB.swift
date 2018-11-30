@@ -38,7 +38,7 @@ struct ConsumerWEB {
 
                 response.render(template: "views/forgotpassword")
                 response.completed()
-                
+                return
             }
         }
         
@@ -64,20 +64,24 @@ struct ConsumerWEB {
                         let h = "<p>To reset your password for your account, please <a href=\"\(AuthenticationVariables.baseURL)/verifyAccount/forgotpassword/\(find.passreset)\">click here</a></p>"
                         
                         response.render(template: "views/forgotpassword", context: ["msg_body":"We sent a confirmation email to \(email).","msg_title":"Success!"])
-                        response.completed()
                         
                         Utility.sendMail(name: find.username, address: email, subject: "Password reset!", html: h, text: "")
+                        
+                        response.completed()
+                        return
+                        
                     } else {
                         
                         response.render(template: "views/forgotpassword", context: ["msg_body":"Please try again.","msg_title":"Unknown Error."])
                         response.completed()
-                        
+                        return
                     }
                     
                 } else {
                     // Show an error:
                     response.render(template: "views/forgotpassword", context: ["msg_body":"We had an issue looking up this email.","msg_title":"Forgot Password Error"])
                     response.completed()
+                    return
                 }
                 
             }
@@ -156,6 +160,7 @@ struct ConsumerWEB {
 //                response.render(template: template, context: context)
                 response.redirect(path: request.getSourcePath())
                 response.completed()
+                return
             }
         }
     }

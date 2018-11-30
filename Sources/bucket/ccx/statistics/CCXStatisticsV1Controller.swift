@@ -50,11 +50,13 @@ struct CCXStatisticsV1Controller {
                         try response.setBody(json: json)
                         response.setHeader(.contentType, value: "application/json")
                         response.completed(status: .badRequest)
+                        return
                     }
                 
                     try response.setBody(json: json)
                     response.setHeader(.contentType, value: "application/json")
                     response.completed(status: .ok)
+                    return
                 
                 } catch {
                     response.caughtError(error)
@@ -82,7 +84,7 @@ struct CCXStatisticsV1Controller {
                 // security
                 let contextAccountID = request.session?.userid ?? ""
                 let contextAuthenticated = !(request.session?.userid ?? "").isEmpty
-                if !contextAuthenticated { response.redirect(path: "/login") }
+                if !contextAuthenticated { response.redirect(path: "/login"); response.completed(); return }
                 
                 // Verify Admin
                 Account.adminBounce(request, response)
@@ -132,6 +134,8 @@ struct CCXStatisticsV1Controller {
                 }
                 //show the stats we just generated
                 response.renderMustache(template: request.documentRoot + "/views/ccx.admin.stats.mustache", context: context)
+                response.completed()
+                return
             }
         }
       }

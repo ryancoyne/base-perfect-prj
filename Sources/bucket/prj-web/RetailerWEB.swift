@@ -42,9 +42,11 @@ struct RetailerWEB {
             return {
                 request, response in
 
-print("retailer_index START: Cookie Name: \(SessionConfig.name)")
-print("retailer_index START: Cookie Value: \(request.getCookie(name: SessionConfig.name) ?? "No Cookie Value")")
-
+                print("retailer_index START response: \(response)")
+                for h in response.headers {
+                    print("     header: \(h)")
+                }
+                
                 var msg_return:[[String:Any]] = []
                 var data_return:[String:Any] = [:]
                 
@@ -144,14 +146,18 @@ print("retailer_index START: Cookie Value: \(request.getCookie(name: SessionConf
                     data_return["error_messages"] = msg_return
                 }
 
-print("retailer_index END: Cookie Name: \(SessionConfig.name)")
-print("retailer_index END: Cookie Value: \(request.getCookie(name: SessionConfig.name) ?? "No Cookie Value")")
-
                 response.addSourcePage("/retailer/index/\(country_id ?? 0)")
-                
-                data_return["sourcePage"] = "/retailer/index/\(country_id ?? 0)"
+  
+//                data_return["sourcePage"] = "/retailer/index/\(country_id ?? 0)"
                 response.render(template: "views/retailer.index", context: data_return)
                 response.completed()
+
+                print("retailer_index END response: \(response)")
+                for h in response.headers {
+                    print("     header: \(h)")
+                }
+                
+                return
                 
             }
         }
@@ -252,7 +258,7 @@ print("retailer_index END: Cookie Value: \(request.getCookie(name: SessionConfig
 
                 response.render(template: "views/retailer.detail", context: data_return)
                 response.completed()
-                
+                return
             }
         }
 
@@ -300,7 +306,7 @@ print("retailer_index END: Cookie Value: \(request.getCookie(name: SessionConfig
                 
                 response.render(template: "views/retailer.add", context: data_return)
                 response.completed()
-                
+                return
             }
         }
 

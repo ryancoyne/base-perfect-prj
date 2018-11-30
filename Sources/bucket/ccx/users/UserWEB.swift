@@ -46,7 +46,7 @@ struct UserWEB {
                 guard request.SecurityCheck() else { response.badSecurityToken; return }
 
                 let t = request.session?.data["csrf"] as? String ?? ""
-                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
+                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/"); response.completed(); return }
                 var context: [String : Any] = appExtras(request)
                 
                 if let v = request.urlVariables["passvalidation"], !(v as String).isEmpty {
@@ -66,6 +66,7 @@ struct UserWEB {
                         context["msg_title"] = "Account Validation Error."
                         context["msg_body"] = ""
                         response.render(template: "views/msg", context: context)
+                        response.completed()
                         return
                     } else {
                         
@@ -80,6 +81,8 @@ struct UserWEB {
                         context["passvalidation"] = v
                         context["csrfToken"] = t
                         response.render(template: "views/registerComplete", context: context)
+                        response.completed()
+                        return
                     }
                 } else {
                     
@@ -94,6 +97,8 @@ struct UserWEB {
                     context["msg_title"] = "Account Validation Error."
                     context["msg_body"] = "Code not found."
                     response.render(template: "views/msg", context: context)
+                    response.completed()
+                    return
                 }
             }
         }
@@ -106,7 +111,7 @@ struct UserWEB {
                 guard request.SecurityCheck() else { response.badSecurityToken; return }
 
                 let t = request.session?.data["csrf"] as? String ?? ""
-                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
+                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/"); response.completed(); return }
                 var context: [String : Any] = appExtras(request)
                 
                 if let v = request.param(name: "passvalidation"), !(v as String).isEmpty {
@@ -117,6 +122,7 @@ struct UserWEB {
                         context["msg_title"] = "Account Validation Error."
                         context["msg_body"] = ""
                         response.render(template: "views/msg", context: context)
+                        response.completed()
                         return
                     } else {
                         
@@ -146,6 +152,8 @@ struct UserWEB {
                                 context["msg_title"] = "Account Validated and Completed."
                                 context["msg_body"] = "<p><a class=\"button\" href=\"/\">Click to continue</a></p>"
                                 response.render(template: "views/msg", context: context)
+                                response.completed()
+                                return
                                 
                             } catch {
                                 print(error)
@@ -155,6 +163,7 @@ struct UserWEB {
                             context["passvalidation"] = v
                             context["csrfToken"] = t
                             response.render(template: "views/registerComplete", context: context)
+                            response.completed()
                             return
                         }
                         
@@ -163,6 +172,8 @@ struct UserWEB {
                     context["msg_title"] = "Account Validation Error."
                     context["msg_body"] = "Code not found."
                     response.render(template: "views/msg", context: context)
+                    response.completed()
+                    return
                 }
             }
         }
@@ -186,16 +197,21 @@ struct UserWEB {
                         context["msg_title"] = "Account Validation Error."
                         context["msg_body"] = ""
                         response.render(template: "views/msg", context: context)
+                        response.completed()
                         return
                     } else {
                         context["passreset"] = v
                         context["csrfToken"] = t
                         response.render(template: "views/forgotpasswordComplete", context: context)
+                        response.completed()
+                        return
                     }
                 } else {
                     context["msg_title"] = "Account Validation Error."
                     context["msg_body"] = "Code not found."
                     response.render(template: "views/msg", context: context)
+                    response.completed()
+                    return
                 }
             }
         }
@@ -208,7 +224,7 @@ struct UserWEB {
                 guard request.SecurityCheck() else { response.badSecurityToken; return }
 
                 let t = request.session?.data["csrf"] as? String ?? ""
-                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
+                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/"); response.completed(); return }
             
                 var context: [String : Any] = appExtras(request)
                 
@@ -220,6 +236,7 @@ struct UserWEB {
                         context["msg_title"] = "Account Validation Error."
                         context["msg_body"] = ""
                         response.render(template: "views/msg", context: context)
+                        response.completed()
                         return
                     } else {
                         
@@ -239,6 +256,8 @@ struct UserWEB {
                                 context["msg_title"] = "You successfully changed your password!"
                                 //                           context["msg_body"] = "<p><a class=\"button\" href=\"/\">Click to continue</a></p>"
                                 response.render(template: "views/msg", context: context)
+                                response.completed()
+                                return
                                 
                             } catch {
                                 print(error)
@@ -248,6 +267,7 @@ struct UserWEB {
                             context["passvalidation"] = v
                             context["csrfToken"] = t
                             response.render(template: "views/forgotpasswordComplete", context: context)
+                            response.completed()
                             return
                         }
                         
@@ -256,6 +276,8 @@ struct UserWEB {
                     context["msg_title"] = "Account Validation Error."
                     context["msg_body"] = "Code not found."
                     response.render(template: "views/msg", context: context)
+                    response.completed()
+                    return
                 }
             }
         }

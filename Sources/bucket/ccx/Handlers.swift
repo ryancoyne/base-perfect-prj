@@ -60,6 +60,9 @@ class Handlers {
 			for i in Handlers.appExtras(request) { context[i.0] = i.1 }
 
 			response.renderMustache(template: request.documentRoot + "/views/index.mustache", context: context)
+            response.completed()
+            return
+
 		}
 	}
     
@@ -120,7 +123,9 @@ class Handlers {
             
             response.renderMustache(template: request.documentRoot + "/views/initialsetup.mustache", context: context)
             // response.renderMustache(template: request.documentRoot + "/views/login.mustache", context: context)
-            
+            response.completed()
+            return
+
         }
     }
     
@@ -186,6 +191,7 @@ class Handlers {
     static func errorJSON(_ request: HTTPRequest, _ response: HTTPResponse, msg: String) {
         _ = try? response.setBody(json: ["error": msg])
         response.completed(status: .badRequest)
+        return
     }
 
     // Used for healthcheck functionality for monitors and load balancers.
@@ -199,6 +205,7 @@ class Handlers {
 
             let _ = try? response.setBody(json: ["health": "ok"])
             response.completed(status: .ok)
+            return
         }
     }
     

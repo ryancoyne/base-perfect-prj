@@ -62,7 +62,7 @@ struct AdminAPI {
                 // and render the template (once we have the template complete)
                 response.render(template: "views/forgotpassword")
                 response.completed()
-
+                return
             }
         }
         
@@ -86,7 +86,7 @@ struct AdminAPI {
                 // and render the template (once we have the template complete)
                 response.render(template: "views/batch")
                 response.completed()
-                
+                return
             }
         }
     }

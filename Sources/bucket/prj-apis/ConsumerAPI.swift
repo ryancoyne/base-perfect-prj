@@ -57,6 +57,7 @@ struct ConsumerAPI {
                 let buckets = UserBalanceFunctions().getConsumerBalances(request.session!.userid)
                 try? response.setBody(json: ["buckets":buckets])
                     .completed(status: .ok)
+                return
                 
             }
         }
@@ -80,6 +81,7 @@ struct ConsumerAPI {
                     UserBalanceFunctions().getCurrentBalance(request.session!.userid, countryid: countryId)
                 try? response.setBody(json: ["amount":amount])
                     .completed(status: .ok)
+                return
                 
             }
         }
@@ -207,6 +209,7 @@ struct ConsumerAPI {
                 
                 let _ = try? response.setBody(json: mainReturn)
                 response.completed(status: .ok)
+                return
                 
             }
         }
@@ -255,6 +258,8 @@ struct ConsumerAPI {
                                                              changedby: nil)
                         
                         response.invalidCustomerCodeAlreadyRedeemed
+                        return
+                        
                     } else {
                         
                         AuditRecordActions.customerCodeCheck(schema: schema,
@@ -265,6 +270,8 @@ struct ConsumerAPI {
                                                              changedby: nil)
                         
                         response.invalidCustomerCode
+                        return
+                        
                     }
                     return
                 }
@@ -331,12 +338,14 @@ struct ConsumerAPI {
                     
                     response.addHeader(HTTPResponseHeader.Name.cacheControl, value: "no-cache")
                     response.renderMustache(template: request.documentRoot + "/views/code-download.mustache", context: retCode)
+                    response.completed()
                     return
                     
                 } else {
                     // there was a problem....
                     response.addHeader(HTTPResponseHeader.Name.cacheControl, value: "no-cache")
                     response.renderMustache(template: request.documentRoot + "/views/code-download.mustache", context: [:])
+                    response.completed()
                     return
                 }
                 
@@ -388,6 +397,8 @@ struct ConsumerAPI {
                                                              changedby: nil)
 
                         response.invalidCustomerCodeAlreadyRedeemed
+                        return
+                        
                     } else {
                         
                         AuditRecordActions.customerCodeRedeemed(schema: schema,
@@ -399,6 +410,8 @@ struct ConsumerAPI {
                                                              changedby: nil)
 
                         response.invalidCustomerCode
+                        return
+                        
                     }
                     return
                 }
@@ -658,6 +671,7 @@ struct ConsumerAPI {
 
                 let _ = try? response.setBody(json: retJSON)
                 response.completed(status: .ok)
+                return
 
             }
         }
@@ -770,6 +784,7 @@ struct ConsumerAPI {
 
                     let _ = try? response.setBody(json: retJSON)
                     response.completed(status: .ok)
+                    return
                 } else {
                     
                     var audit:[String:Any] = [:]

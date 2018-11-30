@@ -123,13 +123,14 @@ struct InstallationsV1Controller {
                         try? response.setBody(json: ["id":inst.id])
                             .setHeader(.contentType, value: "application/json")
                             .completed(status: .ok)
+                        return
                         
                     } catch {
                         // there was a problem with the saves
                         try? response.setBody(json: ["error":"Problems saving the installation and notification"])
                             .setHeader(.contentType, value: "application/json")
                             .completed(status: .custom(code: 420, message: "Chill dude...... The required parameters were not passed."))
-                        
+                        return
                     }
                     
                 } catch BucketAPIError.unparceableJSON(let attemptedJSON) {
@@ -138,6 +139,7 @@ struct InstallationsV1Controller {
                     try? response.setBody(json: ["error":error.localizedDescription])
                         .setHeader(.contentType, value: "application/json; charset=UTF-8")
                         .completed(status: .internalServerError)
+                    return
                 }
                 
             }
