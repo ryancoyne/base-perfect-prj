@@ -226,7 +226,8 @@ SessionConfig.userAgentLock = false
 SessionConfig.CSRF.checkState = true
 SessionConfig.CORS.enabled = true
 SessionConfig.cookieSameSite = .lax
-SessionConfig.cookieDomain = EnvironmentVariables.sharedInstance.SessionName!
+//SessionConfig.cookieDomain = EnvironmentVariables.sharedInstance.SessionName!
+SessionConfig.cookieDomain = EnvironmentVariables.sharedInstance.URL_DOMAIN!
 
 // Setup logging
 let myLogger = RequestLogger()
@@ -290,7 +291,7 @@ print("main.swift: Complete CCX Tables")
 var routes: [[String: Any]] = [[String: Any]]()
 
 routes = routes + UserAPI.json.routes
-routes = routes + UserAPI.web.routes
+routes = routes + UserWEB.web.routes
 routes = routes + InstallationsV1Controller.json.routes
 routes = routes + CCXStatisticsV1Controller.json.routes
 routes = routes + FriendAPI.json.routes

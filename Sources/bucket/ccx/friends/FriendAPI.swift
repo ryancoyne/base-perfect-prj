@@ -59,6 +59,7 @@ struct FriendAPI {
                             try? response.setBody(json: ["error":"You requested matchesOnly, but you did not give us anything to match."])
                                 .setHeader(.contentType, value: "application/json")
                                 .completed(status: .custom(code: 420, message: "Chill dude...... The required parameters were not passed."))
+                            return
                         }
                         
                     }
@@ -98,6 +99,7 @@ struct FriendAPI {
                 try? response.setBody(json: returnd)
                     .setHeader(.contentType, value: "application/json")
                     .completed(status: .ok)
+                return
             }
         }
 
@@ -117,11 +119,13 @@ struct FriendAPI {
                         try? response.setBody(json: Friends.addFriend(id, session))
                                                 .setHeader(.contentType, value: "application/json")
                                                 .completed(status: .ok)
+                        return
                     } else {
                         // Return bad request - no post body:
                         try? response.setBody(json: ["error":"Please give an id or an array of ids in post body."])
                                                 .setHeader(.contentType, value: "application/json")
                                                 .completed(status: .badRequest)
+                        return
                     }
                 }
             }
@@ -163,12 +167,14 @@ struct FriendAPI {
                         try? response.setBody(json: ["error":"Please give an id or an array of ids in post body."])
                             .setHeader(.contentType, value: "application/json")
                             .completed(status: .badRequest)
+                        return
                     }
                     
                     // return the ok response (didn't get caught by the bad request)
                     try? response.setBody(json: retDict)
                         .setHeader(.contentType, value: "application/json")
                         .completed(status: .ok)
+                    return
                 }
             }
         }

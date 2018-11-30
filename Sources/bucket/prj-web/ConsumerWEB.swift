@@ -23,9 +23,9 @@ struct ConsumerWEB {
         // POST request for login
         static var routes : [[String:Any]] {
             return [
-                ["method":"post", "uri":"/login", "handler":login],
-                ["method":"get", "uri":"/forgotpassword", "handler":forgotPassword],
-                ["method":"post", "uri":"/forgotpasswordEntered", "handler":forgotPasswordEntered],
+//                ["method":"post", "uri":"/login", "handler":LocalAuthWebHandlers.login],
+//                ["method":"get", "uri":"/forgotpassword", "handler":forgotPassword],
+//                ["method":"post", "uri":"/forgotpasswordEntered", "handler":forgotPasswordEntered],
             ]
         }
         
@@ -38,7 +38,7 @@ struct ConsumerWEB {
 
                 response.render(template: "views/forgotpassword")
                 response.completed()
-                
+                return
             }
         }
         
@@ -64,20 +64,24 @@ struct ConsumerWEB {
                         let h = "<p>To reset your password for your account, please <a href=\"\(AuthenticationVariables.baseURL)/verifyAccount/forgotpassword/\(find.passreset)\">click here</a></p>"
                         
                         response.render(template: "views/forgotpassword", context: ["msg_body":"We sent a confirmation email to \(email).","msg_title":"Success!"])
-                        response.completed()
                         
                         Utility.sendMail(name: find.username, address: email, subject: "Password reset!", html: h, text: "")
+                        
+                        response.completed()
+                        return
+                        
                     } else {
                         
                         response.render(template: "views/forgotpassword", context: ["msg_body":"Please try again.","msg_title":"Unknown Error."])
                         response.completed()
-                        
+                        return
                     }
                     
                 } else {
                     // Show an error:
                     response.render(template: "views/forgotpassword", context: ["msg_body":"We had an issue looking up this email.","msg_title":"Forgot Password Error"])
                     response.completed()
+                    return
                 }
                 
             }
@@ -105,12 +109,27 @@ struct ConsumerWEB {
                     return
                 }
 
-                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
-                context["csrfToken"] = request.session?.data["csrf"] as? String ?? ""
+//                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
+//                context["csrfToken"] = request.session?.data["csrf"] as? String ?? ""
 
-                var redir_path = "/"
-                if let sp = request.param(name: "sourcePage") {
-                    redir_path = sp
+                if let s = request.session, !s.userid.isEmpty, s.data["csrf"].stringValue == request.header(.custom(name: "X-CSRF-Token")) {
+                    
+                    AuditRecordActions.userLogin(schema: nil,
+                                                 session_id: request.session?.token ?? "NO SESSION TOKEN",
+                                                 user: request.session?.userid,
+                                                 row_data: nil,
+                                                 changed_fields: nil,
+                                                 description: "The user was already logged in and tried to login again.",
+                                                 changedby: request.session?.userid)
+                    
+                    if !request.getSourcePath().isEmpty {
+                        response.redirect(path: request.getSourcePath())
+                        response.completed(status: .ok)
+                        return
+                    }
+                    
+                    response.alreadyAuthenticated(request)
+                    return
                 }
 
                 if let email = request.param(name: "email").stringValue, !email.isEmpty,
@@ -119,11 +138,13 @@ struct ConsumerWEB {
                         let account = try Account.loginWithEmail(email, password)
                         request.session?.userid = account.id
                         context["authenticated"] = true
+                        
 //                        context["msg_title"] = "Login Successful."
 //                        context["msg_body"] = ""
                         // if there is a source, redirect there
                         
-                        response.redirect(path: redir_path)
+                        response.redirect(path: request.getSourcePath(), sessionid: request.session!.token)
+//                        response.sessionRedirect(path: request.getSourcePath(), session: request.session!)
                         response.completed()
                         return
                     } catch {
@@ -137,8 +158,9 @@ struct ConsumerWEB {
                     template = "views/login"
                 }
 //                response.render(template: template, context: context)
-                response.redirect(path: redir_path)
+                response.redirect(path: request.getSourcePath())
                 response.completed()
+                return
             }
         }
     }

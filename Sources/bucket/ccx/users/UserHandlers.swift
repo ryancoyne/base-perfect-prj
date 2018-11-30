@@ -13,7 +13,7 @@ extension Handlers {
             // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
             guard request.SecurityCheck() else { response.badSecurityToken; return }
 
-            if (request.session?.userid ?? "").isEmpty { response.completed(status: .notAcceptable) }
+            if (request.session?.userid ?? "").isEmpty { response.completed(status: .notAcceptable); return }
             
             // Verify Admin
             Account.adminBounce(request, response)
@@ -64,7 +64,7 @@ extension Handlers {
 
             let contextAccountID = request.session?.userid ?? ""
             let contextAuthenticated = !(request.session?.userid ?? "").isEmpty
-            if !contextAuthenticated { response.redirect(path: "/login") }
+            if !contextAuthenticated { response.redirect(path: "/login"); response.completed(); return }
             
             // Verify Admin
             Account.adminBounce(request, response)
@@ -87,6 +87,8 @@ extension Handlers {
                 context[i.0] = i.1
             }
             response.renderMustache(template: request.documentRoot + "/views/users.mustache", context: context)
+            response.completed()
+            return
         }
     }
 
@@ -99,7 +101,7 @@ extension Handlers {
 
             let contextAccountID = request.session?.userid ?? ""
             let contextAuthenticated = !(request.session?.userid ?? "").isEmpty
-            if !contextAuthenticated { response.redirect(path: "/login") }
+            if !contextAuthenticated { response.redirect(path: "/login"); response.completed(); return }
             
             // Verify Admin
             Account.adminBounce(request, response)
@@ -157,6 +159,8 @@ extension Handlers {
                 context[i.0] = i.1
             }
             response.renderMustache(template: request.documentRoot + "/views/users.mustache", context: context)
+            response.completed()
+            return
         }
     }
 
@@ -169,7 +173,7 @@ extension Handlers {
 
             let contextAccountID = request.session?.userid ?? ""
             let contextAuthenticated = !(request.session?.userid ?? "").isEmpty
-            if !contextAuthenticated { response.redirect(path: "/login") }
+            if !contextAuthenticated { response.redirect(path: "/login"); response.completed(); return }
             
             // Verify Admin
             Account.adminBounce(request, response)
@@ -259,6 +263,8 @@ extension Handlers {
             }
             
             response.renderMustache(template: request.documentRoot + "/views/users.mustache", context: context)
+            response.completed()
+            return
         }
     }
 

@@ -71,6 +71,7 @@ struct AdminWEB {
                     response.status = .internalServerError
                     response.appendBody(string: "\(error)")
                     response.completed()
+                    return
                 }
 
             }
@@ -138,6 +139,7 @@ struct AdminWEB {
             response.status = .internalServerError
             response.appendBody(string: "\(error)")
             response.completed()
+            return
         }
     }
 }

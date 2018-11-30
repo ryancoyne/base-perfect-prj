@@ -631,6 +631,7 @@ struct RetailerAPI {
                 
                 if bodyReturn.isNotNil {
                     _ = try? response.setBody(json: bodyReturn).setHeader(.custom(name: "Content-Type"), value: "application/json; charset=UTF-8").completed(status: .ok)
+                    return
                 }
             }
         }
@@ -777,6 +778,7 @@ struct RetailerAPI {
                                 try? response.setBody(json: retInfo)
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
+                                return
                                 
                             } catch {
                                 // Return some caught error:
@@ -836,6 +838,7 @@ struct RetailerAPI {
                             try? response.setBody(json: responseDictionary)
                                 .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                 .completed(status: .ok)
+                            return
                             
                         }
                         
@@ -935,6 +938,7 @@ struct RetailerAPI {
                                 try? response.setBody(json: retInfo )
                                     .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                     .completed(status: .created)
+                                return
                                 
                             } catch {
                                 // Return some caught error:
@@ -1005,6 +1009,7 @@ struct RetailerAPI {
                             try? response.setBody(json: responseDictionary)
                                 .setHeader(.contentType, value: "application/json; charset=UTF-8")
                                 .completed(status: .ok)
+                            return
                         }
                         
                     }
@@ -1505,6 +1510,7 @@ struct RetailerAPI {
                     // ideas?
                     try? response.setBody(json: json)
                         .completed(status: .ok)
+                    return
                     
                 } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
                     return response.invalidRequest(invalidJSONString)
@@ -1607,6 +1613,7 @@ struct RetailerAPI {
                     // all OK - returned at the bottom
                     _=try? response.setBody(json: ["result":"Successfully deleted the transaction."])
                     response.completed(status: .ok)
+                    return
                     
                 } else {
                     
@@ -1638,8 +1645,8 @@ struct RetailerAPI {
                         return
                     }
                     
-                    response.invalidCustomerCode
-                    return
+                    return response.invalidCustomerCode
+                    
                 }
                 
             }
@@ -1741,6 +1748,7 @@ struct RetailerAPI {
                     // all OK - returned at the bottom
                     _=try? response.setBody(json: ["result":"Successfully refunded the transaction."])
                     response.completed(status: .ok)
+                    return
                     
                 } else {
                     
@@ -1772,8 +1780,8 @@ struct RetailerAPI {
                         return
                     }
                     
-                    response.invalidCustomerCode
-                    return
+                    return response.invalidCustomerCode
+                    
                 }
                 
             }

@@ -108,6 +108,7 @@ struct UserAPI {
                     _ = try? response.setBody(json: ["message":"Logout was successful"])
                                                  .setHeader(.contentType, value: "application/json")
                                                  .completed(status: .ok)
+                    return
                     
                 } else if let _ = request.session?.token {
                     
@@ -118,12 +119,14 @@ struct UserAPI {
                     _ = try? response.setBody(json: ["errorCode":"NoAuth", "message":"You need to be logged in to logout."])
                                                  .setHeader(.contentType, value: "application/json")
                                                  .completed(status: .forbidden)
+                    return
                     
                 } else {
                     
                     _ = try? response.setBody(json: ["errorCode":"NoUserOrToken", "message":"You need to be logged in to logout."])
                                                  .setHeader(.contentType, value: "application/json")
                                                  .completed(status: .forbidden)
+                    return
                     
                 }
             }
@@ -173,6 +176,7 @@ struct UserAPI {
                             try? response.setBody(json: acc.asDictionary)
                                 .setHeader(.contentType, value: "application/json")
                                 .completed(status: .ok)
+                            return
                             
                         } else {
                             // Failed on login
@@ -207,6 +211,7 @@ struct UserAPI {
                             try? response.setBody(json: acc.asDictionary)
                                 .setHeader(.contentType, value: "application/json")
                                 .completed(status: .ok)
+                            return
                             
                         } else {
                             // Failed on login
@@ -226,6 +231,8 @@ struct UserAPI {
                         try? response.setBody(json: ["errorCode":"RequiredJSON","message":"Please send in 'email' || 'username' along with 'password'.'"])
                             .setHeader(.contentType, value: "application/json; charset=UTF-8")
                             .completed(status: .forbidden)
+                        return
+                        
                     }
                 } catch BucketAPIError.unparceableJSON(let jsonString) {
                     return response.invalidRequest(jsonString)
@@ -267,6 +274,7 @@ struct UserAPI {
                         try? response.setBody(json: ["errorCode":"RegistrationIssue", "message":"The email attempting to be registered already exists."])
                             .completed(status: .custom(code: 409, message: "Email Exists"))
                         return
+                        
                     } else {
                         
                         // success!
@@ -295,6 +303,7 @@ struct UserAPI {
                         _ = try response.setBody(json: retDict)
                         response.completed(status: .ok)
                         return
+                        
                     }
                     
                 } catch BucketAPIError.unparceableJSON(let jsonStr) {
@@ -339,6 +348,7 @@ struct UserAPI {
                                 _ = try response.setBody(json: ["result":"success", "message":"Congratulations!  You are amazing!  You changed your password!"])
                                 response.completed(status: .ok)
                                 return
+                                
                             } else {
 
                                 AuditRecordActions.userChange(schema: nil,
@@ -352,19 +362,23 @@ struct UserAPI {
                                 LocalAuthHandlers.error(request, response, error: "Please supply a vaid password",
                                                         code: .badRequest)
                                 return
+                                
                             }
                         } catch {
                             LocalAuthHandlers.error(request, response, error: "Invalid JSON", code: .badRequest)
                             return
+                            
                         }
                     } else {
                         LocalAuthHandlers.error(request, response, error: "Change Password Error: Insufficient Data", code: .badRequest)
                         return
+                        
                     }
                     // end chpwd
                 } catch {
                     LocalAuthHandlers.error(request, response, error: "AccountError", code: .badRequest)
                     return
+                    
                 }
             }
         }
@@ -383,6 +397,8 @@ struct UserAPI {
                     try? response.setBody(json: ["error":"No post body params"])
                         .setHeader(.contentType, value: "application/json")
                         .completed(status: .badRequest)
+                    return
+                    
                 } else {
                     
                     var responseDic:[String:Any] = [:]
@@ -407,6 +423,7 @@ struct UserAPI {
                     try? response.setBody(json: responseDic)
                         .setHeader(.contentType, value: "application/json")
                         .completed(status: .ok)
+                    return
                     
                 }
                 
@@ -572,6 +589,8 @@ struct UserAPI {
                                     try? response.setBody(json: account.asDictionary)
                                         .setHeader(.contentType, value: "application/json")
                                         .completed(status: .ok)
+                                    return
+                                    
                                 } else {
                                     // Return an error indicating we failed attempting to use oauth.
                                     response.invalidToken
@@ -596,6 +615,8 @@ struct UserAPI {
                                     try? response.setBody(json: account.asDictionary)
                                         .setHeader(.contentType, value: "application/json")
                                         .completed(status: .ok)
+                                    return
+                                    
                                 } else {
                                     response.invalidToken
                                     return
@@ -612,6 +633,8 @@ struct UserAPI {
                     } catch {
                         try? response.setBody(json: ["error" : "Unknown Error"])
                             .completed(status: .internalServerError)
+                        return
+                        
                     }
                 
                 }
@@ -681,6 +704,8 @@ struct UserAPI {
                         try? response.setBody(json: ["result":"success"])
                             .setHeader(.contentType, value: "application/json")
                             .completed(status: .ok)
+                        return
+                        
                     } catch {
                         return response.caughtError(error)
                     }
@@ -860,6 +885,7 @@ struct UserAPI {
                             try? response.setBody(json: ["error":error.localizedDescription])
                                 .setHeader(.contentType, value: "application/json")
                                 .completed(status: .badRequest)
+                            return
                         }
                     }
                 }
@@ -868,6 +894,8 @@ struct UserAPI {
                 try? response.setBody(json: ["error":"The file was not uploaded"])
                     .setHeader(.contentType, value: "application/json")
                     .completed(status: .badRequest)
+                return
+                
             }
             
             // save to the object (the filename)
@@ -884,6 +912,8 @@ struct UserAPI {
                 try? response.setBody(json: ["error":"Could not get user for update on \(imagetype)_picture"])
                     .setHeader(.contentType, value: "application/json")
                     .completed(status: .badRequest)
+                return
+                
             }
             c.detail["\(imagetype)_picture"] = picturesource
             changed_fields["\(imagetype)_picture"] = picturesource
@@ -927,11 +957,14 @@ struct UserAPI {
                 try? response.setBody(json: ["error":"The picture was not uploaded"])
                     .setHeader(.contentType, value: "application/json")
                     .completed(status: .badRequest)
+                return
+                
             }
                 
             try? response.setBody(json: retd)
                 .setHeader(.contentType, value: "application/json")
                 .completed(status: .ok)
+                return
 
             }
         }
@@ -968,7 +1001,10 @@ struct UserAPI {
 
                             try? response.setBody(json: ["errorCode":"EmailDNE","message":"You are not registered on Bucket."])
                             .setHeader(.contentType, value: "application/json")
-                            .completed(status: .forbidden) }
+                            .completed(status: .forbidden)
+                            return
+                            
+                        }
                     
                         if (try? account.save()).isNotNil {
                             
@@ -987,12 +1023,15 @@ struct UserAPI {
                                 .setHeader(.contentType, value: "application/json")
                                 .completed(status: .ok)
                             Utility.sendMail(name: account.username, address: email, subject: "Password reset!", html: h, text: "")
+                            return
                             
                         } else {
                             // Failed to save the passvalidation.
                             try? response.setBody(json: ["error":"Unknown error"])
                                 .setHeader(.contentType, value: "application/json")
                                 .completed(status: .internalServerError)
+                            return
+                            
                         }
                         
                     } else {
@@ -1000,6 +1039,7 @@ struct UserAPI {
                         try? response.setBody(json: ["errorCode":"RequiredJSON","message":"You must send in the key 'email'  to reset your password."])
                             .setHeader(.contentType, value: "application/json")
                             .completed(status: .badRequest)
+                        return
                         
                     }
                     
@@ -1015,245 +1055,6 @@ struct UserAPI {
             }
         }
         
-    }
-    //MARK: - Web Handlers:
-    /// This json structure supports all the web endpoints that support the application, including forgot password, completion of registration.
-    struct web {
-        static var routes : [[String:Any]] {
-            return [["method":"get", "uri":"/verifyAccount/forgotpassword/{passreset}", "handler": forgotpassVerify],
-                    ["method":"post", "uri":"/forgotpasswordCompletion", "handler": forgotpasswordCompletion],
-                    ["method":"get", "uri":"/verifyAccount/{passvalidation}", "handler": registerVerify],
-                    ["method":"post", "uri":"/registrationCompletion", "handler": registerCompletion],
-                    ["method":"get", "uri":"/logout", "handler":LocalAuthWebHandlers.logout],
-                    ["method":"get", "uri":"/users", "handler":Handlers.userList],
-                    ["method":"get", "uri":"/users/create", "handler":Handlers.userMod],
-                    ["method":"get", "uri":"/users/create/edit", "handler":Handlers.userMod],
-                    ["method":"post", "uri":"/users/create", "handler":Handlers.userModAction],
-                    ["method":"post", "uri":"/users/{id}/edit", "handler":Handlers.userModAction],
-                    ["method":"delete", "uri":"/users/{id}/delete", "handler":Handlers.userDelete]]
-        }
-        //MARK: - Register Verify Page:
-        public static func registerVerify(_ data: [String:Any]) throws -> RequestHandler {
-            return {
-                request, response in
-                
-                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-                guard request.SecurityCheck() else { response.badSecurityToken; return }
-
-                let t = request.session?.data["csrf"] as? String ?? ""
-                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
-                var context: [String : Any] = appExtras(request)
-                
-                if let v = request.urlVariables["passvalidation"], !(v as String).isEmpty {
-                    
-                    let acc = Account(validation: v)
-                    
-                    if acc.id.isEmpty {
-                        
-                        AuditRecordActions.userRegistration(schema: nil,
-                                                            session_id: request.session?.token ?? "NO SESSION TOKEN",
-                                                            user: request.session?.userid,
-                                                            row_data: nil,
-                                                            changed_fields: nil,
-                                                            description: "Registration NOT complete.  Account verification failed.",
-                                                            changedby: nil)
-                        
-                        context["msg_title"] = "Account Validation Error."
-                        context["msg_body"] = ""
-                        response.render(template: "views/msg", context: context)
-                        return
-                    } else {
-                        
-                        AuditRecordActions.userRegistration(schema: nil,
-                                                            session_id: request.session?.token ?? "NO SESSION TOKEN",
-                                                            user: request.session?.userid,
-                                                            row_data: nil,
-                                                            changed_fields: nil,
-                                                            description: "Registration complete.  Account verified.",
-                                                            changedby: nil)
-                        
-                        context["passvalidation"] = v
-                        context["csrfToken"] = t
-                        response.render(template: "views/registerComplete", context: context)
-                    }
-                } else {
-                    
-                    AuditRecordActions.userRegistration(schema: nil,
-                                                        session_id: request.session?.token ?? "NO SESSION TOKEN",
-                                                        user: request.session?.userid,
-                                                        row_data: nil,
-                                                        changed_fields: nil,
-                                                        description: "Registration NOT complete.  Account verification failed.  Code not found.",
-                                                        changedby: nil)
-
-                    context["msg_title"] = "Account Validation Error."
-                    context["msg_body"] = "Code not found."
-                    response.render(template: "views/msg", context: context)
-                }
-            }
-        }
-        //MARK: - Register Completion Page:
-        public static func registerCompletion(data: [String:Any]) throws -> RequestHandler {
-            return {
-                request, response in
-                
-                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-                guard request.SecurityCheck() else { response.badSecurityToken; return }
-
-                let t = request.session?.data["csrf"] as? String ?? ""
-                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
-                var context: [String : Any] = appExtras(request)
-                
-                if let v = request.param(name: "passvalidation"), !(v as String).isEmpty {
-                    
-                    let acc = Account(validation: v)
-                    
-                    if acc.id.isEmpty {
-                        context["msg_title"] = "Account Validation Error."
-                        context["msg_body"] = ""
-                        response.render(template: "views/msg", context: context)
-                        return
-                    } else {
-                        
-                        if let p1 = request.param(name: "p1"), !(p1 as String).isEmpty,
-                            let p2 = request.param(name: "p2"), !(p2 as String).isEmpty,
-                            p1 == p2 {
-                            acc.makePassword(p1)
-                            if acc.usertype == .provisional {
-                                acc.usertype = .standard
-                            }
-                            //                            acc.usertype = .standard
-                            acc.detail["isNew"] = true
-                            
-                            if let _ = acc.detail["created"] {
-                                acc.detail["modified"] = CCXServiceClass.getNow()
-                            } else {
-                                acc.detail["created"] = CCXServiceClass.getNow()
-                            }
-                            
-                            do {
-                                try acc.save()
-                                
-                                // check with stages 
-                                UserAPI.UserSuccessfullyCreated(acc)
-                                
-                                request.session?.userid = acc.id
-                                context["msg_title"] = "Account Validated and Completed."
-                                context["msg_body"] = "<p><a class=\"button\" href=\"/\">Click to continue</a></p>"
-                                response.render(template: "views/msg", context: context)
-                                
-                            } catch {
-                                print(error)
-                            }
-                        } else {
-                            context["msg_body"] = "<p>Account Validation Error: The passwords must not be empty, and must match.</p>"
-                            context["passvalidation"] = v
-                            context["csrfToken"] = t
-                            response.render(template: "views/registerComplete", context: context)
-                            return
-                        }
-                        
-                    }
-                } else {
-                    context["msg_title"] = "Account Validation Error."
-                    context["msg_body"] = "Code not found."
-                    response.render(template: "views/msg", context: context)
-                }
-            }
-        }
-        //MARK: - Forgot Password Validation Page:
-        public static func forgotpassVerify(data: [String:Any]) throws -> RequestHandler {
-            return {
-                request, response in
-                
-                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-                guard request.SecurityCheck() else { response.badSecurityToken; return }
-
-                let t = request.session?.data["csrf"] as? String ?? ""
-                
-                var context: [String : Any] = appExtras(request)
-                
-                if let v = request.urlVariables["passreset"], !(v as String).isEmpty {
-                    
-                    let acc = Account(reset: v)
-                    
-                    if acc.id.isEmpty {
-                        context["msg_title"] = "Account Validation Error."
-                        context["msg_body"] = ""
-                        response.render(template: "views/msg", context: context)
-                        return
-                    } else {
-                        context["passreset"] = v
-                        context["csrfToken"] = t
-                        response.render(template: "views/forgotpasswordComplete", context: context)
-                    }
-                } else {
-                    context["msg_title"] = "Account Validation Error."
-                    context["msg_body"] = "Code not found."
-                    response.render(template: "views/msg", context: context)
-                }
-            }
-        }
-        //MARK: - Forgot Password Completion Page:
-        public static func forgotpasswordCompletion(data: [String:Any]) throws -> RequestHandler {
-            return {
-                request, response in
-                
-                // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-                guard request.SecurityCheck() else { response.badSecurityToken; return }
-
-                let t = request.session?.data["csrf"] as? String ?? ""
-                if let i = request.session?.userid, !i.isEmpty { response.redirect(path: "/") }
-            
-                var context: [String : Any] = appExtras(request)
-                
-                if let v = request.param(name: "passreset"), !(v as String).isEmpty {
-                    
-                    let acc = Account(reset: v)
-                    
-                    if acc.id.isEmpty {
-                        context["msg_title"] = "Account Validation Error."
-                        context["msg_body"] = ""
-                        response.render(template: "views/msg", context: context)
-                        return
-                    } else {
-                        
-                        if let p1 = request.param(name: "p1"), !(p1 as String).isEmpty,
-                            let p2 = request.param(name: "p2"), !(p2 as String).isEmpty,
-                            p1 == p2 {
-                            acc.makePassword(p1)
-                            if acc.usertype == .provisional {
-                                acc.usertype = .standard
-                            }
-                            //                        acc.usertype = .standard
-                            acc.detail["modified"] = CCXServiceClass.getNow()
-                            acc.passreset.removeAll()
-                            do {
-                                try acc.save()
-                                request.session?.userid = acc.id
-                                context["msg_title"] = "You successfully changed your password!"
-                                //                           context["msg_body"] = "<p><a class=\"button\" href=\"/\">Click to continue</a></p>"
-                                response.render(template: "views/msg", context: context)
-                                
-                            } catch {
-                                print(error)
-                            }
-                        } else {
-                            context["msg_body"] = "<p>Account Validation Error: The passwords must not be empty, and must match.</p>"
-                            context["passvalidation"] = v
-                            context["csrfToken"] = t
-                            response.render(template: "views/forgotpasswordComplete", context: context)
-                            return
-                        }
-                        
-                    }
-                } else {
-                    context["msg_title"] = "Account Validation Error."
-                    context["msg_body"] = "Code not found."
-                    response.render(template: "views/msg", context: context)
-                }
-            }
-        }
     }
     
     //MARK: Update current location to the user
@@ -1624,6 +1425,8 @@ extension Account {
             try user.get(request.session?.userid ?? "")
             if user.usertype != .admin {
                 response.redirect(path: "/")
+                response.completed()
+                return
             }
         } catch {
             print(error)

@@ -41,6 +41,11 @@ struct RetailerWEB {
         public static func retailer_index(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
+
+                print("retailer_index START response: \(response)")
+                for h in response.headers {
+                    print("     header: \(h)")
+                }
                 
                 var msg_return:[[String:Any]] = []
                 var data_return:[String:Any] = [:]
@@ -55,18 +60,26 @@ struct RetailerWEB {
                     schema = Country.getSchema(country_id!)
                 }
                 
+                var nothere = false
                 if schema.isEmpty || country_id.isNil {
                     // there is an error with the country ID
                     msg_return.append(["msg_body":"We currently are not in this country.  Please try again later."])
+                    nothere = true
                 }
                 
                 // check to see if the user is permitted to these retailer pages
                 let user = request.account
-                if user.isNil {
+                if (user.isNil && !nothere) || user.isNil {
                     msg_return.append(["msg_body":"Please login to access this section."])
                     data_return["require_login"] = true
-                } else {
-                    if !(user!.isRetailerStandard() || user!.isBucketStandard()) {
+                } else if !nothere {
+                    // no matter what they are logged in...
+                    data_return["authenticated"] = true
+                    // now lets check to see if they are permitted to see this page.
+                    if user!.isRetailerStandard() || user!.isRetailerAdmin() || user!.isBucketStandard() || user!.isBucketAdmin() {
+                        // this means that they are logged in as either a retailer or bucket
+                    } else {
+                        // they are not permitted to access this section.
                         msg_return.append(["msg_body":"Please login correctly to access this section."])
                         data_return["require_login"] = true
                     }
@@ -91,7 +104,7 @@ struct RetailerWEB {
                 }
                 
                 // only look up the retailers if there is a schema to use
-                if !schema.isEmpty {
+                if !schema.isEmpty && user.isNotNil {
 
                     var sql = ""
                     
@@ -138,10 +151,19 @@ struct RetailerWEB {
                 if msg_return.count > 0 {
                     data_return["error_messages"] = msg_return
                 }
-                
-                data_return["sourcePage"] = "/retailer/index/\(country_id ?? 0)"
+
+                response.addSourcePage("/retailer/index/\(country_id ?? 0)")
+  
+//                data_return["sourcePage"] = "/retailer/index/\(country_id ?? 0)"
                 response.render(template: "views/retailer.index", context: data_return)
                 response.completed()
+
+                print("retailer_index END response: \(response)")
+                for h in response.headers {
+                    print("     header: \(h)")
+                }
+                
+                return
                 
             }
         }
@@ -242,7 +264,7 @@ struct RetailerWEB {
 
                 response.render(template: "views/retailer.detail", context: data_return)
                 response.completed()
-                
+                return
             }
         }
 
@@ -290,7 +312,7 @@ struct RetailerWEB {
                 
                 response.render(template: "views/retailer.add", context: data_return)
                 response.completed()
-                
+                return
             }
         }
 
