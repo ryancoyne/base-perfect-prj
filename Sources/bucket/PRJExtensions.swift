@@ -4,6 +4,38 @@ import PerfectLocalAuthentication
 import PerfectSMTP
 import PostgresStORM
 
+public struct WebPages {
+    
+    public struct retailer {
+        static let index = "/retailer/index/{countryId}"
+        static let add = "/retailer/add/{countryId}"
+        static let detail = "/retailer/detail/{countryId}/{retailerId}"
+
+        public struct terminal {
+            static let index = "/retailer/terminal/index/{countryId}"
+            static let add = "/retailer/terminal/add/{countryId}/{retailerId}"
+            static let detail = "/retailer/terminal/detail/{countryId}/{retailerId}/{terminalId}"
+        }
+
+        public struct address {
+            static let index = "/retailer/address/index/{countryId}/{retailerId}"
+            static let add = "/retailer/address/add/{countryId}/{retailerId}"
+            static let detail = "/retailer/address/detail/{countryId}/{retailerId}"
+
+            public struct terminal {
+                static let index = "/retailer/address/terminal/index/{countryId}/{retailerId}/{addressId}"
+                static let add = "/retailer/address/terminal/add/{countryId}/{retailerId}/{addressId}"
+                static let detail = "/retailer/address/terminal/detail/{countryId}/{retailerId}/{terminalId}"
+            }
+        }
+    }
+    
+    public struct consumer {
+        static let index = "/consumer/index"
+    }
+    
+}
+
 extension TimeZone {
     static var utc : TimeZone {
         return TimeZone(abbreviation: "UTC")!
@@ -26,6 +58,71 @@ extension PostgresStORM {
 }
 
 extension Account {
+    
+    // this checks the permissions for  page and allows the appropruate permissions for each web page.
+    public func pagePermissions(_ pageLink: String)->(permitted: Bool, update: Bool, userType: AccountType) {
+        
+        var viewPermitted = false
+        var permitUpdate = false
+        
+        // this is the minimum access level for the pages
+        switch ( self.usertype, pageLink ) {
+            
+        // bucket admin
+        case (.admin, WebPages.retailer.detail),
+             (.admin, WebPages.retailer.index),
+             (.admin, WebPages.retailer.add) :
+            viewPermitted = true
+            permitUpdate = true
+        
+        case (.admin, WebPages.retailer.address.detail),
+             (.admin, WebPages.retailer.address.index),
+             (.admin, WebPages.retailer.address.add) :
+            viewPermitted = true
+            permitUpdate = true
+            
+        // bucket standard
+        case (.admin1, WebPages.retailer.detail),
+             (.admin1, WebPages.retailer.index),
+             (.admin1, WebPages.retailer.add) :
+            viewPermitted = true
+            permitUpdate = true
+            
+        case (.admin1, WebPages.retailer.address.detail),
+             (.admin1, WebPages.retailer.address.index),
+             (.admin1, WebPages.retailer.address.add) :
+            viewPermitted = true
+            permitUpdate = true
+
+        // retailer admin
+        case (.admin2, WebPages.retailer.detail),
+             (.admin2, WebPages.retailer.index):
+            viewPermitted = true
+            permitUpdate = true
+
+        case (.admin2, WebPages.retailer.address.detail),
+             (.admin2, WebPages.retailer.address.index),
+             (.admin2, WebPages.retailer.address.add):
+            viewPermitted = true
+            permitUpdate = true
+
+        // retailer standard
+        case (.admin3, WebPages.retailer.detail),
+             (.admin3, WebPages.retailer.index):
+            viewPermitted = true
+
+        case (.admin3, WebPages.retailer.address.detail),
+             (.admin3, WebPages.retailer.address.index):
+            viewPermitted = true
+
+        default:
+            viewPermitted = false
+            permitUpdate = false
+        }
+        
+        return (viewPermitted, permitUpdate, self.usertype)
+        
+    }
     
     public func isBucketAdmin() -> Bool {
         switch usertype {
@@ -463,6 +560,11 @@ extension HTTPRequest {
         }
     }
     
+    func WebPermissionsCheck(_ user: Account, _ page: String) {
+        
+    }
+    
+    
     func SecurityCheck() -> Bool {
         
         // always not require header security values on the local machine
@@ -632,6 +734,27 @@ extension HTTPRequest {
 
 extension HTTPResponse {
     
+    func accessDenied() {
+    
+        var data_return:[String:Any] = [:]
+        data_return["authenticated"] = true
+        data_return["error_messages"] = ["msg_body":"Not Allowed: You are not permitted to view this section."]
+        self.render(template: "views/denied.index", context: data_return)
+        self.completed()
+        return
+
+    }
+    
+    func badWebSecurityTokenError() {
+        
+        var data_return:[String:Any] = [:]
+        data_return["error_messages"] = self.badSecurityTokenWeb
+        data_return["authenticated"] = false
+        self.render(template: "views/whoops.index", context: data_return)
+        self.completed()
+        return
+    }
+    
     func addSourcePage(_ sourcePage:String) {
         
         if sourcePage.isEmpty { return }
@@ -683,8 +806,10 @@ extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .unauthorized)
     }
-    var badSecurityTokenWeb: String {
-        return "<div class='error'>There was a problem with a security token</div>"
+    var badSecurityTokenWeb: [String:Any] {
+        
+        return ["msg_body":"Please login to access this section."]
+        
     }
 
     func invalidRequest(_ invalidJsonString : String) {

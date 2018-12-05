@@ -24,13 +24,9 @@ struct RetailerWEB {
         // POST request for login
         static var routes : [[String:Any]] {
             return [
-                ["method":"get", "uri":"/retailer/index/{countryId}", "handler":retailer_index],
-                ["method":"get", "uri":"/retailer/add/{countryId}", "handler":retailer_add],
-                ["method":"get", "uri":"/retailer/detail/{countryId}/{retailerId}", "handler":retailer_detail],
-//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminal/add", "handler":retailer_add_terminal],
-//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminal/{terminalId}", "handler":retailer_terminal],
-//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/address/{addressId}", "handler":retailer_address],
-//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminals", "handler":retailer_add_address],
+                ["method":"get", "uri":WebPages.retailer.index, "handler":retailer_index],
+                ["method":"get", "uri":WebPages.retailer.add, "handler":retailer_add],
+                ["method":"get", "uri":WebPages.retailer.detail, "handler":retailer_detail],
             ]
         }
         
@@ -42,16 +38,11 @@ struct RetailerWEB {
             return {
                 request, response in
 
-                print("retailer_index START response: \(response)")
-                for h in response.headers {
-                    print("     header: \(h)")
-                }
-                
                 var msg_return:[[String:Any]] = []
                 var data_return:[String:Any] = [:]
                 
                 // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-                guard request.SecurityCheck() else { return response.badSecurityToken }
+                guard request.SecurityCheck() else { return response.badWebSecurityTokenError() }
 
                 // grab the country id
                 let country_id = request.countryId
@@ -76,13 +67,8 @@ struct RetailerWEB {
                     // no matter what they are logged in...
                     data_return["authenticated"] = true
                     // now lets check to see if they are permitted to see this page.
-                    if user!.isRetailerStandard() || user!.isRetailerAdmin() || user!.isBucketStandard() || user!.isBucketAdmin() {
-                        // this means that they are logged in as either a retailer or bucket
-                    } else {
-                        // they are not permitted to access this section.
-                        msg_return.append(["msg_body":"Please login correctly to access this section."])
-                        data_return["require_login"] = true
-                    }
+                    let page_permission = user!.pagePermissions(WebPages.retailer.index)
+                    if !page_permission.permitted { response.accessDenied() }
                 }
                 
                 data_return["title_label"] = "Retailer Information"
@@ -109,8 +95,14 @@ struct RetailerWEB {
                     var sql = ""
                     
                     // lets grab the retailers for the country
-                    if (user!.isRetailerStandard() || user!.isRetailerAdmin()), let r_id = user?.detail["retailer_id"].stringValue {
-                        sql = "SELECT * FROM \(schema).retailer WHERE id = \(r_id) ORDER BY name DESC;"
+                    if (user!.isRetailerStandard() || user!.isRetailerAdmin()), let r_id = user?.detail["retailer"].stringValue {
+                        // first make sure they are permitted in this schema...
+                        let loc = r_id.index(of: ".")
+                        let s_check = r_id.substring(0, length: loc)
+                        if s_check != schema { response.accessDenied() }
+                        let sp = loc + 1
+                        let r = r_id.substring(sp, length: (sp - schema.length))
+                        sql = "SELECT * FROM \(schema).retailer WHERE id = \(r) ORDER BY name DESC;"
                     } else if (user!.isBucketAdmin() || user!.isBucketStandard()) {
                         sql = "SELECT * FROM \(schema).retailer ORDER BY name DESC;"
                     }
@@ -158,11 +150,6 @@ struct RetailerWEB {
                 response.render(template: "views/retailer.index", context: data_return)
                 response.completed()
 
-                print("retailer_index END response: \(response)")
-                for h in response.headers {
-                    print("     header: \(h)")
-                }
-                
                 return
                 
             }
