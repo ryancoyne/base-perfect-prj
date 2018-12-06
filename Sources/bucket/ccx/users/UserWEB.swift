@@ -400,6 +400,7 @@ extension LocalAuthWebHandlers {
                 
             } else {
                 // do nothing - the page will be presented again with the login rather than data
+                
             }
 
             response.redirect(path: request.getSourcePath(), sessionid: (request.session?.token)!)

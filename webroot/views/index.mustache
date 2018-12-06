@@ -1,0 +1,28 @@
+{{> admin.header }}
+
+{{>message-insert}}
+
+    {{^authenticated}}
+        {{>login-body}}
+    {{/authenticated}}
+
+    {{#authenticated}}
+
+        {{#require_login}}
+            {{>login-body}}
+        {{/require_login}}
+
+        {{^require_login}}
+
+            <!-- Page Content -->
+            <div class="container">
+
+            <div class="form-row bg-secondary text-white text-center">
+                <div class="col-md-12">Welcome To Bucket Technologies, Inc</div>
+            </div>
+
+      {{/require_login}}
+
+    {{/authenticated}}
+
+{{> admin.footer }}

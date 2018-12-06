@@ -56,6 +56,11 @@ class Handlers {
                 }
             }
 
+            response.addSourcePage("/")
+            context["title_label"] = "Welcome"
+            context["title"] = "Bucket Technologies"
+            context["subtitle"] = " - Goodbye Coins, Hello Change"
+
 			// add app config vars
 			for i in Handlers.extras(request) { context[i.0] = i.1 }
 			for i in Handlers.appExtras(request) { context[i.0] = i.1 }

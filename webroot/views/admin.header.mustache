@@ -33,31 +33,26 @@
             {{#authenticated}}
 
             <ul class="navbar-nav ml-auto">
+
                 <li class="nav-item active">
-                    {{#page_retailer}}
-                        <a class="nav-link" href="#">Retailers
-                        <span class="sr-only">(current)</span>
-                    {{/page_retailer}}
-                    {{^page_retailer}}
-                        {{#country_id}}
-                            <a class="nav-link" href="/retailer/index/{{country_id}}">Retailers</a>
-                        {{/country_id}}
-                        {{^country_id}}
-                            <a class="nav-link" href="/retailer">Retailers</a>
-                        {{/country_id}}
-                    {{/page_retailer}}
-                    </a>
+                    <a class="nav-link" href="/retailer/index/0">Countries</a>
                 </li>
-                <li class="nav-item">
+
+                {{#country_id}}
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/retailer/index/{{country_id}}">Retailers</a>
+                    </li>
+                {{/country_id}}
+                <li class="nav-item active">
                     <a class="nav-link" href="/terminals/index/{{country_id}}">Terminals</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="/users/">Users</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="reports/">Reports</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="/logout">Logout</a>
                 </li>
             </ul>

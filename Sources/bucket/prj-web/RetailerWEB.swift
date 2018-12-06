@@ -32,8 +32,6 @@ struct RetailerWEB {
         
         //MARK: --
         //MARK: Retailer list page
-
-        //MARK: --
         public static func retailer_index(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
@@ -46,6 +44,51 @@ struct RetailerWEB {
 
                 // grab the country id
                 let country_id = request.countryId
+                
+                // grab the user
+                let user = request.account
+                
+                // country ID is not valid - see if it is 0 to show the country list
+                if country_id.isNil, let c_id = request.urlVariables["countryId"].intValue, c_id == 0 {
+                    
+                    data_return["title_label"] = "Retailer Information"
+                    data_return["title"] = "All Countries"
+                    
+                    if user.isNotNil { data_return["authenticated"] = true }
+                    
+                    // grab the available countries
+                    let c = Country()
+                    let pg_sql = "SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN('public','audit','topology', 'information_schema', 'pg_catalog', 'pg_toast_temp_1', 'pg_temp_1', 'pg_toast')"
+                    var the_countries:[[String:Any]] = []
+                    let c_rs = try? c.sqlRows(pg_sql, params: [])
+                    if c_rs.isNotNil {
+                        for c_d in c_rs! {
+                            if let cc = c_d.data["schema_name"].stringValue, cc.length == 2 {
+                                
+                                var the_detail_info:[String:Any] = [:]
+                                let c_sql = "SELECT id, name, code_alpha_2 FROM public.country WHERE LOWER(code_alpha_2) = '\(cc)'"
+                                let c_code_detail = try? c.sqlRows(c_sql, params: [])
+                                if c_code_detail.isNotNil, c_code_detail!.count > 0 {
+                                    the_detail_info["id"] = c_code_detail![0].data["id"]
+                                    the_detail_info["name"] = c_code_detail![0].data["name"]
+                                    the_detail_info["code_alpha_2"] = c_code_detail![0].data["code_alpha_2"].stringValue?.lowercased()
+
+                                    the_countries.append(the_detail_info)
+                                }
+                                
+                            }
+                        }
+                    }
+                    
+                    if the_countries.count > 0 { data_return["country_list"] = the_countries }
+                    
+                    response.addSourcePage("/retailer/index/0")
+                    response.render(template: "views/retailer.index.no.country", context: data_return)
+                    response.completed()
+
+                }
+                
+                // we have a valid country ID
                 var schema = ""
                 if country_id.isNotNil {
                     schema = Country.getSchema(country_id!)
@@ -59,7 +102,6 @@ struct RetailerWEB {
                 }
                 
                 // check to see if the user is permitted to these retailer pages
-                let user = request.account
                 if (user.isNil && !nothere) || user.isNil {
                     msg_return.append(["msg_body":"Please login to access this section."])
                     data_return["require_login"] = true
@@ -73,8 +115,6 @@ struct RetailerWEB {
                 
                 data_return["title_label"] = "Retailer Information"
 
-                data_return["page_retailer"] = true
-                
                 if country_id.isNotNil {
                     
                     data_return["country_id"] = country_id
@@ -145,8 +185,6 @@ struct RetailerWEB {
                 }
 
                 response.addSourcePage("/retailer/index/\(country_id ?? 0)")
-  
-//                data_return["sourcePage"] = "/retailer/index/\(country_id ?? 0)"
                 response.render(template: "views/retailer.index", context: data_return)
                 response.completed()
 
