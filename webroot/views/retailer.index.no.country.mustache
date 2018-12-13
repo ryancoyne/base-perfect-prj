@@ -1,0 +1,45 @@
+{{> admin.header }}
+
+{{>message-insert}}
+
+    {{^authenticated}}
+        {{>login-body}}
+    {{/authenticated}}
+
+    {{#authenticated}}
+
+        {{#require_login}}
+            {{>login-body}}
+        {{/require_login}}
+
+        {{^require_login}}
+
+            <!-- Page Content -->
+            <div class="container">
+            
+            <div class="form-row bg-secondary text-white">
+                <div class="col-md-12">Retailer Country List</div>
+            </div>
+            {{^country_list}}
+                <div class="form-row bg-secondary text-white">
+                    <div class="col-md-12">&nbsp;</div>
+                    <div class="col-md-12">No Countries</div>
+                    <div class="col-md-12">&nbsp;</div>
+                </div>
+            {{/country_list}}
+            
+            {{#country_list}}
+                <div class="form-row bg-secondary text-white">
+                    <div class="col-md-12">
+                        <a class="page-link" href="/retailer/index/{{id}}">{{name}}: {{code_alpha_2}}</a>
+                    </div>
+                </div>
+            {{/country_list}}
+      
+            </div>
+
+      {{/require_login}}
+
+    {{/authenticated}}
+
+{{> admin.footer }}

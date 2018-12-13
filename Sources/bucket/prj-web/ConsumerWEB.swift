@@ -99,11 +99,9 @@ struct ConsumerWEB {
                 var context: [String : Any] = ["title": "Bucket Technologies", "subtitle":"Goodbye coins, Hello Change"]
 
                 // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-                var problem:String
                 if !request.SecurityCheck() {
-                    problem = response.badSecurityTokenWeb
                     context["msg_title"] = "Login Error."
-                    context["msg_body"] = problem
+                    context["msg_body"] = response.badSecurityTokenWeb["msg_body"]
                     response.render(template: template, context: context)
                     response.completed()
                     return

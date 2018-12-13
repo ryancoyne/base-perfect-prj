@@ -393,6 +393,14 @@ extension LocalAuthWebHandlers {
                         response.redirect(path: request.getSourcePath(), sessionid: (request.session?.token)!)
                         response.completed()
                         return
+                    } catch OAuth2ServerError.loginError {
+                        // try it here - because we are looking at the second try for the username/password (since we arte trying email first)
+                        context["msg_body"] = "Lets try to login correctly this time."
+//                        let _ = try? response.setBody(json: context.jsonEncodedString())
+                        response.redirect(path: request.getSourcePath(), sessionid: (request.session?.token)!)
+                        response.completed()
+                        return
+
                     } catch {
                         emailattempt = false
                     }
@@ -400,6 +408,12 @@ extension LocalAuthWebHandlers {
                 
             } else {
                 // do nothing - the page will be presented again with the login rather than data
+                
+                context["msg_body"] = "Lets try to login correctly this time."
+                let _ = try? response.setBody(json: context.jsonEncodedString())
+                response.redirect(path: request.getSourcePath(), sessionid: (request.session?.token)!)
+                response.completed()
+                return
             }
 
             response.redirect(path: request.getSourcePath(), sessionid: (request.session?.token)!)

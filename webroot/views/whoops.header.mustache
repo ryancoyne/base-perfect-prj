@@ -29,37 +29,22 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
-
-            {{#authenticated}}
-
             <ul class="navbar-nav ml-auto">
-
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+            {{#authenticated}}
                 <li class="nav-item active">
                     <a class="nav-link" href="/retailer/index/0">Countries</a>
-                </li>
-
-                {{#country_id}}
-                    <li class="nav-item active">
-                        <a class="nav-link" href="/retailer/index/{{country_id}}">Retailers</a>
-                    </li>
-                {{/country_id}}
-                <li class="nav-item active">
-                    <a class="nav-link" href="/terminals/index/{{country_id}}">Terminals</a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="/users/">Users</a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="reports/">Reports</a>
                 </li>
                 <li class="nav-item active">
                     <a class="nav-link" href="/logout">Logout</a>
                 </li>
-            </ul>
-
             {{/authenticated}}
+            </ul>
 
         </div>
     </div>
 </nav>
+
 

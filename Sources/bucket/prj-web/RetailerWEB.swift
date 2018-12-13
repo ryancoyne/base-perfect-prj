@@ -24,37 +24,71 @@ struct RetailerWEB {
         // POST request for login
         static var routes : [[String:Any]] {
             return [
-                ["method":"get", "uri":"/retailer/index/{countryId}", "handler":retailer_index],
-                ["method":"get", "uri":"/retailer/add/{countryId}", "handler":retailer_add],
-                ["method":"get", "uri":"/retailer/detail/{countryId}/{retailerId}", "handler":retailer_detail],
-//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminal/add", "handler":retailer_add_terminal],
-//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminal/{terminalId}", "handler":retailer_terminal],
-//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/address/{addressId}", "handler":retailer_address],
-//                ["method":"get", "uri":"/retailer/{countryId}/{retailerId}/terminals", "handler":retailer_add_address],
+                ["method":"get", "uri":WebPages.retailer.index, "handler":retailer_index],
+                ["method":"get", "uri":WebPages.retailer.add, "handler":retailer_add],
+                ["method":"get", "uri":WebPages.retailer.detail, "handler":retailer_detail],
             ]
         }
         
         //MARK: --
         //MARK: Retailer list page
-
-        //MARK: --
         public static func retailer_index(data: [String:Any]) throws -> RequestHandler {
             return {
                 request, response in
 
-                print("retailer_index START response: \(response)")
-                for h in response.headers {
-                    print("     header: \(h)")
-                }
-                
                 var msg_return:[[String:Any]] = []
                 var data_return:[String:Any] = [:]
                 
                 // check for the security token - this is the token that shows the request is coming from CloudFront and not outside
-                guard request.SecurityCheck() else { return response.badSecurityToken }
+                guard request.SecurityCheck() else { return response.badWebSecurityTokenError() }
 
                 // grab the country id
                 let country_id = request.countryId
+                
+                // grab the user
+                let user = request.account
+                
+                // country ID is not valid - see if it is 0 to show the country list
+                if country_id.isNil, let c_id = request.urlVariables["countryId"].intValue, c_id == 0 {
+                    
+                    data_return["title_label"] = "Retailer Information"
+                    data_return["title"] = "All Countries"
+                    
+                    if user.isNotNil { data_return["authenticated"] = true }
+                    
+                    // grab the available countries
+                    let c = Country()
+                    let pg_sql = "SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN('public','audit','topology', 'information_schema', 'pg_catalog', 'pg_toast_temp_1', 'pg_temp_1', 'pg_toast')"
+                    var the_countries:[[String:Any]] = []
+                    let c_rs = try? c.sqlRows(pg_sql, params: [])
+                    if c_rs.isNotNil {
+                        for c_d in c_rs! {
+                            if let cc = c_d.data["schema_name"].stringValue, cc.length == 2 {
+                                
+                                var the_detail_info:[String:Any] = [:]
+                                let c_sql = "SELECT id, name, code_alpha_2 FROM public.country WHERE LOWER(code_alpha_2) = '\(cc)'"
+                                let c_code_detail = try? c.sqlRows(c_sql, params: [])
+                                if c_code_detail.isNotNil, c_code_detail!.count > 0 {
+                                    the_detail_info["id"] = c_code_detail![0].data["id"]
+                                    the_detail_info["name"] = c_code_detail![0].data["name"]
+                                    the_detail_info["code_alpha_2"] = c_code_detail![0].data["code_alpha_2"].stringValue?.lowercased()
+
+                                    the_countries.append(the_detail_info)
+                                }
+                                
+                            }
+                        }
+                    }
+                    
+                    if the_countries.count > 0 { data_return["country_list"] = the_countries }
+                    
+                    response.addSourcePage("/retailer/index/0")
+                    response.render(template: "views/retailer.index.no.country", context: data_return)
+                    response.completed()
+
+                }
+                
+                // we have a valid country ID
                 var schema = ""
                 if country_id.isNotNil {
                     schema = Country.getSchema(country_id!)
@@ -68,7 +102,6 @@ struct RetailerWEB {
                 }
                 
                 // check to see if the user is permitted to these retailer pages
-                let user = request.account
                 if (user.isNil && !nothere) || user.isNil {
                     msg_return.append(["msg_body":"Please login to access this section."])
                     data_return["require_login"] = true
@@ -76,19 +109,12 @@ struct RetailerWEB {
                     // no matter what they are logged in...
                     data_return["authenticated"] = true
                     // now lets check to see if they are permitted to see this page.
-                    if user!.isRetailerStandard() || user!.isRetailerAdmin() || user!.isBucketStandard() || user!.isBucketAdmin() {
-                        // this means that they are logged in as either a retailer or bucket
-                    } else {
-                        // they are not permitted to access this section.
-                        msg_return.append(["msg_body":"Please login correctly to access this section."])
-                        data_return["require_login"] = true
-                    }
+                    let page_permission = user!.pagePermissions(WebPages.retailer.index)
+                    if !page_permission.permitted { response.accessDenied() }
                 }
                 
                 data_return["title_label"] = "Retailer Information"
 
-                data_return["page_retailer"] = true
-                
                 if country_id.isNotNil {
                     
                     data_return["country_id"] = country_id
@@ -109,8 +135,14 @@ struct RetailerWEB {
                     var sql = ""
                     
                     // lets grab the retailers for the country
-                    if (user!.isRetailerStandard() || user!.isRetailerAdmin()), let r_id = user?.detail["retailer_id"].stringValue {
-                        sql = "SELECT * FROM \(schema).retailer WHERE id = \(r_id) ORDER BY name DESC;"
+                    if (user!.isRetailerStandard() || user!.isRetailerAdmin()), let r_id = user?.detail["retailer"].stringValue {
+                        // first make sure they are permitted in this schema...
+                        let loc = r_id.index(of: ".")
+                        let s_check = r_id.substring(0, length: loc)
+                        if s_check != schema { response.accessDenied() }
+                        let sp = loc + 1
+                        let r = r_id.substring(sp, length: (sp - schema.length))
+                        sql = "SELECT * FROM \(schema).retailer WHERE id = \(r) ORDER BY name DESC;"
                     } else if (user!.isBucketAdmin() || user!.isBucketStandard()) {
                         sql = "SELECT * FROM \(schema).retailer ORDER BY name DESC;"
                     }
@@ -153,16 +185,9 @@ struct RetailerWEB {
                 }
 
                 response.addSourcePage("/retailer/index/\(country_id ?? 0)")
-  
-//                data_return["sourcePage"] = "/retailer/index/\(country_id ?? 0)"
                 response.render(template: "views/retailer.index", context: data_return)
                 response.completed()
 
-                print("retailer_index END response: \(response)")
-                for h in response.headers {
-                    print("     header: \(h)")
-                }
-                
                 return
                 
             }
