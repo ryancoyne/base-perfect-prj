@@ -15,10 +15,17 @@ import PerfectSessionPostgreSQL
 import PerfectSession
 import SwiftMoment
 
+
 //MARK: - Admin API
 /// This Admin structure supports all the normal endpoints for a user based login application.
 struct AdminAPI {
-    
+    var baseFilesURL = "http://pictures.com"
+    func cashoutGroupIconFileURL(_ groupName : String, _ fileName : String) -> String {
+        return baseFilesURL + "/groups/\(groupName)/icons/\(fileName)"
+    }
+    func cashoutGroupBackgroundFileURL(_ groupName : String, _ fileName : String) -> String {
+        return baseFilesURL + "/groups/\(groupName)/backgrounds/\(fileName)"
+    }
     //MARK: - JSON Routes
     /// This json structure supports all the JSON endpoints that you can use in the application.
     struct json {
