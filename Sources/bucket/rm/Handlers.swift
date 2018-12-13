@@ -58,8 +58,8 @@ class Handlers {
 
             response.addSourcePage("/")
             context["title_label"] = "Welcome"
-            context["title"] = "Bucket Technologies"
-            context["subtitle"] = " - Goodbye Coins, Hello Change"
+            context["title"] = "Project Title"
+            context["subtitle"] = "Project Subtitle"
 
 			// add app config vars
 			for i in Handlers.extras(request) { context[i.0] = i.1 }
