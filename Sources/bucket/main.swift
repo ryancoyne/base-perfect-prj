@@ -133,7 +133,7 @@ Log.logger = SysLogger()
 
 // if the notifications directory exists, lets set it up
 let notesettings = NotificationSettings()
-if CCXServiceClass.doesDirectoryExist(Dir("ccx/installations"), create: false) {
+if RMServiceClass.doesDirectoryExist(Dir("ccx/installations"), create: false) {
     notesettings.IOS_APNS_KEY_IDENTIFIER       = InstallationVariables.sharedInstance.IOS_APNS_KEY_IDENTIFIER!
     notesettings.IOS_APNS_PRIVATE_KEY_FILEPATH = InstallationVariables.sharedInstance.IOS_APNS_PRIVATE_KEY_FILEPATH!
     notesettings.IOS_APNS_TEAM_IDENTIFIER      = InstallationVariables.sharedInstance.IOS_APNS_TEAM_IDENTIFIER!
@@ -243,7 +243,7 @@ let sessionDriver = SessionPostgresDriver()
 
 print("main.swift: Running Config.runSetup()")
 
-Config.runSetup()
+RMConfig.runSetup()
 
 print("main.swift: Complete Config.runSetup()")
 
@@ -251,24 +251,24 @@ print("main.swift: Complete Config.runSetup()")
 // Defaults
 // =======================================================================
 print("main.swift: Creating displayTitle")
-var configTitle = Config.getVal("title", "")
-//var configTitle = CCXServiceClass.sharedInstance.displayTitle
+var configTitle = RMConfig.getVal("title", "")
+//var configTitle = RMServiceClass.sharedInstance.displayTitle
 print("main.swift: Completed displayTitle")
 
 print("main.swift: Creating displaySubTitle")
-var configSubTitle = Config.getVal("subtitle","")
+var configSubTitle = RMConfig.getVal("subtitle","")
 print("main.swift: Completed displaySubTitle")
 
 print("main.swift: Creating displayLogo")
-var configLogo = Config.getVal("logo","/assets/images/no-logo.png")
+var configLogo = RMConfig.getVal("logo","/assets/images/no-logo.png")
 print("main.swift: Completed displayLogo")
 
 print("main.swift: Creating displayLogoSrcSet")
-var configLogoSrcSet = Config.getVal("logosrcset","/assets/images/no-logo.png 1x, /assets/images/no-logo.svg 2x")
+var configLogoSrcSet = RMConfig.getVal("logosrcset","/assets/images/no-logo.png 1x, /assets/images/no-logo.svg 2x")
 print("main.swift: Completed displayLogoSrcSet")
 
 print("main.swift: Creating sysinit")
-let si = Config.getVal("sysinit", "0")
+let si = RMConfig.getVal("sysinit", "0")
 let systemInit = si.toBool() ?? false
 print("main.swift: Complete sysinit")
 
@@ -276,7 +276,7 @@ print("main.swift: Complete sysinit")
 
 print("main.swift: Creating CCX Tables")
 
-CCXDBTables.sharedInstance.createTables()
+RMDBTables.sharedInstance.createTables()
 
 print("main.swift: Complete CCX Tables")
 
@@ -293,19 +293,19 @@ var routes: [[String: Any]] = [[String: Any]]()
 routes = routes + UserAPI.json.routes
 routes = routes + UserWEB.web.routes
 routes = routes + InstallationsV1Controller.json.routes
-routes = routes + CCXStatisticsV1Controller.json.routes
+routes = routes + RMStatisticsV1Controller.json.routes
 routes = routes + FriendAPI.json.routes
-routes.append(contentsOf: RetailerAPI.json.routes)
-routes.append(contentsOf: ConsumerAPI.json.routes)
-routes.append(contentsOf: AdminAPI.json.routes)
+//routes.append(contentsOf: RetailerAPI.json.routes)
+//routes.append(contentsOf: ConsumerAPI.json.routes)
+//routes.append(contentsOf: AdminAPI.json.routes)
 
 // only if we are not in production
-if !isProduction {
-    routes.append(contentsOf: TestingAPI.json.routes)
-    routes.append(contentsOf: RetailerWEB.web.routes)
-    routes.append(contentsOf: ConsumerWEB.web.routes)
-    routes.append(contentsOf: AdminWEB.web.routes)
-}
+//if !isProduction {
+//    routes.append(contentsOf: TestingAPI.json.routes)
+//    routes.append(contentsOf: RetailerWEB.web.routes)
+//    routes.append(contentsOf: ConsumerWEB.web.routes)
+//    routes.append(contentsOf: AdminWEB.web.routes)
+//}
 
 //MARK:-
 //MARK: Initilization functions - only when we move to a new server that has not been initilized
