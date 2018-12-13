@@ -133,7 +133,7 @@ struct InstallationsV1Controller {
                         return
                     }
                     
-                } catch BucketAPIError.unparceableJSON(let attemptedJSON) {
+                } catch RMAPIError.unparceableJSON(let attemptedJSON) {
                     return response.invalidRequest(attemptedJSON)
                 } catch {
                     try? response.setBody(json: ["error":error.localizedDescription])

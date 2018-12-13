@@ -74,7 +74,7 @@ struct UserAPI {
                         return
                     }
         
-                } catch BucketAPIError.unparceableJSON(let string) {
+                } catch RMAPIError.unparceableJSON(let string) {
                     return response.invalidRequest(string)
                 } catch {
                     return response.caughtError(error)
@@ -234,7 +234,7 @@ struct UserAPI {
                         return
                         
                     }
-                } catch BucketAPIError.unparceableJSON(let jsonString) {
+                } catch RMAPIError.unparceableJSON(let jsonString) {
                     return response.invalidRequest(jsonString)
                 } catch {
                     response.caughtError(error)
@@ -306,7 +306,7 @@ struct UserAPI {
                         
                     }
                     
-                } catch BucketAPIError.unparceableJSON(let jsonStr) {
+                } catch RMAPIError.unparceableJSON(let jsonStr) {
                     return response.invalidRequest(jsonStr)
                 } catch {
                     return response.caughtError(error)
@@ -627,7 +627,7 @@ struct UserAPI {
                             return
                         }
                         
-                    } catch BucketAPIError.unparceableJSON(let unparceableJSON) {
+                    } catch RMAPIError.unparceableJSON(let unparceableJSON) {
                         response.invalidRequest(unparceableJSON)
                         return
                     } catch {
@@ -710,7 +710,7 @@ struct UserAPI {
                         return response.caughtError(error)
                     }
                     
-                } catch BucketAPIError.unparceableJSON(let attemptedJSON) {
+                } catch RMAPIError.unparceableJSON(let attemptedJSON) {
                     return response.invalidRequest(attemptedJSON)
                 } catch {
                     return response.caughtError(error)
@@ -1043,7 +1043,7 @@ struct UserAPI {
                         
                     }
                     
-                } catch BucketAPIError.unparceableJSON(let invalidJSONString) {
+                } catch RMAPIError.unparceableJSON(let invalidJSONString) {
                     return response.invalidRequest(invalidJSONString)
                     
                 } catch {
@@ -1079,7 +1079,7 @@ struct UserAPI {
                 
                 // now lets add a current location record
                 let ul = UserLocation()
-                ul.geopoint = CCXGeographyPoint(latitude: latitude, longitude: longitude)
+                ul.geopoint = RMGeographyPoint(latitude: latitude, longitude: longitude)
                 ul.geopointtime = RMServiceClass.getNow()
                 //MARK:-
                 //MARK: CHECK USER ID FOR NEW USERS

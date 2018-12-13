@@ -30,7 +30,7 @@ extension HTTPRequest {
         } else if let str = self.postBodyString, str.isEmpty {
             return [:]
         } else if let str = self.postBodyString {
-            throw BucketAPIError.unparceableJSON(str)
+            throw RMAPIError.unparceableJSON(str)
         } else {
             return nil
         }

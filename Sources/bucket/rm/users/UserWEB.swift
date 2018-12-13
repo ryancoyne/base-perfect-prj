@@ -305,7 +305,7 @@ struct UserWEB {
                 
                 // now lets add a current location record
                 let ul = UserLocation()
-                ul.geopoint = CCXGeographyPoint(latitude: latitude, longitude: longitude)
+                ul.geopoint = RMGeographyPoint(latitude: latitude, longitude: longitude)
                 ul.geopointtime = RMServiceClass.getNow()
                 //MARK:-
                 //MARK: CHECK USER ID FOR NEW USERS

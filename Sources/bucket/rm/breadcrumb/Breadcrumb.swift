@@ -31,7 +31,7 @@ class Breadcrumb: PostgresStORM {
     var batterylevel        : Double? = nil
     var applicationstatus   : String? = nil
     
-    var geopoint            : CCXGeographyPoint = CCXGeographyPoint()
+    var geopoint            : RMGeographyPoint = RMGeographyPoint()
     
     //MARK: Table name
     override public func table() -> String { return "breadcrumb" }

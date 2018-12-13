@@ -1,12 +1,12 @@
 //
 //  RMAPIError.swift
-//  COpenSSL
+//  bucket
 //
 //  Created by Ryan Coyne on 12/13/18.
 //
 
 import Foundation
 
-enum BucketAPIError: Error {
+enum RMAPIError: Error {
     case unparceableJSON(String)
 }

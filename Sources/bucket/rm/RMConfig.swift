@@ -1,5 +1,5 @@
 //
-//  CCXConfig.swift
+//  RMConfig.swift
 //
 //  Created by Ryan Coyne on 10/30/17.
 //

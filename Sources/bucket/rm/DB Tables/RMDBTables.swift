@@ -1,5 +1,5 @@
 //
-//  CCXDBTables.swift
+//  RMDBTables.swift
 //  findapride
 //
 //  Created by Mike Silvers on 10/22/17.
@@ -11,34 +11,6 @@ import StORM
 import PostgresStORM
 import PerfectLogger
 import PerfectLocalAuthentication
-
-struct RMTableLevels {
-    static let userlocation    = 1.00
-}
-
-struct RMDBTableDefaults {
-    static let sysinit    = "1"
-    static let sampledata = "0"
-}
-
-struct RMSystemData {
-    static let admin = "DFD117EA-8878-4335-8F26-05B2F0BE843F"
-}
-
-struct RMSampleData {
-    static let user1 = "B33F0845-33DE-4C80-B430-8ABB2EB874C3"
-    static let user2 = "5AEA600A-11CF-4664-A49B-CB4DF8125E52"
-    static let user3 = "4671115D-C296-4CFE-855A-7C59AD9A9183"
-    static let user4 = "145E3B19-F49C-4A60-85E4-770D8B2EA055"
-    static let user5 = "CA5DA361-9259-4132-A117-EA5F26E0B89B"
-}
-
-struct RMDefaultUserValues {
-    static let user_admin  = "ADMIN_USER"
-    static let user_server = "SERVER_USER"
-}
-
-
 
 final class RMDBTables {
 

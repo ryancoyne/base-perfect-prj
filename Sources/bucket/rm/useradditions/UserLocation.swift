@@ -19,7 +19,7 @@ class UserLocation: PostgresStORM {
     var modified : Int? = nil
     var modifiedby : String? = nil
     
-    var geopoint : CCXGeographyPoint? = nil
+    var geopoint : RMGeographyPoint? = nil
     var geopointtime : Int? = nil
     var user_id : String? = nil
     
@@ -54,7 +54,7 @@ class UserLocation: PostgresStORM {
         
         if let long = this.data.longitude, let lat = this.data.latitude {
             if geopoint.isNil {
-                geopoint = CCXGeographyPoint()
+                geopoint = RMGeographyPoint()
             }
             geopoint?.longitude = long
             geopoint?.latitude = lat

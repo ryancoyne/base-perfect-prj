@@ -50,6 +50,20 @@ extension HTTPResponse {
             .setHeader(.contentType, value: "application/json; charset=UTF-8")
             .completed(status: .badRequest)
     }
+    func notLoggedIn() {
+        let returnD = ["errorCode" : "Unauthorized", "message":"Please log in."]
+        try! self.setBody(json: returnD)
+            .completed(status: .unauthorized)
+    }
+    func caughtError(_ error : Error) {
+        try! self.setBody(json: ["error": error.localizedDescription])
+            .completed(status: .unauthorized)
+    }
+    
+    var alreadyLoggedIn : Void {
+        try! self.setBody(json: ["error" : "You are already logged in."])
+            .completed(status: .ok)
+    }
     var invalidJSONFormat : Void {
         return try! self
             .setBody(json: ["errorCode":"InvalidJSON", "message":"Please check the required JSON format for this request."])

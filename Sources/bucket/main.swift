@@ -274,11 +274,11 @@ print("main.swift: Complete sysinit")
 
 // Make sure the tables exist
 
-print("main.swift: Creating CCX Tables")
+print("main.swift: Creating RM Tables")
 
 RMDBTables.sharedInstance.createTables()
 
-print("main.swift: Complete CCX Tables")
+print("main.swift: Complete RM Tables")
 
 // project specific tables
 //print("main.swift: Creating Project Tables")
