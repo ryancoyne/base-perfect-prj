@@ -128,7 +128,7 @@ extension Dictionary where Key == String, Value == Any {
             }
         }
         get {
-            return self["created"].intValue ?? self["created"] as? String
+            return self["created"].intValue ?? self["created"].stringValue
         }
     }
     var modified : Any? {
@@ -140,7 +140,7 @@ extension Dictionary where Key == String, Value == Any {
             }
         }
         get {
-            return self["modified"].intValue ?? self["modified"] as? String
+            return self["modified"].intValue ?? self["modified"].stringValue
         }
     }
     var deleted : Any? {
@@ -152,7 +152,7 @@ extension Dictionary where Key == String, Value == Any {
             }
         }
         get {
-            return self["deleted"].intValue ?? self["deleted"] as? String
+            return self["deleted"].intValue ?? self["deleted"].stringValue
         }
     }
     var createdBy : String? {
@@ -164,7 +164,7 @@ extension Dictionary where Key == String, Value == Any {
             }
         }
         get {
-            return self["createdby"] as? String
+            return self["createdby"].stringValue
         }
     }
     var modifiedBy : String? {
@@ -176,7 +176,7 @@ extension Dictionary where Key == String, Value == Any {
             }
         }
         get {
-            return self["modifiedby"] as? String
+            return self["modifiedby"].stringValue
         }
     }
     var deletedBy : String? {
@@ -188,7 +188,7 @@ extension Dictionary where Key == String, Value == Any {
             }
         }
         get {
-            return self["deletedby"] as? String
+            return self["deletedby"].stringValue
         }
     }
     var longdescription : String? {
@@ -201,13 +201,13 @@ extension Dictionary where Key == String, Value == Any {
             }
         }
         get {
-            return self["longdescription"] as? String
+            return self["longdescription"].stringValue
         }
         
     }
     var shortdescription : String? {
         get {
-            return self["description"] as? String
+            return self["description"].stringValue
             
         }
         set {
@@ -255,7 +255,7 @@ extension Dictionary where Key == String, Value == Any {
             }
         }
         get {
-            return self["geopointtime"].intValue ?? self["geopointtime"] as? String
+            return self["geopointtime"].intValue ?? self["geopointtime"].stringValue
         }
     }
     var geopoint : [String:Any]! {
@@ -431,7 +431,7 @@ struct BreadcrumbDictionary {
     /// This variable can be either an int or a string.
     var geopointtime : Any? {
         get {
-            return self.dic["geopointtime"].intValue ?? self.dic["geopointtime"] as? String
+            return self.dic["geopointtime"].intValue ?? self.dic["geopointtime"].stringValue
         }
         set {
             if newValue != nil, newValue.intValue != 0 {
@@ -449,7 +449,7 @@ struct FriendDictionary {
     /// This variable key is "user_id". Set nil to remove from the dictionary.
     var user_id : String? {
         get {
-            return self.dic["user_id"] as? String
+            return self.dic["user_id"].stringValue
         }
         set {
             if newValue != nil {
@@ -462,7 +462,7 @@ struct FriendDictionary {
     /// This variable key is "friend_id". Set nil to remove from the dictionary.
     var friend_id : String? {
         get {
-            return self.dic["friend_id"] as? String
+            return self.dic["friend_id"].stringValue
         }
         set {
             if newValue != nil {
@@ -482,7 +482,7 @@ struct FriendDictionary {
             }
         }
         get {
-            return self.dic["invited"].intValue ?? self.dic["invited"] as? String
+            return self.dic["invited"].intValue ?? self.dic["invited"].stringValue
         }
     }
     /// This variable key is "accepted". Set nil to remove from the dictionary.
@@ -495,7 +495,7 @@ struct FriendDictionary {
             }
         }
         get {
-            return self.dic["accepted"].intValue ?? self.dic["accepted"] as? String
+            return self.dic["accepted"].intValue ?? self.dic["accepted"].stringValue
         }
     }
     /// This variable key is "rejected". Set nil to remove from the dictionary.
@@ -508,7 +508,7 @@ struct FriendDictionary {
             }
         }
         get {
-            return self.dic["rejected"].intValue ?? self.dic["rejected"] as? String
+            return self.dic["rejected"].intValue ?? self.dic["rejected"].stringValue
         }
     }
 }
@@ -646,7 +646,7 @@ struct UserDictionary {
     fileprivate var dic : [String:Any]!
     var id : String? {
         get {
-            return self.dic["user_id"] as? String
+            return self.dic["user_id"].stringValue
         }
         set {
             if newValue != nil {
@@ -658,7 +658,7 @@ struct UserDictionary {
     }
     var remoteid : String? {
         get {
-            return self.dic["remoteid"] as? String
+            return self.dic["remoteid"].stringValue
         }
         set {
             if newValue != nil {
@@ -670,7 +670,7 @@ struct UserDictionary {
     }
     var email : String? {
         get {
-            return self.dic["email"] as? String
+            return self.dic["email"].stringValue
         }
         set {
             if newValue != nil {
@@ -682,7 +682,7 @@ struct UserDictionary {
     }
     var username : String? {
         get {
-            return self.dic["username"] as? String
+            return self.dic["username"].stringValue
         }
         set {
             if newValue != nil {
@@ -694,7 +694,7 @@ struct UserDictionary {
     }
     var passvalidation : String? {
         get {
-            return self.dic["passvalidation"] as? String
+            return self.dic["passvalidation"].stringValue
         }
         set {
             if newValue != nil {
@@ -706,7 +706,7 @@ struct UserDictionary {
     }
     var password : String? {
         get {
-            return self.dic["password"] as? String
+            return self.dic["password"].stringValue
         }
         set {
             if newValue != nil {
@@ -718,7 +718,7 @@ struct UserDictionary {
     }
     var source : String? {
         get {
-            return self.dic["source"] as? String
+            return self.dic["source"].stringValue
         }
         set {
             if newValue != nil {
@@ -730,7 +730,7 @@ struct UserDictionary {
     }
     var usertype : String? {
         get {
-            return self.dic["usertype"] as? String
+            return self.dic["usertype"].stringValue
         }
         set {
             if newValue != nil {
