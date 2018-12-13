@@ -41,6 +41,9 @@
         "LOCAL_FILE_PATH": "./files",
         "LOCAL_FILE_PATH_LOGS": "./logs"
     },
+    "security" : {
+        "CHECK" : "S-792B9A88-26E1-4502-AD04-E0D89E63822D"
+    },
     "misc": {
         "note": "These are miscellaneous variables.  The StORM varible determines if StORM transactions are written to a log file.  The server environment may be either PROD for production or DEV for development.  New environments may be added in the future.  The session name is used for cookie authentication.  The HTTP document root is the place where templates and other web based content is stored. This directory is standard and is generally not changed.  The variable SERVER_PUBLIC_URL is used to build strings and point back to the server for consumers.",
         "STORM_DEBUG"       : true,

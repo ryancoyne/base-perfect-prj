@@ -36,9 +36,10 @@ extension HTTPRequest {
         }
     }
     func securityCheck() -> Bool {
+        
         // always not require header security values on the local machine
         #if os(macOS)
-        return true
+            return true
         #endif
         
         var passedCheck = false
@@ -51,19 +52,8 @@ extension HTTPRequest {
         // DEV:     D-4B2E93B2-C844-4F18-A1AE-C13EA1F7D12F
         
         let checkvalue = self.header(.custom(name: "check")) ?? "nope"
-        let env = EnvironmentVariables.sharedInstance.Server!
         
-        switch env {
-        case .production:
-            if checkvalue == "P-A5B26A04-45FE-4C48-B111-84F0A07BB5A3" { passedCheck = true }
-            break
-        case .staging:
-            if checkvalue == "S-792B9A88-26E1-4502-AD04-E0D89E63822D" { passedCheck = true }
-            break
-        case .development:
-            if checkvalue == "D-4B2E93B2-C844-4F18-A1AE-C13EA1F7D12F" { passedCheck = true }
-            break
-        }
+        if checkvalue == EnvironmentVariables.sharedInstance.CHECK { passedCheck = true }
         
         if !passedCheck {
             
@@ -83,11 +73,11 @@ extension HTTPRequest {
             }
             
             // If auditing is turned on, then we will go and do the audit:
-//            AuditRecordActions.securityFailure(schema: nil,
-//                                               session_id: self.session?.token ??  "NO TOKEN",
-//                                               user: self.session?.userid ?? "NO USER",
-//                                               row_data: audit,
-//                                               description: "Security Check Failed.")
+            AuditRecordActions.securityFailure(schema: nil,
+                                               session_id: self.session?.token ??  "NO TOKEN",
+                                               user: self.session?.userid ?? "NO USER",
+                                               row_data: audit,
+                                               description: "Security Check Failed.")
             
         }
         

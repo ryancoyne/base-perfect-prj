@@ -219,6 +219,10 @@ final class EnvironmentVariables {
             if let value = JSONConfigEnhanced.shared.json(forKey: "url")?["LISTENING_URL_PORT"] as? Int {
                 self.LISTENING_URL_PORT = value
             }
+            
+            if let value = JSONConfigEnhanced.shared.json(forKey: "security")?["CHECK"] as? String {
+                self.CHECK = value
+            }
 
 //            if let value = JSONConfigEnhanced.shared.value(forKeyPath: "api.API_DOMAIN") as? String {
             if let value = JSONConfigEnhanced.shared.json(forKey: "api")?["API_DOMAIN"] as? String {
@@ -628,6 +632,22 @@ final class EnvironmentVariables {
                 _EMAIL_FROM_DISPLAY_NAME = newValue!
             } else {
                 _EMAIL_FROM_DISPLAY_NAME = nil
+            }
+        }
+    }
+    
+    //MARK: --
+    //MARK: Security
+    private var _CHECK: String?
+    public var CHECK: String? {
+        get {
+            return _CHECK
+        }
+        set {
+            if newValue != nil {
+                _CHECK = newValue!
+            } else {
+                _CHECK = nil
             }
         }
     }
