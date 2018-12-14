@@ -282,15 +282,15 @@ struct UserAPI {
                         let thenewuser = Account()
                         try? thenewuser.find(["email": email])
                         
-                        let userret:[String:Any] = UserAPI.UserSuccessfullyCreated(thenewuser)
+//                        let userret:[String:Any] = UserAPI.UserSuccessfullyCreated(thenewuser)
                         
                         var retDict:[String:Any] = [:]
                         retDict["message"] = "Check your email for a verification email.  It contains instructions to complete your signup!"
                         
-                        // add in the return values for the user connections
-                        for (key,value) in userret {
-                            retDict[key] = value
-                        }
+//                        // add in the return values for the user connections
+//                        for (key,value) in userret {
+//                            retDict[key] = value
+//                        }
                         
                         AuditRecordActions.userRegistration(schema: nil,
                                                             session_id: request.session?.token ?? "NO SESSION TOKEN" ,
@@ -529,10 +529,6 @@ struct UserAPI {
                     
                     // no need for the GIS save function - the location info is saved in the detail (and another table)
                     try user.create()
-                    
-                    // lets see if we can link stages
-                    // do this before we change the user.detail with the isNew element.
-                    UserAPI.UserSuccessfullyCreated(user)
                     
                     user.detail["isNew"] = true
                     
@@ -1112,20 +1108,20 @@ struct UserAPI {
         
     }
     
-    @discardableResult
-    static func UserSuccessfullyCreated(_ user:Account)->[String:Any] {
-        
-        var returnDict:[String:Any] = [:]
-        
-        // Call outside associations, if needed
-//        let results = StagesConnecter.sharedInstance.associateUsers(user)
-        let results:[String:Any] = [:]
-        for (key,value) in results {
-            returnDict[key] = value
-        }
-        
-        return returnDict
-    }
+//    @discardableResult
+//    static func UserSuccessfullyCreated(_ user:Account)->[String:Any] {
+//
+//        var returnDict:[String:Any] = [:]
+//
+//        // Call outside associations, if needed
+////        let results = StagesConnecter.sharedInstance.associateUsers(user)
+//        let results:[String:Any] = [:]
+//        for (key,value) in results {
+//            returnDict[key] = value
+//        }
+//
+//        return returnDict
+//    }
 }
 
 

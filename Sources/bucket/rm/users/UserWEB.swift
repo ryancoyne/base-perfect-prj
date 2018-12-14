@@ -145,9 +145,6 @@ struct UserWEB {
                             do {
                                 try acc.save()
                                 
-                                // check with stages 
-                                UserAPI.UserSuccessfullyCreated(acc)
-                                
                                 request.session?.userid = acc.id
                                 context["msg_title"] = "Account Validated and Completed."
                                 context["msg_body"] = "<p><a class=\"button\" href=\"/\">Click to continue</a></p>"

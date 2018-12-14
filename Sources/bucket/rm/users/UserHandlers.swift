@@ -227,9 +227,6 @@ extension Handlers {
                     
                     try? user.create()
                     
-                    // lets see if we can link stages
-                    UserAPI.UserSuccessfullyCreated(user)
-                    
                 } else {
                     user.detail["modified"] = RMServiceClass.getNow()
                     try? user.save()
