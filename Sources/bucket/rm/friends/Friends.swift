@@ -39,7 +39,7 @@ class Friends: PostgresStORM {
     
     //MARK -
     //MARK: initializers
-    override init() {
+    required init() {
         super.init()
     }
     
