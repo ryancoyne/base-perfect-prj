@@ -2,7 +2,7 @@
 // Date: 2018-09-26 13:49:49 +0000
 import PackageDescription
 let package = Package(
-	name: "bucket",
+	name: "base_prj",
 	targets: [],
 	dependencies: [
 		.Package(url: "https://github.com/PerfectlySoft/Perfect-HTTPServer.git", versions: Version(3,0,0)..<Version(3,9223372036854775807,9223372036854775807)),
